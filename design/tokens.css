@@ -1,0 +1,45 @@
+:root{
+  --surface: #F3F5F8;
+  --card: #FFFFFF;
+  --ink: #201F1D;
+  --ink-secondary: #444141;
+  --muted: #605D5D;
+  --border: #D7D3D3;
+  --hairline: #EAE7E7;
+  --brand: #2155E6;
+  --brand-strong: #1D46BF;
+  --brand-tint: #EDF2FF;
+  --success: #15803D;
+  --success-tint: rgba(21,128,61,.10);
+  --danger: #B91C1C;
+  --danger-tint: rgba(185,28,28,.08);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+  --control-height: 48px;
+  --control-height-lg: 52px;
+  --tap-min: 44px;
+}
+@media (prefers-color-scheme: dark){:root{
+  --surface: #111317;
+  --card: #1B1E24;
+  --ink: #F2F3F5;
+  --ink-secondary: #C9CCD2;
+  --muted: #9BA0A8;
+  --border: #353A43;
+  --hairline: #262A31;
+  --brand: #4C7BFF;
+  --brand-strong: #8AA8FF;
+  --brand-tint: #1A2442;
+  --success: #4ADE80;
+  --success-tint: rgba(74,222,128,.14);
+  --danger: #F87171;
+  --danger-tint: rgba(248,113,113,.14);
+}}
