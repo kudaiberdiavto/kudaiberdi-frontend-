@@ -1,12 +1,55 @@
-import { Pressable, Text, View } from 'react-native'
-import { router } from 'expo-router'
-import { Button, Card, Screen } from '@/components/ui'
+import { Pressable, ScrollView, Text, View } from 'react-native'
+import { router, useLocalSearchParams } from 'expo-router'
+import { Button, Card, QueryErrorBanner, Screen } from '@/components/ui'
 import { ChevronLeftIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
-import { activeRequest, sellerAnswers } from '@/mocks'
+import { formatHours, formatPlace, formatPrice, plural } from '@/lib/format'
+import { flattenPages } from '@/api/pagination'
+import { useMyRequests, useRequest, useRequestReplies } from '@/api/requests'
+import type { Reply } from '@/api/types'
 
+/** 07 «Кто ответил «есть»». Without `id` (the tab itself) — the latest request. */
 export default function BuyerAnswersScreen() {
 	const c = useColors()
+	const params = useLocalSearchParams<{ id?: string }>()
+	const latest = useMyRequests()
+	const id = params.id ? Number(params.id) : flattenPages(latest.data)[0]?.id
+
+	if (!id) {
+		return (
+			<Screen>
+				<View style={{ paddingTop: 12, gap: 14 }}>
+					<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.52, color: c.ink }}>Запросы</Text>
+					<QueryErrorBanner error={latest.error} onRetry={() => latest.refetch()} />
+					{latest.isSuccess ? (
+						<>
+							<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted }}>
+								Запросов пока нет. Спросите деталь — ответят те, у кого она есть.
+							</Text>
+							<Button label="Найти запчасть" onPress={() => router.push('/search-part')} />
+						</>
+					) : null}
+				</View>
+			</Screen>
+		)
+	}
+
+	return <Answers id={id} canGoBack={Boolean(params.id)} />
+}
+
+function Answers({ id, canGoBack }: { id: number; canGoBack: boolean }) {
+	const c = useColors()
+	const request = useRequest(id)
+	const replies = useRequestReplies(id)
+	const data = request.data
+	// Only «Есть» answers come here, and they always carry the shop.
+	const items = (replies.data ?? []).filter((r): r is Reply & { shop: NonNullable<Reply['shop']> } => r.shop !== null)
+	const firstOpen = items.findIndex((r) => r.shop.open.openNow)
+
+	const have = data?.haveCount ?? 0
+	const summary = `${have} ${plural(have, ['продавец', 'продавца', 'продавцов'])} ${plural(have, ['ответил', 'ответили', 'ответили'])} «есть»`
+	const status =
+		data?.status === 'ACTIVE' ? 'ещё ждём' : data?.status === 'CLOSED' ? 'закрыт' : data ? 'время вышло' : ''
 
 	return (
 		<Screen padding={0}>
@@ -20,69 +63,101 @@ export default function BuyerAnswersScreen() {
 					gap: 12,
 				}}
 			>
-				<Pressable onPress={() => router.back()}>
-					<ChevronLeftIcon size={24} color={c.ink} />
-				</Pressable>
+				{canGoBack ? (
+					<Pressable onPress={() => router.back()}>
+						<ChevronLeftIcon size={24} color={c.ink} />
+					</Pressable>
+				) : null}
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 18, fontFamily: fontFamily(700), color: c.ink }}>{activeRequest.title}</Text>
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{activeRequest.car}</Text>
+					<Text numberOfLines={1} style={{ fontSize: 18, fontFamily: fontFamily(700), color: c.ink }}>
+						{data?.text ?? ' '}
+					</Text>
+					<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{data?.car.label ?? ' '}</Text>
 				</View>
 			</View>
 
-			<View
-				style={{
-					marginHorizontal: 16,
-					marginBottom: 14,
-					borderRadius: 14,
-					backgroundColor: c.card,
-					paddingVertical: 12,
-					paddingHorizontal: 14,
-					flexDirection: 'row',
-					alignItems: 'center',
-					gap: 10,
+			<QueryErrorBanner
+				error={request.error ?? replies.error}
+				onRetry={() => {
+					request.refetch()
+					replies.refetch()
 				}}
-			>
-				<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.success }} />
-				<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>
-					{activeRequest.answersLabel}
-				</Text>
-				<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>{activeRequest.waitingLabel}</Text>
-			</View>
+				offlineText="Нет сети. Покажем ответы, когда появится"
+				style={{ marginHorizontal: 16, marginBottom: 14 }}
+			/>
 
-			<View style={{ flex: 1, paddingHorizontal: 16, gap: 12 }}>
-				{sellerAnswers.map((s) => (
-					<Card key={s.id} style={{ gap: 10 }}>
-						<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-							<Text style={{ fontSize: 18, fontFamily: fontFamily(700), color: c.ink }}>{s.name}</Text>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.ink }}>{s.rating}</Text>
-						</View>
+			{data ? (
+				<Pressable
+					// Tap — request stats [32]: who got it, saw it, said «нет»; extend.
+					onPress={() => router.push({ pathname: '/request-stats', params: { id: String(id) } })}
+					style={{
+						marginHorizontal: 16,
+						marginBottom: 14,
+						borderRadius: 14,
+						backgroundColor: c.card,
+						paddingVertical: 12,
+						paddingHorizontal: 14,
+						flexDirection: 'row',
+						alignItems: 'center',
+						gap: 10,
+					}}
+				>
+					<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: have ? c.success : c.border }} />
+					<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>{summary}</Text>
+					<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>{status}</Text>
+				</Pressable>
+			) : null}
 
-						<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.inkSecondary }}>
-							{s.place}
-							<Text style={{ color: s.isOpen ? c.success : c.muted }}>{s.openLabel}</Text>
-						</Text>
-
-						{s.message ? (
-							<View style={{ borderRadius: 12, backgroundColor: raw.fill, paddingVertical: 10, paddingHorizontal: 12 }}>
-								<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.ink }}>
-									{s.message}
-								</Text>
-							</View>
-						) : null}
-
-						{s.message ? (
-							<Button
-								label="Написать"
-								variant={s.primary ? 'primary' : 'secondary'}
-								height={48}
-								radius={12}
-								fontSize={16}
-								onPress={() => router.push('/chat')}
-							/>
-						) : null}
-					</Card>
+			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 12 }} showsVerticalScrollIndicator={false}>
+				{items.map((reply, i) => (
+					<ReplyCard key={reply.id} reply={reply} primary={i === firstOpen} />
 				))}
-			</View>
+			</ScrollView>
 		</Screen>
+	)
+}
+
+function ReplyCard({ reply, primary }: { reply: Reply & { shop: NonNullable<Reply['shop']> }; primary: boolean }) {
+	const c = useColors()
+	const { shop } = reply
+	const open = shop.open.openNow
+	// Message box shows the seller's text; without it — the price, if given.
+	const note = reply.message ?? (reply.price ? formatPrice(reply.price) : null)
+
+	return (
+		<Card style={{ gap: 10 }}>
+			<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+				<Text numberOfLines={1} style={{ flex: 1, fontSize: 18, fontFamily: fontFamily(700), color: c.ink }}>
+					{shop.name}
+				</Text>
+				{shop.reviewsCount > 0 ? (
+					<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.ink }}>★ {shop.rating.toFixed(1)}</Text>
+				) : null}
+			</View>
+
+			<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.inkSecondary }}>
+				{formatPlace(shop.location)} ·{' '}
+				<Text style={{ color: open ? c.success : c.muted }}>
+					{open ? `открыт до ${formatHours(shop.open.openTo)}` : 'закрыт'}
+				</Text>
+			</Text>
+
+			{open && note ? (
+				<View style={{ borderRadius: 12, backgroundColor: raw.fill, paddingVertical: 10, paddingHorizontal: 12 }}>
+					<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.ink }}>{note}</Text>
+				</View>
+			) : null}
+
+			{open ? (
+				<Button
+					label="Написать"
+					variant={primary ? 'primary' : 'secondary'}
+					height={48}
+					radius={12}
+					fontSize={16}
+					onPress={() => router.push({ pathname: '/chat', params: { chatId: String(reply.chatId) } })}
+				/>
+			) : null}
+		</Card>
 	)
 }

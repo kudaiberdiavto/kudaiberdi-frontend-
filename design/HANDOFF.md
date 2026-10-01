@@ -18,6 +18,7 @@
 | `assets/brands/*.png` | логотипы марок (Toyota, Lexus, Mercedes-Benz, Honda, Nissan) | вставлять в круглые слоты марок |
 | `brands.json` | список марок: slug, файл логотипа, цвет заглушки | если `logo` = null — показывать букву-заглушку |
 | `PROMPT.md` | готовый промпт для Claude Code | вставить целиком |
+| `INTEGRATION_PROMPT.md` | промпт для подключения к бэкенду (после вёрстки) | вставить целиком |
 
 ## Правила точного совпадения
 
@@ -71,6 +72,14 @@
 
 - Все фото в макете (товары, места, аватары) — нарисованные заглушки. В приложении это загруженные пользователем фото: `object-fit: cover`, размеры и радиусы как в specs.
 - Логотип марки — картинка в белом круге (обводка 1.5–2px `#D7D3D3`, внутренний отступ 16%, `contain`). Размеры круга: 18, 20, 28, 32, 34, 36, 40, 44.
+
+## Бэкенд
+
+- **Контракт API** — `kudaibergen-back/docs/BACKEND_SPEC.md` (на этой машине: `~/IdeaProjects/kudaibergen-back/docs/BACKEND_SPEC.md`), полное описание полей — Swagger бэкенда `/swagger-ui.html`. Пути: покупатель — `/api/v1/me/...`, `/requests/...`, `/parts/...`; продавец — `/api/v1/my/shop/...`, `/my/parts/...`. id — числа; в ссылках «Поделиться» — `publicId` (`/shops/public/{publicId}`, `/parts/public/{publicId}`).
+- **Живые события — Centrifugo, не STOMP.** Клиент — SDK `centrifuge` (WebSocket). Токен подключения — `GET /api/v1/realtime/token`. После подключения подписаться на личный канал `inbox:{userId}#{userId}`: там события `CHAT` (строка списка чатов), `UNREAD` (бейджи) и `REQUEST_STATS` (статистика своего запроса, экран 32 — тот же JSON, что `GET /requests/{id}/stats`). Открытый чат — канал `chat:{chatId}` с токеном `GET /api/v1/chats/{id}/subscription-token`: события `MESSAGE`, `READ`, `TYPING`. Все события — `{type, payload}`.
+- **Фото:** перед отправкой приложение сжимает фото до 1080 px по длинной стороне (JPEG, не HEIC) — на рынке слабый мобильный интернет. Загрузка — `POST /api/v1/media/photos` (multipart `file`, `purpose` = PART / SHOP / AVATAR / REQUEST / REPLY), полученный `id` передаётся в `mediaIds`.
+- **Пуши об истечении запроса:** `data.type = NO_REPLY` — открыть экран 20 «Пока никто не ответил»; `REQUEST_EXPIRED` — статистику запроса (32) с «Продлить».
+- Бейджи и счётчики («В наличии · 32 / Нет · 6», «24 запчасти для Camry 50», «Запрос получат 18 продавцов») приходят с сервера — на клиенте не считать.
 
 ## Что в макете — пример, а не данные
 

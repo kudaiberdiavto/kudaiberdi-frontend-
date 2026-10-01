@@ -11,7 +11,11 @@
       "icon": "./assets/expo.icon",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Покажем, где вы на схеме рынка, и построим путь к боксу."
-      }
+      },
+      "bundleIdentifier": "com.bekturillo.kudaibergenv2",
+      "associatedDomains": [
+        "applinks:kudaibergen.kg"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +25,48 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.CAMERA"
+      ],
+      "package": "com.bekturillo.kudaibergenv2",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "kudaibergen.kg",
+              "pathPrefix": "/p/"
+            },
+            {
+              "scheme": "https",
+              "host": "kudaibergen.kg",
+              "pathPrefix": "/s/"
+            },
+            {
+              "scheme": "https",
+              "host": "kudaibergen.kg",
+              "pathPrefix": "/qr/"
+            },
+            {
+              "scheme": "https",
+              "host": "kudaibergen.kg",
+              "pathPrefix": "/m/"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "output": "static",
@@ -46,6 +91,19 @@
         "expo-camera",
         {
           "cameraPermission": "Сфотографируйте запчасть, чтобы показать её покупателям."
+        }
+      ],
+      "./plugins/with-ios-scene-lifecycle",
+      [
+        "expo-notifications",
+        {
+          "sounds": []
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Покажем мастерам, куда ехать — только когда вы отправляете заявку."
         }
       ]
     ],

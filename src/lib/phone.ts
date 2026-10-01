@@ -10,3 +10,15 @@ export function formatLocalPhone(raw: string) {
 export function isValidLocalPhone(raw: string) {
 	return raw.replace(/\D/g, '').length === 9
 }
+
+/** "555 12 34 56" → "+996555123456" (the backend accepts only E.164 +996). */
+export function toE164(local: string) {
+	return `${COUNTRY_CODE}${local.replace(/\D/g, '')}`
+}
+
+/** "+996555123456" → "+996 555 12 34 56". */
+export function formatE164(phone: string) {
+	return phone.startsWith(COUNTRY_CODE)
+		? `${COUNTRY_CODE} ${formatLocalPhone(phone.slice(COUNTRY_CODE.length))}`
+		: phone
+}

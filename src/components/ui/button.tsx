@@ -1,4 +1,6 @@
-import { Pressable, Text, type StyleProp, type ViewStyle } from 'react-native'
+import type { ComponentType } from 'react'
+import { ActivityIndicator, Pressable, Text, type StyleProp, type ViewStyle } from 'react-native'
+import type { IconProps } from '@/components/icons'
 import { fontFamily, useColors, raw } from '@/theme'
 
 type Variant = 'primary' | 'secondary' | 'outline'
@@ -12,6 +14,10 @@ interface ButtonProps {
 	radius?: number
 	fontSize?: number
 	disabled?: boolean
+	/** Request in flight: keeps the size, swaps the label for a small spinner. */
+	loading?: boolean
+	/** Icon left of the label, in the label colour (37: «Позвонить», «Написать»). */
+	icon?: ComponentType<IconProps>
 	style?: StyleProp<ViewStyle>
 }
 
@@ -23,6 +29,8 @@ export function Button({
 	radius = 14,
 	fontSize = 17,
 	disabled,
+	loading,
+	icon: Icon,
 	style,
 }: ButtonProps) {
 	const c = useColors()
@@ -32,21 +40,30 @@ export function Button({
 	return (
 		<Pressable
 			onPress={onPress}
-			disabled={disabled}
+			disabled={disabled || loading}
 			style={[
 				{
 					height,
 					borderRadius: radius,
 					backgroundColor: bg,
+					flexDirection: 'row',
 					alignItems: 'center',
 					justifyContent: 'center',
+					gap: 8,
 					opacity: disabled ? 0.4 : 1,
 				},
 				variant === 'outline' && { borderWidth: 2, borderColor: c.border },
 				style,
 			]}
 		>
-			<Text style={{ fontSize, fontFamily: fontFamily(700), color: fg }}>{label}</Text>
+			{loading ? (
+				<ActivityIndicator color={fg} />
+			) : (
+				<>
+					{Icon ? <Icon size={20} color={fg} strokeWidth={2.2} /> : null}
+					<Text style={{ fontSize, fontFamily: fontFamily(700), color: fg }}>{label}</Text>
+				</>
+			)}
 		</Pressable>
 	)
 }

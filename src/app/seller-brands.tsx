@@ -1,22 +1,31 @@
 import { useState } from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
+import { QueryErrorBanner } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { CheckIcon, ChevronLeftIcon, SearchIcon } from '@/components/icons'
-import { brandBySlug, brands } from '@/data/brands'
 import { fontFamily, useColors } from '@/theme'
-import { sellerBrandsScreen } from '@/mocks'
+import { plural } from '@/lib/format'
+import { useBrands } from '@/api/directory'
+import { useMyShop, useSetShopBrands } from '@/api/shop'
 
+/** 23 «Марки, которые продаю» — requests come only for these brands. */
 export default function SellerBrandsScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
-	const [selected, setSelected] = useState(sellerBrandsScreen.selectedSlugs)
+	const shop = useMyShop()
+	const [q, setQ] = useState('')
+	const all = useBrands(q.trim() ? { q: q.trim() } : {})
+	const save = useSetShopBrands()
+	const [picked, setPicked] = useState<number[] | null>(null)
+	const selected = picked ?? shop.data?.brands.map((b) => b.id) ?? []
 
-	const toggle = (slug: string) =>
-		setSelected((prev) => (prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]))
+	const toggle = (id: number) => setPicked(selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id])
 
-	const otherBrands = brands.filter((b) => !sellerBrandsScreen.popularSlugs.includes(b.slug))
+	const searching = q.trim().length > 0
+	const popularBrands = searching ? [] : (all.data ?? []).filter((b) => b.popular)
+	const otherBrands = searching ? (all.data ?? []) : (all.data ?? []).filter((b) => !b.popular)
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
@@ -34,7 +43,7 @@ export default function SellerBrandsScreen() {
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					{sellerBrandsScreen.title}
+					Марки, которые продаю
 				</Text>
 			</View>
 
@@ -53,28 +62,38 @@ export default function SellerBrandsScreen() {
 					}}
 				>
 					<SearchIcon size={20} color={c.muted} strokeWidth={2.4} />
-					<Text style={{ fontSize: 16, fontFamily: fontFamily(400), color: '#7D7979' }}>{sellerBrandsScreen.searchPlaceholder}</Text>
+					<TextInput
+						value={q}
+						onChangeText={setQ}
+						placeholder="Найти марку"
+						placeholderTextColor="#7D7979"
+						style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+					/>
 				</View>
 
-				<Text style={{ fontSize: 14, lineHeight: 19.6, fontFamily: fontFamily(400), color: c.muted }}>{sellerBrandsScreen.hint}</Text>
+				<QueryErrorBanner error={shop.error ?? all.error ?? save.error} onRetry={() => all.refetch()} />
+
+				<Text style={{ fontSize: 14, lineHeight: 19.6, fontFamily: fontFamily(400), color: c.muted }}>
+					Запросы будут приходить только по этим маркам. Логотипы видят покупатели в вашем профиле.
+				</Text>
 
 				<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
 					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-						{sellerBrandsScreen.popularLabel}
+						{searching ? 'НАЙДЕНО' : 'ПОПУЛЯРНЫЕ'}
 					</Text>
 					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>Выбрано {selected.length}</Text>
 				</View>
 
 				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-					{sellerBrandsScreen.popularSlugs.map((slug) => {
-						const brand = brandBySlug(slug)
-						const active = selected.includes(slug)
+					{popularBrands.map((brand) => {
+						const active = selected.includes(brand.id)
 						return (
 							<Pressable
-								key={slug}
-								onPress={() => toggle(slug)}
+								key={brand.id}
+								onPress={() => toggle(brand.id)}
 								style={{
-									width: 84,
+									// Four per row: (358 − 3 × 8) / 4.
+									width: 83.5,
 									height: 96,
 									borderRadius: 14,
 									backgroundColor: active ? c.brandTint : c.card,
@@ -108,24 +127,26 @@ export default function SellerBrandsScreen() {
 								<Text
 									style={{ fontSize: 12, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}
 								>
-									{brand.name}
+									{brand.shortName}
 								</Text>
 							</Pressable>
 						)
 					})}
 				</View>
 
-				<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-					{sellerBrandsScreen.allLabel}
-				</Text>
+				{!searching ? (
+					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
+						ВСЕ МАРКИ А–Я
+					</Text>
+				) : null}
 
 				<View style={{ borderRadius: 16, backgroundColor: c.card, overflow: 'hidden' }}>
 					{otherBrands.map((brand, i) => {
-						const active = selected.includes(brand.slug)
+						const active = selected.includes(brand.id)
 						return (
 							<Pressable
-								key={brand.slug}
-								onPress={() => toggle(brand.slug)}
+								key={brand.id}
+								onPress={() => toggle(brand.id)}
 								style={{
 									height: 56,
 									paddingHorizontal: 16,
@@ -169,10 +190,24 @@ export default function SellerBrandsScreen() {
 				}}
 			>
 				<Pressable
-					onPress={() => router.back()}
-					style={{ height: 56, borderRadius: 14, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}
+					disabled={selected.length === 0 || save.isPending}
+					onPress={() => save.mutate(selected, { onSuccess: () => router.back() })}
+					style={{
+						height: 56,
+						borderRadius: 14,
+						backgroundColor: c.brand,
+						alignItems: 'center',
+						justifyContent: 'center',
+						opacity: selected.length === 0 ? 0.4 : 1,
+					}}
 				>
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Сохранить · {selected.length} марки</Text>
+					{save.isPending ? (
+						<ActivityIndicator color="#FFFFFF" />
+					) : (
+						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+							Сохранить · {selected.length} {plural(selected.length, ['марка', 'марки', 'марок'])}
+						</Text>
+					)}
 				</Pressable>
 			</View>
 		</View>

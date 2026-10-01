@@ -10,7 +10,8 @@ export interface Brand {
 	logo: ImageSourcePropType | null
 }
 
-const logos: Record<string, ImageSourcePropType> = {
+/** Bundled logos — shown instantly and offline; other brands use the server's `logoUrl`. */
+export const logos: Record<string, ImageSourcePropType> = {
 	toyota: require('../../assets/brands/toyota.png'),
 	lexus: require('../../assets/brands/lexus.png'),
 	honda: require('../../assets/brands/honda.png'),

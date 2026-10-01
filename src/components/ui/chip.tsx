@@ -9,6 +9,8 @@ interface ChipProps {
 	radius?: number
 	fontSize?: number
 	paddingHorizontal?: number
+	/** Unselected label colour (the new screens use ink). */
+	color?: string
 }
 
 export function Chip({
@@ -19,6 +21,7 @@ export function Chip({
 	radius = 20,
 	fontSize = 14,
 	paddingHorizontal = 14,
+	color,
 }: ChipProps) {
 	const c = useColors()
 	return (
@@ -39,7 +42,7 @@ export function Chip({
 				style={{
 					fontSize,
 					fontFamily: fontFamily(selected ? 700 : 600),
-					color: selected ? c.brandStrong : c.inkSecondary,
+					color: selected ? c.brandStrong : (color ?? c.inkSecondary),
 				}}
 			>
 				{label}

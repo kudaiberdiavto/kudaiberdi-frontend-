@@ -4,9 +4,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ChevronLeftIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
+import { ApiError } from '@/lib/api'
+import { formatE164 } from '@/lib/phone'
+import { useSendOtp, useVerifyOtp } from '@/api/auth'
+import { homeHref } from '@/store/useSession'
 
 const CODE_LENGTH = 4
-const RESEND_SECONDS = 42
 
 function formatCountdown(seconds: number) {
 	return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
@@ -15,10 +18,15 @@ function formatCountdown(seconds: number) {
 export default function CodeScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
-	const { phone } = useLocalSearchParams<{ phone?: string }>()
-	const [code, setCode] = useState('')
-	const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS)
+	const params = useLocalSearchParams<{ phone: string; resendIn?: string; debugCode?: string }>()
+	const phone = params.phone
+	// Dev backend returns the code in `debugCode` — prefill it instead of waiting for an SMS.
+	const [code, setCode] = useState(__DEV__ ? (params.debugCode ?? '') : '')
+	const [secondsLeft, setSecondsLeft] = useState(Number(params.resendIn) || 0)
 	const inputRef = useRef<TextInput>(null)
+	const verify = useVerifyOtp()
+	const resend = useSendOtp()
+	const error = (verify.error ?? resend.error) as ApiError | Error | null
 
 	useEffect(() => {
 		if (secondsLeft <= 0) return
@@ -29,8 +37,34 @@ export default function CodeScreen() {
 	useEffect(() => {
 		if (code.length < CODE_LENGTH) return
 		Keyboard.dismiss()
-		router.push('/role')
+		verify.mutate(
+			{ phone, code },
+			{
+				onSuccess: ({ user }) => router.replace(homeHref(user)),
+				onError: () => setCode(''),
+			}
+		)
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- submit once per completed code
 	}, [code])
+
+	const sendAgain = () => {
+		verify.reset()
+		setCode('')
+		resend.mutate(phone, {
+			onSuccess: (response) => {
+				setSecondsLeft(response.resendIn)
+				if (__DEV__ && response.debugCode) setCode(response.debugCode)
+			},
+			onError: (e) => {
+				if (e instanceof ApiError && e.retryAfter) setSecondsLeft(e.retryAfter)
+			},
+		})
+	}
+
+	const errorText =
+		error instanceof ApiError && error.code === 'OTP_INVALID' && typeof error.extra.attemptsLeft === 'number'
+			? `${error.message}. Осталось попыток: ${error.extra.attemptsLeft}`
+			: error?.message
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
@@ -55,7 +89,7 @@ export default function CodeScreen() {
 					<Text style={{ fontSize: 28, fontFamily: fontFamily(700), letterSpacing: -0.56, color: c.ink }}>
 						Код из SMS
 					</Text>
-					<Text style={{ fontSize: 16, fontFamily: fontFamily(400), color: c.muted }}>Отправили на {phone}</Text>
+					<Text style={{ fontSize: 16, fontFamily: fontFamily(400), color: c.muted }}>Отправили на {formatE164(phone)}</Text>
 				</View>
 
 				<Pressable onPress={() => inputRef.current?.focus()} style={{ flexDirection: 'row', gap: 12 }}>
@@ -70,7 +104,7 @@ export default function CodeScreen() {
 									height: 76,
 									borderRadius: 14,
 									borderWidth: 2,
-									borderColor: isActive ? c.brand : c.border,
+									borderColor: error ? c.danger : isActive ? c.brand : c.border,
 									backgroundColor: c.card,
 									alignItems: 'center',
 									justifyContent: 'center',
@@ -89,11 +123,19 @@ export default function CodeScreen() {
 				<TextInput
 					ref={inputRef}
 					value={code}
-					onChangeText={(text) => setCode(text.replace(/\D/g, '').slice(0, CODE_LENGTH))}
+					onChangeText={(text) => {
+						if (verify.isPending) return
+						verify.reset()
+						setCode(text.replace(/\D/g, '').slice(0, CODE_LENGTH))
+					}}
 					keyboardType="number-pad"
 					maxLength={CODE_LENGTH}
 					style={{ position: 'absolute', width: 0, height: 0, opacity: 0 }}
 				/>
+
+				{errorText && (
+					<Text style={{ fontSize: 15, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text>
+				)}
 
 				<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>
 					{secondsLeft > 0 ? (
@@ -103,10 +145,7 @@ export default function CodeScreen() {
 						</>
 					) : (
 						<Text
-							onPress={() => {
-								setSecondsLeft(RESEND_SECONDS)
-								setCode('')
-							}}
+							onPress={resend.isPending ? undefined : sendAgain}
 							style={{ fontFamily: fontFamily(700), color: c.brandStrong }}
 						>
 							Отправить код снова

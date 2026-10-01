@@ -1,8 +1,12 @@
 import { TabList, TabSlot, TabTrigger, Tabs } from 'expo-router/ui'
 import { TabBarContainer, TabButton } from '@/components/tab-bar'
+import { useUnread } from '@/api/chats'
 import { ChatIcon, HomeIcon, MarketIcon, ProfileIcon, RequestsIcon } from '@/components/icons'
 
 export default function BuyerLayout() {
+	// Unread chats for this side — counted on the server, kept live by the UNREAD event.
+	const unread = useUnread().data?.asBuyer ?? 0
+
 	return (
 		<Tabs>
 			<TabSlot />
@@ -18,7 +22,7 @@ export default function BuyerLayout() {
 					<TabButton icon={MarketIcon} label="Рынок" />
 				</TabTrigger>
 				<TabTrigger name="chats" asChild>
-					<TabButton icon={ChatIcon} label="Чаты" badge={2} />
+					<TabButton icon={ChatIcon} label="Чаты" badge={unread || undefined} />
 				</TabTrigger>
 				<TabTrigger name="profile" asChild>
 					<TabButton icon={ProfileIcon} label="Профиль" />

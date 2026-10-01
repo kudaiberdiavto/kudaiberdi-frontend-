@@ -1,10 +1,23 @@
-import { Image, Pressable, Text, View } from 'react-native'
-import type { Brand } from '@/data/brands'
+import { Image, Pressable, Text, View, type ImageSourcePropType } from 'react-native'
+import { logos } from '@/data/brands'
+import { resolveUrl } from '@/lib/api'
 import { fontFamily, useColors } from '@/theme'
 
-/** Кружок логотипа марки — картинка из assets/brands или буква-заглушка, если файла нет. */
-export function BrandLogo({ brand, size = 36 }: { brand: Brand; size?: number }) {
+/** Local demo brand (`logo`) or the server's BrandDto (`logoUrl`). */
+interface BrandLike {
+	slug: string
+	name: string
+	placeholder: string
+	color: string
+	logo?: ImageSourcePropType | null
+	logoUrl?: string | null
+}
+
+/** Кружок логотипа марки — картинка из assets/brands, с сервера, или буква-заглушка. */
+export function BrandLogo({ brand: input, size = 36 }: { brand: BrandLike; size?: number }) {
 	const c = useColors()
+	const url = resolveUrl(input.logoUrl)
+	const brand = { ...input, logo: input.logo ?? logos[input.slug] ?? (url ? { uri: url } : null) }
 	return (
 		<View
 			style={{
@@ -49,7 +62,7 @@ export function BrandChip({
 	onPress,
 	height = 44,
 }: {
-	brand: Brand
+	brand: BrandLike
 	label?: string
 	selected?: boolean
 	onPress?: () => void

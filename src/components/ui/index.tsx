@@ -9,6 +9,11 @@ export { Badge } from './badge'
 export { BrandChip, BrandLogo } from './brand'
 export { PhotoPlaceholder } from './photo'
 export { ProductCard } from './product-card'
+export { NoticeBanner, QueryErrorBanner } from './notice'
+export { DurationPicker, DURATION_OPTIONS } from './duration-picker'
+export { ContainerGrid } from './container-grid'
+export { CountdownBar } from './countdown-bar'
+export { RequestStatsFunnel } from './request-stats-funnel'
 
 interface ScreenProps {
 	children: ReactNode
@@ -94,6 +99,13 @@ interface SegmentedProps {
 	borderColor?: string
 	height?: number
 	itemHeight?: number
+	/** Inner padding and gap between items — 4 by default; the v2 screens [06б, 31] use 3 / 0. */
+	padding?: number
+	gap?: number
+	/** Weight of the active label — 700 by default; 600 on the v2 screens. */
+	activeWeight?: 600 | 700
+	/** Colour of inactive labels — inkSecondary by default; muted on the v2 screens. */
+	inactiveColor?: string
 }
 
 export function Segmented({
@@ -104,6 +116,10 @@ export function Segmented({
 	borderColor,
 	height = 56,
 	itemHeight = 44,
+	padding = 4,
+	gap = 4,
+	activeWeight = 700,
+	inactiveColor,
 }: SegmentedProps) {
 	const c = useColors()
 	return (
@@ -111,8 +127,8 @@ export function Segmented({
 			style={{
 				height,
 				flexDirection: 'row',
-				gap: 4,
-				padding: 4,
+				gap,
+				padding,
 				borderRadius: 12,
 				backgroundColor: background ?? c.card,
 				borderWidth: borderColor ? 2 : 0,
@@ -137,8 +153,8 @@ export function Segmented({
 						<Text
 							style={{
 								fontSize: 14,
-								fontFamily: fontFamily(active ? 700 : 600),
-								color: active ? '#FFFFFF' : c.inkSecondary,
+								fontFamily: fontFamily(active ? activeWeight : 600),
+								color: active ? '#FFFFFF' : (inactiveColor ?? c.inkSecondary),
 							}}
 						>
 							{label}
@@ -346,3 +362,5 @@ export function Avatar({
 		</View>
 	)
 }
+export { OfferCard, ServiceBadge, ServiceGrid, ServiceIcon, ServiceRequestCard, ServiceTile, SummaryChips, WizardStepper } from './service'
+export type { SummaryChip } from './service'

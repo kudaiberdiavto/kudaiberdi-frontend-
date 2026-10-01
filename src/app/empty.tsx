@@ -1,38 +1,45 @@
 import { Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { router } from 'expo-router'
-import { Button } from '@/components/ui'
+import { router, useLocalSearchParams } from 'expo-router'
+import { Button, QueryErrorBanner } from '@/components/ui'
 import { SearchIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
+import { plural } from '@/lib/format'
+import { useCloseRequest, useExtendRequest, useRequest, useWidenRequest } from '@/api/requests'
 
+/** 20 «Пока никто не ответил» — push NO_REPLY or a NO_ANSWERS card on 05. */
 export default function EmptyAnswersScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
+	const id = Number(useLocalSearchParams<{ id: string }>().id)
+	const request = useRequest(id)
+	const widen = useWidenRequest(id)
+	const extend = useExtendRequest(id)
+	const close = useCloseRequest(id)
+	const data = request.data
+
+	// Sent to the whole market already — widening adds nobody, offer more time instead.
+	const wholeMarket = data?.target === 'MARKET'
+	const seen = data?.seenCount ?? 0
+	const hint = data
+		? `Запрос видели ${seen} ${plural(seen, ['продавец', 'продавца', 'продавцов'])}. ` +
+			(wholeMarket ? 'Продлите время — может, ответят позже.' : 'Отправьте всему рынку — деталь редкая.')
+		: ' '
+	const openAnswers = () => router.replace({ pathname: '/buyer/requests', params: { id: String(id) } })
+	const actionError = widen.error ?? extend.error ?? close.error
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<View
-				style={{
-					marginTop: 4,
-					marginHorizontal: 16,
-					borderRadius: 12,
-					backgroundColor: c.dangerTint,
-					paddingVertical: 12,
-					paddingHorizontal: 14,
-					flexDirection: 'row',
-					alignItems: 'center',
-					gap: 10,
-				}}
-			>
-				<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.danger }} />
-				<Text style={{ flex: 1, fontSize: 14, fontFamily: fontFamily(600), color: c.ink }}>
-					Нет сети. Покажем ответы, когда появится
-				</Text>
-			</View>
+			<QueryErrorBanner
+				error={request.error}
+				onRetry={() => request.refetch()}
+				offlineText="Нет сети. Покажем ответы, когда появится"
+				style={{ marginTop: 4, marginHorizontal: 16 }}
+			/>
 
 			<View style={{ paddingTop: 14, paddingHorizontal: 16, gap: 2 }}>
-				<Text style={{ fontSize: 18, fontFamily: fontFamily(700), color: c.ink }}>Балка задняя</Text>
-				<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>Honda Fit · 2009</Text>
+				<Text style={{ fontSize: 18, fontFamily: fontFamily(700), color: c.ink }}>{data?.text ?? ' '}</Text>
+				<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{data?.car.label ?? ' '}</Text>
 			</View>
 
 			<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14, paddingHorizontal: 32 }}>
@@ -61,13 +68,38 @@ export default function EmptyAnswersScreen() {
 						textAlign: 'center',
 					}}
 				>
-					Запрос видели 12 продавцов ряда 28. Отправьте всему рынку — деталь редкая.
+					{hint}
 				</Text>
 			</View>
 
 			<View style={{ paddingHorizontal: 16, paddingBottom: 24 + insets.bottom, gap: 10 }}>
-				<Button label="Отправить всему рынку" />
-				<Button label="Закрыть запрос" variant="outline" height={52} fontSize={16} onPress={() => router.back()} />
+				{actionError ? (
+					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{actionError.message}</Text>
+				) : null}
+				{wholeMarket ? (
+					<Button
+						label="Продлить на 30 мин"
+						disabled={!data?.canExtend}
+						loading={extend.isPending}
+						onPress={() => extend.mutate(30, { onSuccess: openAnswers })}
+					/>
+				) : (
+					<Button
+						label="Отправить всему рынку"
+						disabled={!data}
+						loading={widen.isPending}
+						onPress={() => widen.mutate('MARKET', { onSuccess: openAnswers })}
+					/>
+				)}
+				<Button
+					label="Закрыть запрос"
+					variant="outline"
+					height={52}
+					fontSize={16}
+					disabled={!data}
+					loading={close.isPending}
+					onPress={() => close.mutate({}, { onSuccess: () => router.replace('/buyer') })}
+				/>
 			</View>
 		</View>
 	)

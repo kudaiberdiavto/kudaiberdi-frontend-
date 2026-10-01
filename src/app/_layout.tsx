@@ -16,6 +16,10 @@ import {
 	useFonts,
 } from '@expo-google-fonts/inter'
 import { queryClient } from '@/lib/query-client'
+import { RealtimeProvider } from '@/lib/realtime'
+import { PushProvider } from '@/lib/push'
+import { useDictionariesVersion } from '@/lib/dictionaries'
+import { useSession } from '@/store/useSession'
 import { lightColors } from '@/theme'
 
 SplashScreen.preventAutoHideAsync()
@@ -30,24 +34,37 @@ export default function RootLayout() {
 		Inter_800ExtraBold,
 	})
 
-	useEffect(() => {
-		if (fontsLoaded) SplashScreen.hideAsync()
-	}, [fontsLoaded])
+	const booting = useSession((s) => s.status === 'booting')
 
-	if (!fontsLoaded) return null
+	useEffect(() => {
+		useSession.getState().boot()
+	}, [])
+	useDictionariesVersion()
+
+	const ready = fontsLoaded && !booting
+
+	useEffect(() => {
+		if (ready) SplashScreen.hideAsync()
+	}, [ready])
+
+	if (!ready) return null
 
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<QueryClientProvider client={queryClient}>
-				<SafeAreaProvider>
-					<StatusBar style="dark" />
-					<Stack
-						screenOptions={{
-							headerShown: false,
-							contentStyle: { backgroundColor: lightColors.surface },
-						}}
-					/>
-				</SafeAreaProvider>
+				<RealtimeProvider>
+					<PushProvider>
+						<SafeAreaProvider>
+							<StatusBar style="dark" />
+							<Stack
+								screenOptions={{
+									headerShown: false,
+									contentStyle: { backgroundColor: lightColors.surface },
+								}}
+							/>
+						</SafeAreaProvider>
+					</PushProvider>
+				</RealtimeProvider>
 			</QueryClientProvider>
 		</GestureHandlerRootView>
 	)

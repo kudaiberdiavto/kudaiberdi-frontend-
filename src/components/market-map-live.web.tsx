@@ -7,15 +7,8 @@ import { StyleSheet, Text, View } from 'react-native'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { marketMapStyle } from '@/data/map-style'
-import {
-	marketBlocks,
-	marketBoundary,
-	marketCenter,
-	marketEntrances,
-	marketLabels,
-	marketPassages,
-	routeToGeoJSON,
-} from '@/lib/market-geojson'
+import { type MarketGeo, routeToGeoJSON } from '@/lib/market-geojson'
+import { useMarketGeo } from '@/api/market'
 import { raw, useColors } from '@/theme'
 
 const MARKET_ZOOM = 16.2
@@ -32,27 +25,42 @@ maplibregl.setWorkerUrl('/maplibre-gl-worker.mjs')
 
 export interface MarketMapLiveHandle {
 	focusOn: (coordinate: [number, number], zoom?: number) => void
+	focusOnRow: (rowId: number, zoom?: number) => void
 	focusOnMe: (zoom?: number) => Promise<void>
 	zoomBy: (delta: number) => void
 	reset: () => void
 }
 
 interface MarketMapLiveProps {
-	highlighted?: string[]
-	route?: [number, number][]
+	highlightedRowIds?: number[]
+	route?: number[][]
 	showUser?: boolean
 }
 
-function highlightExpr(highlighted: string[], active: string, fallback: string): maplibregl.ExpressionSpecification | string {
-	if (!highlighted.length) return fallback
-	return ['case', ['in', ['get', 'label'], ['literal', highlighted]], active, fallback]
+/** `hl` — the row is highlighted, `muted` — another one is (set by useMarketGeo). */
+function highlightExpr(active: string, muted: string, fallback: string): maplibregl.ExpressionSpecification {
+	return ['case', ['==', ['get', 'hl'], true], active, ['==', ['get', 'muted'], true], muted, fallback]
+}
+
+/** Push fresh GeoJSON into the sources — the map itself is created once. */
+function setSources(map: maplibregl.Map, geo: MarketGeo) {
+	const set = (id: string, data: GeoJSON.FeatureCollection) => (map.getSource(id) as maplibregl.GeoJSONSource | undefined)?.setData(data)
+	set('market-boundary', geo.boundary)
+	set('market-passages', geo.passages)
+	set('market-blocks', geo.blocks)
+	set('market-labels', geo.labels)
+	set('market-entrances', geo.entrances)
 }
 
 export const MarketMapLive = forwardRef(function MarketMapLive(
-	{ highlighted = [], route, showUser = true }: MarketMapLiveProps,
+	{ highlightedRowIds = [], route, showUser = true }: MarketMapLiveProps,
 	ref: Ref<MarketMapLiveHandle>,
 ) {
 	const c = useColors()
+	const geo = useMarketGeo(highlightedRowIds)
+	const marketCenter = geo.center
+	const geoRef = useRef(geo)
+	const routeRef = useRef(route)
 	const containerRef = useRef<HTMLDivElement | null>(null)
 	const mapRef = useRef<maplibregl.Map | null>(null)
 	const userMarkerRef = useRef<maplibregl.Marker | null>(null)
@@ -63,6 +71,10 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 	useImperativeHandle(ref, () => ({
 		focusOn(coordinate, zoom = 18) {
 			mapRef.current?.flyTo({ center: coordinate, zoom, duration: 600 })
+		},
+		focusOnRow(rowId, zoom = 17.5) {
+			const center = geo.rowCenter(rowId)
+			if (center) mapRef.current?.flyTo({ center, zoom, duration: 600 })
 		},
 		async focusOnMe(zoom = 18) {
 			if (!('geolocation' in navigator)) return
@@ -105,7 +117,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 
 		map.on('load', () => {
 			setStatus('ready')
-			map.addSource('market-boundary', { type: 'geojson', data: marketBoundary })
+			map.addSource('market-boundary', { type: 'geojson', data: geoRef.current.boundary })
 			map.addLayer({ id: 'market-boundary-fill', type: 'fill', source: 'market-boundary', paint: { 'fill-color': raw.mapBoundary } })
 			map.addLayer({
 				id: 'market-boundary-line',
@@ -114,7 +126,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 				paint: { 'line-color': raw.mapBoundaryStroke, 'line-opacity': 0.55, 'line-width': 2 },
 			})
 
-			map.addSource('market-passages', { type: 'geojson', data: marketPassages })
+			map.addSource('market-passages', { type: 'geojson', data: geoRef.current.passages })
 			map.addLayer({
 				id: 'market-passage-casing',
 				type: 'line',
@@ -130,7 +142,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 				paint: { 'line-color': raw.mapPassage, 'line-width': ['interpolate', ['linear'], ['zoom'], 15, 2.5, 18, 11, 20, 29] },
 			})
 
-			map.addSource('market-blocks', { type: 'geojson', data: marketBlocks })
+			map.addSource('market-blocks', { type: 'geojson', data: geoRef.current.blocks })
 			map.addLayer({
 				id: 'market-block-fill',
 				type: 'fill',
@@ -144,7 +156,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 						raw.mapAdmin,
 						['==', ['get', 'kind'], 'stall'],
 						'rgba(255,255,255,0.6)',
-						highlightExpr(highlighted, c.brandTint, highlighted.length ? raw.mapRowMuted : raw.mapRow),
+						highlightExpr(c.brandTint, raw.mapRowMuted, raw.mapRow),
 					] as maplibregl.ExpressionSpecification,
 				},
 			})
@@ -159,15 +171,13 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 						raw.mapShopBorder,
 						['==', ['get', 'kind'], 'admin'],
 						raw.mapAdminBorder,
-						highlightExpr(highlighted, c.brand, highlighted.length ? raw.mapRowMutedBorder : raw.mapRowBorder),
+						highlightExpr(c.brand, raw.mapRowMutedBorder, raw.mapRowBorder),
 					] as maplibregl.ExpressionSpecification,
-					'line-width': highlighted.length
-						? (['case', ['in', ['get', 'label'], ['literal', highlighted]], 2, 1] as maplibregl.ExpressionSpecification)
-						: 1,
+					'line-width': ['case', ['==', ['get', 'hl'], true], 2, 1],
 				},
 			})
 
-			map.addSource('market-labels', { type: 'geojson', data: marketLabels })
+			map.addSource('market-labels', { type: 'geojson', data: geoRef.current.labels })
 			map.addLayer({
 				id: 'market-label',
 				type: 'symbol',
@@ -180,13 +190,13 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 					'text-allow-overlap': false,
 				},
 				paint: {
-					'text-color': highlightExpr(highlighted, c.brandStrong, c.ink),
+					'text-color': ['case', ['==', ['get', 'hl'], true], c.brandStrong, c.ink],
 					'text-halo-color': '#FFFFFF',
 					'text-halo-width': 1.2,
 				},
 			})
 
-			map.addSource('market-entrances', { type: 'geojson', data: marketEntrances })
+			map.addSource('market-entrances', { type: 'geojson', data: geoRef.current.entrances })
 			map.addLayer({
 				id: 'market-entrance-dot',
 				type: 'circle',
@@ -212,8 +222,8 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 				paint: { 'text-color': c.brandStrong, 'text-halo-color': '#FFFFFF', 'text-halo-width': 1.4 },
 			})
 
-			if (route) {
-				map.addSource('market-route', { type: 'geojson', data: routeToGeoJSON(route) })
+			{
+				map.addSource('market-route', { type: 'geojson', data: routeToGeoJSON(routeRef.current ?? []) })
 				map.addLayer({
 					id: 'market-route-halo',
 					type: 'line',
@@ -249,6 +259,18 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- карта пересоздаётся только при монтировании компонента
 	}, [])
+
+	// Highlight / scheme changed — update the sources in place.
+	useEffect(() => {
+		geoRef.current = geo
+		if (status === 'ready' && mapRef.current) setSources(mapRef.current, geo)
+	}, [geo, status])
+
+	useEffect(() => {
+		routeRef.current = route
+		const source = mapRef.current?.getSource('market-route') as maplibregl.GeoJSONSource | undefined
+		if (status === 'ready') source?.setData(routeToGeoJSON(route ?? []))
+	}, [route, status])
 
 	return (
 		<View style={StyleSheet.absoluteFill}>

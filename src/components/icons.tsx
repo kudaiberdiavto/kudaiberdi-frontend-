@@ -169,6 +169,15 @@ export function ShareIcon({ size, color, strokeWidth = 2.2 }: IconProps) {
 	)
 }
 
+/** «В избранное» [29, 30] — not in the mockup set; drawn in the same stroke style. */
+export function HeartIcon({ size, color, strokeWidth = 2.2, filled }: IconProps & { filled?: boolean }) {
+	return (
+		<Svg {...base(size)} fill={filled ? color : 'none'} stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+			<Path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z" />
+		</Svg>
+	)
+}
+
 export function PhoneIcon({ size, color, strokeWidth = 2.2 }: IconProps) {
 	return (
 		<Svg {...base(size)} fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
@@ -209,6 +218,33 @@ export function TagIcon({ size, color, strokeWidth = 1.9 }: IconProps) {
 		<Svg {...base(size)} fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
 			<Path d="M3.5 12.2 11 4.7a2 2 0 0 1 1.4-.6H19a1 1 0 0 1 1 1v6.6a2 2 0 0 1-.6 1.4l-7.5 7.5a1.5 1.5 0 0 1-2.1 0l-6.3-6.3a1.5 1.5 0 0 1 0-2.1z" />
 			<Circle cx={15.5} cy={8.5} r={1.5} />
+		</Svg>
+	)
+}
+
+/** Camera of the v2 screens [06б] — a slightly different outline than CameraIcon. */
+export function PhotoIcon({ size, color, strokeWidth = 2 }: IconProps) {
+	return (
+		<Svg {...base(size)} fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+			<Path d="M4 8h3l2-3h6l2 3h3v11H4z" />
+			<Circle cx={12} cy={13} r={3.5} />
+		</Svg>
+	)
+}
+
+export function ClockIcon({ size, color, strokeWidth = 2.2 }: IconProps) {
+	return (
+		<Svg {...base(size)} fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+			<Circle cx={12} cy={12} r={8.5} />
+			<Path d="M12 7.5V12l3 2" />
+		</Svg>
+	)
+}
+
+export function FlagIcon({ size, color, strokeWidth = 2 }: IconProps) {
+	return (
+		<Svg {...base(size)} fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+			<Path d="M5 21V4M5 4h11l-2 4 2 4H5" />
 		</Svg>
 	)
 }

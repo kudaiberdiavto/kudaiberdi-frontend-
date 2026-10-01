@@ -1,0 +1,62 @@
+[
+ {
+  "code": "CAR_REPAIR",
+  "name_ru": "СТО и ремонт",
+  "icon": "assets/services/car_repair.svg"
+ },
+ {
+  "code": "TIRE_SERVICE",
+  "name_ru": "Шиномонтаж",
+  "icon": "assets/services/tire_service.svg"
+ },
+ {
+  "code": "LPG",
+  "name_ru": "ГБО",
+  "icon": "assets/services/lpg.svg"
+ },
+ {
+  "code": "TOW_TRUCK",
+  "name_ru": "Эвакуатор",
+  "icon": "assets/services/tow_truck.svg"
+ },
+ {
+  "code": "CAR_WASH",
+  "name_ru": "Автомойка",
+  "icon": "assets/services/car_wash.svg"
+ },
+ {
+  "code": "AUTO_ELECTRIC",
+  "name_ru": "Автоэлектрик",
+  "icon": "assets/services/auto_electric.svg"
+ },
+ {
+  "code": "BODY_PAINT",
+  "name_ru": "Кузов и покраска",
+  "icon": "assets/services/body_paint.svg"
+ },
+ {
+  "code": "DIAGNOSTICS",
+  "name_ru": "Диагностика",
+  "icon": "assets/services/diagnostics.svg"
+ },
+ {
+  "code": "OIL_CHANGE",
+  "name_ru": "Замена масла",
+  "icon": "assets/services/oil_change.svg"
+ },
+ {
+  "code": "WHEEL_ALIGNMENT",
+  "name_ru": "Развал-схождение",
+  "icon": "assets/services/wheel_alignment.svg"
+ },
+ {
+  "code": "TINTING",
+  "name_ru": "Тонировка",
+  "icon": "assets/services/tinting.svg"
+ },
+ {
+  "code": "MOBILE_MASTER",
+  "name_ru": "Выездной мастер",
+  "icon": "assets/services/mobile_master.svg"
+ }
+]

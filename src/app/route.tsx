@@ -1,12 +1,15 @@
 import { useEffect, useRef } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { MarketMapLive, type MarketMapLiveHandle } from '@/components/market-map-live'
+import { QueryErrorBanner } from '@/components/ui'
 import { ChevronLeftIcon, LocateIcon } from '@/components/icons'
 import { schemaToGeo } from '@/lib/geo'
 import { fontFamily, raw, useColors } from '@/theme'
-import { routeToBox } from '@/mocks'
+import { formatDuration, formatPlace, formatSide } from '@/lib/format'
+import { useRoute } from '@/api/market'
+import { useSendMessage } from '@/api/chats'
 
 const cardShadow = {
 	shadowColor: '#201F1D',
@@ -19,16 +22,30 @@ const cardShadow = {
 export default function RouteScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
+	const params = useLocalSearchParams<{ containerId: string; shopName?: string; chatId?: string }>()
+	const chatId = Number(params.chatId) || 0
+	const route = useRoute(Number(params.containerId) || 0)
+	const sender = useSendMessage(chatId, 'BUYER')
 	const mapRef = useRef<MarketMapLiveHandle>(null)
+	const data = route.data
+	const polyline = data?.polyline
 
-	/** Открываем сразу приближенным к боксу, а не на весь рынок. */
+	/** Открываем на середине маршрута, чтобы путь от входа до бокса был виден целиком. */
 	useEffect(() => {
-		mapRef.current?.focusOn(schemaToGeo(routeToBox.target.x, routeToBox.target.y), 18.5)
-	}, [])
+		if (!polyline?.length) return
+		const xs = polyline.map(([x]) => x)
+		const ys = polyline.map(([, y]) => y)
+		const mid = schemaToGeo((Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2)
+		mapRef.current?.focusOn(mid, 16.6)
+	}, [polyline])
+
+	const subtitle = data
+		? [params.shopName, `${formatSide(data.target.side)} сторона`].filter(Boolean).join(' · ')
+		: ' '
 
 	return (
 		<View style={{ flex: 1, backgroundColor: raw.mapSurface }}>
-			<MarketMapLive ref={mapRef} route={routeToBox.points} />
+			<MarketMapLive ref={mapRef} route={data?.polyline} highlightedRowIds={data ? [data.target.rowId] : undefined} />
 
 			<View
 				style={[
@@ -52,8 +69,8 @@ export default function RouteScreen() {
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{routeToBox.title}</Text>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>{routeToBox.subtitle}</Text>
+					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{data ? formatPlace(data.target) : ' '}</Text>
+					<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>{subtitle}</Text>
 				</View>
 			</View>
 
@@ -99,13 +116,19 @@ export default function RouteScreen() {
 			>
 				<View style={{ width: 40, height: 5, borderRadius: 3, backgroundColor: c.border, alignSelf: 'center' }} />
 
+				<QueryErrorBanner error={route.error} onRetry={() => route.refetch()} offlineText="Нет сети. Маршрут построим, когда появится" />
+
 				<View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-					<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>{routeToBox.time}</Text>
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>{routeToBox.distance}</Text>
+					<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>
+						{data ? formatDuration(Math.max(1, data.minutes)) : ' '}
+					</Text>
+					<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>
+						{data ? `· ${data.distanceM} м пешком${data.fromSource === 'ENTRANCE' ? ' от входа' : ''}` : ''}
+					</Text>
 				</View>
 
-				{routeToBox.steps.map((step, i) => (
-					<View key={step} style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+				{(data?.steps ?? []).map((step, i) => (
+					<View key={step.n} style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
 						<View
 							style={{
 								width: 28,
@@ -129,7 +152,7 @@ export default function RouteScreen() {
 								color: c.ink,
 							}}
 						>
-							{step}
+							{step.text}
 						</Text>
 					</View>
 				))}
@@ -146,10 +169,14 @@ export default function RouteScreen() {
 							justifyContent: 'center',
 						}}
 					>
-						<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>{routeToBox.actions.message}</Text>
+						<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>{chatId ? 'Написать' : 'Назад'}</Text>
 					</Pressable>
 					<Pressable
+						// «Я на месте» — the ARRIVED quick reply to the seller (when opened from the chat).
+						disabled={!chatId || sender.isPending}
+						onPress={() => sender.send({ quickReply: 'ARRIVED' })}
 						style={{
+							opacity: chatId ? 1 : 0.4,
 							flex: 1.4,
 							height: 52,
 							borderRadius: 12,
@@ -158,7 +185,9 @@ export default function RouteScreen() {
 							justifyContent: 'center',
 						}}
 					>
-						<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{routeToBox.actions.arrived}</Text>
+						<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+							{sender.isSuccess ? 'Продавец знает ✓' : 'Я на месте'}
+						</Text>
 					</Pressable>
 				</View>
 			</View>

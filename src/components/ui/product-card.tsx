@@ -1,5 +1,5 @@
-import { Pressable, Text, View } from 'react-native'
-import { CheckIcon, MapPinIcon } from '@/components/icons'
+import { Image, Pressable, Text, View } from 'react-native'
+import { CheckIcon, HeartIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { PhotoPlaceholder } from './photo'
 
@@ -11,6 +11,10 @@ export function ProductCard({
 	location,
 	onPress,
 	width = 174,
+	photoUrl,
+	shopAvatarUrl,
+	dimmed,
+	favorite,
 }: {
 	price: string
 	title: string
@@ -18,12 +22,23 @@ export function ProductCard({
 	location: string
 	onPress?: () => void
 	width?: number
+	/** Main photo (`mainPhoto.thumbUrl`); without it — the drawn placeholder. */
+	photoUrl?: string | null
+	shopAvatarUrl?: string | null
+	/** Out of stock — shown faded. */
+	dimmed?: boolean
+	/** ♥ in the corner, filled when the part is in favorites. */
+	favorite?: boolean
 }) {
 	const c = useColors()
 	return (
-		<Pressable onPress={onPress} style={{ width, borderRadius: 16, backgroundColor: c.card, overflow: 'hidden' }}>
+		<Pressable onPress={onPress} style={{ width, borderRadius: 16, backgroundColor: c.card, overflow: 'hidden', opacity: dimmed ? 0.6 : 1 }}>
 			<View>
-				<PhotoPlaceholder width={width} height={118} radius={0} />
+				{photoUrl ? (
+					<Image source={{ uri: photoUrl }} style={{ width, height: 118 }} resizeMode="cover" />
+				) : (
+					<PhotoPlaceholder width={width} height={118} radius={0} />
+				)}
 				<View
 					style={{
 						position: 'absolute',
@@ -37,7 +52,7 @@ export function ProductCard({
 						justifyContent: 'center',
 					}}
 				>
-					<MapPinIcon size={16} color={c.ink} />
+					<HeartIcon size={16} color={favorite ? c.danger : c.ink} filled={favorite} />
 				</View>
 			</View>
 
@@ -53,7 +68,11 @@ export function ProductCard({
 					</View>
 				) : null}
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-					<View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: '#EEEEEE' }} />
+					{shopAvatarUrl ? (
+						<Image source={{ uri: shopAvatarUrl }} style={{ width: 20, height: 20, borderRadius: 10 }} />
+					) : (
+						<View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: '#EEEEEE' }} />
+					)}
 					<Text style={{ fontSize: 12, fontFamily: fontFamily(400), color: c.muted }}>{location}</Text>
 				</View>
 			</View>

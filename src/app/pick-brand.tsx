@@ -1,20 +1,41 @@
 import { useState } from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
+import { QueryErrorBanner } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { ChevronLeftIcon, SearchIcon } from '@/components/icons'
-import { brandBySlug } from '@/data/brands'
 import { fontFamily, raw, useColors } from '@/theme'
-import { pickBrandScreen } from '@/mocks'
+import { useSearchCount } from '@/api/catalog'
+import { useBrands, useModels } from '@/api/directory'
+import type { Brand } from '@/api/types'
+import { toPartFilters, useCatalogFilters } from '@/store/useCatalogFilters'
 
+/** 28 «Марка авто» — for the catalog when the car is not in the garage. */
 export default function PickBrandScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
-	const [slug, setSlug] = useState<string | null>(pickBrandScreen.selectedSlug)
-	const [model, setModel] = useState(pickBrandScreen.sheet.activeModel)
+	const filters = useCatalogFilters()
+	const [q, setQ] = useState('')
+	const [brand, setBrand] = useState<Brand | null>(filters.brand)
+	const [modelId, setModelId] = useState<number | null>(filters.modelId)
 
-	const brand = slug ? brandBySlug(slug) : null
+	const searching = q.trim().length > 0
+	const all = useBrands(searching ? { q: q.trim() } : {})
+	const models = useModels(brand?.id)
+	const count = useSearchCount(
+		toPartFilters({ ...filters, carId: null, brand, modelId }),
+		Boolean(brand)
+	)
+	const popular = searching ? [] : (all.data ?? []).filter((b) => b.popular)
+	const others = searching ? (all.data ?? []) : (all.data ?? []).filter((b) => !b.popular)
+	const model = models.data?.find((m) => m.id === modelId)
+
+	const apply = (withModel: boolean) => {
+		if (!brand) return
+		filters.pickBrand(brand, withModel && model ? { id: model.id, label: model.label } : null)
+		router.back()
+	}
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
@@ -32,7 +53,7 @@ export default function PickBrandScreen() {
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					{pickBrandScreen.title}
+					Марка авто
 				</Text>
 			</View>
 
@@ -51,23 +72,33 @@ export default function PickBrandScreen() {
 					}}
 				>
 					<SearchIcon size={20} color={c.muted} strokeWidth={2.4} />
-					<Text style={{ fontSize: 16, fontFamily: fontFamily(400), color: '#7D7979' }}>{pickBrandScreen.searchPlaceholder}</Text>
+					<TextInput
+						value={q}
+						onChangeText={setQ}
+						placeholder="Марка или модель"
+						placeholderTextColor="#7D7979"
+						style={{ flex: 1, minWidth: 0, fontSize: 16, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+					/>
 				</View>
 
-				<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-					{pickBrandScreen.popularLabel}
-				</Text>
+				<QueryErrorBanner error={all.error} onRetry={() => all.refetch()} />
+
+				{popular.length ? (
+					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ПОПУЛЯРНЫЕ</Text>
+				) : null}
 
 				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-					{pickBrandScreen.popularSlugs.map((s) => {
-						const b = brandBySlug(s)
-						const active = slug === s
+					{popular.map((b) => {
+						const active = brand?.id === b.id
 						return (
 							<Pressable
-								key={s}
-								onPress={() => setSlug(s)}
+								key={b.id}
+								onPress={() => {
+									setBrand(b)
+									setModelId(null)
+								}}
 								style={{
-									width: 84,
+									width: 83.5, // four per row: (358 − 3 × 8) / 4
 									height: 92,
 									borderRadius: 14,
 									backgroundColor: active ? c.brandTint : c.card,
@@ -80,16 +111,43 @@ export default function PickBrandScreen() {
 							>
 								<BrandLogo brand={b} size={40} />
 								<Text style={{ fontSize: 12, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
-									{b.name}
+									{b.shortName}
 								</Text>
 							</Pressable>
 						)
 					})}
 				</View>
 
-				<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-					{pickBrandScreen.allLabel}
-				</Text>
+				{others.length ? (
+					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
+						{searching ? 'НАЙДЕНО' : 'ВСЕ МАРКИ А–Я'}
+					</Text>
+				) : null}
+				<View style={{ borderRadius: 16, backgroundColor: c.card, overflow: 'hidden' }}>
+					{others.map((b, i) => (
+						<Pressable
+							key={b.id}
+							onPress={() => {
+								setBrand(b)
+								setModelId(null)
+							}}
+							style={{
+								height: 56,
+								paddingHorizontal: 16,
+								flexDirection: 'row',
+								alignItems: 'center',
+								gap: 12,
+								backgroundColor: brand?.id === b.id ? c.brandTint : c.card,
+								borderBottomWidth: i === others.length - 1 ? 0 : 2,
+								borderBottomColor: c.surface,
+							}}
+						>
+							<BrandLogo brand={b} size={34} />
+							<Text style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(400), color: c.ink }}>{b.name}</Text>
+						</Pressable>
+					))}
+				</View>
+				{brand ? <View style={{ height: 260 }} /> : null}
 			</ScrollView>
 
 			{brand ? (
@@ -115,17 +173,18 @@ export default function PickBrandScreen() {
 						<BrandLogo brand={brand} size={44} />
 						<View style={{ gap: 2 }}>
 							<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{brand.name}</Text>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{pickBrandScreen.sheet.subtitle}</Text>
+							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>Выберите модель или пропустите</Text>
 						</View>
 					</View>
 
 					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-						{pickBrandScreen.sheet.models.map((label, i) => {
-							const active = model === i
+						{(models.data ?? []).map((m) => {
+							const active = modelId === m.id
+							const label = m.label
 							return (
 								<Pressable
-									key={label}
-									onPress={() => setModel(i)}
+									key={m.id}
+									onPress={() => setModelId(active ? null : m.id)}
 									style={{
 										height: 44,
 										paddingHorizontal: 14,
@@ -147,20 +206,25 @@ export default function PickBrandScreen() {
 
 					<View style={{ flexDirection: 'row', gap: 8 }}>
 						<Pressable
+							onPress={() => apply(false)}
 							style={{ flex: 1, height: 52, borderRadius: 14, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{pickBrandScreen.sheet.allModels}</Text>
+							<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Все модели</Text>
 						</Pressable>
 						<Pressable
-							onPress={() => router.push('/catalog')}
+							onPress={() => apply(true)}
 							style={{ flex: 1.4, height: 52, borderRadius: 14, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{pickBrandScreen.sheet.showLabel}</Text>
+							{count.data === undefined ? (
+								<ActivityIndicator color="#FFFFFF" />
+							) : (
+								<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Показать {count.data}</Text>
+							)}
 						</Pressable>
 					</View>
 
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
-						{pickBrandScreen.addToGarage} <Text style={{ fontFamily: fontFamily(700), color: c.brandStrong }}>{pickBrandScreen.addToGarageStrong}</Text>
+					<Text onPress={() => router.push('/garage-add')} style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
+						Добавить эту машину в <Text style={{ fontFamily: fontFamily(700), color: c.brandStrong }}>Мой гараж</Text>
 					</Text>
 				</View>
 			) : null}
