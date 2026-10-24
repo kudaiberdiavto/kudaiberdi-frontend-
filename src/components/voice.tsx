@@ -9,20 +9,22 @@ import { resolveUrl, uploadVoice, type VoicePurpose } from '@/lib/api'
 import { fontFamily, useColors } from '@/theme'
 import type { Voice, VoiceUpload } from '@/api/types'
 
-const BARS = 24
-/** Bar heights of the design's waveform — used when the server has no waveform for the note. */
+const BAR_WIDTH = 4
+const BAR_GAP = 2
+/** Bar heights of the design's waveform — repeated when the server has no waveform for the note. */
 const DESIGN_BARS = [6, 11, 20, 8, 17, 9, 14, 9, 14, 20, 17, 6, 17, 6, 13, 8, 6, 13, 8, 17, 13, 9, 12, 7]
 
 export const voiceClock = (seconds: number) =>
 	`${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
 
-/** ≤100 peaks 0…1 → 22 bar heights 6…20 px. */
-function barHeights(waveform: number[] | null | undefined) {
-	if (!waveform?.length) return DESIGN_BARS
-	return Array.from({ length: BARS }, (_, i) => {
-		const from = Math.floor((i * waveform.length) / BARS)
-		const to = Math.max(from + 1, Math.floor(((i + 1) * waveform.length) / BARS))
-		const peak = Math.max(...waveform.slice(from, to))
+/** As many bars as fit the width (4 px bars, 2 px gaps); ≤100 peaks 0…1 → heights 6…20 px. */
+function barHeights(waveform: number[] | null | undefined, width: number) {
+	const count = Math.max(1, Math.floor((width + BAR_GAP) / (BAR_WIDTH + BAR_GAP)))
+	if (!waveform?.length) return Array.from({ length: count }, (_, i) => DESIGN_BARS[i % DESIGN_BARS.length])
+	return Array.from({ length: count }, (_, i) => {
+		const from = Math.floor((i * waveform.length) / count)
+		const to = Math.max(from + 1, Math.floor(((i + 1) * waveform.length) / count))
+		const peak = Math.max(...waveform.slice(from, Math.min(to, waveform.length)))
 		return Math.round(6 + peak * 14)
 	})
 }
@@ -69,7 +71,7 @@ export function VoicePlayer({
 	const started = status.playing || (status.currentTime > 0 && !finished)
 	const progress = started && duration ? Math.min(1, status.currentTime / duration) : 0
 	const color = tone === 'green' ? c.success : c.brand
-	const bars = barHeights(voice.waveform)
+	const bars = barHeights(voice.waveform, barsWidth)
 
 	const toggle = () => {
 		if (status.playing) player.pause()
@@ -80,9 +82,9 @@ export function VoicePlayer({
 	}
 
 	const row = (opacity: number) => (
-		<View style={{ width: barsWidth || undefined, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 24 }}>
+		<View style={{ width: barsWidth || undefined, flexDirection: 'row', alignItems: 'center', gap: BAR_GAP, height: 24 }}>
 			{bars.map((barHeight, i) => (
-				<View key={i} style={{ width: 4, height: barHeight, borderRadius: 2, backgroundColor: color, opacity }} />
+				<View key={i} style={{ width: BAR_WIDTH, height: barHeight, borderRadius: 2, backgroundColor: color, opacity }} />
 			))}
 		</View>
 	)
