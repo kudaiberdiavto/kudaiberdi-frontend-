@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { router } from 'expo-router'
 import { MarketMapLive, type MarketMapLiveHandle } from '@/components/market-map-live'
 import { BrandLogo } from '@/components/ui/brand'
 import { QueryErrorBanner } from '@/components/ui'
@@ -12,6 +13,7 @@ import { useCars } from '@/api/garage'
 import { useMapHighlight } from '@/api/market'
 import { useSignedIn } from '@/api/catalog'
 import type { Brand } from '@/api/types'
+import { useCatalogFilters } from '@/store/useCatalogFilters'
 
 type Filter = { kind: 'BRAND'; brand: Brand } | { kind: 'CATEGORY'; id: number; name: string }
 
@@ -48,6 +50,14 @@ export default function BuyerMarketScreen() {
 	const query = q.trim().toLowerCase()
 	const brandHits = query ? (found.data ?? []).slice(0, 4) : []
 	const categoryHits = query ? (categories.data ?? []).filter((category) => category.name.toLowerCase().includes(query)).slice(0, 3) : []
+
+	/** Parts for sale with the same brand or category — the catalog (selling parts stays as it was). */
+	const openCatalog = () => {
+		const f = useCatalogFilters.getState()
+		if (filter?.kind === 'BRAND') f.pickBrand(filter.brand, null)
+		if (filter?.kind === 'CATEGORY') f.setCategory(filter.id)
+		router.push('/catalog')
+	}
 
 	const choose = (next: Filter) => {
 		setPicked(next)
@@ -182,6 +192,14 @@ export default function BuyerMarketScreen() {
 						) : (
 							<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>Пока никто не продаёт {name} на рынке</Text>
 						)}
+						<Pressable
+							onPress={openCatalog}
+							style={{ height: 52, borderRadius: 14, backgroundColor: c.card, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14 }}
+						>
+							<LoupeIcon size={20} color={c.brand} />
+							<Text style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>Запчасти {name} в продаже</Text>
+							<ChevronIcon size={20} color="#B8B4B4" />
+						</Pressable>
 					</>
 				) : null}
 			</ScrollView>

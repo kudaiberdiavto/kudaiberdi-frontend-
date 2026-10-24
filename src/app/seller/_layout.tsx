@@ -3,9 +3,9 @@ import { TabBarContainer, TabButton } from '@/components/tab-bar'
 import { useUnread } from '@/api/chats'
 import { useIncomingRequests } from '@/api/incoming'
 import { flattenPages } from '@/api/pagination'
-import { BoxIcon, ChatIcon, RequestsIcon } from '@/components/icons'
+import { BoxIcon, ChatIcon, RequestsIcon, TagIcon } from '@/components/icons'
 
-/** Seller tabs (v23): Запросы · Чаты · Мой бокс. */
+/** Seller tabs: Запросы · Товары · Чаты · Мой бокс (продажа запчастей осталась, как была). */
 export default function SellerLayout() {
 	// Unread chats for this side — counted on the server, kept live by the UNREAD event.
 	const unread = useUnread().data?.asShop ?? 0
@@ -20,6 +20,9 @@ export default function SellerLayout() {
 				<TabTrigger name="requests" asChild>
 					<TabButton icon={RequestsIcon} label="Запросы" badge={fresh || undefined} />
 				</TabTrigger>
+				<TabTrigger name="products" asChild>
+					<TabButton icon={TagIcon} label="Товары" />
+				</TabTrigger>
 				<TabTrigger name="chats" asChild>
 					<TabButton icon={ChatIcon} label="Чаты" badge={unread || undefined} />
 				</TabTrigger>
@@ -30,6 +33,7 @@ export default function SellerLayout() {
 
 			<TabList style={{ display: 'none' }}>
 				<TabTrigger name="requests" href="/seller" />
+				<TabTrigger name="products" href="/seller/products" />
 				<TabTrigger name="chats" href="/seller/chats" />
 				<TabTrigger name="box" href="/seller/box" />
 			</TabList>
