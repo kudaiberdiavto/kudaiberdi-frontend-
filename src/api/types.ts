@@ -27,6 +27,11 @@ export type UpdateCarBody = Schemas['UpdateCarRequest']
 
 // ─── Media ───────────────────────────────────────────────────────────────────
 export type Photo = Schemas['PhotoDto']
+export type Voice = Schemas['VoiceDto']
+export type VoiceUpload = Schemas['VoiceUploadDto']
+export type ReplyDraft = Schemas['ReplyDraftDto']
+export type OfferDraft = Schemas['OfferDraftDto']
+export type TechPassport = Schemas['TechPassportDto']
 export type MediaPurpose = NonNullable<
 	NonNullable<paths['/api/v1/media/photos']['post']['parameters']['query']>['purpose']
 >

@@ -7,7 +7,7 @@ import * as Crypto from 'expo-crypto'
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import { API_URL } from '@/lib/env'
 import { getItem, setItem } from '@/lib/secure-storage'
-import type { MediaItem, MediaPurpose, Photo } from '@/api/types'
+import type { MediaItem, MediaPurpose, Photo, VoiceUpload } from '@/api/types'
 
 export { API_URL }
 const API_BASE = `${API_URL}/api/v1`
@@ -379,4 +379,24 @@ export async function uploadVideo(
 		return form
 	}
 	return uploadForm<MediaItem>(`/media/videos?${query}`, makeForm, options)
+}
+
+export type VoicePurpose = 'REQUEST' | 'REPLY' | 'SERVICE' | 'OFFER'
+
+/**
+ * A voice note [04, 14, 16, 19]: multipart POST /media/voices — up to 60 s. The server transcribes it and, for
+ * REPLY / OFFER, parses the price and time out of what was said (`reply` / `offer` in the response).
+ */
+export async function uploadVoice(
+	voice: { uri: string; durationSec: number; waveform?: number[] },
+	purpose: VoicePurpose,
+	options: { onProgress?: (fraction: number) => void; signal?: AbortSignal } = {}
+): Promise<VoiceUpload> {
+	const query = new URLSearchParams({ purpose, durationSec: String(Math.max(1, Math.round(voice.durationSec))) })
+	const makeForm = async () => {
+		const form = await fileFormData(voice.uri, { name: 'voice.m4a', type: 'audio/m4a' })
+		if (voice.waveform?.length) form.append('waveform', JSON.stringify(voice.waveform))
+		return form
+	}
+	return uploadForm<VoiceUpload>(`/media/voices?${query}`, makeForm, options)
 }

@@ -1,45 +1,29 @@
-import { useEffect, useRef, useState } from 'react'
-import { FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, Text, TextInput, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { FlatList, Pressable, Text, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
-import { Button, Chip, QueryErrorBanner, Screen, SectionLabel, ServiceRequestCard } from '@/components/ui'
+import { QueryErrorBanner, Screen, ServiceIcon } from '@/components/ui'
+import { VoicePlayer } from '@/components/voice'
+import { CheckMark, MicOutline, SmallChip, Switch, myOfferLine } from '@/components/master-v23'
+import { AccountStatusBanner } from '@/components/account-status-banner'
 import { fontFamily, raw, useColors } from '@/theme'
-import { formatDistance, formatDuration, formatHours, minutesLeft } from '@/lib/format'
+import { formatAgo, formatDistance, minutesLeft } from '@/lib/format'
 import { markServiceSeen, serviceName, useMasterFeed, useMasterOffer, useMyMaster, useServiceTypes, useSetAccepting } from '@/api/services'
 import { flattenPages } from '@/api/pagination'
-import type { MasterFeedFilter, MasterFeedItem, MediaItem, ServiceWhen } from '@/api/types'
-import { MediaViewer } from '@/components/media-viewer'
-import { AccountStatusBanner } from '@/components/account-status-banner'
+import type { MasterFeedItem } from '@/api/types'
 
-const WHEN_WORD: Record<ServiceWhen, string> = { NOW: 'сейчас', TODAY: 'сегодня', TOMORROW: 'завтра', AT_TIME: '' }
-const FILTERS: { value: MasterFeedFilter; label: string }[] = [
-	{ value: 'NEW', label: 'Новые' },
-	{ value: 'ANSWERED', label: 'Отвеченные' },
-	{ value: 'EXPIRED', label: 'Истёкшие' },
-]
-
-/** «Когда могу» → `availableAt`. */
-const AVAILABLE: { label: string; at: (now: Date) => Date }[] = [
-	{ label: 'через 1 час', at: (now) => new Date(now.getTime() + 60 * 60_000) },
-	{ label: 'сегодня 15:00', at: (now) => new Date(new Date(now).setHours(15, 0, 0, 0)) },
-	{ label: 'сегодня 18:00', at: (now) => new Date(new Date(now).setHours(18, 0, 0, 0)) },
-	{ label: 'завтра 10:00', at: (now) => new Date(new Date(now.getTime() + 86_400_000).setHours(10, 0, 0, 0)) },
-]
-
-/** 39 «Заявки» — requests matching the master's services and brands; «Могу помочь» / «Не моё». */
+/** 18 «Заявки» — new requests and the ones already answered; reply by voice, «Не моё» or «Могу помочь». */
 export default function MasterRequestsScreen() {
 	const c = useColors()
 	const types = useServiceTypes().data
 	const profile = useMyMaster()
-	const [filter, setFilter] = useState<MasterFeedFilter>('NEW')
-	const requests = useMasterFeed(filter)
+	const fresh = useMasterFeed('NEW')
+	const answered = useMasterFeed('ANSWERED')
 	const accepting = useSetAccepting()
 	const offer = useMasterOffer()
-	const [helping, setHelping] = useState<MasterFeedItem | null>(null)
-	const [viewing, setViewing] = useState<MediaItem[] | null>(null)
-	const items = flattenPages(requests.data)
+	const items = useMemo(() => [...flattenPages(fresh.data), ...flattenPages(answered.data)], [fresh.data, answered.data])
+	const [now, setNow] = useState(() => new Date())
 
-	// The master saw the card — once per request, for the buyer's «Посмотрели» [37].
+	// The master saw the card — once per request, for the buyer's «ответили» [17].
 	const seen = useRef(new Set<number>())
 	useEffect(() => {
 		for (const item of items) {
@@ -48,37 +32,39 @@ export default function MasterRequestsScreen() {
 			markServiceSeen(item.id)
 		}
 	}, [items])
-	const [now, setNow] = useState(() => new Date())
 
 	useEffect(() => {
 		const timer = setInterval(() => setNow(new Date()), 30_000)
 		return () => clearInterval(timer)
 	}, [])
 
-	// First master entry: fill «Мои услуги» [38] before the feed.
+	// First master entry: fill the profile before the feed.
 	if (profile.isSuccess && !profile.data) return <Redirect href={{ pathname: '/master-profile', params: { first: '1' } }} />
 
 	const isAccepting = profile.data?.accepting ?? true
+	const answer = (item: MasterFeedItem, record: boolean) =>
+		router.push({ pathname: '/master-answer', params: { id: String(item.id), ...(record ? { record: '1' } : {}) } })
 
 	const header = (
-		<View style={{ gap: 10, paddingBottom: 10 }}>
-			<View style={{ height: 52, justifyContent: 'center' }}>
-				<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>Заявки</Text>
-			</View>
-			<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-				<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>По вашим услугам и маркам</Text>
+		<View style={{ gap: 10, paddingBottom: 4 }}>
+			<View style={{ height: 60, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), color: c.ink }}>Заявки</Text>
 				<Pressable
 					disabled={!profile.data || accepting.isPending}
 					onPress={() => accepting.mutate(!isAccepting)}
 					style={{
-						height: 32,
-						paddingHorizontal: 12,
-						borderRadius: 16,
-						backgroundColor: isAccepting ? 'rgba(21,128,61,0.12)' : raw.fill,
-						justifyContent: 'center',
+						height: 36,
+						paddingLeft: 12,
+						paddingRight: 6,
+						borderRadius: 18,
+						backgroundColor: isAccepting ? '#E7F6EC' : raw.fill,
+						flexDirection: 'row',
+						alignItems: 'center',
+						gap: 8,
 					}}
 				>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: isAccepting ? c.success : c.muted }}>{isAccepting ? '● Принимаю' : '○ Пауза'}</Text>
+					<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: isAccepting ? c.success : c.muted }}>{isAccepting ? 'Работаю' : 'Пауза'}</Text>
+					<Switch size="sm" value={isAccepting} disabled={!profile.data || accepting.isPending} onChange={(value) => accepting.mutate(value)} />
 				</Pressable>
 			</View>
 			{/* Requests reach only ACTIVE masters — say why the feed is empty. */}
@@ -88,32 +74,10 @@ export default function MasterRequestsScreen() {
 				kind="master"
 				action={{ label: 'Изменить профиль', onPress: () => router.push('/master-profile') }}
 			/>
-			{/* Not on the mockup: «Отвеченные» and «Истёкшие» from GET /my/master/requests?filter= */}
-			<View style={{ flexDirection: 'row', gap: 8 }}>
-				{FILTERS.map((option) => (
-					<Chip
-						key={option.value}
-						label={option.label}
-						height={32}
-						radius={16}
-						fontSize={13}
-						paddingHorizontal={12}
-						color={c.ink}
-						selected={option.value === filter}
-						onPress={() => setFilter(option.value)}
-					/>
-				))}
-			</View>
-			<QueryErrorBanner error={requests.error ?? offer.error ?? accepting.error} onRetry={() => requests.refetch()} />
-			{requests.isSuccess && items.length === 0 ? (
+			<QueryErrorBanner error={fresh.error ?? answered.error ?? offer.error ?? accepting.error} onRetry={() => (fresh.refetch(), answered.refetch())} />
+			{fresh.isSuccess && answered.isSuccess && items.length === 0 ? (
 				<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted, paddingTop: 16 }}>
-					{filter === 'ANSWERED'
-						? 'Здесь будут заявки, на которые вы ответили.'
-						: filter === 'EXPIRED'
-							? 'Истёкших заявок нет.'
-							: isAccepting
-								? 'Новых заявок нет. Пришлём пуш, как только клиенту понадобится ваша услуга.'
-								: 'Вы на паузе — заявки не приходят.'}
+					{isAccepting ? 'Новых заявок нет. Пришлём пуш, как только клиенту понадобится ваша услуга.' : 'Вы на паузе — заявки не приходят.'}
 				</Text>
 			) : null}
 		</View>
@@ -127,162 +91,133 @@ export default function MasterRequestsScreen() {
 				ListHeaderComponent={header}
 				contentContainerStyle={{ gap: 10, paddingBottom: 16 }}
 				showsVerticalScrollIndicator={false}
-				onEndReached={() => requests.hasNextPage && !requests.isFetchingNextPage && requests.fetchNextPage()}
-				onRefresh={() => requests.refetch()}
-				refreshing={false}
-				renderItem={({ item }) => {
-					const left = minutesLeft(item.expiresAt, now)
-					const when = item.when === 'AT_TIME' && item.atTime ? formatHours(item.atTime) : WHEN_WORD[item.when]
-					return (
-						<ServiceRequestCard
-							code={item.service.code}
-							title={item.urgent ? `Срочно · ${serviceName(types, item.service.code)}` : serviceName(types, item.service.code)}
-							carLabel={item.car.label}
-							description={item.description}
-							media={item.media}
-							onOpenMedia={() => setViewing(item.media)}
-							distance={
-								item.where === 'MASTER_COMES' || item.where === 'PICKUP_POINT'
-									? `${formatDistance(item.distanceM)} · к клиенту`
-									: formatDistance(item.distanceM)
-							}
-							when={left > 0 ? `${when} · ещё ${formatDuration(left)}` : `${when} · время вышло`}
-							answered={
-								item.myOffer?.answer === 'CAN_HELP'
-									? 'Вы откликнулись — ждём ответа клиента'
-									: item.myOffer?.answer === 'NOT_MINE'
-										? 'Вы ответили «Не моё»'
-										: left <= 0
-											? 'Время на ответ вышло'
-											: null
-							}
-							onHelp={() => setHelping(item)}
-							onSkip={() => offer.mutate({ id: item.id, body: { answer: 'NOT_MINE' } })}
-						/>
-					)
+				onEndReached={() => {
+					if (fresh.hasNextPage && !fresh.isFetchingNextPage) fresh.fetchNextPage()
+					else if (answered.hasNextPage && !answered.isFetchingNextPage) answered.fetchNextPage()
 				}}
+				onRefresh={() => (fresh.refetch(), answered.refetch())}
+				refreshing={false}
+				renderItem={({ item }) => (
+					<RequestCard
+						item={item}
+						title={serviceName(types, item.service.code)}
+						open={minutesLeft(item.expiresAt, now) > 0}
+						now={now}
+						onVoice={() => answer(item, true)}
+						onHelp={() => answer(item, false)}
+						onSkip={() => offer.mutate({ id: item.id, body: { answer: 'NOT_MINE' } })}
+					/>
+				)}
 			/>
-			<MediaViewer items={viewing} onClose={() => setViewing(null)} />
-			{/* Mounted per request, so the price, time and message start empty each time. */}
-			{helping ? (
-				<HelpSheet
-					key={helping.id}
-					request={helping}
-					error={offer.error?.message ?? null}
-					loading={offer.isPending}
-					onClose={() => {
-						setHelping(null)
-						offer.reset()
-					}}
-					onSend={(body) =>
-						helping &&
-						offer.mutate(
-							{ id: helping.id, body: { answer: 'CAN_HELP', ...body } },
-							{
-								onSuccess: (result) => {
-									setHelping(null)
-									// «Могу помочь» opens the chat with the client — the master writes as SHOP.
-									if (result?.chatId) router.push({ pathname: '/seller-chat', params: { chatId: String(result.chatId) } })
-								},
-							}
-						)
-					}
-				/>
-			) : null}
 		</Screen>
 	)
 }
 
-/** «Могу помочь» → price from, when I can, a message [API_NEW.md §12.5]. No mockup; styled like 36. */
-function HelpSheet({
-	request,
-	loading,
-	error,
-	onClose,
-	onSend,
+function RequestCard({
+	item,
+	title,
+	open,
+	now,
+	onVoice,
+	onHelp,
+	onSkip,
 }: {
-	request: MasterFeedItem | null
-	loading: boolean
-	error: string | null
-	onClose: () => void
-	onSend: (body: { priceFrom?: number; availableAt?: string; message?: string }) => void
+	item: MasterFeedItem
+	title: string
+	open: boolean
+	now: Date
+	onVoice: () => void
+	onHelp: () => void
+	onSkip: () => void
 }) {
 	const c = useColors()
-	const insets = useSafeAreaInsets()
-	const [price, setPrice] = useState('')
-	// Only moments still ahead — the server rejects a past `availableAt` (400 BAD_TIME).
-	const [openedAt] = useState(() => new Date())
-	const options = AVAILABLE.filter((o) => o.at(openedAt).getTime() > openedAt.getTime() + 10 * 60_000)
-	const [available, setAvailable] = useState(options[0].label)
-	const [message, setMessage] = useState('')
-
-	const input = {
-		height: 48,
-		borderRadius: 12,
-		backgroundColor: c.card,
-		borderWidth: 2,
-		borderColor: c.border,
-		paddingHorizontal: 14,
-		fontSize: 15,
-		fontFamily: fontFamily(400),
-		color: c.ink,
-	}
+	const car = [item.car.modelLabel, item.car.year].filter(Boolean).join(' · ') || item.car.label
+	const meta = [car, formatDistance(item.distanceM), formatAgo(item.notifiedAt, { short: true, now })].join(' · ')
+	const mine = item.myOffer
 
 	return (
-		<Modal visible={request !== null} transparent animationType="slide" onRequestClose={onClose}>
-			<KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-				<Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }} onPress={onClose} />
-				<View
-					style={{ backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 16, paddingBottom: 28 + insets.bottom, gap: 12 }}
-				>
-					<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>Могу помочь</Text>
-					<Text numberOfLines={2} style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
-						{request?.description} · {request?.car.label}
-					</Text>
-					<SectionLabel>Цена от, сом</SectionLabel>
-					<TextInput
-						value={price}
-						onChangeText={(v) => setPrice(v.replace(/\D/g, ''))}
-						keyboardType="number-pad"
-						placeholder="1 500"
-						placeholderTextColor={raw.fillInk}
-						style={input}
-					/>
-					<SectionLabel>Когда могу</SectionLabel>
-					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-						{options.map((option) => (
-							<Chip
-								key={option.label}
-								label={option.label}
-								radius={12}
-								color={c.ink}
-								selected={option.label === available}
-								onPress={() => setAvailable(option.label)}
-							/>
-						))}
-					</View>
-					<TextInput
-						value={message}
-						onChangeText={(v) => setMessage(v.slice(0, 300))}
-						placeholder="Сообщение клиенту — необязательно"
-						placeholderTextColor={raw.fillInk}
-						multiline
-						style={[input, { height: 80, paddingTop: 12, textAlignVertical: 'top' }]}
-					/>
-					{error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{error}</Text> : null}
-					<Button
-						label="Откликнуться"
-						loading={loading}
-						onPress={() =>
-							onSend({
-								priceFrom: price ? Number(price) : undefined,
-								availableAt: (options.find((o) => o.label === available) ?? options[0]).at(new Date()).toISOString(),
-								message: message.trim() || undefined,
-							})
-						}
-					/>
+		<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10 }}>
+			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+				<View style={{ width: 36, height: 36, borderRadius: 14, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+					<ServiceIcon code={item.service.code} size={22} color={c.brandStrong} strokeWidth={2.2} />
 				</View>
-			</KeyboardAvoidingView>
-		</Modal>
+				<View style={{ flex: 1, gap: 1 }}>
+					<Text numberOfLines={1} style={{ fontSize: 15, lineHeight: 19.5, fontFamily: fontFamily(700), color: c.ink }}>
+						{title}
+					</Text>
+					<Text numberOfLines={1} style={{ fontSize: 13, lineHeight: 16.9, fontFamily: fontFamily(400), color: c.muted }}>
+						{meta}
+					</Text>
+				</View>
+				{item.urgent ? <SmallChip label="Срочно" tone="red" /> : null}
+			</View>
+
+			<View style={{ gap: 6 }}>
+				<Text style={{ fontSize: 16, lineHeight: 20.8, fontFamily: fontFamily(600), color: c.ink }}>{item.description}</Text>
+				{item.voice ? <VoicePlayer voice={item.voice} /> : null}
+			</View>
+
+			{mine ? (
+				<View
+					style={{
+						minHeight: 44,
+						borderRadius: 12,
+						backgroundColor: mine.answer === 'CAN_HELP' ? '#E7F6EC' : c.surface,
+						flexDirection: 'row',
+						alignItems: 'center',
+						justifyContent: 'center',
+						gap: 6,
+						paddingHorizontal: 10,
+					}}
+				>
+					{mine.answer === 'CAN_HELP' ? <CheckMark size={18} color={c.success} strokeWidth={2.8} /> : null}
+					<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: mine.answer === 'CAN_HELP' ? c.success : c.muted }}>
+						{mine.answer === 'CAN_HELP' ? myOfferLine(mine.priceFrom, mine.availableAt, mine.createdAt) : 'Вы ответили «Не моё»'}
+					</Text>
+				</View>
+			) : !open ? (
+				<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.muted, textAlign: 'center', paddingVertical: 12 }}>Время на ответ вышло</Text>
+			) : (
+				<>
+					<Pressable
+						onPress={onVoice}
+						style={{
+							height: 56,
+							borderRadius: 14,
+							backgroundColor: c.brand,
+							flexDirection: 'row',
+							alignItems: 'center',
+							justifyContent: 'center',
+							gap: 10,
+							shadowColor: c.brand,
+							shadowOpacity: 0.25,
+							shadowOffset: { width: 0, height: 6 },
+							shadowRadius: 14,
+							elevation: 4,
+						}}
+					>
+						<View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
+							<MicOutline size={20} color="#FFFFFF" />
+						</View>
+						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Ответить голосом</Text>
+					</Pressable>
+					<Text style={{ fontSize: 13, lineHeight: 16.9, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
+						Например: «Могу сегодня в три, от полутора тысяч»
+					</Text>
+					<View style={{ flexDirection: 'row', gap: 8 }}>
+						<Pressable onPress={onSkip} style={{ flex: 1, height: 44, borderRadius: 14, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}>
+							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>Не моё</Text>
+						</Pressable>
+						<Pressable
+							onPress={onHelp}
+							style={{ flex: 1, height: 44, borderRadius: 14, backgroundColor: '#E7F6EC', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+						>
+							<CheckMark size={20} color={c.success} />
+							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.success }}>Могу помочь</Text>
+						</Pressable>
+					</View>
+				</>
+			)}
+		</View>
 	)
 }

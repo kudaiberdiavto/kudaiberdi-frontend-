@@ -4346,6 +4346,7 @@ export interface components {
             reviewsCount: number;
             location: components["schemas"]["LocationDto"];
             open: components["schemas"]["OpenStateDto"];
+            phone: string | null;
         };
         ContainerCountsRequest: {
             counts: {
@@ -4567,9 +4568,9 @@ export interface components {
         CreateShop: {
             /** Format: int64 */
             containerId: number;
-            name: string;
+            name?: string;
             brandIds: number[];
-            categoryIds: number[];
+            categoryIds?: number[];
             openFrom?: components["schemas"]["LocalTime"];
             openTo?: components["schemas"]["LocalTime"];
             workDays?: ("MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY")[];
@@ -4589,14 +4590,14 @@ export interface components {
             fuel?: "PETROL" | "DIESEL" | "LPG_PETROL" | "HYBRID" | "ELECTRIC";
             /** @enum {string} */
             origin?: "JAPAN" | "USA" | "EUROPE" | "KOREA" | "UAE" | "UNKNOWN";
-            description: string;
+            description?: string;
             mediaIds?: number[];
             /** @enum {string} */
-            when: "NOW" | "TODAY" | "TOMORROW" | "AT_TIME";
+            when?: "NOW" | "TODAY" | "TOMORROW" | "AT_TIME";
             /** Format: date-time */
             atTime?: string;
             /** @enum {string} */
-            where: "I_COME" | "MASTER_COMES" | "PICKUP_POINT";
+            where?: "I_COME" | "MASTER_COMES" | "PICKUP_POINT";
             /** Format: double */
             lat: number;
             /** Format: double */
@@ -4606,12 +4607,14 @@ export interface components {
             radiusKm?: number;
             /** @enum {string} */
             duration?: "MIN_15" | "MIN_30" | "HOUR_1" | "HOUR_3" | "END_OF_DAY";
+            /** Format: int64 */
+            voiceMediaId?: number;
         };
         MediaItemDto: {
             /** Format: int64 */
             id: number;
             /** @enum {string} */
-            kind: "PHOTO" | "VIDEO";
+            kind: "PHOTO" | "VIDEO" | "AUDIO";
             url: string;
             thumbUrl: string | null;
             /** Format: int32 */
@@ -4683,6 +4686,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             closedAt: string | null;
+            voice: components["schemas"]["VoiceDto"] | null;
         };
         ServiceExtend: {
             /** Format: int32 */
@@ -4698,18 +4702,20 @@ export interface components {
         CreateRequest: {
             /** Format: int64 */
             carId: number;
-            text: string;
+            text?: string;
             /** Format: int64 */
             categoryId?: number;
             /** Format: int64 */
             hintId?: number;
             /** @enum {string} */
-            target: "MARKET" | "ROWS" | "CONTAINERS";
+            target?: "MARKET" | "ROWS" | "CONTAINERS";
             targetRowIds?: number[];
             targetContainerIds?: number[];
             /** @enum {string} */
             duration?: "MIN_30" | "HOUR_1" | "HOUR_3" | "END_OF_DAY";
             mediaIds?: number[];
+            /** Format: int64 */
+            voiceMediaId?: number;
         };
         RequestCarDto: {
             /** Format: int64 */
@@ -4756,6 +4762,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             closedAt: string | null;
+            voice: components["schemas"]["VoiceDto"] | null;
         };
         Widen: {
             /** @enum {string} */
@@ -4780,6 +4787,11 @@ export interface components {
             /** Format: int64 */
             partId?: number;
             mediaIds?: number[];
+            /** Format: int64 */
+            voiceMediaId?: number;
+            original?: boolean;
+            manufacturer?: string;
+            tags?: string[];
         };
         PartCardDto: {
             /** Format: int64 */
@@ -4797,6 +4809,59 @@ export interface components {
             exactModel: boolean;
             isFavorite: boolean;
             shop: components["schemas"]["ShopBriefDto"];
+        };
+        VoiceDto: {
+            /** Format: int64 */
+            id: number;
+            url: string;
+            /** Format: int32 */
+            durationSec: number;
+            waveform: number[];
+            transcript: string | null;
+        };
+        ReplyDraftDto: {
+            /** Format: int32 */
+            price: number | null;
+            /** @enum {string|null} */
+            condition: "NEW" | "USED" | "ON_ORDER" | null;
+            original: boolean | null;
+            manufacturer: string | null;
+            tags: string[];
+        };
+        OfferDraftDto: {
+            /** Format: int32 */
+            priceFrom: number | null;
+            /** @enum {string|null} */
+            when: "NOW" | "TODAY" | "TOMORROW" | "AT_TIME" | null;
+            /** Format: date-time */
+            availableAt: string | null;
+        };
+        VoiceUploadDto: {
+            voice: components["schemas"]["VoiceDto"];
+            reply: components["schemas"]["ReplyDraftDto"] | null;
+            offer: components["schemas"]["OfferDraftDto"] | null;
+        };
+        FalseHave: {
+            /** Format: int64 */
+            shopId: number;
+        };
+        RowCount: {
+            /** Format: int64 */
+            rowId: number;
+            rowCode: string;
+            rowLabel: string;
+            /** Format: int32 */
+            containers: number;
+        };
+        TechPassportDto: {
+            brand: components["schemas"]["BrandDto"] | null;
+            model: components["schemas"]["ModelDto"] | null;
+            /** Format: int32 */
+            year: number | null;
+            vin: string | null;
+            engineVolume: number | null;
+            /** @enum {string|null} */
+            fuel: "PETROL" | "DIESEL" | "LPG_PETROL" | "HYBRID" | "ELECTRIC" | null;
         };
         ReplyDto: {
             /** Format: int64 */
@@ -4821,6 +4886,12 @@ export interface components {
             /** Format: int64 */
             chatId: number | null;
             part: components["schemas"]["PartCardDto"] | null;
+            voice: components["schemas"]["VoiceDto"] | null;
+            original: boolean | null;
+            manufacturer: string | null;
+            tags: string[];
+            /** Format: int32 */
+            walkMinutes: number | null;
         };
         ShopBriefDto: {
             /** Format: int64 */
@@ -5026,6 +5097,8 @@ export interface components {
             /** Format: date-time */
             availableAt?: string;
             message?: string;
+            /** Format: int64 */
+            voiceMediaId?: number;
         };
         ServiceOfferDto: {
             /** Format: int64 */
@@ -5046,6 +5119,7 @@ export interface components {
             chatId: number | null;
             /** Format: date-time */
             createdAt: string;
+            voice: components["schemas"]["VoiceDto"] | null;
         };
         ConfirmDeletionRequest: {
             code: string;
@@ -5075,6 +5149,7 @@ export interface components {
             fuel?: "PETROL" | "DIESEL" | "LPG_PETROL" | "HYBRID" | "ELECTRIC";
             /** @enum {string} */
             origin?: "JAPAN" | "USA" | "EUROPE" | "KOREA" | "UAE" | "UNKNOWN";
+            fromTechPassport?: boolean;
         };
         CarDto: {
             /** Format: int64 */
@@ -5095,6 +5170,7 @@ export interface components {
             fuel: "PETROL" | "DIESEL" | "LPG_PETROL" | "HYBRID" | "ELECTRIC" | null;
             /** @enum {string} */
             origin: "JAPAN" | "USA" | "EUROPE" | "KOREA" | "UAE" | "UNKNOWN";
+            fromTechPassport: boolean;
         };
         ModelDto: {
             /** Format: int64 */
@@ -6130,6 +6206,8 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             expiresAt: string;
+            /** Format: int32 */
+            minPrice: number | null;
         };
         PartHintDto: {
             /** Format: int64 */
@@ -6174,6 +6252,12 @@ export interface components {
             /** Format: int64 */
             partViews: number;
             topCategories: components["schemas"]["TopCategory"][];
+            /** Format: int32 */
+            answeredPercent: number | null;
+            /** Format: int64 */
+            falseHave: number;
+            /** Format: date-time */
+            requestsPausedUntil: string | null;
         };
         TopCategory: {
             /** Format: int64 */
@@ -6205,6 +6289,7 @@ export interface components {
             expiresAt: string;
             seen: boolean;
             myReply: components["schemas"]["ReplyDto"] | null;
+            voice: components["schemas"]["VoiceDto"] | null;
         };
         CursorPageMyPartItemDto: {
             items: components["schemas"]["MyPartItemDto"][];
@@ -6311,6 +6396,7 @@ export interface components {
             expiresAt: string;
             seen: boolean;
             myOffer: components["schemas"]["ServiceOfferDto"] | null;
+            voice: components["schemas"]["VoiceDto"] | null;
         };
         ModelSearchItem: {
             model: components["schemas"]["ModelDto"];
@@ -6527,6 +6613,7 @@ export interface components {
             /** Format: int32 */
             nearestMinutes: number | null;
             fromSource: string;
+            rows: components["schemas"]["RowCount"][];
         };
         Current: {
             /** Format: int64 */

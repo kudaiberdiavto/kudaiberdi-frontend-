@@ -1,49 +1,43 @@
 import { useEffect, useState } from 'react'
-import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { Image, Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { Button, OfferCard, QueryErrorBanner, SectionLabel, ServiceBadge } from '@/components/ui'
-import { BuyerTabBar } from '@/components/buyer-tab-bar'
-import { ChevronLeftIcon } from '@/components/icons'
-import { fontFamily, raw, useColors } from '@/theme'
-import { formatDistance, formatDuration, formatNumber, formatWhenAt, minutesLeft, plural } from '@/lib/format'
-import {
-	serviceName,
-	useExtendServiceRequest,
-	useServiceOffers,
-	useServiceRequest,
-	useServiceStats,
-	useServiceTypes,
-	useWidenServiceRequest,
-} from '@/api/services'
-import type { ServiceOffer } from '@/api/types'
+import { QueryErrorBanner, ServiceIcon } from '@/components/ui'
+import { BackChevron, CallRow, SmallChip, offerWhen } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
+import { fontFamily, useColors } from '@/theme'
+import { resolveUrl } from '@/lib/api'
+import { formatDistance, formatNumber, minutesLeft, plural } from '@/lib/format'
+import { useExtendServiceRequest, useServiceOffers, useServiceRequest, useServiceStats, useWidenServiceRequest } from '@/api/services'
+import type { ServiceOffer } from '@/api/types'
 
-/** «★ 4.9 · 212 отзывов · 2,1 км» / «… · выезд · 3,4 км» */
-function offerMeta(offer: ServiceOffer) {
-	const master = offer.master
-	if (!master) return formatDistance(offer.distanceM)
-	return [
-		master.reviewsCount ? `★ ${master.rating.toFixed(1)}` : 'новый',
-		master.reviewsCount ? `${master.reviewsCount} ${plural(master.reviewsCount, ['отзыв', 'отзыва', 'отзывов'])}` : null,
-		master.mobile ? 'выезд' : null,
-		formatDistance(offer.distanceM),
-	]
-		.filter(Boolean)
-		.join(' · ')
+type Sort = 'NEAR' | 'CHEAP' | 'TODAY'
+const SORTS: { value: Sort; label: string }[] = [
+	{ value: 'NEAR', label: 'Ближе' },
+	{ value: 'CHEAP', label: 'Дешевле' },
+	{ value: 'TODAY', label: 'Сегодня' },
+]
+
+const isToday = (offer: ServiceOffer, now: Date) =>
+	!offer.availableAt || new Date(offer.availableAt).toDateString() === now.toDateString()
+
+/** «ул. Лущихина · 600 м» / «выездной · 2 км». */
+function offerPlace(offer: ServiceOffer) {
+	const where = offer.master?.mobile ? 'выездной' : offer.master?.address.split(',')[0]
+	return [where, formatDistance(offer.distanceM)].filter(Boolean).join(' · ')
 }
 
-/** 37 «Отклики мастеров»: who got it / saw / can help, the timer, and the «Могу помочь» offers. */
+/** 17 «Ответы мастеров» — the timer, sorting and the «Могу помочь» offers with «Позвонить». */
 export default function ServiceOffersScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
 	const id = Number(useLocalSearchParams<{ id: string }>().id)
-	const types = useServiceTypes().data
 	const request = useServiceRequest(id)
 	const stats = useServiceStats(id)
 	const offers = useServiceOffers(id)
 	const extend = useExtendServiceRequest(id)
 	const widen = useWidenServiceRequest(id)
+	const [sort, setSort] = useState<Sort>('NEAR')
 	const [now, setNow] = useState(() => new Date())
 	const [complaint, setComplaint] = useState<ComplaintTarget | null>(null)
 
@@ -54,30 +48,34 @@ export default function ServiceOffersScreen() {
 
 	const detail = request.data
 	const data = stats.data
-	const list = (offers.data ?? []).filter((o) => o.answer === 'CAN_HELP')
+	const all = (offers.data ?? []).filter((offer) => offer.answer === 'CAN_HELP')
+	const list = (sort === 'TODAY' ? all.filter((offer) => isToday(offer, now)) : [...all]).sort((a, b) =>
+		sort === 'CHEAP' ? (a.priceFrom ?? Infinity) - (b.priceFrom ?? Infinity) : a.distanceM - b.distanceM
+	)
 	const left = data ? minutesLeft(data.expiresAt, now) : 0
 	const active = data?.status === 'ACTIVE' && left > 0
-	const progress = data && data.durationMin > 0 ? Math.min(1, left / data.durationMin) : 0
+	const asked = data?.counts.delivered ?? detail?.recipientsCount ?? 0
+	const answered = data?.counts.canHelp ?? all.length
+	const title = detail ? detail.description.charAt(0).toUpperCase() + detail.description.slice(1) : ' '
 	const actionError = extend.error ?? widen.error
-
-	const count = (label: string, value: number | undefined, color = c.inkSecondary) => (
-		<Text style={{ fontSize: 13, lineHeight: 16, fontFamily: fontFamily(400), color, flexShrink: 1 }}>
-			{label}
-			{'\n'}
-			<Text style={{ fontFamily: fontFamily(700) }}>{value ?? '–'}</Text>
-		</Text>
-	)
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<Pressable onPress={() => router.back()}>
-					<ChevronLeftIcon size={24} color={c.ink} />
+				<Pressable onPress={() => router.back()} hitSlop={10}>
+					<BackChevron size={24} color={c.ink} />
 				</Pressable>
-				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>Отклики мастеров</Text>
+				<Text numberOfLines={1} style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
+					{title}
+				</Text>
+				{detail ? (
+					<View style={{ width: 34, height: 34, borderRadius: 14, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+						<ServiceIcon code={detail.service.code} size={22} color={c.brandStrong} strokeWidth={2.2} />
+					</View>
+				) : null}
 			</View>
 
-			<ScrollView contentContainerStyle={{ paddingTop: 8, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} showsVerticalScrollIndicator={false}>
+			<ScrollView contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16 + insets.bottom, gap: 10 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner
 					error={request.error ?? stats.error ?? offers.error}
 					onRetry={() => {
@@ -87,96 +85,152 @@ export default function ServiceOffersScreen() {
 					}}
 				/>
 
-				{detail ? (
-					<View style={{ borderRadius: 16, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14, gap: 8 }}>
-						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-							<ServiceBadge code={detail.service.code} />
-							<View style={{ flex: 1, gap: 1 }}>
-								<Text numberOfLines={1} style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>
-									{serviceName(types, detail.service.code, true)} · {detail.description.charAt(0).toLowerCase() + detail.description.slice(1)}
-								</Text>
-								<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
-									{detail.car.label}
-								</Text>
-							</View>
+				{data ? (
+					<View style={{ borderRadius: 16, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+						<View
+							style={{
+								width: 20,
+								height: 20,
+								borderRadius: 10,
+								backgroundColor: active ? '#E7F6EC' : c.surface,
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
+							<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: active ? c.success : c.border }} />
 						</View>
-						<View style={{ flexDirection: 'row', gap: 16 }}>
-							{count('Получили', data?.counts.delivered)}
-							{count('Посмотрели', data?.counts.seen)}
-							{count('Могут', data?.counts.canHelp, c.success)}
-							{count('Не их профиль', data?.counts.notMine)}
-						</View>
-						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-							<View style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: raw.fill, overflow: 'hidden' }}>
-								<View style={{ width: `${progress * 100}%`, height: '100%', backgroundColor: c.success }} />
-							</View>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: active ? c.success : c.muted }}>
-								{active ? `ещё ${formatDuration(left)}` : data?.status === 'CLOSED' ? 'закрыта' : 'время вышло'}
+						<View style={{ flex: 1, gap: 2 }}>
+							<Text style={{ fontSize: 15, lineHeight: 19.5, fontFamily: fontFamily(700), color: c.ink }}>
+								{active
+									? `Ищем ещё ${left} ${plural(left, ['минуту', 'минуты', 'минут'])}`
+									: data.status === 'CLOSED'
+										? 'Заявка закрыта'
+										: 'Время вышло'}
+							</Text>
+							<Text style={{ fontSize: 13.5, lineHeight: 17.5, fontFamily: fontFamily(400), color: c.muted }}>
+								Спросили {asked} {plural(asked, ['мастера', 'мастеров', 'мастеров'])} · ответили {answered}
 							</Text>
 						</View>
+						{/* Time is up: wait longer, or (nobody answered) look further away. */}
+						{!active && data.status !== 'CLOSED' && (data.canExtend || detail?.canWiden) ? (
+							<Pressable
+								disabled={extend.isPending || widen.isPending}
+								onPress={() => (answered || !detail?.canWiden ? extend.mutate(30) : widen.mutate(undefined))}
+								style={{ height: 36, paddingHorizontal: 12, borderRadius: 12, backgroundColor: c.brandTint, justifyContent: 'center' }}
+							>
+								<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>
+									{answered || !detail?.canWiden ? 'Ещё 30 мин' : `+5 км`}
+								</Text>
+							</Pressable>
+						) : null}
 					</View>
 				) : null}
-
 				{actionError ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{actionError.message}</Text> : null}
 
-				{/* Time is up: extend, or (no offers) look further away. */}
-				{data && detail && !active && data.status !== 'CLOSED' ? (
-					<View style={{ flexDirection: 'row', gap: 8 }}>
-						{data.canExtend ? (
-							<Button label="+30 мин" variant="secondary" height={48} style={{ flex: 1 }} loading={extend.isPending} onPress={() => extend.mutate(30)} />
-						) : null}
-						{detail.canWiden ? (
-							<Button
-								label={`Радиус ${data.radiusKm + 5} км`}
-								height={48}
-								style={{ flex: 1.4 }}
-								loading={widen.isPending}
-								onPress={() => widen.mutate(undefined)}
-							/>
-						) : null}
-					</View>
-				) : null}
+				<View style={{ flexDirection: 'row', gap: 8 }}>
+					{SORTS.map((option) => {
+						const selected = option.value === sort
+						return (
+							<Pressable
+								key={option.value}
+								onPress={() => setSort(option.value)}
+								style={{
+									height: 36,
+									paddingHorizontal: 14,
+									borderRadius: 18,
+									backgroundColor: selected ? c.brand : c.card,
+									borderWidth: selected ? 0 : 1.5,
+									borderColor: c.border,
+									justifyContent: 'center',
+								}}
+							>
+								<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: selected ? '#FFFFFF' : c.ink }}>{option.label}</Text>
+							</Pressable>
+						)
+					})}
+				</View>
 
-				{list.length ? (
-					<>
-						<SectionLabel>{`Могут помочь · ${list.length}`}</SectionLabel>
-						{list.map((offer) => (
-							<OfferCard
-								key={offer.id}
-								name={offer.master?.name ?? 'Мастер'}
-								avatarUrl={offer.master?.avatarUrl ?? null}
-								meta={offerMeta(offer)}
-								price={offer.priceFrom ? `от ${formatNumber(offer.priceFrom)} с` : null}
-								when={offer.availableAt ? formatWhenAt(offer.availableAt, now) : null}
-								message={offer.message}
-								onCall={offer.master?.phone ? () => Linking.openURL(`tel:${offer.master!.phone}`) : undefined}
-								onWrite={offer.chatId ? () => router.push({ pathname: '/chat', params: { chatId: String(offer.chatId) } }) : undefined}
-								onOpen={offer.master ? () => router.push({ pathname: '/master-card', params: { id: String(offer.master!.id) } }) : undefined}
-								onComplain={() => setComplaint({ type: 'SERVICE_OFFER', targetId: offer.id, relatedServiceRequestId: id })}
-							/>
-						))}
-					</>
-				) : data && offers.isSuccess ? (
+				{list.map((offer, index) => (
+					<OfferCard
+						key={offer.id}
+						offer={offer}
+						best={index === 0}
+						onComplain={() => setComplaint({ type: 'SERVICE_OFFER', targetId: offer.id, relatedServiceRequestId: id })}
+					/>
+				))}
+
+				{offers.isSuccess && list.length === 0 ? (
 					<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center', paddingVertical: 24 }}>
-						{active ? 'Ждём ответы мастеров. Пришлём пуш, как только кто-то откликнется.' : 'Никто не откликнулся. Продлите время или расширьте радиус.'}
+						{all.length
+							? 'На сегодня никто не свободен — посмотрите все ответы'
+							: active
+								? 'Ждём ответы мастеров. Пришлём пуш, как только кто-то ответит.'
+								: 'Никто не ответил. Подождите ещё или поищите дальше.'}
 					</Text>
 				) : null}
 			</ScrollView>
 
-			{/* «Договорились» — close with the chosen master and rate them [09]. */}
-			{list.length && data?.status !== 'CLOSED' ? (
-				<View style={{ paddingTop: 12, paddingHorizontal: 16, paddingBottom: 12, backgroundColor: c.surface }}>
-					<Button
-						label="Договорились"
-						variant="outline"
-						height={48}
-						onPress={() => router.push({ pathname: '/closed', params: { id: String(id), kind: 'service' } })}
-					/>
+			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />
+		</View>
+	)
+}
+
+/** An offer [17]: avatar, name, place, «от 1 500 сом», time and note chips, «Позвонить» · chat · route. */
+function OfferCard({ offer, best, onComplain }: { offer: ServiceOffer; best: boolean; onComplain: () => void }) {
+	const c = useColors()
+	const master = offer.master
+	const name = master?.name ?? 'Мастер'
+	const when = offerWhen(offer.availableAt, new Date(offer.createdAt))
+	return (
+		<Pressable
+			onLongPress={onComplain}
+			delayLongPress={450}
+			style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10, borderWidth: 2, borderColor: best ? c.success : c.card }}
+		>
+			<Pressable
+				onPress={master ? () => router.push({ pathname: '/master-card', params: { id: String(master.id) } }) : undefined}
+				style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
+			>
+				{master?.avatarUrl ? (
+					<Image source={{ uri: resolveUrl(master.avatarUrl) }} style={{ width: 44, height: 44, borderRadius: 22 }} />
+				) : (
+					<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.brandStrong }}>{name.replace(/^(СТО|Мастер)\s*«?/, '').slice(0, 1)}</Text>
+					</View>
+				)}
+				<View style={{ flex: 1, gap: 2 }}>
+					<Text numberOfLines={1} style={{ fontSize: 16, lineHeight: 20.8, fontFamily: fontFamily(700), color: c.ink }}>
+						{name}
+					</Text>
+					<Text numberOfLines={1} style={{ fontSize: 13.5, lineHeight: 17.5, fontFamily: fontFamily(400), color: c.muted }}>
+						{offerPlace(offer)}
+					</Text>
+				</View>
+				{offer.priceFrom ? (
+					<View style={{ alignItems: 'flex-end' }}>
+						<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), letterSpacing: -0.22, color: c.ink }}>
+							<Text style={{ fontSize: 12, fontFamily: fontFamily(600), color: c.muted, letterSpacing: 0 }}>от </Text>
+							{formatNumber(offer.priceFrom)}
+						</Text>
+						<Text style={{ fontSize: 12, lineHeight: 15.6, fontFamily: fontFamily(600), color: c.muted }}>сом</Text>
+					</View>
+				) : null}
+			</Pressable>
+			{when || offer.message ? (
+				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+					{when ? <SmallChip label={when} tone="green" /> : null}
+					{offer.message ? <SmallChip label={offer.message} tone="grey" /> : null}
 				</View>
 			) : null}
-
-			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />
-			<BuyerTabBar active="requests" />
-		</View>
+			<CallRow
+				onCall={master?.phone ? () => Linking.openURL(`tel:${master.phone}`) : undefined}
+				onChat={offer.chatId ? () => router.push({ pathname: '/chat', params: { chatId: String(offer.chatId) } }) : undefined}
+				onRoute={
+					master?.address && !master.mobile
+						? () => Linking.openURL(`https://2gis.kg/bishkek/search/${encodeURIComponent(master.address)}`)
+						: undefined
+				}
+			/>
+		</Pressable>
 	)
 }

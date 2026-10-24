@@ -155,3 +155,13 @@ export function useReviewTags() {
 		staleTime: Infinity,
 	})
 }
+
+/**
+ * «Сказали «есть», а не было» [08]: a mark for a shop that answered «Есть». 400 `SHOP_NOT_REPLIED`,
+ * 409 `ALREADY_MARKED`. The request stays open.
+ */
+export function useFalseHave(id: number) {
+	return useRequestAction(id, (shopId: number) =>
+		apiFetch<void>(`/requests/${id}/false-have`, { method: 'POST', body: { shopId } })
+	)
+}

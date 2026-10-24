@@ -1,346 +1,214 @@
 import { useRef, useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { router } from 'expo-router'
 import { MarketMapLive, type MarketMapLiveHandle } from '@/components/market-map-live'
-import { LocateIcon, SearchIcon } from '@/components/icons'
+import { BrandLogo } from '@/components/ui/brand'
+import { QueryErrorBanner } from '@/components/ui'
+import { Caps, ChevronIcon, CrossIcon, LoupeIcon, TopBar } from '@/components/buyer-v23'
 import { fontFamily, raw, useColors } from '@/theme'
-import { countLabel, formatPlace, plural } from '@/lib/format'
+import { plural } from '@/lib/format'
 import { useBrands, useCategories } from '@/api/directory'
 import { useCars } from '@/api/garage'
-import { useMapHighlight, useMarketSearch } from '@/api/market'
+import { useMapHighlight } from '@/api/market'
 import { useSignedIn } from '@/api/catalog'
-import { useCatalogFilters } from '@/store/useCatalogFilters'
+import type { Brand } from '@/api/types'
 
-const MODES = ['Марка', 'Запчасть'] as const
-const FILTERS = ['Ряды', 'Магазины', 'Парковка', 'Туалет']
+type Filter = { kind: 'BRAND'; brand: Brand } | { kind: 'CATEGORY'; id: number; name: string }
 
-const cardShadow = {
-	shadowColor: '#201F1D',
-	shadowOpacity: 0.12,
-	shadowOffset: { width: 0, height: 2 },
-	shadowRadius: 5,
-	elevation: 3,
-}
+/** Rows shown before «Все». */
+const PREVIEW = 4
 
+/** 09 «Рынок»: where your brand (or a part) is sold — rows on the scheme and the list of rows. */
 export default function BuyerMarketScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
-	const [mode, setMode] = useState(0)
-	const [brandId, setBrandId] = useState<number | null>(null)
-	const [categoryId, setCategoryId] = useState<number | null>(null)
+	const [picked, setPicked] = useState<Filter | null>(null)
 	const [q, setQ] = useState('')
-	const [searchOpen, setSearchOpen] = useState(false)
+	const [all, setAll] = useState(false)
 	const mapRef = useRef<MarketMapLiveHandle>(null)
 
 	const signedIn = useSignedIn()
-	const brands = useBrands({ popular: true })
+	const popular = useBrands({ popular: true })
+	const found = useBrands(q.trim() ? { q: q.trim() } : {})
 	const categories = useCategories()
 	const primaryBrand = useCars().data?.find((car) => car.isPrimary)?.brand
-	// Default brand: the primary car's brand, else the first popular one.
-	const activeBrandId = brandId ?? (signedIn ? primaryBrand?.id : undefined) ?? brands.data?.[0]?.id
-	const activeCategoryId = categoryId ?? categories.data?.[0]?.id
-	const kind = mode === 0 ? 'BRAND' : 'CATEGORY'
-	const highlight = useMapHighlight(kind, mode === 0 ? activeBrandId : activeCategoryId)
+	// Default — the primary car's brand, else the first popular one.
+	const defaultBrand = (signedIn ? primaryBrand : undefined) ?? popular.data?.[0]
+	const filter: Filter | null = picked ?? (defaultBrand ? { kind: 'BRAND', brand: defaultBrand } : null)
+	const highlight = useMapHighlight(filter?.kind ?? 'BRAND', filter ? (filter.kind === 'BRAND' ? filter.brand.id : filter.id) : undefined)
 	const h = highlight.data
-	const search = useMarketSearch(searchOpen ? q : '')
+	const rows = h?.rows ?? []
+	const name = filter ? (filter.kind === 'BRAND' ? filter.brand.name : filter.name) : ''
 
-	// The mockup keeps the whole market in view — highlighted rows are visible without flying in;
-	// the camera moves only for a search result.
+	// Chips: the selected brand first, then the other popular ones.
+	const chips = [
+		...(filter?.kind === 'BRAND' ? [filter.brand] : []),
+		...(popular.data ?? []).filter((brand) => filter?.kind !== 'BRAND' || brand.id !== filter.brand.id),
+	].slice(0, 8)
+	const query = q.trim().toLowerCase()
+	const brandHits = query ? (found.data ?? []).slice(0, 4) : []
+	const categoryHits = query ? (categories.data ?? []).filter((category) => category.name.toLowerCase().includes(query)).slice(0, 3) : []
 
-	const legend = [
-		{ label: 'Проход', background: '#FFF7E0', border: '#E3C88A', radius: 0, width: 1 },
-		{ label: h ? `Есть ${h.name}` : 'Есть', background: '#EDF2FF', border: '#2155E6', radius: 2, width: 1.5 },
-		{ label: 'Ряд', background: '#DCE3EE', border: '#BCC6D5', radius: 2, width: 1 },
-	]
-
-	const showList = () => {
-		const f = useCatalogFilters.getState()
-		const brand = brands.data?.find((b) => b.id === activeBrandId)
-		if (mode === 0 && brand) f.pickBrand(brand, null)
-		if (mode === 1 && activeCategoryId) f.setCategory(activeCategoryId)
-		router.push('/catalog')
+	const choose = (next: Filter) => {
+		setPicked(next)
+		setQ('')
+		setAll(false)
 	}
 
 	return (
-		<View style={{ flex: 1, backgroundColor: raw.mapSurface }}>
-			<MarketMapLive ref={mapRef} highlightedRowIds={h?.rowIds} />
+		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
+			<TopBar title="Рынок" big onBack={false} />
 
-			<View style={{ position: 'absolute', left: 16, right: 16, top: insets.top + 10 }}>
+			<ScrollView
+				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
+				showsVerticalScrollIndicator={false}
+				keyboardShouldPersistTaps="handled"
+			>
 				<View
-					style={[
-						{
-							height: 48,
-							borderRadius: 14,
-							backgroundColor: c.card,
-							flexDirection: 'row',
-							alignItems: 'center',
-							gap: 10,
-							paddingHorizontal: 14,
-						},
-						cardShadow,
-					]}
+					style={{
+						height: 48,
+						borderRadius: 14,
+						borderWidth: 2,
+						borderColor: c.border,
+						backgroundColor: c.card,
+						flexDirection: 'row',
+						alignItems: 'center',
+						gap: 10,
+						paddingHorizontal: 14,
+					}}
 				>
-					<SearchIcon size={20} color={c.muted} strokeWidth={2.4} />
+					<LoupeIcon size={20} color={c.muted} />
 					<TextInput
 						value={q}
-						onChangeText={(text) => {
-							setQ(text)
-							setSearchOpen(true)
-						}}
-						placeholder="Ряд, бокс или магазин"
-						placeholderTextColor={c.muted}
+						onChangeText={setQ}
+						placeholder="Марка или запчасть"
+						placeholderTextColor="#8C8888"
 						style={{ flex: 1, minWidth: 0, fontSize: 16, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 					/>
 				</View>
 
-				{searchOpen && q.trim() && search.data ? (
-					<View style={[{ marginTop: 6, borderRadius: 14, backgroundColor: c.card, overflow: 'hidden' }, cardShadow]}>
-						{search.data.rows.slice(0, 3).map((row) => (
+				{query ? (
+					<View style={{ borderRadius: 14, backgroundColor: c.card, overflow: 'hidden' }}>
+						{brandHits.map((brand) => (
 							<Pressable
-								key={`row-${row.id}`}
-								onPress={() => {
-									setSearchOpen(false)
-									mapRef.current?.focusOnRow(row.id, 18)
-								}}
-								style={{ paddingVertical: 12, paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: c.hairline }}
+								key={`brand-${brand.id}`}
+								onPress={() => choose({ kind: 'BRAND', brand })}
+								style={{ paddingVertical: 10, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: 1, borderBottomColor: c.hairline }}
 							>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>{row.label}</Text>
+								<BrandLogo brand={brand} size={28} />
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>{brand.name}</Text>
 							</Pressable>
 						))}
-						{search.data.containers.slice(0, 4).map((box) => (
+						{categoryHits.map((category) => (
 							<Pressable
-								key={`box-${box.containerId}`}
-								onPress={() => {
-									setSearchOpen(false)
-									router.push({ pathname: '/route', params: { containerId: String(box.containerId) } })
-								}}
+								key={`category-${category.id}`}
+								onPress={() => choose({ kind: 'CATEGORY', id: category.id, name: category.name })}
 								style={{ paddingVertical: 12, paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: c.hairline }}
 							>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>{formatPlace(box)}</Text>
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>{category.name}</Text>
 							</Pressable>
 						))}
-						{search.data.rows.length + search.data.containers.length === 0 ? (
+						{brandHits.length + categoryHits.length === 0 ? (
 							<Text style={{ padding: 14, fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>Ничего не нашли</Text>
 						) : null}
 					</View>
 				) : null}
-			</View>
 
-			<ScrollView
-				horizontal
-				showsHorizontalScrollIndicator={false}
-				style={{ position: 'absolute', left: 0, right: 0, top: insets.top + 66 }}
-				contentContainerStyle={{ gap: 8, paddingLeft: 16, paddingRight: 16 }}
-			>
-				{FILTERS.map((label) => (
-					<View
-						key={label}
-						style={[
-							{
-								height: 36,
-								borderRadius: 18,
-								paddingHorizontal: 14,
-								backgroundColor: c.card,
-								alignItems: 'center',
-								justifyContent: 'center',
-							},
-							cardShadow,
-						]}
-					>
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.ink }}>{label}</Text>
-					</View>
-				))}
-			</ScrollView>
-
-			<View
-				style={[
-					{
-						position: 'absolute',
-						left: 16,
-						bottom: 196,
-						paddingVertical: 8,
-						paddingHorizontal: 10,
-						borderRadius: 12,
-						backgroundColor: 'rgba(255,255,255,0.94)',
-						gap: 6,
-					},
-					cardShadow,
-				]}
-			>
-				{legend.map((item) => (
-					<View key={item.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-						<View
-							style={{
-								width: 16,
-								height: 8,
-								borderRadius: item.radius,
-								backgroundColor: item.background,
-								borderWidth: item.width,
-								borderColor: item.border,
-							}}
-						/>
-						<Text style={{ fontSize: 12, fontFamily: fontFamily(600), color: c.inkSecondary }}>{item.label}</Text>
-					</View>
-				))}
-			</View>
-
-			<View
-				style={[
-					{
-						position: 'absolute',
-						right: 16,
-						bottom: 252,
-						width: 48,
-						borderRadius: 14,
-						backgroundColor: c.card,
-						alignItems: 'center',
-					},
-					cardShadow,
-				]}
-			>
-				<Pressable onPress={() => mapRef.current?.zoomBy(1)} style={{ height: 46, justifyContent: 'center' }}>
-					<Text style={{ fontSize: 24, fontFamily: fontFamily(500), color: c.ink }}>+</Text>
-				</Pressable>
-				<View style={{ width: 28, height: 1, backgroundColor: c.hairline }} />
-				<Pressable onPress={() => mapRef.current?.zoomBy(-1)} style={{ height: 46, justifyContent: 'center' }}>
-					<Text style={{ fontSize: 24, fontFamily: fontFamily(500), color: c.ink }}>−</Text>
-				</Pressable>
-			</View>
-
-			<Pressable
-				onPress={() => mapRef.current?.focusOnMe()}
-				style={[
-					{
-						position: 'absolute',
-						right: 16,
-						bottom: 196,
-						width: 48,
-						height: 48,
-						borderRadius: 14,
-						backgroundColor: c.card,
-						alignItems: 'center',
-						justifyContent: 'center',
-					},
-					cardShadow,
-				]}
-			>
-				<LocateIcon size={24} color={c.brand} />
-			</Pressable>
-
-			<View
-				style={{
-					position: 'absolute',
-					left: 0,
-					right: 0,
-					bottom: 0,
-					backgroundColor: c.card,
-					borderTopLeftRadius: 24,
-					borderTopRightRadius: 24,
-					paddingTop: 10,
-					paddingHorizontal: 16,
-					paddingBottom: 16,
-					gap: 12,
-					shadowColor: '#201F1D',
-					shadowOpacity: 0.1,
-					shadowOffset: { width: 0, height: -4 },
-					shadowRadius: 8,
-					elevation: 8,
-				}}
-			>
-				<View style={{ width: 40, height: 5, borderRadius: 3, backgroundColor: c.border, alignSelf: 'center' }} />
-
-				<View style={{ height: 40, borderRadius: 12, backgroundColor: c.surface, padding: 3, flexDirection: 'row' }}>
-					{MODES.map((label, i) => {
-						const active = mode === i
+				<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+					{filter?.kind === 'CATEGORY' ? (
+						<SelectedChip label={filter.name} onClear={() => setPicked(null)} />
+					) : null}
+					{chips.map((brand) => {
+						const active = filter?.kind === 'BRAND' && filter.brand.id === brand.id
 						return (
 							<Pressable
-								key={label}
-								onPress={() => setMode(i)}
-								style={[
-									{
-										flex: 1,
-										borderRadius: 9,
-										alignItems: 'center',
-										justifyContent: 'center',
-										backgroundColor: active ? c.card : 'transparent',
-									},
-									active && {
-										shadowColor: '#201F1D',
-										shadowOpacity: 0.12,
-										shadowOffset: { width: 0, height: 1 },
-										shadowRadius: 1.5,
-										elevation: 1,
-									},
-								]}
-							>
-								<Text
-									style={{ fontSize: 14, fontFamily: fontFamily(600), color: active ? c.ink : c.muted }}
-								>
-									{label}
-								</Text>
-							</Pressable>
-						)
-					})}
-				</View>
-
-				<ScrollView
-					horizontal
-					showsHorizontalScrollIndicator={false}
-					contentContainerStyle={{ gap: 8, paddingRight: 16 }}
-					style={{ marginRight: -16 }}
-				>
-					{(mode === 0
-						? (brands.data ?? []).map((b) => ({ id: b.id, label: b.name }))
-						: (categories.data ?? []).map((cat) => ({ id: cat.id, label: cat.name }))
-					).map(({ id, label }) => {
-						const active = id === (mode === 0 ? activeBrandId : activeCategoryId)
-						return (
-							<Pressable
-								key={id}
-								onPress={() => (mode === 0 ? setBrandId(id) : setCategoryId(id))}
+								key={brand.id}
+								onPress={() => (active ? setPicked(null) : choose({ kind: 'BRAND', brand }))}
 								style={{
-									height: 36,
-									paddingHorizontal: 14,
-									borderRadius: 18,
-									backgroundColor: active ? c.brand : c.surface,
+									height: 40,
+									paddingLeft: 6,
+									paddingRight: active ? 12 : 14,
+									borderRadius: 20,
+									backgroundColor: active ? c.brandTint : c.card,
+									borderWidth: 2,
+									borderColor: active ? c.brand : c.border,
+									flexDirection: 'row',
 									alignItems: 'center',
-									justifyContent: 'center',
+									gap: 8,
 								}}
 							>
-								<Text
-									style={{ fontSize: 14, fontFamily: fontFamily(600), color: active ? '#FFFFFF' : c.ink }}
-								>
-									{active ? `✓ ${label}` : label}
+								<BrandLogo brand={brand} size={28} />
+								<Text style={{ fontSize: 14, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.inkSecondary }}>
+									{brand.shortName ?? brand.name}
 								</Text>
+								{active ? <CrossIcon size={16} color={c.brandStrong} strokeWidth={2.6} /> : null}
 							</Pressable>
 						)
 					})}
 				</ScrollView>
 
-				<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-					<View style={{ gap: 2 }}>
-						<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>
-							{h
-								? h.rowsCount
-									? `${h.name} — в ${h.rowsCount} ${plural(h.rowsCount, ['ряду', 'рядах', 'рядах'])}`
-									: `${h.name} — пока нигде`
-								: ' '}
-						</Text>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
-							{h && h.rowsCount
-								? `${countLabel(h.shopsCount, ['бокс', 'бокса', 'боксов'])}` +
-									(h.nearestRow ? ` · ближайший ряд ${h.nearestRow}${h.nearestDistanceM ? `, ${h.nearestDistanceM} м` : ''}` : '')
-								: highlight.isError
-									? 'Нет сети'
-									: ' '}
-						</Text>
-					</View>
-					<Text onPress={showList} style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>
-						Списком
-					</Text>
+				<View style={{ height: 330, borderRadius: 18, overflow: 'hidden', backgroundColor: raw.mapSurface }}>
+					<MarketMapLive ref={mapRef} highlightedRowIds={h?.rowIds} />
 				</View>
-			</View>
+
+				<QueryErrorBanner error={highlight.error} onRetry={() => highlight.refetch()} />
+
+				{h ? (
+					<>
+						<Caps link={rows.length > PREVIEW ? (all ? 'Свернуть' : 'Все') : undefined} onLink={() => setAll(!all)}>
+							{`${name} — ${rows.length} ${plural(rows.length, ['ряд', 'ряда', 'рядов'])}`}
+						</Caps>
+						{rows.length ? (
+							<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 8 }}>
+								{(all ? rows : rows.slice(0, PREVIEW)).map((row) => (
+									<Pressable
+										key={row.rowId}
+										onPress={() => mapRef.current?.focusOnRow(row.rowId, 18)}
+										style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 }}
+									>
+										<View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+											<Text style={{ fontSize: 15, fontFamily: fontFamily(800), color: c.brandStrong }}>{row.rowCode}</Text>
+										</View>
+										<View style={{ flex: 1, gap: 1 }}>
+											<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>{row.rowLabel}</Text>
+											<Text style={{ fontSize: 13.5, fontFamily: fontFamily(400), color: c.muted }}>
+												{row.containers} {plural(row.containers, ['контейнер', 'контейнера', 'контейнеров'])} с {name}
+											</Text>
+										</View>
+										<ChevronIcon size={20} color="#B8B4B4" />
+									</Pressable>
+								))}
+							</View>
+						) : (
+							<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>Пока никто не продаёт {name} на рынке</Text>
+						)}
+					</>
+				) : null}
+			</ScrollView>
 		</View>
+	)
+}
+
+function SelectedChip({ label, onClear }: { label: string; onClear: () => void }) {
+	const c = useColors()
+	return (
+		<Pressable
+			onPress={onClear}
+			style={{
+				height: 40,
+				paddingLeft: 14,
+				paddingRight: 12,
+				borderRadius: 20,
+				backgroundColor: c.brandTint,
+				borderWidth: 2,
+				borderColor: c.brand,
+				flexDirection: 'row',
+				alignItems: 'center',
+				gap: 8,
+			}}
+		>
+			<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>{label}</Text>
+			<CrossIcon size={16} color={c.brandStrong} strokeWidth={2.6} />
+		</Pressable>
 	)
 }

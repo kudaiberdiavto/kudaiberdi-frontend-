@@ -12,7 +12,7 @@ export function useCars() {
 	})
 }
 
-function useCarMutation<T>(mutationFn: (variables: T) => Promise<unknown>) {
+function useCarMutation<T, R>(mutationFn: (variables: T) => Promise<R>) {
 	const queryClient = useQueryClient()
 	return useMutation({
 		mutationFn,

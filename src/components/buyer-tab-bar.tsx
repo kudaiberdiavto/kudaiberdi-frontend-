@@ -1,18 +1,17 @@
 import { router } from 'expo-router'
 import { TabBarContainer, TabButton } from '@/components/tab-bar'
 import { useUnread } from '@/api/chats'
-import { ChatIcon, HomeIcon, MarketIcon, ProfileIcon, RequestsIcon } from '@/components/icons'
+import { ChatIcon, HomeIcon, MarketIcon, ProfileIcon } from '@/components/icons'
 
 const TABS = [
 	{ name: 'home', href: '/buyer', icon: HomeIcon, label: 'Главная' },
-	{ name: 'requests', href: '/buyer/requests', icon: RequestsIcon, label: 'Запросы' },
 	{ name: 'market', href: '/buyer/market', icon: MarketIcon, label: 'Рынок' },
 	{ name: 'chats', href: '/buyer/chats', icon: ChatIcon, label: 'Чаты' },
 	{ name: 'profile', href: '/buyer/profile', icon: ProfileIcon, label: 'Профиль' },
 ] as const
 
 /**
- * The buyer TabBar for stack screens that show it in the mockup (32) —
+ * The buyer TabBar for stack screens that show it in the mockup —
  * same look as buyer/_layout, but a tap navigates back into the tabs.
  */
 export function BuyerTabBar({ active }: { active: (typeof TABS)[number]['name'] }) {

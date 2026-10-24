@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { router } from 'expo-router'
-import { BrandLogo, Button, QueryErrorBanner } from '@/components/ui'
+import { router, useLocalSearchParams } from 'expo-router'
+import { BottomSheet, BrandLogo, Button, QueryErrorBanner } from '@/components/ui'
 import { ChevronLeftIcon, SearchIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { useBrands, useModels } from '@/api/directory'
@@ -24,13 +24,15 @@ function yearsOf(model: CarModel | undefined) {
 export default function GarageAddScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
+	// From «Фото техпаспорта» [04] when the model wasn't read: what was read is prefilled.
+	const passport = useLocalSearchParams<{ brand?: string; year?: string; vin?: string; engineVolume?: string; fuel?: string }>()
 	const [q, setQ] = useState('')
-	const [brand, setBrand] = useState<Brand | null>(null)
+	const [brand, setBrand] = useState<Brand | null>(() => (passport.brand ? (JSON.parse(passport.brand) as Brand) : null))
 	const [modelId, setModelId] = useState<number | null>(null)
-	const [year, setYear] = useState<number | null>(null)
+	const [year, setYear] = useState<number | null>(passport.year ? Number(passport.year) : null)
 	// Optional — masters filter by them [33–36]; origin defaults on the server by brand.
-	const [engineVolume, setEngineVolume] = useState<number | null>(null)
-	const [fuel, setFuel] = useState<FuelType | null>(null)
+	const [engineVolume, setEngineVolume] = useState<number | null>(passport.engineVolume ? Number(passport.engineVolume) : null)
+	const [fuel, setFuel] = useState<FuelType | null>((passport.fuel as FuelType | undefined) ?? null)
 	const [origin, setOrigin] = useState<CarOrigin | null>(null)
 
 	const all = useBrands(q.trim() ? { q: q.trim() } : {})
@@ -177,29 +179,44 @@ export default function GarageAddScreen() {
 			</ScrollView>
 
 			{brand ? (
-				<View
-					style={{
-						borderTopLeftRadius: 24,
-						borderTopRightRadius: 24,
-						backgroundColor: c.card,
-						paddingTop: 10,
-						paddingHorizontal: 16,
-						paddingBottom: insets.bottom + 12,
-						gap: 14,
-						shadowColor: '#201F1D',
-						shadowOpacity: 0.14,
-						shadowOffset: { width: 0, height: -6 },
-						shadowRadius: 20,
-						elevation: 10,
-					}}
+				<BottomSheet
+					onClose={() => setBrand(null)}
+					header={
+						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+							<BrandLogo brand={brand} size={44} />
+							<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{brand.name}</Text>
+						</View>
+					}
+					footer={
+						<>
+							{addCar.error ? (
+								<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{addCar.error.message}</Text>
+							) : null}
+							<Button
+								label="Добавить в гараж"
+								height={52}
+								disabled={!modelId || !year}
+								loading={addCar.isPending}
+								onPress={() =>
+									modelId &&
+									year &&
+									addCar.mutate(
+										{
+											modelId,
+											year,
+											engineVolume: engineVolume ?? undefined,
+											fuel: fuel ?? undefined,
+											origin: origin ?? undefined,
+											vin: passport.vin || undefined,
+											fromTechPassport: Boolean(passport.brand) || undefined,
+										},
+										{ onSuccess: () => router.back() }
+									)
+								}
+							/>
+						</>
+					}
 				>
-					<View style={{ width: 40, height: 5, borderRadius: 3, backgroundColor: c.border, alignSelf: 'center' }} />
-
-					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-						<BrandLogo brand={brand} size={44} />
-						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{brand.name}</Text>
-					</View>
-
 					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>МОДЕЛЬ</Text>
 					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 						{(models.data ?? []).map((m) => chip(m.label, m.id === modelId, () => {
@@ -233,26 +250,7 @@ export default function GarageAddScreen() {
 							</View>
 						</>
 					) : null}
-
-					{addCar.error ? (
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{addCar.error.message}</Text>
-					) : null}
-
-					<Button
-						label="Добавить в гараж"
-						height={52}
-						disabled={!modelId || !year}
-						loading={addCar.isPending}
-						onPress={() =>
-							modelId &&
-							year &&
-							addCar.mutate(
-								{ modelId, year, engineVolume: engineVolume ?? undefined, fuel: fuel ?? undefined, origin: origin ?? undefined },
-								{ onSuccess: () => router.back() }
-							)
-						}
-					/>
-				</View>
+				</BottomSheet>
 			) : null}
 		</View>
 	)

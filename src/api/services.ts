@@ -1,4 +1,4 @@
-// Service requests [05б, 33–37] and the master side [38, 39] — contract section 12.
+// Service requests [16, 17] and the master side [18–20] — contract sections 12 and 13.5.
 import { useRef } from 'react'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ApiError, apiFetch, newIdempotencyKey } from '@/lib/api'
@@ -12,11 +12,11 @@ import type {
 	CreateMasterBody,
 	CreateServiceRequestBody,
 	MasterFeedFilter,
+	MasterFeedItem,
 	MasterFeedPage,
 	MasterOfferBody,
 	MasterPublic,
 	MasterReview,
-	MasterStats,
 	Me,
 	MyMaster,
 	ServiceEstimate,
@@ -287,9 +287,11 @@ export function useMasterOffer() {
 	})
 }
 
-export function useMasterStats(period: 'WEEK' | 'MONTH') {
+/** One request of the feed — the «Проверьте и отправьте» sheet [19]. */
+export function useMasterRequest(id: number) {
 	return useQuery({
-		queryKey: masterKeys.stats(period),
-		queryFn: ({ signal }) => apiFetch<MasterStats>('/my/master/stats', { query: { period }, signal }),
+		queryKey: [...masterKeys.feedAll, 'one', id],
+		queryFn: ({ signal }) => apiFetch<MasterFeedItem>(`/my/master/requests/${id}`, { signal }),
+		enabled: id > 0,
 	})
 }

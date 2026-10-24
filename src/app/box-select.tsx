@@ -1,189 +1,311 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { Button, QueryErrorBanner, SectionLabel } from '@/components/ui'
+import { BottomSheet, BrandLogo, Button, QueryErrorBanner } from '@/components/ui'
+import { BackIcon, BrandTile, Label, PlusIcon, TickIcon } from '@/components/seller-v23'
+import { SearchIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
-import { formatSide } from '@/lib/format'
 import { useRowContainers, useRows } from '@/api/market'
-import { useMyShop, useRelocateShop } from '@/api/shop'
+import { useBrands } from '@/api/directory'
+import { useMyShop, useRegisterShop, useRelocateShop } from '@/api/shop'
 import { useSession } from '@/store/useSession'
 import { useClaimContainer } from '@/api/complaints'
 import { ApiError } from '@/lib/api'
+import type { Brand } from '@/api/types'
 
-/** 10а «Где ваш бокс?» — registration step 1, or moving to another box when the shop exists. */
+/** Rows in the order of the mockup grid [11]; rows the mockup doesn't know go after them. */
+const ROW_ORDER = ['18', '16', '14', '12', '10', '8', '6', '4', '1', 'Ц', 'Л', 'Н', 'Я', 'С', 'Ж', 'Д', 'В', 'Ю', 'Х', 'У']
+/** Brand tiles before «Другие» — as in the mockup. */
+const TILES = 5
+
+/**
+ * 11 «Ваш контейнер» — registration in one minute: row, container number, brands → POST /shops.
+ * With a shop already — moving to another container (brands are changed in «Мой бокс»).
+ */
 export default function BoxSelectScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
 	const hasShop = useSession((s) => s.hasShop)
 	const shop = useMyShop()
 	const rows = useRows()
+	const brands = useBrands()
+	const register = useRegisterShop()
 	const relocate = useRelocateShop()
 
 	const current = shop.data?.location
 	const [rowId, setRowId] = useState<number | null>(null)
-	const [box, setBox] = useState<{ id: number; number: number } | null>(null)
+	const [number, setNumber] = useState('')
+	const [picked, setPicked] = useState<number[]>([])
+	const [othersOpen, setOthersOpen] = useState(false)
 	// «Это мой контейнер» — a taken box that is actually yours.
 	const [claim, setClaim] = useState<{ id: number; number: number } | null>(null)
-	const activeRowId = rowId ?? current?.rowId ?? rows.data?.[0]?.id
-	const row = rows.data?.find((r) => r.id === activeRowId)
+
+	const sortedRows = useMemo(() => {
+		const rank = (code: string) => (ROW_ORDER.includes(code) ? ROW_ORDER.indexOf(code) : ROW_ORDER.length)
+		return [...(rows.data ?? [])].sort((a, b) => rank(a.code) - rank(b.code))
+	}, [rows.data])
+	const activeRowId = rowId ?? current?.rowId ?? null
+	const row = sortedRows.find((r) => r.id === activeRowId)
 	const detail = useRowContainers(activeRowId ?? 0)
 
-	const next = () => {
-		if (!box || !row) return
-		if (hasShop) {
-			// Place checks are off on the server for now (SHOP_VERIFICATION_REQUIRED=false) — the move applies at once.
-			relocate.mutate(box.id, { onSuccess: (v) => (v.required ? router.replace('/verify-box') : router.back()) })
-		} else {
-			router.push({
-				pathname: '/my-box',
-				params: { containerId: String(box.id), place: `${row.label} · Бокс ${box.number}` },
-			})
-		}
+	// The container by its number in the chosen row.
+	const typed = Number(number)
+	const slot = number
+		? (detail.data?.sides ?? []).flatMap((side) => side.containers).find((item) => item.number === typed)
+		: undefined
+	const taken = slot ? slot.occupied && slot.id !== current?.containerId : false
+	const placeError =
+		!row || !number || !detail.isSuccess
+			? null
+			: !slot
+				? `В ряду ${row.code} нет контейнера ${number}`
+				: taken
+					? `Контейнер ${number} уже занят другим продавцом`
+					: null
+
+	const all = brands.data ?? []
+	const popular = all.filter((b) => b.popular).slice(0, TILES)
+	// Brands picked in «Другие» show up as tiles too.
+	const tiles = [...popular, ...all.filter((b) => picked.includes(b.id) && !popular.some((p) => p.id === b.id))]
+	const toggle = (id: number) => setPicked((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]))
+
+	const ready = Boolean(slot && !taken && (hasShop || picked.length > 0))
+	const error = register.error ?? relocate.error
+
+	const submit = () => {
+		if (!slot) return
+		if (hasShop) relocate.mutate(slot.id, { onSuccess: () => router.back() })
+		else register.mutate({ containerId: slot.id, brandIds: picked }, { onSuccess: () => router.replace('/seller') })
 	}
 
 	return (
-		<View
-			style={{
-				flex: 1,
-				backgroundColor: c.surface,
-				paddingTop: insets.top + 8,
-				paddingHorizontal: 16,
-				paddingBottom: 16,
-				gap: 14,
-			}}
-		>
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.muted }}>
-				{hasShop ? 'Переезд в другой бокс' : 'Шаг 1 из 2'}
-			</Text>
-			<Text style={{ fontSize: 26, lineHeight: 29.9, fontFamily: fontFamily(700), letterSpacing: -0.52, color: c.ink }}>
-				Где ваш бокс?
-			</Text>
+		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
+			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+				{router.canGoBack() ? (
+					<Pressable onPress={() => router.back()} hitSlop={10}>
+						<BackIcon color={c.ink} />
+					</Pressable>
+				) : null}
+				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
+					Ваш контейнер
+				</Text>
+			</View>
 
-			<QueryErrorBanner error={rows.error ?? detail.error} onRetry={() => rows.refetch()} />
+			<ScrollView
+				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
+				keyboardShouldPersistTaps="handled"
+				showsVerticalScrollIndicator={false}
+			>
+				<QueryErrorBanner error={rows.error ?? detail.error ?? brands.error} onRetry={() => rows.refetch()} />
 
-			<ScrollView contentContainerStyle={{ gap: 14 }} showsVerticalScrollIndicator={false}>
-				<SectionLabel>Ряд</SectionLabel>
-
+				<Label>Ряд</Label>
 				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-					{(rows.data ?? []).map((item) => {
+					{sortedRows.map((item) => {
 						const active = item.id === activeRowId
 						return (
 							<Pressable
 								key={item.id}
-								onPress={() => {
-									setRowId(item.id)
-									setBox(null)
-								}}
+								onPress={() => setRowId(item.id)}
 								style={{
-									minWidth: 55,
-									height: 44,
-									paddingHorizontal: 8,
+									// Seven in a row: (358 − 6 × 6) / 7.
+									width: '12.9%',
+									flexGrow: 1,
+									height: 40,
 									borderRadius: 10,
-									borderWidth: 2,
+									borderWidth: 1.5,
 									borderColor: active ? c.brand : c.border,
-									backgroundColor: active ? c.brandTint : c.card,
+									backgroundColor: active ? c.brand : c.card,
 									alignItems: 'center',
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: active ? c.brandStrong : c.ink }}>
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(active ? 800 : 600), color: active ? '#FFFFFF' : c.ink }}>
 									{item.code}
 								</Text>
 							</Pressable>
 						)
 					})}
-					<Pressable
-						onPress={() => router.push('/buyer/market')}
-						style={{
-							width: 55,
-							height: 44,
-							borderRadius: 10,
-							borderWidth: 2,
-							borderStyle: 'dashed',
-							borderColor: raw.dashed,
-							alignItems: 'center',
-							justifyContent: 'center',
-						}}
-					>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Карта</Text>
-					</Pressable>
 				</View>
 
-				<SectionLabel style={{ paddingTop: 6 }}>{`Ваш контейнер в ряду ${row?.code ?? ''}`}</SectionLabel>
-
-				<View style={{ borderRadius: 14, backgroundColor: c.card, padding: 10 }}>
-					{(detail.data?.sides ?? []).map((side, index) => (
-						<View key={side.side}>
-							{index > 0 ? (
-								<View style={{ height: 20, justifyContent: 'center', marginVertical: 4 }}>
-									<View style={{ borderTopWidth: 2, borderStyle: 'dashed', borderColor: c.border }} />
-								</View>
-							) : null}
-
-							<Text style={{ fontSize: 12, fontFamily: fontFamily(400), color: c.muted, paddingBottom: 6 }}>
-								{`${formatSide(side.side)} сторона`.replace(/^./, (ch) => ch.toUpperCase())}
+				<Label>Номер контейнера</Label>
+				<View
+					style={{
+						height: 56,
+						borderRadius: 14,
+						backgroundColor: c.card,
+						borderWidth: 2,
+						borderColor: placeError ? c.danger : c.brand,
+						paddingHorizontal: 16,
+						justifyContent: 'center',
+					}}
+				>
+					<TextInput
+						value={number}
+						onChangeText={(text) => setNumber(text.replace(/\D/g, '').slice(0, 4))}
+						keyboardType="number-pad"
+						placeholder={row ? `Например, 12` : 'Сначала выберите ряд'}
+						placeholderTextColor={raw.fillInk}
+						style={{ fontSize: 24, fontFamily: fontFamily(800), color: c.ink, padding: 0 }}
+					/>
+				</View>
+				{placeError ? (
+					<View style={{ gap: 4 }}>
+						<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{placeError}</Text>
+						{taken && slot ? (
+							<Text
+								onPress={() => setClaim({ id: slot.id, number: slot.number })}
+								style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}
+							>
+								Это мой контейнер
 							</Text>
-							<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-								{side.containers.map((slot) => {
-									const active = box?.id === slot.id
-									// Taken by another seller in the app — grey; your own current box stays selectable.
-									const taken = slot.occupied && slot.id !== current?.containerId
-									return (
-										<Pressable
-											key={slot.id}
-											onPress={() => (taken ? setClaim({ id: slot.id, number: slot.number }) : setBox({ id: slot.id, number: slot.number }))}
-											style={{
-												width: 40,
-												height: 44,
-												borderRadius: 8,
-												backgroundColor: active ? c.brand : raw.fill,
-												alignItems: 'center',
-												justifyContent: 'center',
-											}}
-										>
-											<Text
-												style={{
-													fontSize: 14,
-													fontFamily: fontFamily(700),
-													color: active ? '#FFFFFF' : taken ? raw.fillInk : c.inkSecondary,
-												}}
-											>
-												{slot.number}
-											</Text>
-										</Pressable>
-									)
-								})}
-							</View>
-						</View>
-					))}
-				</View>
+						) : null}
+					</View>
+				) : null}
 
-				<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
-					Серый номер — бокс уже занят другим продавцом. Если это ваш бокс — нажмите на номер.
-				</Text>
+				{hasShop ? null : (
+					<>
+						<Label>Какие марки продаёте</Label>
+						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+							{tiles.map((brand) => (
+								<BrandTile key={brand.id} brand={brand} active={picked.includes(brand.id)} onPress={() => toggle(brand.id)} />
+							))}
+							<Pressable
+								onPress={() => setOthersOpen(true)}
+								style={{
+									flexBasis: '31%',
+									flexGrow: 1,
+									minHeight: 82,
+									borderRadius: 14,
+									borderWidth: 2,
+									borderStyle: 'dashed',
+									borderColor: '#B8C3D3',
+									alignItems: 'center',
+									justifyContent: 'center',
+									gap: 4,
+								}}
+							>
+								<PlusIcon size={20} color={c.brandStrong} />
+								<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>Другие</Text>
+							</Pressable>
+						</View>
+						<Text style={{ fontSize: 13.5, lineHeight: 17.5, fontFamily: fontFamily(400), color: c.muted }}>
+							Запросы будут приходить только по этим маркам
+						</Text>
+					</>
+				)}
+
+				{error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
 			</ScrollView>
 
-			{relocate.error ? (
-				<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{relocate.error.message}</Text>
-			) : null}
+			{othersOpen ? (
+				<OtherBrands brands={all} picked={picked} onToggle={toggle} onClose={() => setOthersOpen(false)} />
+			) : (
+				<View
+					style={{
+						paddingTop: 12,
+						paddingHorizontal: 16,
+						paddingBottom: Math.max(28, insets.bottom + 12),
+						backgroundColor: c.card,
+						borderTopWidth: 1,
+						borderTopColor: c.hairline,
+					}}
+				>
+					<Button
+						label={hasShop ? 'Переехать сюда' : 'Начать получать запросы'}
+						disabled={!ready}
+						loading={register.isPending || relocate.isPending}
+						onPress={submit}
+					/>
+				</View>
+			)}
 
 			<ClaimSheet
-				box={claim && row ? { ...claim, place: `${row.label} · Бокс ${claim.number}` } : null}
+				box={claim && row ? { ...claim, place: `${row.label} · конт. ${claim.number}` } : null}
 				onClose={() => setClaim(null)}
 				onFree={(free) => {
 					setClaim(null)
-					setBox(free)
+					setNumber(String(free.number))
 				}}
 			/>
-
-			<Button
-				label={box && row ? `${row.label} · Бокс ${box.number} — далее` : 'Выберите бокс'}
-				disabled={!box}
-				loading={relocate.isPending}
-				onPress={next}
-			/>
 		</View>
+	)
+}
+
+/** «Другие» — all brands A–Я with search. */
+function OtherBrands({
+	brands,
+	picked,
+	onToggle,
+	onClose,
+}: {
+	brands: Brand[]
+	picked: number[]
+	onToggle: (id: number) => void
+	onClose: () => void
+}) {
+	const c = useColors()
+	const [q, setQ] = useState('')
+	const query = q.trim().toLowerCase()
+	const list = query
+		? brands.filter((b) => b.name.toLowerCase().includes(query) || b.shortName.toLowerCase().includes(query))
+		: brands
+
+	return (
+		<BottomSheet
+			onClose={onClose}
+			maxHeight={0.8}
+			header={
+				<View style={{ gap: 12 }}>
+					<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>Все марки</Text>
+					<View
+						style={{
+							height: 48,
+							borderRadius: 12,
+							backgroundColor: c.surface,
+							flexDirection: 'row',
+							alignItems: 'center',
+							gap: 10,
+							paddingHorizontal: 12,
+						}}
+					>
+						<SearchIcon size={20} color={c.muted} strokeWidth={2.4} />
+						<TextInput
+							value={q}
+							onChangeText={setQ}
+							placeholder="Найти марку"
+							placeholderTextColor={raw.fillInk}
+							style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+						/>
+					</View>
+				</View>
+			}
+			footer={<Button label={picked.length ? `Готово · ${picked.length}` : 'Готово'} onPress={onClose} />}
+		>
+			{list.map((brand) => {
+				const active = picked.includes(brand.id)
+				return (
+					<Pressable key={brand.id} onPress={() => onToggle(brand.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+						<BrandLogo brand={brand} size={34} />
+						<Text style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(400), color: c.ink }}>{brand.name}</Text>
+						<View
+							style={{
+								width: 24,
+								height: 24,
+								borderRadius: 7,
+								borderWidth: 2,
+								borderColor: active ? c.brand : c.border,
+								backgroundColor: active ? c.brand : 'transparent',
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
+							{active ? <TickIcon size={14} color="#FFFFFF" strokeWidth={3} /> : null}
+						</View>
+					</Pressable>
+				)
+			})}
+		</BottomSheet>
 	)
 }
 

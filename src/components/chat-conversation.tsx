@@ -3,7 +3,9 @@ import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, Text, TextI
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { QueryErrorBanner } from '@/components/ui'
 import * as ImagePicker from 'expo-image-picker'
-import { GalleryIcon, MicIcon, SendIcon } from '@/components/icons'
+import { SendIcon } from '@/components/icons'
+import { CameraV23Icon, MicV23Icon, TickIcon } from '@/components/buyer-v23'
+import { VoicePlayer } from '@/components/voice'
 import { RecordingBar, useVoiceRecorder, VideoBubble, VoiceBubble } from '@/components/chat-media'
 import { fontFamily, raw, useColors } from '@/theme'
 import { newIdempotencyKey, resolveUrl } from '@/lib/api'
@@ -199,20 +201,22 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction }: P
 			<View
 				style={{
 					paddingTop: 10,
-					paddingHorizontal: 16,
-					paddingBottom: 18 + insets.bottom,
-					borderTopWidth: 2,
+					paddingHorizontal: 12,
+					paddingBottom: Math.max(insets.bottom, 28),
+					backgroundColor: c.card,
+					borderTopWidth: 1,
 					borderTopColor: c.hairline,
 					flexDirection: 'row',
-					gap: 10,
+					alignItems: 'center',
+					gap: 8,
 				}}
 			>
 				{canWrite && !voice.recording ? (
 					<Pressable
 						onPress={attach}
-						style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}
+						style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' }}
 					>
-						<GalleryIcon size={20} color={c.ink} />
+						<CameraV23Icon size={22} color={c.ink} />
 					</Pressable>
 				) : null}
 				{voice.recording ? (
@@ -227,15 +231,15 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction }: P
 						}}
 						onSubmitEditing={send}
 						placeholder={canWrite ? 'Сообщение' : chat.data?.blockedByOther ? 'Собеседник ограничил чат' : 'Чат недоступен'}
-						placeholderTextColor={raw.fillInk}
+						placeholderTextColor="#8C8888"
 						maxLength={2000}
 						style={{
 							flex: 1,
-							height: 48,
-							borderRadius: 24,
-							backgroundColor: c.card,
+							height: 44,
+							borderRadius: 22,
+							backgroundColor: c.surface,
 							paddingHorizontal: 16,
-							fontSize: 15,
+							fontSize: 16,
 							fontFamily: fontFamily(400),
 							color: c.ink,
 						}}
@@ -261,9 +265,9 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction }: P
 					<Pressable
 						onPress={voice.start}
 						disabled={!canWrite}
-						style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}
+						style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}
 					>
-						<MicIcon size={20} color={c.ink} />
+						<MicV23Icon size={22} color="#FFFFFF" />
 					</Pressable>
 				)}
 			</View>
@@ -314,18 +318,32 @@ function Message({
 	// A master's «Могу помочь» [37]: `{offerId, priceFrom, availableAt}`.
 	const offerPrice = typeof payload.priceFrom === 'number' ? `от ${formatPrice(payload.priceFrom)}` : null
 	const offerAt = typeof payload.availableAt === 'string' ? formatWhenAt(payload.availableAt) : null
-	const body =
-		message.text ??
-		(message.code ? QUICK_TEXT[message.code] : null) ??
-		''
+	const partReply = message.type === 'REPLY' && typeof payload.requestId === 'number'
+	const body = partReply
+		? replyText(payload, message.text)
+		: (message.text ?? (message.code ? QUICK_TEXT[message.code] : null) ?? '')
+
+	// The other side's voice note — the pill player from the v23 mockup [07].
+	if (message.type === 'VOICE' && message.mediaUrl && !mine) {
+		return (
+			<View style={{ alignSelf: 'flex-start', width: 230, gap: 3 }}>
+				<VoicePlayer
+					voice={{ url: message.mediaUrl, durationSec: message.durationSeconds ?? 0, waveform: message.waveform ?? [] }}
+					background={c.card}
+				/>
+				<Text style={{ fontSize: 11, fontFamily: fontFamily(400), color: raw.fillInk }}>{formatClock(message.createdAt)}</Text>
+			</View>
+		)
+	}
 
 	return (
 		<Pressable onLongPress={onComplain} disabled={!onComplain} delayLongPress={450} style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '78%', gap: 3 }}>
 			<View
 				style={{
-					borderRadius: 16,
-					borderBottomLeftRadius: mine ? 16 : 4,
-					borderBottomRightRadius: mine ? 4 : 16,
+					maxWidth: 260,
+					borderRadius: 18,
+					borderBottomLeftRadius: mine ? 18 : 6,
+					borderBottomRightRadius: mine ? 6 : 18,
 					backgroundColor: mine ? c.brand : c.card,
 					paddingVertical: message.type === 'PHOTO' || message.type === 'VIDEO' ? 4 : 10,
 					paddingHorizontal: message.type === 'PHOTO' || message.type === 'VIDEO' ? 4 : 14,
@@ -350,10 +368,15 @@ function Message({
 					/>
 				) : null}
 				{message.type === 'VIDEO' && message.mediaUrl ? <VideoBubble mediaUrl={message.mediaUrl} /> : null}
-				{body ? (
-					<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: mine ? '#FFFFFF' : c.ink }}>{body}</Text>
+				{body && message.code === 'RESERVED' ? (
+					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+						<TickIcon size={18} color={c.success} strokeWidth={2.8} />
+						<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: mine ? '#FFFFFF' : c.ink }}>{body}</Text>
+					</View>
+				) : body ? (
+					<Text style={{ fontSize: 16, lineHeight: 21.6, fontFamily: fontFamily(400), color: mine ? '#FFFFFF' : c.ink }}>{body}</Text>
 				) : null}
-				{price && (message.type === 'REPLY' || message.type === 'PART') ? (
+				{price && !partReply && (message.type === 'REPLY' || message.type === 'PART') ? (
 					<Text style={{ fontSize: 15, fontFamily: fontFamily(800), color: mine ? '#FFFFFF' : c.ink }}>{price}</Text>
 				) : null}
 				{message.type === 'REPLY' && (offerPrice || offerAt) ? (
@@ -381,4 +404,19 @@ function Message({
 			</Text>
 		</Pressable>
 	)
+}
+
+const CONDITION_WORD: Record<string, string> = { NEW: 'новые', USED: 'б/у', ON_ORDER: 'под заказ' }
+
+/** «Есть KYB оригинал, новые. Пара — 3 200 сом» from the REPLY card payload [07]; the seller's own text follows. */
+function replyText(payload: Record<string, unknown>, text: string | null | undefined) {
+	const condition = typeof payload.condition === 'string' ? payload.condition : null
+	const original = typeof payload.original === 'boolean' ? payload.original : null
+	const manufacturer = typeof payload.manufacturer === 'string' ? payload.manufacturer : null
+	const tags = Array.isArray(payload.tags) ? payload.tags.filter((tag): tag is string => typeof tag === 'string') : []
+	const head = ['Есть', manufacturer, original === true ? 'оригинал' : original === false ? 'копия' : null].filter(Boolean).join(' ')
+	let line = condition ? `${head}, ${CONDITION_WORD[condition] ?? ''}` : head
+	if (tags.length) line += `. ${tags.join(', ')}`
+	if (typeof payload.price === 'number') line += ` — ${formatPrice(payload.price)}`
+	return text ? `${line}\n${text}` : line
 }

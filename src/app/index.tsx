@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { Keyboard, Platform, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Redirect, router } from 'expo-router'
+import { LinearGradient } from 'expo-linear-gradient'
 import { Button } from '@/components/ui'
+import { LoupeIcon } from '@/components/buyer-v23'
 import { fontFamily, useColors } from '@/theme'
 import { COUNTRY_CODE, formatLocalPhone, isValidLocalPhone, toE164 } from '@/lib/phone'
 import { ApiError } from '@/lib/api'
@@ -56,15 +58,17 @@ export default function PhoneScreen() {
 			onPress={Platform.OS === 'web' ? undefined : Keyboard.dismiss}
 			style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}
 		>
-			<View style={{ height: 44, paddingHorizontal: 22, alignItems: 'flex-end' }}>
+			{/* RU / KG right away [01] */}
+			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
 				<View
 					style={{
-						marginTop: 24,
-						flexDirection: 'row',
-						gap: 3,
-						padding: 3,
-						borderRadius: 10,
+						height: 34,
+						borderRadius: 17,
 						backgroundColor: c.card,
+						borderWidth: 1.5,
+						borderColor: c.border,
+						flexDirection: 'row',
+						padding: 2,
 					}}
 				>
 					{LANGS.map(({ value, label }) => {
@@ -74,9 +78,8 @@ export default function PhoneScreen() {
 								key={value}
 								onPress={() => setLang(value)}
 								style={{
-									height: 30,
-									paddingHorizontal: 10,
-									borderRadius: 8,
+									width: 40,
+									borderRadius: 15,
 									alignItems: 'center',
 									justifyContent: 'center',
 									backgroundColor: active ? c.brand : 'transparent',
@@ -91,82 +94,75 @@ export default function PhoneScreen() {
 				</View>
 			</View>
 
-			<View style={{ flex: 1, paddingTop: 80, paddingHorizontal: 24, paddingBottom: 24, gap: 28 }}>
-				<View
+			<View style={{ flex: 1, paddingTop: 4, paddingHorizontal: 24, paddingBottom: 16, gap: 12 }}>
+				<View style={{ height: 40 }} />
+				<LinearGradient
+					colors={['#2155E6', '#1D46BF']}
+					start={{ x: 0.2, y: 0 }}
+					end={{ x: 0.8, y: 1 }}
 					style={{
-						width: 64,
-						height: 64,
-						borderRadius: 18,
-						backgroundColor: c.brand,
+						width: 72,
+						height: 72,
+						borderRadius: 22,
 						alignItems: 'center',
 						justifyContent: 'center',
+						shadowColor: '#2155E6',
+						shadowOpacity: 0.3,
+						shadowOffset: { width: 0, height: 10 },
+						shadowRadius: 12,
+						elevation: 8,
 					}}
 				>
-					<Text style={{ fontSize: 34, fontFamily: fontFamily(700), color: '#FFFFFF' }}>К</Text>
-				</View>
-
-				<View style={{ gap: 8 }}>
-					<Text
-						style={{
-							fontSize: 32,
-							lineHeight: 35.2,
-							fontFamily: fontFamily(700),
-							letterSpacing: -0.64,
-							color: c.ink,
+					<LoupeIcon size={36} color="#FFFFFF" strokeWidth={2.6} />
+				</LinearGradient>
+				<Text
+					style={{ marginTop: 8, fontSize: 32, lineHeight: 41.6, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink }}
+				>
+					Кудайберген
+				</Text>
+				<Text style={{ fontSize: 17, lineHeight: 24.65, fontFamily: fontFamily(400), color: c.muted }}>
+					Запчасть с рынка — без хождения по рядам. Спросите один раз, продавцы ответят с ценой.
+				</Text>
+				<View style={{ height: 24 }} />
+				<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.muted }}>Ваш номер телефона</Text>
+				<View
+					style={{
+						height: 60,
+						borderRadius: 14,
+						borderWidth: 2,
+						borderColor: error ? c.danger : c.brand,
+						backgroundColor: c.card,
+						paddingHorizontal: 16,
+						flexDirection: 'row',
+						alignItems: 'center',
+						gap: 12,
+					}}
+				>
+					<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{COUNTRY_CODE}</Text>
+					<View style={{ width: 1.5, height: 26, backgroundColor: c.border }} />
+					<TextInput
+						value={phone}
+						onChangeText={(text) => {
+							const next = formatLocalPhone(text)
+							setPhone(next)
+							sendOtp.reset()
+							// All 9 digits typed — hide the keyboard so «Получить код» is visible.
+							if (isValidLocalPhone(next)) Keyboard.dismiss()
 						}}
-					>
-						Кудайберген
-					</Text>
-					<Text style={{ fontSize: 17, lineHeight: 24.65, fontFamily: fontFamily(400), color: c.muted }}>
-						Спросите деталь — ответят те, у кого она есть
-					</Text>
+						keyboardType="phone-pad"
+						placeholder="555 12 34 56"
+						placeholderTextColor={c.muted}
+						style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(400), letterSpacing: 0.4, color: c.ink, padding: 0 }}
+					/>
 				</View>
+				{error ? (
+					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text>
+				) : (
+					<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>Пароль не нужен — пришлём код по SMS</Text>
+				)}
+			</View>
 
-				<View style={{ gap: 8 }}>
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.muted }}>Номер телефона</Text>
-					<View
-						style={{
-							height: 64,
-							borderRadius: 14,
-							borderWidth: 2,
-							borderColor: error ? c.danger : c.brand,
-							backgroundColor: c.card,
-							paddingHorizontal: 16,
-							flexDirection: 'row',
-							alignItems: 'center',
-						}}
-					>
-						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>{COUNTRY_CODE}</Text>
-						<View style={{ width: 2, height: 26, backgroundColor: c.border, marginHorizontal: 12 }} />
-						<TextInput
-							value={phone}
-							onChangeText={(text) => {
-								const next = formatLocalPhone(text)
-								setPhone(next)
-								sendOtp.reset()
-								// All 9 digits typed — hide the keyboard so «Получить код» is visible.
-								if (isValidLocalPhone(next)) Keyboard.dismiss()
-							}}
-							keyboardType="phone-pad"
-							placeholder="555 12 34 56"
-							placeholderTextColor={c.muted}
-							style={{
-								flex: 1,
-								fontSize: 20,
-								fontFamily: fontFamily(700),
-								letterSpacing: 0.8,
-								color: c.ink,
-								padding: 0,
-							}}
-						/>
-					</View>
-					{error && (
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text>
-					)}
-				</View>
-
-				<View style={{ flex: 1 }} />
-
+			<View style={{ paddingTop: 12, paddingHorizontal: 24, paddingBottom: Math.max(insets.bottom, 34) }}>
 				<Button
 					label="Получить код"
 					disabled={!isValidLocalPhone(phone)}

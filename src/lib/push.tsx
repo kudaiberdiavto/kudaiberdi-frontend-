@@ -1,5 +1,6 @@
 // Push notifications (FCM on the backend). Registers the device after sign-in,
-// routes taps by `data.type`, and answers «Нет» / «Не моё» straight from the NEW_REQUEST / NEW_SERVICE_REQUEST push.
+// routes taps by `data.type`, and answers «Есть + цена» / «Нет» / «Не моё» straight from the NEW_REQUEST /
+// NEW_SERVICE_REQUEST push [12].
 
 import { type ReactNode, useEffect } from 'react'
 import { Platform } from 'react-native'
@@ -10,7 +11,7 @@ import { apiFetch } from '@/lib/api'
 import { getItem, setItem } from '@/lib/secure-storage'
 import { queryClient } from '@/lib/query-client'
 import { useSession } from '@/store/useSession'
-import { chatKeys, masterKeys, shopKeys } from '@/api/keys'
+import { chatKeys, incomingKeys, masterKeys, shopKeys } from '@/api/keys'
 import type { Chat, Me } from '@/api/types'
 
 const TOKEN_KEY = 'push.token'
@@ -27,6 +28,10 @@ interface PushData {
 	event?: string
 	/** DISPUTE_RESOLVED: «true» / «false». */
 	won?: string
+	/** NEW_REQUEST [12]: the buyer's voice note and the first photo. */
+	voiceUrl?: string
+	voiceDurationSec?: string
+	photoUrl?: string
 }
 
 // Expo Go has no device push tokens (Android since SDK 53) — push works in the dev / release build.
@@ -36,9 +41,14 @@ if (Platform.OS !== 'web') {
 	Notifications.setNotificationHandler({
 		handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
 	})
-	// «Есть / Нет» on a new request [14]: «Нет» answers in the background, «Есть» opens 12 (it needs the condition).
+	// «Есть / Нет» on a new request [12] — the app isn't opened: «Есть» asks for the price right in the notification.
 	Notifications.setNotificationCategoryAsync('NEW_REQUEST', [
-		{ identifier: 'HAVE', buttonTitle: 'Есть', options: { opensAppToForeground: true } },
+		{
+			identifier: 'HAVE',
+			buttonTitle: 'Есть',
+			textInput: { submitButtonTitle: 'Отправить', placeholder: 'Цена, сом' },
+			options: { opensAppToForeground: false },
+		},
 		{ identifier: 'NOT_HAVE', buttonTitle: 'Нет', options: { opensAppToForeground: false } },
 	]).catch(() => {})
 	// «Могу помочь / Не моё» on a new service request [39]: «Не моё» answers in the background.
@@ -74,11 +84,10 @@ async function openPush(data: PushData) {
 		case 'NEW_REQUEST':
 			return router.push({ pathname: '/seller-answer', params: { id: requestId } })
 		case 'REPLY_HAVE':
-			return router.push({ pathname: '/buyer/requests', params: { id: requestId } })
+			return router.push({ pathname: '/request', params: { id: requestId } })
 		case 'NO_REPLY':
-			return router.push({ pathname: '/empty', params: { id: requestId } })
 		case 'REQUEST_EXPIRED':
-			return router.push({ pathname: '/request-stats', params: { id: requestId } })
+			return router.push({ pathname: '/request', params: { id: requestId } })
 		case 'SALE':
 			return router.push('/seller')
 		case 'PRICE_DROP':
@@ -120,8 +129,39 @@ async function openPush(data: PushData) {
 	}
 }
 
+/** «3 200», «3200 сом» typed into the push → 3200; no digits — null. */
+function typedPrice(text: string | undefined) {
+	const digits = (text ?? '').replace(/\D/g, '')
+	const price = Number(digits)
+	return digits && price > 0 ? price : null
+}
+
 async function handleResponse(response: Notifications.NotificationResponse) {
 	const data = (response.notification.request.content.data ?? {}) as PushData
+	if (response.actionIdentifier === 'HAVE' && data.requestId) {
+		const price = typedPrice(response.userText)
+		try {
+			if (price === null) throw new Error('PRICE_REQUIRED')
+			await apiFetch(`/requests/${data.requestId}/replies`, {
+				method: 'POST',
+				body: { answer: 'HAVE', price },
+				idempotencyKey: `push-${response.notification.request.identifier}`,
+			})
+		} catch {
+			// The action runs in the background — a tap on this reminder finishes the answer in the app [14].
+			await Notifications.scheduleNotificationAsync({
+				content: {
+					title: 'Ответ не отправлен',
+					body: price === null ? '«Есть» — только с ценой. Нажмите, чтобы ответить' : 'Нажмите, чтобы ответить в приложении',
+					data: { type: 'NEW_REQUEST', requestId: data.requestId },
+				},
+				trigger: null,
+			}).catch(() => {})
+			return
+		}
+		queryClient.invalidateQueries({ queryKey: incomingKeys.all })
+		return
+	}
 	if (response.actionIdentifier === 'NOT_HAVE' && data.requestId) {
 		await apiFetch(`/requests/${data.requestId}/replies`, {
 			method: 'POST',

@@ -1,4 +1,4 @@
-// Seller's own box [10а, 10, 11, 21, 22, 23] and its verification.
+// Seller's own box [11, 13, 15]: registration, profile, brands, open toggle, moving.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
 import { useSession } from '@/store/useSession'
@@ -33,7 +33,7 @@ function useShopMutation<TVariables>(mutationFn: (variables: TVariables) => Prom
 	})
 }
 
-/** Registration [10а → 10]: the shop starts as PENDING_VERIFICATION until the QR check. */
+/** «Начать получать запросы» [11]: container + brands; the name defaults to «Ряд 14, конт. 12». */
 export function useRegisterShop() {
 	const queryClient = useQueryClient()
 	return useMutation({
@@ -57,12 +57,6 @@ export function useSetShopBrands() {
 	return useShopMutation((brandIds: number[]) => apiFetch<MyShop>('/my/shop/brands', { method: 'PUT', body: { brandIds } }))
 }
 
-export function useSetShopCategories() {
-	return useShopMutation((categoryIds: number[]) =>
-		apiFetch<MyShop>('/my/shop/categories', { method: 'PUT', body: { categoryIds } })
-	)
-}
-
 /** Toggle «Бокс открыт / закрыт» [11, 21] — a closed box gets no requests. Optimistic. */
 export function useSetShopOpen() {
 	const queryClient = useQueryClient()
@@ -81,23 +75,7 @@ export function useSetShopOpen() {
 	})
 }
 
-/** Avatar from POST /media/photos (purpose AVATAR); `null` removes it. */
-export function useSetShopAvatar() {
-	return useShopMutation((mediaId: number | null) =>
-		mediaId === null
-			? apiFetch<MyShop>('/my/shop/avatar', { method: 'DELETE' })
-			: apiFetch<MyShop>('/my/shop/avatar', { method: 'PUT', body: { mediaId } })
-	)
-}
-
 // ─── Photos of the place [22]: up to 8, the first is the cover ──────────────
-
-export function useShopPhotos() {
-	return useQuery({
-		queryKey: shopKeys.photos,
-		queryFn: ({ signal }) => apiFetch<ShopPhoto[]>('/my/shop/photos', { signal }),
-	})
-}
 
 function usePhotosMutation<TVariables>(mutationFn: (variables: TVariables) => Promise<ShopPhoto[]>) {
 	const queryClient = useQueryClient()
@@ -116,24 +94,7 @@ export function useAddShopPhoto() {
 	)
 }
 
-export function useMakeShopCover() {
-	return usePhotosMutation((mediaId: number) =>
-		apiFetch<ShopPhoto[]>(`/my/shop/photos/${mediaId}/cover`, { method: 'POST' })
-	)
-}
-
-export function useRemoveShopPhoto() {
-	return usePhotosMutation((mediaId: number) => apiFetch<ShopPhoto[]>(`/my/shop/photos/${mediaId}`, { method: 'DELETE' }))
-}
-
 // ─── Verification of the place ──────────────────────────────────────────────
-
-export function useVerification() {
-	return useQuery({
-		queryKey: shopKeys.verification,
-		queryFn: ({ signal }) => apiFetch<Verification>('/my/shop/verification', { signal }),
-	})
-}
 
 function useVerificationMutation<TVariables>(mutationFn: (variables: TVariables) => Promise<Verification>) {
 	const queryClient = useQueryClient()
@@ -144,18 +105,6 @@ function useVerificationMutation<TVariables>(mutationFn: (variables: TVariables)
 			queryClient.invalidateQueries({ queryKey: shopKeys.my })
 		},
 	})
-}
-
-/** The QR sticker on the container — instant approval. 400 QR_MISMATCH / NOT_AT_MARKET / LOCATION_REQUIRED. */
-export function useVerifyByQr() {
-	return useVerificationMutation((body: { qrToken: string; lat?: number; lon?: number }) =>
-		apiFetch<Verification>('/my/shop/verification/qr', { method: 'POST', body })
-	)
-}
-
-/** No sticker — ask the market administration (up to one working day). */
-export function useRequestAdminVerification() {
-	return useVerificationMutation(() => apiFetch<Verification>('/my/shop/verification/admin-request', { method: 'POST' }))
 }
 
 /** Moving to another container: stays on the old one until the new place is verified. */
