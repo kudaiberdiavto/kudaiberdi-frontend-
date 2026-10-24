@@ -133,7 +133,7 @@ export function VoiceBubble({
 	mine: boolean
 }) {
 	const c = useColors()
-	const player = useAudioPlayer(resolveUrl(mediaUrl))
+	const player = useAudioPlayer(resolveUrl(mediaUrl), { updateInterval: 50 })
 	const status = useAudioPlayerStatus(player)
 	const duration = status.duration || durationSeconds || 0
 	const progress = duration ? status.currentTime / duration : 0
@@ -172,7 +172,7 @@ export function VoiceBubble({
 							flex: 1,
 							height: Math.max(3, peak * 28),
 							borderRadius: 2,
-							backgroundColor: i / list.length <= progress ? fg : dim,
+							backgroundColor: progress > 0 && i / list.length < progress ? fg : dim,
 						}}
 					/>
 				))}

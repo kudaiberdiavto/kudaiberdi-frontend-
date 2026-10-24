@@ -9,9 +9,9 @@ import { resolveUrl, uploadVoice, type VoicePurpose } from '@/lib/api'
 import { fontFamily, useColors } from '@/theme'
 import type { Voice, VoiceUpload } from '@/api/types'
 
-const BARS = 22
+const BARS = 24
 /** Bar heights of the design's waveform — used when the server has no waveform for the note. */
-const DESIGN_BARS = [6, 11, 20, 8, 17, 9, 14, 9, 14, 20, 17, 6, 17, 6, 13, 8, 6, 13, 8, 17, 13, 9]
+const DESIGN_BARS = [6, 11, 20, 8, 17, 9, 14, 9, 14, 20, 17, 6, 17, 6, 13, 8, 6, 13, 8, 17, 13, 9, 12, 7]
 
 export const voiceClock = (seconds: number) =>
 	`${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
@@ -44,8 +44,9 @@ function PauseIcon({ size = 14, color = '#FFFFFF' }: { size?: number; color?: st
 }
 
 /**
- * The pill player: ▶ in a circle, 22 bars, «0:08». `tone` — green in answers (05), blue for the buyer's and
+ * The pill player: ▶ in a circle, bars, «0:08». `tone` — green in answers (05), blue for the buyer's and
  * master's notes (12–14, 16–19). `background` — the pill colour (#F3F5F8 on cards, white on grey).
+ * At rest all bars are pale; while playing they fill smoothly from the left.
  */
 export function VoicePlayer({
 	voice,
@@ -59,20 +60,32 @@ export function VoicePlayer({
 	height?: number
 }) {
 	const c = useColors()
-	const player = useAudioPlayer(resolveUrl(voice.url))
+	// 50 ms — the default 500 ms makes the fill jump
+	const player = useAudioPlayer(resolveUrl(voice.url), { updateInterval: 50 })
 	const status = useAudioPlayerStatus(player)
+	const [barsWidth, setBarsWidth] = useState(0)
 	const duration = status.duration || voice.durationSec || 0
-	const progress = duration ? status.currentTime / duration : 0
+	const finished = status.didJustFinish
+	const started = status.playing || (status.currentTime > 0 && !finished)
+	const progress = started && duration ? Math.min(1, status.currentTime / duration) : 0
 	const color = tone === 'green' ? c.success : c.brand
 	const bars = barHeights(voice.waveform)
 
 	const toggle = () => {
 		if (status.playing) player.pause()
 		else {
-			if (status.didJustFinish || progress >= 0.99) player.seekTo(0)
+			if (finished || progress >= 0.99) player.seekTo(0)
 			player.play()
 		}
 	}
+
+	const row = (opacity: number) => (
+		<View style={{ width: barsWidth || undefined, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 24 }}>
+			{bars.map((barHeight, i) => (
+				<View key={i} style={{ width: 4, height: barHeight, borderRadius: 2, backgroundColor: color, opacity }} />
+			))}
+		</View>
+	)
 
 	return (
 		<Pressable
@@ -83,7 +96,7 @@ export function VoicePlayer({
 				backgroundColor: background ?? c.surface,
 				flexDirection: 'row',
 				alignItems: 'center',
-				gap: 8,
+				gap: 10,
 				paddingLeft: 6,
 				paddingRight: 14,
 			}}
@@ -100,22 +113,15 @@ export function VoicePlayer({
 			>
 				{status.playing ? <PauseIcon /> : <PlayIcon />}
 			</View>
-			<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-				{bars.map((barHeight, i) => (
-					<View
-						key={i}
-						style={{
-							width: 3,
-							height: barHeight,
-							borderRadius: 2,
-							backgroundColor: color,
-							opacity: status.playing || progress > 0 ? (i / BARS <= progress ? 0.9 : 0.4) : i < 9 ? 0.9 : 0.4,
-						}}
-					/>
-				))}
+			<View style={{ flex: 1 }} onLayout={(event) => setBarsWidth(event.nativeEvent.layout.width)}>
+				{row(0.3)}
+				{/* the played part: the same bars in full colour, clipped to the progress */}
+				<View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: barsWidth * progress, overflow: 'hidden' }}>
+					{row(1)}
+				</View>
 			</View>
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>
-				{voiceClock(status.playing || status.currentTime ? status.currentTime : duration)}
+			<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted, minWidth: 30, textAlign: 'right' }}>
+				{voiceClock(started ? status.currentTime : duration)}
 			</Text>
 		</Pressable>
 	)
