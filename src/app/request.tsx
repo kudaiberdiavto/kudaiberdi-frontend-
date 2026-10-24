@@ -129,6 +129,14 @@ export default function RequestScreen() {
 				) : null}
 				{extend.error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{extend.error.message}</Text> : null}
 
+				{/* The buyer's own voice note — not in the mockup, but they should be able to replay what they asked. */}
+				{detail?.voice ? (
+					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 8 }}>
+						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Ваш запрос голосом</Text>
+						<VoicePlayer voice={detail.voice} />
+					</View>
+				) : null}
+
 				<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 					<SortChip label="Дешевле" active={sort === 'CHEAP'} onPress={() => setSort('CHEAP')} />
 					<SortChip label="Ближе ко входу" active={sort === 'NEAR'} onPress={() => setSort('NEAR')} />
