@@ -137,7 +137,7 @@ export function useSignedIn() {
 // ─── Videos from the market: the «Рынок» feed and «Видео с рынка» on the home screen ─────
 
 /** GET /catalog/videos — parts with a video, the ones fitting the car first, then the newest. */
-export function useVideoFeed(car: { modelId?: number; year?: number } = {}, limit = 10) {
+export function useVideoFeed(car: { carId?: number; brandId?: number; modelId?: number; year?: number } = {}, limit = 10) {
 	return useInfiniteQuery({
 		queryKey: videoKeys.feed({ ...car, limit }),
 		queryFn: ({ pageParam, signal }) =>

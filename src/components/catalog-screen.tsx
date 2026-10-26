@@ -7,6 +7,7 @@ import { BrandLogo } from '@/components/ui/brand'
 import { SearchIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { useVideoViewer } from '@/store/useVideoViewer'
+import { MarketVideos } from '@/components/market-videos'
 import { resolveUrl } from '@/lib/api'
 import { countLabel, formatPlace, formatPrice, plural } from '@/lib/format'
 import { useSearchParts, useSignedIn } from '@/api/catalog'
@@ -46,7 +47,8 @@ export function CatalogScreen() {
 	// A master or СТО has no car of their own — they pick the client's: brand → model.
 	const isMaster = useSession((s) => s.role) === 'MASTER'
 	const carId = f.carId === undefined ? carList.find((car) => car.isPrimary)?.id ?? null : f.carId
-	const search = useSearchParts(toPartFilters({ ...f, carId }))
+	const partFilters = toPartFilters({ ...f, carId })
+	const search = useSearchParts(partFilters)
 	const pages = search.data?.pages
 	const items = pages?.flatMap((page) => page.items) ?? []
 	const total = pages?.[0]?.total
@@ -181,6 +183,16 @@ export function CatalogScreen() {
 			</ScrollView>
 
 			<QueryErrorBanner error={search.error} onRetry={() => search.refetch()} offlineText="Нет сети. Покажем запчасти, когда появится" />
+
+			{/* Parts with a video — the same strip as on the home screen, for the car picked here. */}
+			{!f.q.trim() && f.categoryId == null ? (
+				<MarketVideos
+					car={{
+						filters: { carId: partFilters.carId, brandId: partFilters.brandId, modelId: partFilters.modelId },
+						label: appliedCar?.displayName ?? null,
+					}}
+				/>
+			) : null}
 
 			<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
 				<Text numberOfLines={1} style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>

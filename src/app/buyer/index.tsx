@@ -1,8 +1,8 @@
-import { useCallback, useState, type ComponentType, type ReactNode } from 'react'
-import { FlatList, Pressable, ScrollView, Text, View, type ViewToken } from 'react-native'
+import { useState, type ComponentType, type ReactNode } from 'react'
+import { Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
-import { router, useIsFocused } from 'expo-router'
+import { router } from 'expo-router'
 import { BottomSheet, QueryErrorBanner } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import {
@@ -19,7 +19,8 @@ import {
 	WrenchIcon,
 	priceDigits,
 } from '@/components/buyer-v23'
-import { TruckIcon, VideoTile, deliveryStatusText, useFeedCar } from '@/components/video-v23'
+import { TruckIcon, deliveryStatusText } from '@/components/video-v23'
+import { MarketVideos } from '@/components/market-videos'
 import { fontFamily, useColors } from '@/theme'
 import { minutesLeft, plural } from '@/lib/format'
 import { useMe } from '@/api/me'
@@ -27,10 +28,9 @@ import { useCars, useMakePrimaryCar } from '@/api/garage'
 import { useMyRequests } from '@/api/requests'
 import { flattenPages } from '@/api/pagination'
 import { serviceName, useMyServiceRequests, useServiceTypes } from '@/api/services'
-import { useSignedIn, useVideoFeed } from '@/api/catalog'
+import { useSignedIn } from '@/api/catalog'
 import { useDeliveryOrders } from '@/api/delivery'
-import type { Car, DeliveryOrder, RequestSummary, ServiceRequestSummary, VideoFeedItem } from '@/api/types'
-import { useVideoViewer } from '@/store/useVideoViewer'
+import type { Car, DeliveryOrder, RequestSummary, ServiceRequestSummary } from '@/api/types'
 
 type Row = { kind: 'part'; request: RequestSummary } | { kind: 'service'; request: ServiceRequestSummary }
 
@@ -199,71 +199,6 @@ export default function BuyerHomeScreen() {
 			</ScrollView>
 
 			{picking && cars.data ? <CarPicker cars={cars.data} onClose={() => setPicking(false)} /> : null}
-		</View>
-	)
-}
-
-/** «Видео с рынка» — tiles play by themselves without sound; a tap opens the feed on that video. */
-function MarketVideos() {
-	const c = useColors()
-	const { car, byCar, params } = useFeedCar()
-	const feed = useVideoFeed(params)
-	const items = flattenPages(feed.data)
-	const focused = useIsFocused()
-	const [visible, setVisible] = useState<number[]>([0, 1, 2])
-	// FlatList wants the same callback for its whole life.
-	const onViewable = useCallback(
-		({ viewableItems }: { viewableItems: ViewToken<VideoFeedItem>[] }) =>
-			setVisible(viewableItems.flatMap((token) => (token.index == null ? [] : [token.index]))),
-		[]
-	)
-
-	if (!items.length) return null
-
-	const openFeed = (partId?: number) => {
-		if (partId) useVideoViewer.getState().openVideo(partId)
-		router.push('/videos')
-	}
-
-	return (
-		<View style={{ gap: 10, paddingTop: 2 }}>
-			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-				<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ВИДЕО С РЫНКА</Text>
-				{car && byCar ? (
-					<View style={{ height: 22, paddingHorizontal: 8, borderRadius: 11, backgroundColor: c.brandTint, justifyContent: 'center' }}>
-						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: c.brandStrong }}>для {car.model.label}</Text>
-					</View>
-				) : null}
-				<View style={{ flex: 1 }} />
-				<Text onPress={() => openFeed()} style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>
-					Смотреть все
-				</Text>
-			</View>
-			<FlatList
-				horizontal
-				data={items}
-				keyExtractor={(item) => String(item.partId)}
-				showsHorizontalScrollIndicator={false}
-				contentContainerStyle={{ gap: 8 }}
-				style={{ marginHorizontal: -16 }}
-				ListHeaderComponent={<View style={{ width: 8 }} />}
-				ListFooterComponent={<View style={{ width: 8 }} />}
-				onViewableItemsChanged={onViewable}
-				viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
-				renderItem={({ item, index }) => (
-					<VideoTile
-						video={item.video}
-						title={item.title}
-						price={item.price}
-						place={item.shop.place}
-						playing={focused && visible.includes(index)}
-						onPress={() => openFeed(item.partId)}
-					/>
-				)}
-			/>
-			<Text style={{ fontSize: 12.5, lineHeight: 16, fontFamily: fontFamily(400), color: c.muted }}>
-				Играют сами без звука — нажмите, чтобы открыть на весь экран
-			</Text>
 		</View>
 	)
 }
