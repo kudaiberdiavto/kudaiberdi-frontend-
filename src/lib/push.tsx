@@ -32,6 +32,8 @@ interface PushData {
 	voiceUrl?: string
 	voiceDurationSec?: string
 	photoUrl?: string
+	/** DELIVERY_ORDER (and the buyer's delivery statuses): the order to open. */
+	deliveryOrderId?: string
 }
 
 // Expo Go has no device push tokens (Android since SDK 53) — push works in the dev / release build.
@@ -80,6 +82,10 @@ export async function unregisterDevice() {
 /** Where a push leads (contract, section 1). */
 async function openPush(data: PushData) {
 	const requestId = data.requestId ?? ''
+	// «Новый заказ с доставкой» to the shop, «Курьер забрал посылку» to the buyer — the order's screen decides the side.
+	if (data.deliveryOrderId && data.type?.startsWith('DELIVERY')) {
+		return router.push({ pathname: '/delivery-order', params: { id: data.deliveryOrderId } })
+	}
 	switch (data.type) {
 		case 'NEW_REQUEST':
 			return router.push({ pathname: '/seller-answer', params: { id: requestId } })

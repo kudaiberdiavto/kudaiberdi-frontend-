@@ -1,8 +1,8 @@
-import { useState, type ComponentType, type ReactNode } from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { useCallback, useState, type ComponentType, type ReactNode } from 'react'
+import { FlatList, Pressable, ScrollView, Text, View, type ViewToken } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
-import { router } from 'expo-router'
+import { router, useIsFocused } from 'expo-router'
 import { BottomSheet, QueryErrorBanner } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import {
@@ -19,6 +19,7 @@ import {
 	WrenchIcon,
 	priceDigits,
 } from '@/components/buyer-v23'
+import { TruckIcon, VideoTile, deliveryStatusText, useFeedCar } from '@/components/video-v23'
 import { fontFamily, useColors } from '@/theme'
 import { minutesLeft, plural } from '@/lib/format'
 import { useMe } from '@/api/me'
@@ -26,7 +27,10 @@ import { useCars, useMakePrimaryCar } from '@/api/garage'
 import { useMyRequests } from '@/api/requests'
 import { flattenPages } from '@/api/pagination'
 import { serviceName, useMyServiceRequests, useServiceTypes } from '@/api/services'
-import type { Car, RequestSummary, ServiceRequestSummary } from '@/api/types'
+import { useSignedIn, useVideoFeed } from '@/api/catalog'
+import { useDeliveryOrders } from '@/api/delivery'
+import type { Car, DeliveryOrder, RequestSummary, ServiceRequestSummary, VideoFeedItem } from '@/api/types'
+import { useMarketTab } from '@/store/useMarketTab'
 
 type Row = { kind: 'part'; request: RequestSummary } | { kind: 'service'; request: ServiceRequestSummary }
 
@@ -40,7 +44,7 @@ const HOME_SERVICES: { code: string; label: string; icon: ComponentType<{ size?:
 /** Rows shown before «Все». */
 const PREVIEW = 3
 
-/** 03 Главная: the car, «Найти запчасть», masters nearby, «Мои запросы». */
+/** 03 Главная: the car, «Найти запчасть», «Видео с рынка», parcels on the way, «Мои запросы», masters. */
 export default function BuyerHomeScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
@@ -50,6 +54,7 @@ export default function BuyerHomeScreen() {
 	const services = useMyServiceRequests()
 	const [all, setAll] = useState(false)
 	const [picking, setPicking] = useState(false)
+	const parcels = useDeliveryOrders('BUYER', useSignedIn()).data ?? []
 	// Parts requests and service requests in one list, newest first.
 	const items: Row[] = [
 		...flattenPages(requests.data).map((request) => ({ kind: 'part' as const, request })),
@@ -62,7 +67,7 @@ export default function BuyerHomeScreen() {
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<View style={{ height: 60, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.muted }}>{name ? `Салам, ${name} 👋` : 'Салам 👋'}</Text>
+					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.muted }}>{name ? `Салам, ${name}` : 'Салам'}</Text>
 					<Text numberOfLines={1} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>
 						{car ? `${car.title} · ${car.year}` : 'Машина не выбрана'}
 					</Text>
@@ -96,10 +101,12 @@ export default function BuyerHomeScreen() {
 						start={{ x: 0.25, y: 0 }}
 						end={{ x: 0.75, y: 1 }}
 						style={{
-							height: 196,
-							borderRadius: 28,
-							padding: 22,
-							justifyContent: 'space-between',
+							height: 108,
+							borderRadius: 24,
+							paddingHorizontal: 18,
+							flexDirection: 'row',
+							alignItems: 'center',
+							gap: 14,
 							overflow: 'hidden',
 							shadowColor: '#1D46BF',
 							shadowOpacity: 0.32,
@@ -108,50 +115,34 @@ export default function BuyerHomeScreen() {
 							elevation: 12,
 						}}
 					>
-						<View style={{ position: 'absolute', right: -36, bottom: -46, opacity: 0.13 }}>
-							<LoupeIcon size={200} color="#FFFFFF" strokeWidth={1.6} />
-						</View>
 						<View
 							style={{
-								width: 54,
-								height: 54,
-								borderRadius: 16,
+								width: 46,
+								height: 46,
+								borderRadius: 14,
 								backgroundColor: 'rgba(255,255,255,0.18)',
 								alignItems: 'center',
 								justifyContent: 'center',
 							}}
 						>
-							<LoupeIcon size={28} color="#FFFFFF" strokeWidth={2.6} />
+							<LoupeIcon size={24} color="#FFFFFF" strokeWidth={2.6} />
 						</View>
-						<View style={{ gap: 4 }}>
-							<Text style={{ fontSize: 30, lineHeight: 39, fontFamily: fontFamily(800), letterSpacing: -0.6, color: '#FFFFFF' }}>
+						<View style={{ flex: 1, gap: 3 }}>
+							<Text style={{ fontSize: 23, lineHeight: 29, fontFamily: fontFamily(800), letterSpacing: -0.4, color: '#FFFFFF' }}>
 								Найти запчасть
 							</Text>
-							<Text style={{ fontSize: 15, lineHeight: 20.25, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>
-								Сфотайте или скажите голосом — продавцы ответят с ценой
+							<Text style={{ fontSize: 13.5, lineHeight: 18, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>
+								Фото или голосом — продавцы ответят с ценой
 							</Text>
 						</View>
 					</LinearGradient>
 				</Pressable>
 
-				<View style={{ height: 2 }} />
-				<Caps>Нужен мастер?</Caps>
-				<View style={{ flexDirection: 'row', gap: 8 }}>
-					{HOME_SERVICES.map(({ code, label, icon: Icon }) => (
-						<ServiceTile
-							key={code}
-							label={label}
-							icon={<Icon size={22} color={c.brandStrong} strokeWidth={2} />}
-							onPress={() => router.push({ pathname: '/service-new', params: { service: code } })}
-						/>
-					))}
-					<ServiceTile
-						label="Все услуги"
-						muted
-						icon={<PlusThinIcon size={22} color={c.ink} />}
-						onPress={() => router.push('/service-new')}
-					/>
-				</View>
+				<MarketVideos />
+
+				{parcels.map((order) => (
+					<ParcelRow key={order.id} order={order} />
+				))}
 
 				<View style={{ height: 2 }} />
 				<Caps link={items.length > PREVIEW ? (all ? 'Свернуть' : 'Все') : undefined} onLink={() => setAll(!all)}>
@@ -185,10 +176,114 @@ export default function BuyerHomeScreen() {
 						Показать ещё
 					</Text>
 				) : null}
+
+				<View style={{ height: 2 }} />
+				<Caps>Нужен мастер?</Caps>
+				<View style={{ flexDirection: 'row', gap: 8 }}>
+					{HOME_SERVICES.map(({ code, label, icon: Icon }) => (
+						<ServiceTile
+							key={code}
+							label={label}
+							icon={<Icon size={22} color={c.brandStrong} strokeWidth={2} />}
+							onPress={() => router.push({ pathname: '/service-new', params: { service: code } })}
+						/>
+					))}
+					<ServiceTile
+						label="Все услуги"
+						muted
+						icon={<PlusThinIcon size={22} color={c.ink} />}
+						onPress={() => router.push('/service-new')}
+					/>
+				</View>
+
 			</ScrollView>
 
 			{picking && cars.data ? <CarPicker cars={cars.data} onClose={() => setPicking(false)} /> : null}
 		</View>
+	)
+}
+
+/** «Видео с рынка» — tiles play by themselves without sound; a tap opens the feed on that video. */
+function MarketVideos() {
+	const c = useColors()
+	const { car, byCar, params } = useFeedCar()
+	const feed = useVideoFeed(params)
+	const items = flattenPages(feed.data)
+	const focused = useIsFocused()
+	const [visible, setVisible] = useState<number[]>([0, 1, 2])
+	// FlatList wants the same callback for its whole life.
+	const onViewable = useCallback(
+		({ viewableItems }: { viewableItems: ViewToken<VideoFeedItem>[] }) =>
+			setVisible(viewableItems.flatMap((token) => (token.index == null ? [] : [token.index]))),
+		[]
+	)
+
+	if (!items.length) return null
+
+	const openFeed = (partId?: number) => {
+		if (partId) useMarketTab.getState().openVideo(partId)
+		else useMarketTab.getState().setMode('video')
+		router.navigate('/buyer/market')
+	}
+
+	return (
+		<View style={{ gap: 10, paddingTop: 2 }}>
+			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+				<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ВИДЕО С РЫНКА</Text>
+				{car && byCar ? (
+					<View style={{ height: 22, paddingHorizontal: 8, borderRadius: 11, backgroundColor: c.brandTint, justifyContent: 'center' }}>
+						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: c.brandStrong }}>для {car.model.label}</Text>
+					</View>
+				) : null}
+				<View style={{ flex: 1 }} />
+				<Text onPress={() => openFeed()} style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>
+					Смотреть все
+				</Text>
+			</View>
+			<FlatList
+				horizontal
+				data={items}
+				keyExtractor={(item) => String(item.partId)}
+				showsHorizontalScrollIndicator={false}
+				contentContainerStyle={{ gap: 8 }}
+				style={{ marginHorizontal: -16 }}
+				ListHeaderComponent={<View style={{ width: 8 }} />}
+				ListFooterComponent={<View style={{ width: 8 }} />}
+				onViewableItemsChanged={onViewable}
+				viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+				renderItem={({ item, index }) => (
+					<VideoTile
+						video={item.video}
+						title={item.title}
+						price={item.price}
+						place={item.shop.place}
+						playing={focused && visible.includes(index)}
+						onPress={() => openFeed(item.partId)}
+					/>
+				)}
+			/>
+			<Text style={{ fontSize: 12.5, lineHeight: 16, fontFamily: fontFamily(400), color: c.muted }}>
+				Играют сами без звука — нажмите, чтобы открыть на весь экран
+			</Text>
+		</View>
+	)
+}
+
+/** A parcel on the way — «Где посылка». */
+function ParcelRow({ order }: { order: DeliveryOrder }) {
+	const c = useColors()
+	return (
+		<RequestCard
+			tile={
+				<Tile>
+					<TruckIcon size={22} color={c.brandStrong} />
+				</Tile>
+			}
+			title={order.part.title}
+			status={`${deliveryStatusText(order)} · ${order.number}`}
+			live={order.status === 'PICKED_UP'}
+			onPress={() => router.push({ pathname: '/delivery-order', params: { id: String(order.id) } })}
+		/>
 	)
 }
 

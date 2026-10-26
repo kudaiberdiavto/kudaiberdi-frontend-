@@ -4793,6 +4793,8 @@ export interface components {
             exactModel: boolean;
             isFavorite: boolean;
             shop: components["schemas"]["ShopBriefDto"];
+            video: components["schemas"]["VideoDto"] | null;
+            shipsToRegions: boolean;
         };
         VoiceDto: {
             /** Format: int64 */
@@ -4931,6 +4933,10 @@ export interface components {
             position?: "FRONT" | "REAR";
             mediaIds?: number[];
             fitments?: components["schemas"]["FitmentInput"][];
+            /** Format: int64 */
+            videoMediaId?: number;
+            removeVideo?: boolean;
+            shipsToRegions?: boolean;
         };
         FitDto: {
             carLabel: string;
@@ -4979,6 +4985,167 @@ export interface components {
             publishedAt: string | null;
             /** Format: date-time */
             updatedAt: string;
+            video: components["schemas"]["VideoDto"] | null;
+            shipsToRegions: boolean;
+        };
+        VideoDto: {
+            /** Format: int64 */
+            id: number;
+            url: string;
+            posterUrl: string | null;
+            /** Format: int32 */
+            durationSec: number;
+        };
+        VideoShopDto: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            avatarUrl: string | null;
+            place: string;
+            phone: string | null;
+            /** Format: int32 */
+            replyMinutes: number | null;
+        };
+        VideoFeedItemDto: {
+            /** Format: int64 */
+            partId: number;
+            publicId: string;
+            title: string;
+            /** Format: int32 */
+            price: number;
+            /** @enum {string} */
+            condition: "NEW" | "USED" | "ON_ORDER";
+            video: components["schemas"]["VideoDto"];
+            fits: boolean | null;
+            fitsLabel: string;
+            shipsToRegions: boolean;
+            isFavorite: boolean;
+            shop: components["schemas"]["VideoShopDto"];
+        };
+        VideoFeedPageDto: {
+            items: components["schemas"]["VideoFeedItemDto"][];
+            nextCursor: string | null;
+        };
+        PartVideoDraftModelDto: {
+            /** Format: int64 */
+            modelId: number;
+            /** Format: int64 */
+            brandId: number;
+            label: string;
+        };
+        PartVideoDraftDto: {
+            title: string | null;
+            /** Format: int32 */
+            price: number | null;
+            /** @enum {string|null} */
+            condition: "NEW" | "USED" | null;
+            models: components["schemas"]["PartVideoDraftModelDto"][];
+        };
+        PartVideoUploadDto: {
+            video: components["schemas"]["MediaItemDto"];
+            transcript: string | null;
+            draft: components["schemas"]["PartVideoDraftDto"];
+        };
+        DeliveryDistrictDto: {
+            code: string;
+            name: string;
+            /** Format: int32 */
+            days: number;
+            /** Format: int32 */
+            price: number;
+        };
+        DeliveryRegionDto: {
+            /** @enum {string} */
+            code: "BISHKEK" | "CHUY" | "OSH" | "JALAL_ABAD" | "ISSYK_KUL" | "NARYN" | "TALAS" | "BATKEN";
+            name: string;
+            inName: string;
+            /** Format: int32 */
+            days: number;
+            /** Format: int32 */
+            price: number | null;
+            districts: components["schemas"]["DeliveryDistrictDto"][];
+        };
+        DeliveryTariffsDto: {
+            regions: components["schemas"]["DeliveryRegionDto"][];
+            cutoff: string;
+            surchargeNote: string;
+            courierName: string;
+            /** Not in the contract yet: the «Курьер Ылдам» phone (app.delivery.courier-phone). */
+            courierPhone?: string | null;
+        };
+        CreateDeliveryOrder: {
+            /** Format: int64 */
+            partId: number;
+            /** @enum {string} */
+            region: "BISHKEK" | "CHUY" | "OSH" | "JALAL_ABAD" | "ISSYK_KUL" | "NARYN" | "TALAS" | "BATKEN";
+            district?: string;
+            address: string;
+            recipientName: string;
+            recipientPhone: string;
+        };
+        DeliveryPacked: {
+            weightKg: number;
+            fragile: boolean;
+        };
+        DeliveryOrderPartDto: {
+            /** Format: int64 */
+            id: number;
+            title: string;
+            /** Format: int32 */
+            price: number;
+            video: components["schemas"]["VideoDto"] | null;
+            mainPhoto: components["schemas"]["PhotoDto"] | null;
+        };
+        DeliveryOrderShopDto: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            place: string;
+            phone: string | null;
+        };
+        DeliveryOrderBuyerDto: {
+            name: string | null;
+            phone: string | null;
+        };
+        DeliveryOrderDto: {
+            /** Format: int64 */
+            id: number;
+            number: string;
+            /** @enum {string} */
+            status: "NEW" | "PACKED" | "COURIER_ORDERED" | "PICKED_UP" | "DELIVERED" | "CANCELLED";
+            part: components["schemas"]["DeliveryOrderPartDto"];
+            shop: components["schemas"]["DeliveryOrderShopDto"];
+            buyer: components["schemas"]["DeliveryOrderBuyerDto"] | null;
+            /** @enum {string} */
+            region: "BISHKEK" | "CHUY" | "OSH" | "JALAL_ABAD" | "ISSYK_KUL" | "NARYN" | "TALAS" | "BATKEN";
+            regionName: string;
+            inName: string;
+            district: string | null;
+            districtName: string | null;
+            address: string;
+            recipientName: string;
+            recipientPhone: string;
+            /** Format: int32 */
+            price: number | null;
+            /** Format: int32 */
+            days: number;
+            weightKg: number | null;
+            fragile: boolean;
+            /** Format: int64 */
+            chatId: number | null;
+            pickupToday: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            packedAt: string | null;
+            /** Format: date-time */
+            courierOrderedAt: string | null;
+            /** Format: date-time */
+            pickedUpAt: string | null;
+            /** Format: date-time */
+            deliveredAt: string | null;
+            /** Format: date-time */
+            cancelledAt: string | null;
         };
         CandidateDto: {
             oem: string;
@@ -5257,7 +5424,7 @@ export interface components {
             /** Format: int64 */
             senderId: number | null;
             /** @enum {string} */
-            type: "TEXT" | "PHOTO" | "VOICE" | "VIDEO" | "REPLY" | "QUICK" | "SYSTEM" | "PART";
+            type: "TEXT" | "PHOTO" | "VOICE" | "VIDEO" | "REPLY" | "QUICK" | "SYSTEM" | "PART" | "DELIVERY";
             text: string | null;
             code: string | null;
             payload: {
@@ -6638,7 +6805,7 @@ export interface components {
             /** Format: int64 */
             id: number;
             /** @enum {string} */
-            type: "TEXT" | "PHOTO" | "VOICE" | "VIDEO" | "REPLY" | "QUICK" | "SYSTEM" | "PART";
+            type: "TEXT" | "PHOTO" | "VOICE" | "VIDEO" | "REPLY" | "QUICK" | "SYSTEM" | "PART" | "DELIVERY";
             text: string | null;
             code: string | null;
             /** @enum {string} */

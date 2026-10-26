@@ -1,10 +1,10 @@
 // Buyer's catalog [27–30]: part search, part card, shop profile, favorites.
-import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery, type InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
 import { useSession } from '@/store/useSession'
-import { catalogKeys, meKeys, shopKeys } from './keys'
+import { catalogKeys, meKeys, shopKeys, videoKeys } from './keys'
 import { cursorPaging } from './pagination'
-import type { PartDetail, PartSearchResult, ReviewPage, ShopPublic } from './types'
+import type { PartDetail, PartSearchResult, ReviewPage, ShopPublic, VideoFeedPage } from './types'
 
 /** Filters of GET /parts/search — the same for /parts/search/count and /shops/{id}/parts. */
 export interface PartFilters {
@@ -132,4 +132,39 @@ export function useToggleShopFavorite(id: number) {
 /** Whether the user can use favorites / chats (catalog and shop profiles are open to guests). */
 export function useSignedIn() {
 	return useSession((s) => s.status === 'authed')
+}
+
+// ─── Videos from the market: the «Рынок» feed and «Видео с рынка» on the home screen ─────
+
+/** GET /catalog/videos — parts with a video, the ones fitting the car first, then the newest. */
+export function useVideoFeed(car: { modelId?: number; year?: number } = {}, limit = 10) {
+	return useInfiniteQuery({
+		queryKey: videoKeys.feed({ ...car, limit }),
+		queryFn: ({ pageParam, signal }) =>
+			apiFetch<VideoFeedPage>('/catalog/videos', { query: { ...car, limit, cursor: pageParam }, signal }),
+		...cursorPaging,
+	})
+}
+
+/** «Сохр.» in the feed — the part's favorite, updated in the feed pages right away. */
+export function useToggleVideoFavorite() {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: ({ partId, favorite }: { partId: number; favorite: boolean }) =>
+			apiFetch<void>(`/parts/${partId}/favorite`, { method: favorite ? 'PUT' : 'DELETE' }),
+		onMutate: ({ partId, favorite }) => {
+			queryClient.setQueriesData<InfiniteData<VideoFeedPage>>({ queryKey: ['videos', 'feed'] }, (data) =>
+				data
+					? {
+							...data,
+							pages: data.pages.map((page) => ({
+								...page,
+								items: page.items.map((item) => (item.partId === partId ? { ...item, isFavorite: favorite } : item)),
+							})),
+						}
+					: data
+			)
+		},
+		onSettled: () => queryClient.invalidateQueries({ queryKey: meKeys.favoriteParts }),
+	})
 }

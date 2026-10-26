@@ -9,7 +9,10 @@ import { formatAgo, formatNumber, formatRemaining } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
 import { useIncomingRequests, useReplyToRequest } from '@/api/incoming'
 import { useMyShop, useSetShopOpen } from '@/api/shop'
-import type { IncomingRequest } from '@/api/types'
+import { useDeliveryOrders } from '@/api/delivery'
+import { TruckTile, toRegion } from '@/components/video-v23'
+import { priceDigits } from '@/components/buyer-v23'
+import type { DeliveryOrder, IncomingRequest } from '@/api/types'
 import { AccountStatusBanner } from '@/components/account-status-banner'
 
 /** 13 «Запросы» — new requests on top with «Ответить голосом», answered ones below. */
@@ -19,6 +22,9 @@ export default function SellerRequestsScreen() {
 	const setOpen = useSetShopOpen()
 	const fresh = useIncomingRequests('NEW')
 	const answered = useIncomingRequests('ANSWERED')
+	// Orders with delivery still to pack or hand to the courier — on top.
+	const delivery = useDeliveryOrders('SHOP')
+	const orders = (delivery.data ?? []).filter((order) => order.status !== 'DELIVERED' && order.status !== 'CANCELLED')
 
 	const open = shop.data?.isOpen ?? true
 	const items = [...flattenPages(fresh.data), ...flattenPages(answered.data)]
@@ -42,6 +48,7 @@ export default function SellerRequestsScreen() {
 				onRefresh={() => {
 					fresh.refetch()
 					answered.refetch()
+					delivery.refetch()
 				}}
 				refreshing={false}
 				ListHeaderComponent={
@@ -57,6 +64,9 @@ export default function SellerRequestsScreen() {
 							onRetry={() => fresh.refetch()}
 							offlineText="Нет сети. Покажем запросы, когда появится"
 						/>
+						{orders.map((order) => (
+							<DeliveryCard key={order.id} order={order} />
+						))}
 						<View
 							style={{
 								borderRadius: 14,
@@ -83,6 +93,36 @@ export default function SellerRequestsScreen() {
 				renderItem={({ item }) => <RequestCard request={item} />}
 			/>
 		</Screen>
+	)
+}
+
+/** «Заказ с доставкой · в Ош» → «Упакуйте и ждите курьера». */
+function DeliveryCard({ order }: { order: DeliveryOrder }) {
+	const c = useColors()
+	const status =
+		order.status === 'NEW'
+			? 'Упакуйте посылку'
+			: order.status === 'PICKED_UP'
+				? 'Отдали курьеру'
+				: `Курьер приедет ${order.pickupToday ? 'сегодня' : 'завтра'}`
+	return (
+		<Pressable
+			onPress={() => router.push({ pathname: '/delivery-order', params: { id: String(order.id), as: 'shop' } })}
+			style={{ borderRadius: 18, backgroundColor: '#FCEBB0', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}
+		>
+			<TruckTile size={44} />
+			<View style={{ flex: 1, gap: 2 }}>
+				<Text style={{ fontSize: 12, fontFamily: fontFamily(700), letterSpacing: 1, color: '#7A5A00' }}>
+					{`${order.status === 'NEW' ? 'Новый заказ' : 'Заказ с доставкой'} · в ${toRegion(order.districtName ?? order.regionName)}`.toUpperCase()}
+				</Text>
+				<Text numberOfLines={1} style={{ fontSize: 16, fontFamily: fontFamily(800), color: c.ink }}>
+					{order.part.title}
+				</Text>
+				<Text numberOfLines={1} style={{ fontSize: 13.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>
+					{priceDigits(order.part.price)} сом · {status}
+				</Text>
+			</View>
+		</Pressable>
 	)
 }
 

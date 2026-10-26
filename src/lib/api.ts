@@ -7,7 +7,7 @@ import * as Crypto from 'expo-crypto'
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import { API_URL } from '@/lib/env'
 import { getItem, setItem } from '@/lib/secure-storage'
-import type { MediaItem, MediaPurpose, Photo, VoiceUpload } from '@/api/types'
+import type { MediaItem, MediaPurpose, PartVideoUpload, Photo, VoiceUpload } from '@/api/types'
 
 export { API_URL }
 const API_BASE = `${API_URL}/api/v1`
@@ -379,6 +379,24 @@ export async function uploadVideo(
 		return form
 	}
 	return uploadForm<MediaItem>(`/media/videos?${query}`, makeForm, options)
+}
+
+/**
+ * «Выложить видео»: multipart POST /media/videos/part — the part's video (up to 30 s) and an optional poster. The
+ * server also transcribes what the seller said and fills the form: title, price, condition, models (`draft`).
+ */
+export async function uploadPartVideo(
+	video: { uri: string; mimeType: string; durationSec?: number; posterUri?: string | null },
+	options: { onProgress?: (fraction: number) => void; signal?: AbortSignal } = {}
+): Promise<PartVideoUpload> {
+	const extension = video.mimeType.split('/')[1]?.split(';')[0] || 'mp4'
+	const query = video.durationSec ? `?durationSec=${Math.ceil(video.durationSec)}` : ''
+	const makeForm = async () => {
+		const form = await fileFormData(video.uri, { name: `video.${extension}`, type: video.mimeType })
+		if (video.posterUri) await appendFile(form, 'poster', await compressPhoto(video.posterUri), { name: 'poster.jpg', type: 'image/jpeg' })
+		return form
+	}
+	return uploadForm<PartVideoUpload>(`/media/videos/part${query}`, makeForm, options)
 }
 
 export type VoicePurpose = 'REQUEST' | 'REPLY' | 'SERVICE' | 'OFFER'

@@ -4,6 +4,7 @@ import { router } from 'expo-router'
 import { Badge, PhotoPlaceholder, QueryErrorBanner, Screen } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { CameraIcon, PlusIcon, SearchIcon } from '@/components/icons'
+import { ReelsIcon } from '@/components/video-v23'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatNumber, formatPrice, plural } from '@/lib/format'
@@ -40,6 +41,21 @@ export default function SellerProductsScreen() {
 				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>
 					Мои запчасти
 				</Text>
+				<Pressable
+					onPress={() => router.push('/seller-video')}
+					style={{
+						height: 40,
+						paddingHorizontal: 12,
+						borderRadius: 20,
+						backgroundColor: c.card,
+						flexDirection: 'row',
+						alignItems: 'center',
+						gap: 6,
+					}}
+				>
+					<ReelsIcon size={20} color={c.brandStrong} strokeWidth={2.2} />
+					<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>Видео</Text>
+				</Pressable>
 				<Pressable
 					onPress={() => newPart('/camera')}
 					style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}

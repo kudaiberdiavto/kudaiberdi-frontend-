@@ -5,6 +5,7 @@ import { router } from 'expo-router'
 import { ProductCard, QueryErrorBanner } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { SearchIcon } from '@/components/icons'
+import { BackIcon } from '@/components/buyer-v23'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { countLabel, formatPlace, formatPrice, plural } from '@/lib/format'
@@ -26,7 +27,7 @@ const SORTS: { value: CatalogSort; label: string }[] = [
  * infinite grid. With a car — fitting parts first; without one — all parts. A master has no car of their own:
  * «Выберите марку» (the client's), until then all parts are shown.
  */
-export function CatalogScreen() {
+export function CatalogScreen({ onBack }: { onBack?: () => void } = {}) {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
 	const signedIn = useSignedIn()
@@ -72,7 +73,14 @@ export function CatalogScreen() {
 
 	const header = (
 		<View style={{ gap: 14, paddingBottom: 14 }}>
-			<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>Поиск запчастей</Text>
+			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+				{onBack ? (
+					<Pressable onPress={onBack} hitSlop={10}>
+						<BackIcon color={c.ink} />
+					</Pressable>
+				) : null}
+				<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>Поиск запчастей</Text>
+			</View>
 
 			<View
 				style={{
@@ -254,7 +262,7 @@ export function CatalogScreen() {
 					position: 'absolute',
 					left: 16,
 					right: 16,
-					bottom: 12,
+					bottom: onBack ? insets.bottom + 12 : 12,
 					height: 52,
 					borderRadius: 14,
 					backgroundColor: c.ink,

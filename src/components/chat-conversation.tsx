@@ -1,11 +1,13 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { router } from 'expo-router'
 import { QueryErrorBanner } from '@/components/ui'
 import * as ImagePicker from 'expo-image-picker'
 import { SendIcon } from '@/components/icons'
 import { CameraV23Icon, MicV23Icon, TickIcon } from '@/components/buyer-v23'
 import { VoicePlayer } from '@/components/voice'
+import { TruckTile } from '@/components/video-v23'
 import { RecordingBar, useVoiceRecorder, VideoBubble, VoiceBubble } from '@/components/chat-media'
 import { fontFamily, raw, useColors } from '@/theme'
 import { newIdempotencyKey, resolveUrl } from '@/lib/api'
@@ -147,6 +149,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction }: P
 					<Message
 						message={item}
 						mine={item.side === mySide}
+						shopSide={mySide === 'SHOP'}
 						status={
 							item.id === lastMine?.id
 								? item.id < 0
@@ -283,8 +286,11 @@ function Message({
 	onRetry,
 	onComplain,
 	about,
+	shopSide,
 }: {
 	message: ChatMessage
+	/** The seller reads the chat — a DELIVERY card opens «Заказ с доставкой», for the buyer «Где посылка». */
+	shopSide?: boolean
 	/** «по запросу «Стойки передние»» over a REPLY. */
 	about?: string | null
 	mine: boolean
@@ -300,6 +306,27 @@ function Message({
 			<View style={{ alignSelf: mine ? 'flex-end' : 'flex-start', borderRadius: 16, borderWidth: 1.5, borderColor: c.border, borderStyle: 'dashed', paddingVertical: 10, paddingHorizontal: 14 }}>
 				<Text style={{ fontSize: 14, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.muted }}>Сообщение скрыто администрацией</Text>
 			</View>
+		)
+	}
+
+	// «Заказ с доставкой KDB-… · в Ош · 350 с» — opens the order.
+	if (message.type === 'DELIVERY') {
+		const orderId = (message.payload as { deliveryOrderId?: unknown } | null)?.deliveryOrderId
+		return (
+			<Pressable
+				onPress={() =>
+					typeof orderId === 'number' &&
+					router.push({ pathname: '/delivery-order', params: { id: String(orderId), ...(shopSide ? { as: 'shop' } : {}) } })
+				}
+				style={{ alignSelf: 'center', width: 280, borderRadius: 16, backgroundColor: '#FCEBB0', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}
+			>
+				<TruckTile size={40} />
+				<View style={{ flex: 1, gap: 2 }}>
+					<Text style={{ fontSize: 15, fontFamily: fontFamily(800), color: c.ink }}>Заказ с доставкой</Text>
+					{message.text ? <Text style={{ fontSize: 13, lineHeight: 17, fontFamily: fontFamily(500), color: c.inkSecondary }}>{message.text}</Text> : null}
+					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>{shopSide ? 'Открыть заказ ›' : 'Где посылка ›'}</Text>
+				</View>
+			</Pressable>
 		)
 	}
 

@@ -105,3 +105,14 @@ export const masterKeys = {
 	publicByLink: (publicId: string) => ['master', 'public', 'link', publicId] as const,
 	reviews: (id: number) => ['master', 'public', id, 'reviews'] as const,
 }
+
+export const videoKeys = {
+	feed: (params: object) => ['videos', 'feed', params] as const,
+}
+
+export const deliveryKeys = {
+	all: ['delivery'] as const,
+	tariffs: ['delivery', 'tariffs'] as const,
+	list: (side: 'BUYER' | 'SHOP') => ['delivery', 'orders', side] as const,
+	detail: (id: number) => ['delivery', 'order', id] as const,
+}
