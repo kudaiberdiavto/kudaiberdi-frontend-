@@ -3,11 +3,11 @@ import { FlatList, Pressable, Text, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
 import { QueryErrorBanner, Screen, ServiceIcon } from '@/components/ui'
 import { VoicePlayer } from '@/components/voice'
-import { CheckMark, MicOutline, SmallChip, Switch, myOfferLine } from '@/components/master-v23'
+import { CheckMark, MicOutline, SmallChip, myOfferLine } from '@/components/master-v23'
 import { AccountStatusBanner } from '@/components/account-status-banner'
 import { fontFamily, raw, useColors } from '@/theme'
 import { formatAgo, formatDistance, formatPrice, minutesLeft } from '@/lib/format'
-import { markServiceSeen, serviceName, useMasterFeed, useMasterOffer, useMyMaster, useServiceTypes, useSetAccepting } from '@/api/services'
+import { markServiceSeen, serviceName, useMasterFeed, useMasterOffer, useMyMaster, useServiceTypes } from '@/api/services'
 import { flattenPages } from '@/api/pagination'
 import { useMyRequests } from '@/api/requests'
 import { LoupeIcon } from '@/components/buyer-v23'
@@ -20,7 +20,6 @@ export default function MasterRequestsScreen() {
 	const profile = useMyMaster()
 	const fresh = useMasterFeed('NEW')
 	const answered = useMasterFeed('ANSWERED')
-	const accepting = useSetAccepting()
 	const offer = useMasterOffer()
 	const items = useMemo(() => [...flattenPages(fresh.data), ...flattenPages(answered.data)], [fresh.data, answered.data])
 	const [now, setNow] = useState(() => new Date())
@@ -45,7 +44,6 @@ export default function MasterRequestsScreen() {
 	// First master entry: fill the profile before the feed.
 	if (profile.isSuccess && !profile.data) return <Redirect href={{ pathname: '/master-profile', params: { first: '1' } }} />
 
-	const isAccepting = profile.data?.accepting ?? true
 	const answer = (item: MasterFeedItem, record: boolean) =>
 		router.push({ pathname: '/master-answer', params: { id: String(item.id), ...(record ? { record: '1' } : {}) } })
 
@@ -53,23 +51,6 @@ export default function MasterRequestsScreen() {
 		<View style={{ gap: 10, paddingBottom: 4 }}>
 			<View style={{ height: 60, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), color: c.ink }}>Заявки</Text>
-				<Pressable
-					disabled={!profile.data || accepting.isPending}
-					onPress={() => accepting.mutate(!isAccepting)}
-					style={{
-						height: 36,
-						paddingLeft: 12,
-						paddingRight: 6,
-						borderRadius: 18,
-						backgroundColor: isAccepting ? '#E7F6EC' : raw.fill,
-						flexDirection: 'row',
-						alignItems: 'center',
-						gap: 8,
-					}}
-				>
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: isAccepting ? c.success : c.muted }}>{isAccepting ? 'Работаю' : 'Пауза'}</Text>
-					<Switch size="sm" value={isAccepting} disabled={!profile.data || accepting.isPending} onChange={(value) => accepting.mutate(value)} />
-				</Pressable>
 			</View>
 			<Pressable
 				onPress={() => router.push('/search-part')}
@@ -82,12 +63,6 @@ export default function MasterRequestsScreen() {
 					<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>Нужна запчасть?</Text>
 					<Text style={{ fontSize: 13.5, fontFamily: fontFamily(400), color: c.muted }}>Для машины клиента — спросим весь рынок</Text>
 				</View>
-			</Pressable>
-			<Pressable
-				onPress={() => router.push('/catalog')}
-				style={{ borderRadius: 16, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14 }}
-			>
-				<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>Запчасти в продаже ›</Text>
 			</Pressable>
 			{partRequests.map((request) => (
 				<Pressable
@@ -112,10 +87,10 @@ export default function MasterRequestsScreen() {
 				kind="master"
 				action={{ label: 'Изменить профиль', onPress: () => router.push('/master-profile') }}
 			/>
-			<QueryErrorBanner error={fresh.error ?? answered.error ?? offer.error ?? accepting.error} onRetry={() => (fresh.refetch(), answered.refetch())} />
+			<QueryErrorBanner error={fresh.error ?? answered.error ?? offer.error} onRetry={() => (fresh.refetch(), answered.refetch())} />
 			{fresh.isSuccess && answered.isSuccess && items.length === 0 ? (
 				<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted, paddingTop: 16 }}>
-					{isAccepting ? 'Новых заявок нет. Пришлём пуш, как только клиенту понадобится ваша услуга.' : 'Вы на паузе — заявки не приходят.'}
+					Новых заявок нет. Пришлём пуш, как только клиенту понадобится ваша услуга.
 				</Text>
 			) : null}
 		</View>

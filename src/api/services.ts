@@ -243,18 +243,6 @@ export function useSetMasterPhotos() {
 	return useMasterUpdate((mediaIds: number[]) => apiFetch<MyMaster>('/my/master/photos', { method: 'PUT', body: { mediaIds } }))
 }
 
-/** «● Принимаю» [39]. */
-export function useSetAccepting() {
-	const queryClient = useQueryClient()
-	return useMutation({
-		mutationFn: (accepting: boolean) => apiFetch<MyMaster>('/my/master/accepting', { method: 'PATCH', body: { accepting } }),
-		onSuccess: (master) => {
-			if (master && typeof master === 'object' && 'id' in master) queryClient.setQueryData(masterKeys.profile, master)
-			else queryClient.invalidateQueries({ queryKey: masterKeys.profile })
-		},
-	})
-}
-
 // ─── Master feed [39] ────────────────────────────────────────────────────────
 
 export function useMasterFeed(filter: MasterFeedFilter = 'NEW') {

@@ -56,7 +56,7 @@ export default function BuyerMarketScreen() {
 		const f = useCatalogFilters.getState()
 		if (filter?.kind === 'BRAND') f.pickBrand(filter.brand, null)
 		if (filter?.kind === 'CATEGORY') f.setCategory(filter.id)
-		router.push('/catalog')
+		router.navigate('/buyer/parts')
 	}
 
 	const choose = (next: Filter) => {

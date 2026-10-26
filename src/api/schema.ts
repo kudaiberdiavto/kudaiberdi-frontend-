@@ -2233,26 +2233,6 @@ export interface paths {
         patch: operations["open_1"];
         trace?: never;
     };
-    "/api/v1/my/master/accepting": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * «● Принимаю» (39)
-         * @description Выключено — заявки не приходят
-         */
-        patch: operations["accepting"];
-        trace?: never;
-    };
     "/api/v1/me": {
         parameters: {
             query?: never;
@@ -10605,30 +10585,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MyShopDto"];
-                };
-            };
-        };
-    };
-    accepting: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetAccepting"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["MyMasterDto"];
                 };
             };
         };

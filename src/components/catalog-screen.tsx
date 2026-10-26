@@ -21,8 +21,12 @@ const SORTS: { value: CatalogSort; label: string }[] = [
 	{ value: 'NEWEST', label: 'Новые' },
 ]
 
-/** 27 «Поиск запчастей»: garage car or any brand, categories, infinite grid. */
-export default function CatalogScreen() {
+/**
+ * 27 «Поиск запчастей» — the «Запчасти» tab of the buyer and the master: garage car or any brand, categories,
+ * infinite grid. With a car — fitting parts first; without one — all parts. A master has no car of their own:
+ * «Выберите марку» (the client's), until then all parts are shown.
+ */
+export function CatalogScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
 	const signedIn = useSignedIn()
@@ -146,7 +150,7 @@ export default function CatalogScreen() {
 							color: carId === null && f.brand ? c.brandStrong : c.ink,
 						}}
 					>
-						{carId === null && f.brand ? `${f.modelLabel ?? f.brand.shortName} ›` : isMaster ? 'Машина клиента ›' : 'Любая марка ›'}
+						{carId === null && f.brand ? `${f.modelLabel ?? f.brand.shortName} ›` : isMaster ? 'Выберите марку ›' : 'Любая марка ›'}
 					</Text>
 				</Pressable>
 			</ScrollView>
@@ -250,7 +254,7 @@ export default function CatalogScreen() {
 					position: 'absolute',
 					left: 16,
 					right: 16,
-					bottom: insets.bottom + 12,
+					bottom: 12,
 					height: 52,
 					borderRadius: 14,
 					backgroundColor: c.ink,
