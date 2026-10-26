@@ -190,7 +190,7 @@ export function useFeedCar() {
 	const cars = useCars()
 	const byCar = useMarketTab((s) => s.byCar)
 	const car = signedIn ? (cars.data?.find((item) => item.isPrimary) ?? cars.data?.[0]) : undefined
-	const params = byCar && car ? { modelId: car.model.id, year: car.year } : {}
+	const params = byCar && car ? { brandId: car.brand.id, modelId: car.model.id, year: car.year } : {}
 	return { car, byCar, params }
 }
 
