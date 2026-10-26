@@ -189,10 +189,7 @@ export default function PartScreen() {
 								<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>{shop.name}</Text>
 								<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
 									{shop.reviewsCount ? `★ ${shop.rating.toFixed(1)} · ` : ''}
-									{formatPlace(shop.location)} ·{' '}
-									<Text style={{ fontFamily: fontFamily(700), color: shop.open.openNow ? c.success : c.muted }}>
-										{shop.open.openNow ? 'открыт' : 'закрыт'}
-									</Text>
+									{formatPlace(shop.location)}
 								</Text>
 							</View>
 							<Text style={{ fontSize: 20, color: c.muted }}>›</Text>

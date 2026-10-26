@@ -55,17 +55,6 @@ export function formatClock(value: string | Date) {
 	return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`
 }
 
-/**
- * Shop hours come as local Bishkek «17:00:00» — show «17:00».
- * TODO(backend): OpenAPI describes LocalTime as an object {hour, minute…}, the API sends a string
- * (BACKEND_QUESTIONS.md) — accept both until the schema is fixed.
- */
-export function formatHours(time: string | { hour?: number; minute?: number } | null | undefined) {
-	if (!time) return ''
-	if (typeof time === 'string') return time.slice(0, 5)
-	return `${String(time.hour ?? 0).padStart(2, '0')}:${String(time.minute ?? 0).padStart(2, '0')}`
-}
-
 /** A moment ahead: «сегодня 15:00», «завтра 10:00», «12 сен 9:00» [37, 39]. */
 export function formatWhenAt(value: string | Date, now = new Date()) {
 	const date = toDate(value)

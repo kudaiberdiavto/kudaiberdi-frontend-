@@ -7,7 +7,7 @@ import { BrandLogo } from '@/components/ui/brand'
 import { ChatIcon, ChevronLeftIcon, GalleryIcon, HeartIcon, MapPinIcon, PhoneIcon, ShareIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
-import { formatDay, formatHours, formatPlace, formatPrice, formatSide, plural } from '@/lib/format'
+import { formatDay, formatPlace, formatPrice, formatSide, plural } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
 import { usePublicShop, useShop, useShopParts, useShopReviews, useSignedIn, useToggleShopFavorite } from '@/api/catalog'
 import { useOpenChat } from '@/api/chats'
@@ -37,14 +37,6 @@ export default function SellerProfileForBuyerScreen() {
 	const favorite = useToggleShopFavorite(shopId)
 	const openChat = useOpenChat()
 
-	const open = shop?.open
-	const openLabel = open
-		? open.openNow
-			? `● Открыто до ${formatHours(open.openTo)}`
-			: open.opensAt
-				? `Закрыто · Откроется в ${formatHours(open.opensAt.slice(11, 16))}`
-				: 'Закрыто'
-		: ' '
 	const photos = shop?.photos ?? []
 	const partItems = flattenPages(parts.data)
 	const reviewItems = flattenPages(reviews.data)
@@ -127,18 +119,6 @@ export default function SellerProfileForBuyerScreen() {
 					) : (
 						<View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: raw.fill, borderWidth: 4, borderColor: c.surface }} />
 					)}
-					<View
-						style={{
-							height: 30,
-							paddingHorizontal: 12,
-							borderRadius: 15,
-							backgroundColor: open?.openNow ? c.successTint : c.hairline,
-							alignItems: 'center',
-							justifyContent: 'center',
-						}}
-					>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: open?.openNow ? c.success : c.muted }}>{openLabel}</Text>
-					</View>
 				</View>
 
 				<View style={{ paddingHorizontal: 16, paddingTop: 12, gap: 14 }}>

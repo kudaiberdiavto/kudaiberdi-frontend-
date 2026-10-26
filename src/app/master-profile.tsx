@@ -11,7 +11,6 @@ import { useBrands } from '@/api/directory'
 import { useMe } from '@/api/me'
 import { useMyMaster, useSaveMaster, useServiceTypes, useSetMasterAvatar, useSetMasterPhotos } from '@/api/services'
 import { usePhotoUploads } from '@/api/media'
-import { formatHours } from '@/lib/format'
 import { resolveUrl } from '@/lib/api'
 import type { CarOrigin, MyMaster } from '@/api/types'
 import { MARKET_POINT } from '@/data/service-types'
@@ -28,29 +27,10 @@ interface Form {
 	lng: number | null
 	radiusKm: number
 	mobile: boolean
-	openFrom: string
-	openTo: string
-	workDays: WorkDay[]
 	phone: string
 }
 
-type WorkDay = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY'
-
 const RADII = [3, 5, 10, 20, 30]
-const FROM = ['08:00', '09:00', '10:00']
-const TO = ['17:00', '18:00', '19:00', '20:00']
-/** The saved time stays visible even if it is not a preset («00:00», «23:59» for round-the-clock). */
-const withCurrent = (presets: string[], current: string) => (presets.includes(current) ? presets : [...presets, current].sort())
-
-const DAYS: { value: WorkDay; label: string }[] = [
-	{ value: 'MONDAY', label: 'Пн' },
-	{ value: 'TUESDAY', label: 'Вт' },
-	{ value: 'WEDNESDAY', label: 'Ср' },
-	{ value: 'THURSDAY', label: 'Чт' },
-	{ value: 'FRIDAY', label: 'Пт' },
-	{ value: 'SATURDAY', label: 'Сб' },
-	{ value: 'SUNDAY', label: 'Вс' },
-]
 
 /** 38 «Мои услуги» — what the master does, brands, origins, where. The first master entry lands here. */
 export default function MasterProfileScreen() {
@@ -80,9 +60,6 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 		lng: initial?.lng ?? null,
 		radiusKm: initial?.radiusKm ?? 5,
 		mobile: initial?.mobile ?? false,
-		openFrom: formatHours(initial?.open.openFrom) || '09:00',
-		openTo: formatHours(initial?.open.openTo) || '18:00',
-		workDays: (initial?.open.workDays as WorkDay[] | undefined) ?? DAYS.slice(0, 6).map((d) => d.value),
 		phone: initial?.phone ?? me?.phone ?? '',
 	}))
 	const [pickBrands, setPickBrands] = useState(false)
@@ -114,7 +91,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 	}
 
 	const selectedBrands = brands.filter((b) => form.brandIds.includes(b.id))
-	const ready = form.workDays.length > 0 && form.services.length > 0 && (form.allBrands || form.brandIds.length > 0) && Boolean(form.address.trim()) && Boolean(form.name.trim())
+	const ready = form.services.length > 0 && (form.allBrands || form.brandIds.length > 0) && Boolean(form.address.trim()) && Boolean(form.name.trim())
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
@@ -248,35 +225,6 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 					<Toggle value={form.mobile} onChange={(mobile) => patch({ mobile })} />
 				</View>
 
-				{/* Not on the mockup: hours, days and phone from the contract (§12.2) — in the style of 38. */}
-				<SectionLabel>Часы работы</SectionLabel>
-				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-					{withCurrent(FROM, form.openFrom).map((time) => (
-						<Chip key={time} label={`с ${time}`} height={36} radius={12} color={c.ink} selected={form.openFrom === time} onPress={() => patch({ openFrom: time })} />
-					))}
-				</View>
-				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-					{withCurrent(TO, form.openTo).map((time) => (
-						<Chip key={time} label={`до ${time}`} height={36} radius={12} color={c.ink} selected={form.openTo === time} onPress={() => patch({ openTo: time })} />
-					))}
-				</View>
-				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-					{DAYS.map((day) => (
-						<Chip
-							key={day.value}
-							label={day.label}
-							height={36}
-							radius={12}
-							paddingHorizontal={10}
-							color={c.ink}
-							selected={form.workDays.includes(day.value)}
-							onPress={() =>
-								patch({ workDays: form.workDays.includes(day.value) ? form.workDays.filter((d) => d !== day.value) : [...form.workDays, day.value] })
-							}
-						/>
-					))}
-				</View>
-
 				<SectionLabel>Телефон для клиентов</SectionLabel>
 				<TextInput
 					value={form.phone}
@@ -306,8 +254,6 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 								lat: form.lat ?? MARKET_POINT.lat,
 								lng: form.lng ?? MARKET_POINT.lng,
 								brandIds: form.allBrands ? [] : form.brandIds,
-								openFrom: `${form.openFrom}:00`,
-								openTo: `${form.openTo}:00`,
 								phone: form.phone || undefined,
 							},
 							{ onSuccess: () => (first ? router.replace('/master') : router.back()) }

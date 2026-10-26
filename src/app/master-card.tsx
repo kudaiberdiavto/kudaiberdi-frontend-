@@ -6,7 +6,7 @@ import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceBadge }
 import { ChatIcon, ChevronLeftIcon, MapPinIcon, PhoneIcon, ShareIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
-import { formatDay, formatHours, plural } from '@/lib/format'
+import { formatDay, plural } from '@/lib/format'
 import { useOpenChat } from '@/api/chats'
 import { useMasterByLink, useMasterPublic, useMasterReviews, useServiceTypes } from '@/api/services'
 import { ORIGINS } from '@/store/useServiceDraft'
@@ -30,14 +30,6 @@ export default function MasterCardScreen() {
 	const [complaint, setComplaint] = useState<ComplaintTarget | null>(null)
 
 	const cover = master?.photos[0]
-	const open = master?.open
-	const openLabel = open
-		? open.openNow
-			? `Открыт до ${formatHours(open.openTo)}`
-			: open.opensAt
-				? `Откроется ${formatHours(open.opensAt)}`
-				: 'Закрыт'
-		: ' '
 	const origins = master?.origins.length
 		? master.origins.map((o) => ORIGINS.find((x) => x.value === o)?.label ?? o).join(', ')
 		: 'любые машины'
@@ -76,9 +68,6 @@ export default function MasterCardScreen() {
 							<Text style={{ fontSize: 32, fontFamily: fontFamily(700), color: c.brandStrong }}>{master?.name.charAt(0) ?? ' '}</Text>
 						</View>
 					)}
-					<View style={{ height: 30, paddingHorizontal: 12, borderRadius: 15, backgroundColor: open?.openNow ? c.successTint : c.hairline, justifyContent: 'center' }}>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: open?.openNow ? c.success : c.muted }}>{openLabel}</Text>
-					</View>
 				</View>
 
 				<View style={{ paddingHorizontal: 16, paddingTop: 10, gap: 12 }}>
