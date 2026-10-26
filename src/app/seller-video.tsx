@@ -80,7 +80,7 @@ export default function SellerVideoScreen() {
 			const d = result.draft
 			if (d.title) setTitle((value) => value || d.title || '')
 			if (d.price) setPrice((value) => value || priceDigits(d.price ?? 0))
-			if (d.condition) setCondition(d.condition)
+			if (d.condition === 'NEW' || d.condition === 'USED') setCondition(d.condition)
 			if (d.models.length) {
 				setModels((list) => [...list, ...d.models.filter((m) => !list.some((x) => x.modelId === m.modelId))])
 				setSelected((list) => [...new Set([...list, ...d.models.map((m) => m.modelId)])])

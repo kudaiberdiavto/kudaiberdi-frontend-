@@ -55,7 +55,7 @@ function dayTime(value: string) {
 }
 
 /** «Ряд 14 · конт. 12» → «Ряд 14, конт. 12». */
-const placeComma = (place: string) => place.replace(' · ', ', ')
+const placeComma = (place: string | null) => (place ?? 'контейнер').replace(' · ', ', ')
 
 /** When the courier brings the parcel: picked up (or the pick-up day) + the region's days. */
 function arrivalText(order: DeliveryOrder, now = new Date()) {

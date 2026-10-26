@@ -12,7 +12,7 @@ import { formatPlace } from '@/lib/format'
 import { usePart } from '@/api/catalog'
 import { useMe } from '@/api/me'
 import { useCreateDeliveryOrder, useDeliveryTariffs } from '@/api/delivery'
-import type { DeliveryRegion, DeliveryRegionCode } from '@/api/types'
+import type { DeliveryDistrict, DeliveryRegion, DeliveryRegionCode } from '@/api/types'
 
 /**
  * «Доставка: регион и способ» — where to (8 regions, remote districts as chips), the courier brings it home: address,
@@ -29,7 +29,7 @@ export default function DeliveryScreen() {
 	const create = useCreateDeliveryOrder()
 
 	const [regionCode, setRegionCode] = useState<DeliveryRegionCode | null>(null)
-	const [district, setDistrict] = useState<string | null>(null)
+	const [district, setDistrict] = useState<DeliveryDistrict['code'] | null>(null)
 	const [address, setAddress] = useState('')
 	const [name, setName] = useState<string | null>(null)
 	const [phone, setPhone] = useState<string | null>(null)

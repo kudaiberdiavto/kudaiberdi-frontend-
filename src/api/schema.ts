@@ -212,7 +212,27 @@ export interface paths {
         put: operations["block"];
         post?: never;
         /** Разблокировать */
-        delete: operations["unblock_2"];
+        delete: operations["unblock_3"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/staff/roles/{role}/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Права роли целиком
+         * @description Действует сразу для всех сотрудников роли. SUPER_ADMIN не меняется
+         */
+        put: operations["setRolePermissions"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -565,6 +585,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/requests/{id}/false-have": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Сказали «есть», а не было (08)
+         * @description Отметка продавцу, ответившему «Есть» на этот запрос, — одна на ответ. Если за 30 дней так отметят три разных
+         *     покупателя, бокс 7 дней не получает запросов. Запрос не закрывается.
+         */
+        post: operations["falseHave"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/requests/{id}/extend": {
         parameters: {
             query?: never;
@@ -676,6 +717,27 @@ export interface paths {
         put?: never;
         /** В архив (свайп на 24) */
         post: operations["archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ocr/tech-passport": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Машина по фото техпаспорта (04)
+         * @description Марка и модель из справочника, год, VIN, объём и топливо. Не прочитали модель — model = null, марку —
+         *     brand = null (показать выбор). Дальше — POST /me/cars с fromTechPassport: true. Фото не сохраняется.
+         */
+        post: operations["techPassport"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1010,6 +1072,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/media/voices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Загрузить голосовое (04, 14, 16, 19)
+         * @description Аудио до 60 секунд и 15 МБ (M4A, AAC, MP3, OGG, WAV, WebM, AMR). purpose: REQUEST — запрос покупателя,
+         *     REPLY — ответ продавца, SERVICE — заявка мастеру, OFFER — отклик мастера. Сервер распознаёт речь
+         *     (voice.transcript) и для REPLY / OFFER разбирает цену, состояние и время (reply / offer) — ими
+         *     заполняется экран «Проверьте и отправьте». id передаётся в voiceMediaId запроса, ответа, заявки или отклика.
+         */
+        post: operations["upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/media/videos": {
         parameters: {
             query?: never;
@@ -1032,6 +1117,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/media/videos/part": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Видео товара («Выложить видео»)
+         * @description Видео до 30 секунд и 100 МБ (MP4 / MOV), poster — необязательная обложка. Сервер распознаёт, что продавец
+         *     сказал («Стойки KYB на Камри пятьдесят, новые, пара — три двести»), и возвращает поля формы в draft:
+         *     название, цену, состояние и машины. video.id передаётся в videoMediaId товара.
+         */
+        post: operations["uploadPartVideo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/media/photos": {
         parameters: {
             query?: never;
@@ -1046,7 +1153,7 @@ export interface paths {
          * @description JPG или PNG до 10 МБ (телефон заранее сжимает до 1080 px). Сервер пережимает в 1080 и 320 px и убирает
          *     EXIF. Возвращает id — его передают в mediaIds товара.
          */
-        post: operations["upload"];
+        post: operations["upload_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1191,6 +1298,93 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/delivery-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Мои заказы с доставкой
+         * @description side = BUYER — мои как покупателя («Посылка KDB-… · В пути» на главной), SHOP — заказы моего бокса
+         *     (сверху «Запросов» продавца). active = true — без полученных и отменённых. До 50, новые сверху.
+         */
+        get: operations["list_3"];
+        put?: never;
+        /**
+         * Заказать доставку
+         * @description Товар должен быть в продаже и с «Отправлю в регионы». Продавцу — пуш и карточка заказа в чате
+         *     покупателя с боксом (chatId в ответе). Оплату товара договариваются в чате.
+         */
+        post: operations["create_5"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery-orders/{id}/received": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * «Получил» — покупатель
+         * @description После того как заказан курьер или он забрал посылку
+         */
+        post: operations["received"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery-orders/{id}/picked-up": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * «Курьер забрал» — продавец
+         * @description Покупателю — пуш «Курьер забрал посылку»
+         */
+        post: operations["pickedUp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery-orders/{id}/packed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * «Упаковал — жду курьера» — продавец
+         * @description Вес (кг) и «Хрупкое» уходят в заявку Ылдам. До 17:30 — курьер заберёт сегодня, позже — завтра;
+         *     курьера заказывает администрация.
+         */
+        post: operations["packed"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/complaints": {
         parameters: {
             query?: never;
@@ -1226,7 +1420,7 @@ export interface paths {
          *     as=MASTER — мои чаты как мастера.
          *     Свежие сверху; closed-запросы — requestClosed=true (рисовать серым).
          */
-        get: operations["list_3"];
+        get: operations["list_4"];
         put?: never;
         /**
          * Открыть чат с магазином («Написать» на 07, 29, 30)
@@ -1325,6 +1519,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/broadcasts/{id}/opened": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Открыл пуш рассылки
+         * @description id — data.broadcastId из пуша. Повтор ничего не меняет
+         */
+        post: operations["opened"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/refresh": {
         parameters: {
             query?: never;
@@ -1405,6 +1619,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/users/{id}/unblock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Снять блокировку
+         * @description Бокс и профиль мастера, заблокированные вместе с аккаунтом, возвращаются
+         */
+        post: operations["unblock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}/message": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Написать
+         * @description Пуш ADMIN_MESSAGE. Ответ — как у магазина и мастера: {recipients}
+         */
+        post: operations["message"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}/block": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Заблокировать
+         * @description Сессии закрываются, вход запрещён; его бокс и профиль мастера блокируются вместе с ним
+         */
+        post: operations["block_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/tenants/import": {
         parameters: {
             query?: never;
@@ -1418,7 +1692,7 @@ export interface paths {
          * Загрузить список (предпросмотр)
          * @description xlsx или csv до 5 МБ: ряд, номер, сторона, ФИО, телефон. Ничего не меняет — показывает, что изменится, и ошибки по строкам
          */
-        post: operations["upload_1"];
+        post: operations["upload_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1439,6 +1713,27 @@ export interface paths {
          * @description Записывает ФИО и телефоны арендаторов в контейнеры. Строки с ошибками пропускаются. Предпросмотр действует 24 часа
          */
         post: operations["apply"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/staff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Сотрудники */
+        get: operations["list_7"];
+        put?: never;
+        /**
+         * Добавить сотрудника
+         * @description Пользователь по телефону создаётся, если его нет. Пароль сотрудник задаёт сам: «Задать пароль» на экране входа (SMS-код)
+         */
+        post: operations["create_6"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1475,7 +1770,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Снять блокировку */
-        post: operations["unblock"];
+        post: operations["unblock_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1535,7 +1830,7 @@ export interface paths {
          * Написать продавцу
          * @description Пуш ADMIN_MESSAGE всем людям бокса; ответить нельзя
          */
-        post: operations["message"];
+        post: operations["message_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1555,7 +1850,7 @@ export interface paths {
          * Заблокировать
          * @description Скрывает магазин и товары, запросы не приходят
          */
-        post: operations["block_1"];
+        post: operations["block_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1675,7 +1970,7 @@ export interface paths {
          * Загрузить логотип марки
          * @description JPG или PNG до 10 МБ; id передаётся в PUT /admin/dictionaries/brands/{id}/logo. Пережимается в JPEG — прозрачный фон станет белым
          */
-        post: operations["upload_2"];
+        post: operations["upload_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1693,13 +1988,13 @@ export interface paths {
          * Список мастеров с табами
          * @description service — код услуги, brandId — работает с маркой (или со всеми), q — название, адрес, цифры телефона. counts — по табам с учётом фильтров
          */
-        get: operations["list_6"];
+        get: operations["list_9"];
         put?: never;
         /**
          * Добавить мастера вручную
          * @description Пользователь по телефону создаётся, если его нет; профиль сразу действует
          */
-        post: operations["create_5"];
+        post: operations["create_7"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1736,7 +2031,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Снять блокировку */
-        post: operations["unblock_1"];
+        post: operations["unblock_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1776,7 +2071,7 @@ export interface paths {
          * Написать мастеру
          * @description Пуш ADMIN_MESSAGE; ответить нельзя
          */
-        post: operations["message_1"];
+        post: operations["message_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1793,7 +2088,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Заблокировать */
-        post: operations["block_2"];
+        post: operations["block_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1831,7 +2126,7 @@ export interface paths {
         put?: never;
         /**
          * Опубликовать черновик
-         * @description Новая версия схемы, приложения перекачивают карту. Ряды сопоставляются по коду: контейнеры и магазины остаются на своих рядах, отсутствующие ряды выключаются
+         * @description Новая версия схемы, приложения перекачивают карту. Ряды сопоставляются по коду: контейнеры и магазины остаются на своих рядах, отсутствующие ряды выключаются. Тело необязательно: {comment} — что поменялось, для журнала
          */
         post: operations["publish_2"];
         delete?: never;
@@ -2003,6 +2298,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/delivery-orders/{id}/delivered": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Доставлено
+         * @description Из COURIER_ORDERED или PICKED_UP — если покупатель не нажал «Получил»
+         */
+        post: operations["delivered"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/delivery-orders/{id}/courier-ordered": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Заявка отправлена в WhatsApp Ылдам
+         * @description Из PACKED. Покупателю — пуш «Заказали курьера Ылдам»
+         */
+        post: operations["courierOrdered"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/delivery-orders/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Отменить заказ */
+        post: operations["cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/dashboard/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Пересчитать сводку сейчас
+         * @description Сбрасывает кэш агрегатов
+         */
+        post: operations["refresh_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/complaints/{id}/resolve": {
         parameters: {
             query?: never;
@@ -2020,6 +2392,67 @@ export interface paths {
          *     объект закрываются этим же решением; заявителям — пуш COMPLAINT_RESOLVED.
          */
         post: operations["resolve_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/broadcasts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * История рассылок
+         * @description Заголовок, кому, получили, % открыли
+         */
+        get: operations["list_12"];
+        put?: never;
+        /** Черновик рассылки */
+        post: operations["create_8"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/broadcasts/{id}/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Запланировать или отправить сейчас
+         * @description {at} или {now: true}. Время в тихих часах 22:00–07:00 (Бишкек) переносится на 07:00 — тогда deferred = true
+         */
+        post: operations["schedule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/broadcasts/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Отменить
+         * @description Черновик, запланированную или идущую — оставшиеся не получат
+         */
+        post: operations["cancel_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2059,7 +2492,7 @@ export interface paths {
          * Новый access-токен по cookie
          * @description Cookie обновляется (старый refresh гасится)
          */
-        post: operations["refresh_1"];
+        post: operations["refresh_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2299,6 +2732,26 @@ export interface paths {
         patch: operations["update_5"];
         trace?: never;
     };
+    "/api/v1/admin/staff/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Изменить роль, подпись, имя, доступ
+         * @description Себя и последнего суперадмина отключить или понизить нельзя. Смена роли или отключение закрывают сессии сотрудника
+         */
+        patch: operations["update_6"];
+        trace?: never;
+    };
     "/api/v1/admin/market/containers/{id}": {
         parameters: {
             query?: never;
@@ -2430,6 +2883,27 @@ export interface paths {
          * @description null — не менять; active = false — скрыть
          */
         patch: operations["updateBrand"];
+        trace?: never;
+    };
+    "/api/v1/admin/broadcasts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Рассылка */
+        get: operations["get_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Изменить черновик
+         * @description Все поля целиком, как при создании
+         */
+        patch: operations["update_7"];
         trace?: never;
     };
     "/api/v1/shops/{shopId}/reviews": {
@@ -3400,6 +3874,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/delivery/tariffs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Тарифы «КУДА ВЕЗТИ»
+         * @description Плитки областей (Бишкек — сегодня, области — 1 день, Баткен — 2 дня), у Оша и Джалал-Абада — чипы
+         *     отдалённых районов (2 дня). Цена — до 5 кг; доплату за вес и размер считает курьер.
+         */
+        get: operations["tariffs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery-orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * «Где посылка» (покупатель) или «Заказ с доставкой» (продавец)
+         * @description buyer — только продавцу
+         */
+        get: operations["get_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/chats/{id}": {
         parameters: {
             query?: never;
@@ -3411,7 +3926,7 @@ export interface paths {
          * Шапка чата (08, 13)
          * @description Магазин или покупатель, закреплённый запрос, «в сети», канал
          */
-        get: operations["get_1"];
+        get: operations["get_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3491,7 +4006,28 @@ export interface paths {
          * Категории запчастей
          * @description Чипы на экранах 10, 15, 26, 27. Язык — Accept-Language
          */
-        get: operations["list_4"];
+        get: operations["list_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalog/videos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Лента видео «Рынок» и «Видео с рынка» на главной
+         * @description Опубликованные товары с видео, в наличии. Машина (carId или brandId + modelId + year) — подходящие ей
+         *     сверху (сначала именно к модели), дальше свежие. По умолчанию 10 на страницу; главная берёт первую.
+         */
+        get: operations["videos"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3561,6 +4097,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Пользователи
+         * @description role: BUYER / SELLER / MASTER / BLOCKED; q — имя или цифры телефона
+         */
+        get: operations["list_6"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Карточка: гараж, бокс / мастер, последние запросы, жалобы от него и на него, санкции */
+        get: operations["detail_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/tenants/import/{id}": {
         parameters: {
             query?: never;
@@ -3569,7 +4142,7 @@ export interface paths {
             cookie?: never;
         };
         /** Предпросмотр или отчёт импорта */
-        get: operations["get_2"];
+        get: operations["get_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3595,6 +4168,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/staff/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Роли и их права
+         * @description allPermissions — все права для галочек
+         */
+        get: operations["roles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/shops": {
         parameters: {
             query?: never;
@@ -3606,7 +4199,7 @@ export interface paths {
          * Список продавцов с табами
          * @description q — название, цифры телефона владельца или «14 12». counts — по всем табам с учётом q
          */
-        get: operations["list_5"];
+        get: operations["list_8"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3623,7 +4216,27 @@ export interface paths {
             cookie?: never;
         };
         /** Карточка продавца (правая панель) */
-        get: operations["detail_3"];
+        get: operations["detail_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/shops/export.xlsx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Продавцы в Excel
+         * @description Те же tab и q, что у списка; до 10 000 строк
+         */
+        get: operations["shops"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3664,6 +4277,23 @@ export interface paths {
          * @description Отклик: мастер, через сколько ответил, когда может, цена «от»
          */
         get: operations["serviceRequest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/service-requests/export.xlsx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Заявки на услуги в Excel */
+        get: operations["serviceRequests_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3749,6 +4379,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/part-requests/export.xlsx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Запросы на запчасти в Excel */
+        get: operations["partRequests_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/me": {
         parameters: {
             query?: never;
@@ -3777,7 +4424,27 @@ export interface paths {
             cookie?: never;
         };
         /** Карточка мастера */
-        get: operations["detail_4"];
+        get: operations["detail_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/masters/export.xlsx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Мастера в Excel
+         * @description Те же фильтры, что у списка
+         */
+        get: operations["masters"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3900,6 +4567,154 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/delivery-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Заказы с доставкой
+         * @description status — таб; q — номер, товар или цифры телефона. counts — {all, NEW, PACKED, COURIER_ORDERED, PICKED_UP, DELIVERED, CANCELLED} с учётом q. Живые изменения — admin:requests {type: DELIVERY_CHANGED, payload: {id, number, event, sellerName, at}}
+         */
+        get: operations["list_10"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/delivery-orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** «Заказать курьера»: заказ, заявка Ылдам (template) и ссылка WhatsApp */
+        get: operations["get_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/dashboard/unanswered-by-brand": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Без ответа за 30 минут по маркам
+         * @description От 3 запросов за период. hint — текст для худшей марки и фильтр рассылки «продают эту марку» (broadcastBrandIds)
+         */
+        get: operations["unansweredByBrand"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/dashboard/top-searched": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Чаще всего ищут
+         * @description По подсказке «Что ищем?», иначе по тексту запроса; % «Есть»
+         */
+        get: operations["topSearched"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/dashboard/requests-by-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** График по дням (Бишкек): запросы, с «Есть», заявки на услуги */
+        get: operations["requestsByDay"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/dashboard/pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ждут действий: продавцы и мастера на проверке, жалобы, споры
+         * @description latest — 10 свежих
+         */
+        get: operations["pending"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/dashboard/kpi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** KPI: запросов сегодня, «Есть» за 30 минут, активных боксов, заявок на услуги */
+        get: operations["kpi"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/dashboard/export.xlsx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Сводка в Excel: KPI, по дням за 30 дней, без ответа по маркам, чаще всего ищут */
+        get: operations["dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/complaints": {
         parameters: {
             query?: never;
@@ -3911,7 +4726,7 @@ export interface paths {
          * Лента жалоб
          * @description status: OPEN (новые) / RESOLVED / REJECTED, не задан — все. counts — по статусам с учётом type
          */
-        get: operations["list_7"];
+        get: operations["list_11"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3928,7 +4743,84 @@ export interface paths {
             cookie?: never;
         };
         /** Жалоба: объект, ответственный и его статистика за 90 дней, заявитель, связанный запрос */
-        get: operations["detail_5"];
+        get: operations["detail_6"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/broadcasts/estimate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Сколько получат
+         * @description «Получат 64 продавца»; withDevices — у скольких есть пуши. brandIds / rowIds / serviceTypes — через запятую
+         */
+        get: operations["estimate_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Журнал
+         * @description Фильтры: adminId, action, entityType, entityId, from, to (ISO UTC). counts — сегодня и за 7 дней с учётом фильтров
+         */
+        get: operations["list_13"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Запись: до и после */
+        get: operations["get_6"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit/facets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Значения для фильтров
+         * @description {actions: [...], entityTypes: [...]}
+         */
+        get: operations["facets"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4328,6 +5220,20 @@ export interface components {
             open: components["schemas"]["OpenStateDto"];
             phone: string | null;
         };
+        RolePermissionsRequest: {
+            permissions: ("DASHBOARD_VIEW" | "EXPORT_EXCEL" | "SELLERS_VIEW" | "SELLERS_VERIFY" | "SELLERS_BLOCK" | "DISPUTES_RESOLVE" | "MASTERS_VIEW" | "MASTERS_VERIFY" | "MASTERS_BLOCK" | "MASTERS_CREATE" | "MARKET_VIEW" | "MARKET_EDIT" | "MARKET_MAP_PUBLISH" | "TENANTS_IMPORT" | "REQUESTS_VIEW" | "REQUESTS_MANAGE" | "COMPLAINTS_VIEW" | "COMPLAINTS_RESOLVE" | "CONTENT_REMOVE" | "SELLER_WARN" | "DICTIONARIES_VIEW" | "DICTIONARIES_EDIT" | "BROADCASTS_VIEW" | "BROADCASTS_SEND" | "USERS_VIEW" | "USERS_BLOCK" | "PII_VIEW" | "MESSAGE_USERS" | "AUDIT_VIEW" | "STAFF_MANAGE")[];
+        };
+        RolePermissionsDto: {
+            /** @enum {string} */
+            role: "SUPER_ADMIN" | "MARKET_ADMIN";
+            defaultTitle: string;
+            editable: boolean;
+            permissions: ("DASHBOARD_VIEW" | "EXPORT_EXCEL" | "SELLERS_VIEW" | "SELLERS_VERIFY" | "SELLERS_BLOCK" | "DISPUTES_RESOLVE" | "MASTERS_VIEW" | "MASTERS_VERIFY" | "MASTERS_BLOCK" | "MASTERS_CREATE" | "MARKET_VIEW" | "MARKET_EDIT" | "MARKET_MAP_PUBLISH" | "TENANTS_IMPORT" | "REQUESTS_VIEW" | "REQUESTS_MANAGE" | "COMPLAINTS_VIEW" | "COMPLAINTS_RESOLVE" | "CONTENT_REMOVE" | "SELLER_WARN" | "DICTIONARIES_VIEW" | "DICTIONARIES_EDIT" | "BROADCASTS_VIEW" | "BROADCASTS_SEND" | "USERS_VIEW" | "USERS_BLOCK" | "PII_VIEW" | "MESSAGE_USERS" | "AUDIT_VIEW" | "STAFF_MANAGE")[];
+        };
+        RolesDto: {
+            roles: components["schemas"]["RolePermissionsDto"][];
+            allPermissions: ("DASHBOARD_VIEW" | "EXPORT_EXCEL" | "SELLERS_VIEW" | "SELLERS_VERIFY" | "SELLERS_BLOCK" | "DISPUTES_RESOLVE" | "MASTERS_VIEW" | "MASTERS_VERIFY" | "MASTERS_BLOCK" | "MASTERS_CREATE" | "MARKET_VIEW" | "MARKET_EDIT" | "MARKET_MAP_PUBLISH" | "TENANTS_IMPORT" | "REQUESTS_VIEW" | "REQUESTS_MANAGE" | "COMPLAINTS_VIEW" | "COMPLAINTS_RESOLVE" | "CONTENT_REMOVE" | "SELLER_WARN" | "DICTIONARIES_VIEW" | "DICTIONARIES_EDIT" | "BROADCASTS_VIEW" | "BROADCASTS_SEND" | "USERS_VIEW" | "USERS_BLOCK" | "PII_VIEW" | "MESSAGE_USERS" | "AUDIT_VIEW" | "STAFF_MANAGE")[];
+        };
         ContainerCountsRequest: {
             counts: {
                 [key: string]: number;
@@ -4572,6 +5478,8 @@ export interface components {
             origin?: "JAPAN" | "USA" | "EUROPE" | "KOREA" | "UAE" | "UNKNOWN";
             description?: string;
             mediaIds?: number[];
+            /** Format: int64 */
+            voiceMediaId?: number;
             /** @enum {string} */
             when?: "NOW" | "TODAY" | "TOMORROW" | "AT_TIME";
             /** Format: date-time */
@@ -4587,8 +5495,6 @@ export interface components {
             radiusKm?: number;
             /** @enum {string} */
             duration?: "MIN_15" | "MIN_30" | "HOUR_1" | "HOUR_3" | "END_OF_DAY";
-            /** Format: int64 */
-            voiceMediaId?: number;
         };
         MediaItemDto: {
             /** Format: int64 */
@@ -4628,6 +5534,7 @@ export interface components {
             description: string;
             photos: components["schemas"]["PhotoDto"][];
             media: components["schemas"]["MediaItemDto"][];
+            voice: components["schemas"]["VoiceDto"] | null;
             /** @enum {string} */
             when: "NOW" | "TODAY" | "TOMORROW" | "AT_TIME";
             /** Format: date-time */
@@ -4666,7 +5573,15 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             closedAt: string | null;
-            voice: components["schemas"]["VoiceDto"] | null;
+        };
+        VoiceDto: {
+            /** Format: int64 */
+            id: number;
+            url: string;
+            /** Format: int32 */
+            durationSec: number;
+            waveform: number[];
+            transcript: string | null;
         };
         ServiceExtend: {
             /** Format: int32 */
@@ -4719,6 +5634,7 @@ export interface components {
             car: components["schemas"]["RequestCarDto"];
             category: components["schemas"]["CategoryDto"] | null;
             photos: components["schemas"]["PhotoDto"][];
+            voice: components["schemas"]["VoiceDto"] | null;
             /** @enum {string} */
             target: "MARKET" | "ROWS" | "CONTAINERS";
             targetRowIds: number[];
@@ -4746,7 +5662,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             closedAt: string | null;
-            voice: components["schemas"]["VoiceDto"] | null;
         };
         Widen: {
             /** @enum {string} */
@@ -4796,59 +5711,6 @@ export interface components {
             video: components["schemas"]["VideoDto"] | null;
             shipsToRegions: boolean;
         };
-        VoiceDto: {
-            /** Format: int64 */
-            id: number;
-            url: string;
-            /** Format: int32 */
-            durationSec: number;
-            waveform: number[];
-            transcript: string | null;
-        };
-        ReplyDraftDto: {
-            /** Format: int32 */
-            price: number | null;
-            /** @enum {string|null} */
-            condition: "NEW" | "USED" | "ON_ORDER" | null;
-            original: boolean | null;
-            manufacturer: string | null;
-            tags: string[];
-        };
-        OfferDraftDto: {
-            /** Format: int32 */
-            priceFrom: number | null;
-            /** @enum {string|null} */
-            when: "NOW" | "TODAY" | "TOMORROW" | "AT_TIME" | null;
-            /** Format: date-time */
-            availableAt: string | null;
-        };
-        VoiceUploadDto: {
-            voice: components["schemas"]["VoiceDto"];
-            reply: components["schemas"]["ReplyDraftDto"] | null;
-            offer: components["schemas"]["OfferDraftDto"] | null;
-        };
-        FalseHave: {
-            /** Format: int64 */
-            shopId: number;
-        };
-        RowCount: {
-            /** Format: int64 */
-            rowId: number;
-            rowCode: string;
-            rowLabel: string;
-            /** Format: int32 */
-            containers: number;
-        };
-        TechPassportDto: {
-            brand: components["schemas"]["BrandDto"] | null;
-            model: components["schemas"]["ModelDto"] | null;
-            /** Format: int32 */
-            year: number | null;
-            vin: string | null;
-            engineVolume: number | null;
-            /** @enum {string|null} */
-            fuel: "PETROL" | "DIESEL" | "LPG_PETROL" | "HYBRID" | "ELECTRIC" | null;
-        };
         ReplyDto: {
             /** Format: int64 */
             id: number;
@@ -4893,6 +5755,18 @@ export interface components {
             side: "NORTH" | "SOUTH" | "WEST" | "EAST";
             isOpenNow: boolean;
             openTo: components["schemas"]["LocalTime"];
+        };
+        VideoDto: {
+            /** Format: int64 */
+            id: number;
+            url: string;
+            posterUrl: string | null;
+            /** Format: int32 */
+            durationSec: number;
+        };
+        FalseHave: {
+            /** Format: int64 */
+            shopId: number;
         };
         Extend: {
             /** Format: int32 */
@@ -4988,164 +5862,28 @@ export interface components {
             video: components["schemas"]["VideoDto"] | null;
             shipsToRegions: boolean;
         };
-        VideoDto: {
+        ModelDto: {
             /** Format: int64 */
             id: number;
-            url: string;
-            posterUrl: string | null;
-            /** Format: int32 */
-            durationSec: number;
-        };
-        VideoShopDto: {
-            /** Format: int64 */
-            id: number;
-            name: string;
-            avatarUrl: string | null;
-            place: string;
-            phone: string | null;
-            /** Format: int32 */
-            replyMinutes: number | null;
-        };
-        VideoFeedItemDto: {
-            /** Format: int64 */
-            partId: number;
-            publicId: string;
-            title: string;
-            /** Format: int32 */
-            price: number;
-            /** @enum {string} */
-            condition: "NEW" | "USED" | "ON_ORDER";
-            video: components["schemas"]["VideoDto"];
-            fits: boolean | null;
-            fitsLabel: string;
-            shipsToRegions: boolean;
-            isFavorite: boolean;
-            shop: components["schemas"]["VideoShopDto"];
-        };
-        VideoFeedPageDto: {
-            items: components["schemas"]["VideoFeedItemDto"][];
-            nextCursor: string | null;
-        };
-        PartVideoDraftModelDto: {
-            /** Format: int64 */
-            modelId: number;
             /** Format: int64 */
             brandId: number;
+            name: string;
+            generation: string | null;
             label: string;
-        };
-        PartVideoDraftDto: {
-            title: string | null;
             /** Format: int32 */
-            price: number | null;
+            yearFrom: number | null;
+            /** Format: int32 */
+            yearTo: number | null;
+        };
+        TechPassportDto: {
+            brand: components["schemas"]["BrandDto"] | null;
+            model: components["schemas"]["ModelDto"] | null;
+            /** Format: int32 */
+            year: number | null;
+            vin: string | null;
+            engineVolume: number | null;
             /** @enum {string|null} */
-            condition: "NEW" | "USED" | null;
-            models: components["schemas"]["PartVideoDraftModelDto"][];
-        };
-        PartVideoUploadDto: {
-            video: components["schemas"]["MediaItemDto"];
-            transcript: string | null;
-            draft: components["schemas"]["PartVideoDraftDto"];
-        };
-        DeliveryDistrictDto: {
-            code: string;
-            name: string;
-            /** Format: int32 */
-            days: number;
-            /** Format: int32 */
-            price: number;
-        };
-        DeliveryRegionDto: {
-            /** @enum {string} */
-            code: "BISHKEK" | "CHUY" | "OSH" | "JALAL_ABAD" | "ISSYK_KUL" | "NARYN" | "TALAS" | "BATKEN";
-            name: string;
-            inName: string;
-            /** Format: int32 */
-            days: number;
-            /** Format: int32 */
-            price: number | null;
-            districts: components["schemas"]["DeliveryDistrictDto"][];
-        };
-        DeliveryTariffsDto: {
-            regions: components["schemas"]["DeliveryRegionDto"][];
-            cutoff: string;
-            surchargeNote: string;
-            courierName: string;
-            /** Not in the contract yet: the «Курьер Ылдам» phone (app.delivery.courier-phone). */
-            courierPhone?: string | null;
-        };
-        CreateDeliveryOrder: {
-            /** Format: int64 */
-            partId: number;
-            /** @enum {string} */
-            region: "BISHKEK" | "CHUY" | "OSH" | "JALAL_ABAD" | "ISSYK_KUL" | "NARYN" | "TALAS" | "BATKEN";
-            district?: string;
-            address: string;
-            recipientName: string;
-            recipientPhone: string;
-        };
-        DeliveryPacked: {
-            weightKg: number;
-            fragile: boolean;
-        };
-        DeliveryOrderPartDto: {
-            /** Format: int64 */
-            id: number;
-            title: string;
-            /** Format: int32 */
-            price: number;
-            video: components["schemas"]["VideoDto"] | null;
-            mainPhoto: components["schemas"]["PhotoDto"] | null;
-        };
-        DeliveryOrderShopDto: {
-            /** Format: int64 */
-            id: number;
-            name: string;
-            place: string;
-            phone: string | null;
-        };
-        DeliveryOrderBuyerDto: {
-            name: string | null;
-            phone: string | null;
-        };
-        DeliveryOrderDto: {
-            /** Format: int64 */
-            id: number;
-            number: string;
-            /** @enum {string} */
-            status: "NEW" | "PACKED" | "COURIER_ORDERED" | "PICKED_UP" | "DELIVERED" | "CANCELLED";
-            part: components["schemas"]["DeliveryOrderPartDto"];
-            shop: components["schemas"]["DeliveryOrderShopDto"];
-            buyer: components["schemas"]["DeliveryOrderBuyerDto"] | null;
-            /** @enum {string} */
-            region: "BISHKEK" | "CHUY" | "OSH" | "JALAL_ABAD" | "ISSYK_KUL" | "NARYN" | "TALAS" | "BATKEN";
-            regionName: string;
-            inName: string;
-            district: string | null;
-            districtName: string | null;
-            address: string;
-            recipientName: string;
-            recipientPhone: string;
-            /** Format: int32 */
-            price: number | null;
-            /** Format: int32 */
-            days: number;
-            weightKg: number | null;
-            fragile: boolean;
-            /** Format: int64 */
-            chatId: number | null;
-            pickupToday: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            packedAt: string | null;
-            /** Format: date-time */
-            courierOrderedAt: string | null;
-            /** Format: date-time */
-            pickedUpAt: string | null;
-            /** Format: date-time */
-            deliveredAt: string | null;
-            /** Format: date-time */
-            cancelledAt: string | null;
+            fuel: "PETROL" | "DIESEL" | "LPG_PETROL" | "HYBRID" | "ELECTRIC" | null;
         };
         CandidateDto: {
             oem: string;
@@ -5264,13 +6002,55 @@ export interface components {
             /** Format: date-time */
             availableAt: string | null;
             message: string | null;
+            voice: components["schemas"]["VoiceDto"] | null;
             /** Format: int32 */
             distanceM: number;
             /** Format: int64 */
             chatId: number | null;
             /** Format: date-time */
             createdAt: string;
-            voice: components["schemas"]["VoiceDto"] | null;
+        };
+        OfferDraftDto: {
+            /** Format: int32 */
+            priceFrom: number | null;
+            /** @enum {string|null} */
+            when: "NOW" | "TODAY" | "TOMORROW" | "AT_TIME" | null;
+            /** Format: date-time */
+            availableAt: string | null;
+        };
+        ReplyDraftDto: {
+            /** Format: int32 */
+            price: number | null;
+            /** @enum {string|null} */
+            condition: "NEW" | "USED" | "ON_ORDER" | null;
+            original: boolean | null;
+            manufacturer: string | null;
+            tags: string[];
+        };
+        VoiceUploadDto: {
+            voice: components["schemas"]["VoiceDto"];
+            reply: components["schemas"]["ReplyDraftDto"] | null;
+            offer: components["schemas"]["OfferDraftDto"] | null;
+        };
+        PartVideoDraftDto: {
+            title: string | null;
+            /** Format: int32 */
+            price: number | null;
+            /** @enum {string|null} */
+            condition: "NEW" | "USED" | "ON_ORDER" | null;
+            models: components["schemas"]["VideoModelDto"][];
+        };
+        PartVideoUploadDto: {
+            video: components["schemas"]["MediaItemDto"];
+            transcript: string | null;
+            draft: components["schemas"]["PartVideoDraftDto"];
+        };
+        VideoModelDto: {
+            /** Format: int64 */
+            modelId: number;
+            /** Format: int64 */
+            brandId: number;
+            label: string;
         };
         ConfirmDeletionRequest: {
             code: string;
@@ -5323,19 +6103,6 @@ export interface components {
             origin: "JAPAN" | "USA" | "EUROPE" | "KOREA" | "UAE" | "UNKNOWN";
             fromTechPassport: boolean;
         };
-        ModelDto: {
-            /** Format: int64 */
-            id: number;
-            /** Format: int64 */
-            brandId: number;
-            name: string;
-            generation: string | null;
-            label: string;
-            /** Format: int32 */
-            yearFrom: number | null;
-            /** Format: int32 */
-            yearTo: number | null;
-        };
         LocateRequest: {
             /** Format: double */
             lat: number;
@@ -5378,6 +6145,86 @@ export interface components {
             token: string;
             /** @enum {string} */
             platform: "IOS" | "ANDROID";
+        };
+        CreateOrder: {
+            /** Format: int64 */
+            partId: number;
+            /** @enum {string} */
+            region: "BISHKEK" | "CHUY" | "OSH" | "JALAL_ABAD" | "ISSYK_KUL" | "NARYN" | "TALAS" | "BATKEN";
+            /** @enum {string} */
+            district?: "CHON_ALAY" | "ALAY" | "AKSY" | "ALA_BUKA";
+            address: string;
+            recipientName: string;
+            recipientPhone: string;
+        };
+        DeliveryBuyerDto: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            phone: string | null;
+        };
+        DeliveryOrderDto: {
+            /** Format: int64 */
+            id: number;
+            number: string;
+            /** @enum {string} */
+            status: "NEW" | "PACKED" | "COURIER_ORDERED" | "PICKED_UP" | "DELIVERED" | "CANCELLED";
+            part: components["schemas"]["DeliveryPartDto"];
+            shop: components["schemas"]["DeliveryShopDto"];
+            buyer: components["schemas"]["DeliveryBuyerDto"] | null;
+            /** @enum {string} */
+            region: "BISHKEK" | "CHUY" | "OSH" | "JALAL_ABAD" | "ISSYK_KUL" | "NARYN" | "TALAS" | "BATKEN";
+            regionName: string;
+            inName: string;
+            /** @enum {string|null} */
+            district: "CHON_ALAY" | "ALAY" | "AKSY" | "ALA_BUKA" | null;
+            districtName: string | null;
+            address: string;
+            recipientName: string;
+            recipientPhone: string;
+            /** Format: int32 */
+            price: number | null;
+            /** Format: int32 */
+            days: number;
+            weightKg: number | null;
+            fragile: boolean;
+            /** Format: int64 */
+            chatId: number | null;
+            pickupToday: boolean;
+            courierPhone: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            packedAt: string | null;
+            /** Format: date-time */
+            courierOrderedAt: string | null;
+            /** Format: date-time */
+            pickedUpAt: string | null;
+            /** Format: date-time */
+            deliveredAt: string | null;
+            /** Format: date-time */
+            cancelledAt: string | null;
+        };
+        DeliveryPartDto: {
+            /** Format: int64 */
+            id: number | null;
+            title: string;
+            /** Format: int32 */
+            price: number;
+            video: components["schemas"]["VideoDto"] | null;
+            mainPhoto: components["schemas"]["PhotoDto"] | null;
+        };
+        DeliveryShopDto: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            sellerName: string;
+            place: string | null;
+            phone: string | null;
+        };
+        Packed: {
+            weightKg: number;
+            fragile?: boolean;
         };
         CreateComplaintRequest: {
             /** @enum {string} */
@@ -5465,6 +6312,87 @@ export interface components {
             /** @enum {string} */
             lang?: "RU" | "KG";
         };
+        AdminUserDetailDto: {
+            /** Format: int64 */
+            id: number;
+            phone: string;
+            name: string | null;
+            lang: string;
+            mode: string;
+            roles: string[];
+            /** Format: date-time */
+            registeredAt: string;
+            /** Format: date-time */
+            lastSeenAt: string | null;
+            blocked: boolean;
+            /** Format: date-time */
+            blockedAt: string | null;
+            blockedReason: string | null;
+            adminRole: string | null;
+            cars: string[];
+            shop: components["schemas"]["UserShopDto"] | null;
+            master: components["schemas"]["UserMasterDto"] | null;
+            recentRequests: components["schemas"]["UserRequestDto"][];
+            /** Format: int64 */
+            requestsTotal: number;
+            complaintsBy: components["schemas"]["UserComplaintDto"][];
+            complaintsAbout: components["schemas"]["UserComplaintDto"][];
+            sanctions: components["schemas"]["SanctionDto"][];
+        };
+        SanctionDto: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            type: "WARNING" | "BLOCK" | "UNBLOCK";
+            reason: string | null;
+            /** Format: int64 */
+            adminId: number | null;
+            /** Format: date-time */
+            activeUntil: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        UserComplaintDto: {
+            /** Format: int64 */
+            id: number;
+            type: string;
+            reason: string;
+            status: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        UserMasterDto: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            status: string;
+        };
+        UserRequestDto: {
+            kind: string;
+            /** Format: int64 */
+            id: number;
+            text: string;
+            status: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        UserShopDto: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            status: string;
+            memberRole: string;
+        };
+        UserMessageRequest: {
+            text: string;
+        };
+        AdminMessageSentDto: {
+            /** Format: int32 */
+            recipients: number;
+        };
+        UserReasonRequest: {
+            reason: string;
+        };
         TenantChange: {
             /** Format: int32 */
             line: number;
@@ -5502,6 +6430,29 @@ export interface components {
             /** Format: int32 */
             line: number;
             message: string;
+        };
+        CreateStaffRequest: {
+            phone: string;
+            fullName: string;
+            title?: string;
+            /** @enum {string} */
+            role: "SUPER_ADMIN" | "MARKET_ADMIN";
+        };
+        StaffDto: {
+            /** Format: int64 */
+            userId: number;
+            phone: string;
+            fullName: string;
+            title: string;
+            /** @enum {string} */
+            role: "SUPER_ADMIN" | "MARKET_ADMIN";
+            active: boolean;
+            hasPassword: boolean;
+            /** Format: date-time */
+            lastLoginAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            createdByName: string | null;
         };
         ShopReasonRequest: {
             reason: string;
@@ -5602,25 +6553,8 @@ export interface components {
             /** Format: date-time */
             decidedAt: string | null;
         };
-        SanctionDto: {
-            /** Format: int64 */
-            id: number;
-            /** @enum {string} */
-            type: "WARNING" | "BLOCK" | "UNBLOCK";
-            reason: string | null;
-            /** Format: int64 */
-            adminId: number | null;
-            /** Format: date-time */
-            activeUntil: string | null;
-            /** Format: date-time */
-            createdAt: string;
-        };
         AdminMessageRequest: {
             text: string;
-        };
-        AdminMessageSentDto: {
-            /** Format: int32 */
-            recipients: number;
         };
         AdminOfferDto: {
             /** Format: int64 */
@@ -5628,6 +6562,7 @@ export interface components {
             /** Format: int64 */
             masterId: number;
             masterName: string;
+            masterMobile: boolean;
             answer: string;
             /** Format: int32 */
             priceFrom: number | null;
@@ -5810,6 +6745,9 @@ export interface components {
         MasterReasonRequest: {
             reason: string;
         };
+        PublishMapRequest: {
+            comment?: string | null;
+        };
         CreateContainerRequest: {
             /** Format: int64 */
             rowId: number;
@@ -5921,6 +6859,66 @@ export interface components {
             /** Format: int64 */
             partsCount: number;
         };
+        AdminDeliveryBuyerDto: {
+            /** Format: int64 */
+            userId: number;
+            name: string | null;
+            phone: string | null;
+        };
+        AdminDeliveryOrderDto: {
+            /** Format: int64 */
+            id: number;
+            number: string;
+            /** @enum {string} */
+            status: "NEW" | "PACKED" | "COURIER_ORDERED" | "PICKED_UP" | "DELIVERED" | "CANCELLED";
+            part: components["schemas"]["DeliveryPartDto"];
+            seller: components["schemas"]["AdminDeliverySellerDto"];
+            buyer: components["schemas"]["AdminDeliveryBuyerDto"];
+            /** @enum {string} */
+            region: "BISHKEK" | "CHUY" | "OSH" | "JALAL_ABAD" | "ISSYK_KUL" | "NARYN" | "TALAS" | "BATKEN";
+            regionName: string;
+            inName: string;
+            /** @enum {string|null} */
+            district: "CHON_ALAY" | "ALAY" | "AKSY" | "ALA_BUKA" | null;
+            districtName: string | null;
+            address: string;
+            recipientName: string;
+            recipientPhone: string;
+            /** Format: int32 */
+            price: number | null;
+            /** Format: int32 */
+            days: number;
+            weightKg: number | null;
+            fragile: boolean;
+            /** Format: int64 */
+            chatId: number | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            packedAt: string | null;
+            /** Format: date-time */
+            courierOrderedAt: string | null;
+            /** Format: date-time */
+            pickedUpAt: string | null;
+            /** Format: date-time */
+            deliveredAt: string | null;
+            /** Format: date-time */
+            cancelledAt: string | null;
+            /** Format: date-time */
+            cutoffAt: string;
+            template: string;
+            whatsappUrl: string;
+            pickupToday: boolean;
+        };
+        AdminDeliverySellerDto: {
+            /** Format: int64 */
+            shopId: number;
+            name: string;
+            shopName: string;
+            address: string;
+            place: string | null;
+            phone: string | null;
+        };
         ResolveComplaintRequest: {
             /** @enum {string} */
             action: "REMOVE_CONTENT" | "WARN_SELLER" | "BLOCK_SHOP" | "UNFOUNDED";
@@ -5981,6 +6979,9 @@ export interface components {
             phone: string | null;
             status: string | null;
             location: string | null;
+            rating: number | null;
+            /** Format: int32 */
+            reviewsCount: number | null;
         };
         PartyStatsDto: {
             /** Format: int64 */
@@ -6010,6 +7011,58 @@ export interface components {
             complaint: components["schemas"]["ComplaintDetailDto"];
             /** Format: int32 */
             resolvedTogether: number;
+        };
+        BroadcastFilters: {
+            brandIds?: number[] | null;
+            rowIds?: number[] | null;
+            serviceTypes?: string[] | null;
+        };
+        BroadcastInput: {
+            /** @enum {string} */
+            audience: "ALL" | "BUYERS" | "SELLERS" | "MASTERS";
+            filters?: components["schemas"]["BroadcastFilters"];
+            titleRu: string;
+            titleKg?: string;
+            bodyRu: string;
+            bodyKg?: string;
+        };
+        BroadcastDto: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            audience: "ALL" | "BUYERS" | "SELLERS" | "MASTERS";
+            filters: components["schemas"]["BroadcastFilters"];
+            titleRu: string;
+            titleKg: string | null;
+            bodyRu: string;
+            bodyKg: string | null;
+            /** @enum {string} */
+            status: "DRAFT" | "SCHEDULED" | "SENDING" | "SENT" | "CANCELLED";
+            /** Format: date-time */
+            scheduledAt: string | null;
+            /** Format: date-time */
+            startedAt: string | null;
+            /** Format: date-time */
+            sentAt: string | null;
+            /** Format: int32 */
+            recipients: number;
+            /** Format: int32 */
+            delivered: number;
+            /** Format: int32 */
+            opened: number;
+            /** Format: int32 */
+            openedPct: number | null;
+            /** Format: int64 */
+            createdBy: number | null;
+            createdByName: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            deferred: boolean;
+        };
+        ScheduleRequest: {
+            /** Format: date-time */
+            at?: string | null;
+            now?: boolean | null;
         };
         AdminVerifyRequest: {
             phone: string;
@@ -6086,9 +7139,6 @@ export interface components {
             workDays?: ("MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY")[];
             phone?: string;
         };
-        SetAccepting: {
-            accepting: boolean;
-        };
         UpdateMeRequest: {
             name?: string;
             /** @enum {string} */
@@ -6123,6 +7173,13 @@ export interface components {
             fuel?: "PETROL" | "DIESEL" | "LPG_PETROL" | "HYBRID" | "ELECTRIC";
             /** @enum {string} */
             origin?: "JAPAN" | "USA" | "EUROPE" | "KOREA" | "UAE" | "UNKNOWN";
+        };
+        UpdateStaffRequest: {
+            /** @enum {string} */
+            role?: "SUPER_ADMIN" | "MARKET_ADMIN";
+            title?: string;
+            fullName?: string;
+            isActive?: boolean;
         };
         UpdateContainerRequest: {
             tenantPhone?: string;
@@ -6355,12 +7412,12 @@ export interface components {
             state: "WAITING" | "HAS_ANSWERS" | "NO_ANSWERS" | "EXPIRED" | "CLOSED";
             /** Format: int32 */
             haveCount: number;
+            /** Format: int32 */
+            minPrice: number | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             expiresAt: string;
-            /** Format: int32 */
-            minPrice: number | null;
         };
         PartHintDto: {
             /** Format: int64 */
@@ -6430,6 +7487,7 @@ export interface components {
             car: components["schemas"]["RequestCarDto"];
             category: components["schemas"]["CategoryDto"] | null;
             photos: components["schemas"]["PhotoDto"][];
+            voice: components["schemas"]["VoiceDto"] | null;
             buyerName: string | null;
             /** @enum {string} */
             status: "ACTIVE" | "EXPIRED" | "CLOSED";
@@ -6442,7 +7500,6 @@ export interface components {
             expiresAt: string;
             seen: boolean;
             myReply: components["schemas"]["ReplyDto"] | null;
-            voice: components["schemas"]["VoiceDto"] | null;
         };
         CursorPageMyPartItemDto: {
             items: components["schemas"]["MyPartItemDto"][];
@@ -6523,6 +7580,7 @@ export interface components {
             description: string;
             photos: components["schemas"]["PhotoDto"][];
             media: components["schemas"]["MediaItemDto"][];
+            voice: components["schemas"]["VoiceDto"] | null;
             /** @enum {string} */
             when: "NOW" | "TODAY" | "TOMORROW" | "AT_TIME";
             /** Format: date-time */
@@ -6549,7 +7607,6 @@ export interface components {
             expiresAt: string;
             seen: boolean;
             myOffer: components["schemas"]["ServiceOfferDto"] | null;
-            voice: components["schemas"]["VoiceDto"] | null;
         };
         ModelSearchItem: {
             model: components["schemas"]["ModelDto"];
@@ -6768,11 +7825,47 @@ export interface components {
             fromSource: string;
             rows: components["schemas"]["RowCount"][];
         };
+        RowCount: {
+            /** Format: int64 */
+            rowId: number;
+            rowCode: string;
+            rowLabel: string;
+            /** Format: int32 */
+            containers: number;
+        };
         Current: {
             /** Format: int64 */
             version: number;
             /** Format: date-time */
             updatedAt: string;
+        };
+        DeliveryTariffsDto: {
+            regions: components["schemas"]["RegionDto"][];
+            cutoff: string;
+            remoteNote: string;
+            surchargeNote: string;
+            courierName: string;
+            courierPhone: string | null;
+        };
+        DistrictDto: {
+            /** @enum {string} */
+            code: "CHON_ALAY" | "ALAY" | "AKSY" | "ALA_BUKA";
+            name: string;
+            /** Format: int32 */
+            days: number;
+            /** Format: int32 */
+            price: number;
+        };
+        RegionDto: {
+            /** @enum {string} */
+            code: "BISHKEK" | "CHUY" | "OSH" | "JALAL_ABAD" | "ISSYK_KUL" | "NARYN" | "TALAS" | "BATKEN";
+            name: string;
+            inName: string;
+            /** Format: int32 */
+            days: number;
+            /** Format: int32 */
+            price: number | null;
+            districts: components["schemas"]["DistrictDto"][];
         };
         ChatListItemDto: {
             /** Format: int64 */
@@ -6834,6 +7927,71 @@ export interface components {
             asShop: number;
             /** Format: int64 */
             asMaster: number;
+        };
+        VideoFeedItemDto: {
+            /** Format: int64 */
+            partId: number;
+            publicId: string;
+            title: string;
+            /** Format: int32 */
+            price: number;
+            currency: string;
+            /** @enum {string} */
+            condition: "NEW" | "USED" | "ON_ORDER";
+            video: components["schemas"]["VideoDto"];
+            fits: boolean | null;
+            fitsLabel: string | null;
+            shipsToRegions: boolean;
+            isFavorite: boolean;
+            shop: components["schemas"]["VideoShopDto"];
+        };
+        VideoFeedPageDto: {
+            items: components["schemas"]["VideoFeedItemDto"][];
+            nextCursor: string | null;
+        };
+        VideoShopDto: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            avatarUrl: string | null;
+            place: string;
+            phone: string | null;
+            /** Format: int32 */
+            replyMinutes: number | null;
+        };
+        AdminPageAdminUserRowUserCounts: {
+            items: components["schemas"]["AdminUserRow"][];
+            nextCursor: string | null;
+            counts: components["schemas"]["UserCounts"];
+        };
+        AdminUserRow: {
+            /** Format: int64 */
+            id: number;
+            phone: string;
+            name: string | null;
+            roles: string[];
+            mode: string;
+            /** Format: date-time */
+            registeredAt: string;
+            /** Format: date-time */
+            lastSeenAt: string | null;
+            /** Format: int64 */
+            requests: number;
+            blocked: boolean;
+            blockedReason: string | null;
+            admin: boolean;
+        };
+        UserCounts: {
+            /** Format: int64 */
+            all: number;
+            /** Format: int64 */
+            buyers: number;
+            /** Format: int64 */
+            sellers: number;
+            /** Format: int64 */
+            masters: number;
+            /** Format: int64 */
+            blocked: number;
         };
         AdminPageAdminShopRowShopTabCounts: {
             items: components["schemas"]["AdminShopRow"][];
@@ -7139,6 +8297,113 @@ export interface components {
             /** Format: int64 */
             hidden: number;
         };
+        AdminPageAdminDeliveryOrderDtoMapStringLong: {
+            items: components["schemas"]["AdminDeliveryOrderDto"][];
+            nextCursor: string | null;
+            counts: {
+                [key: string]: number;
+            };
+        };
+        BrandHint: {
+            /** Format: int64 */
+            brandId: number;
+            text: string;
+            broadcastBrandIds: number[];
+        };
+        BrandUnanswered: {
+            /** Format: int64 */
+            brandId: number;
+            brand: string;
+            /** Format: int64 */
+            requests: number;
+            /** Format: int64 */
+            unanswered: number;
+            /** Format: int32 */
+            pct: number;
+            /** Format: int64 */
+            sellers: number;
+        };
+        UnansweredByBrandDto: {
+            /** @enum {string} */
+            period: "WEEK" | "MONTH";
+            brands: components["schemas"]["BrandUnanswered"][];
+            hint: components["schemas"]["BrandHint"] | null;
+            /** Format: date-time */
+            generatedAt: string;
+        };
+        SearchedItem: {
+            label: string;
+            /** Format: int64 */
+            requests: number;
+            /** Format: int32 */
+            havePct: number;
+        };
+        TopSearchedDto: {
+            /** @enum {string} */
+            period: "WEEK" | "MONTH";
+            items: components["schemas"]["SearchedItem"][];
+            /** Format: date-time */
+            generatedAt: string;
+        };
+        DayPoint: {
+            /** Format: date */
+            date: string;
+            /** Format: int64 */
+            requests: number;
+            /** Format: int64 */
+            withHave: number;
+            /** Format: int64 */
+            serviceRequests: number;
+        };
+        RequestsByDayDto: {
+            /** @enum {string} */
+            range: "D14" | "D30" | "QUARTER";
+            days: components["schemas"]["DayPoint"][];
+            /** Format: date-time */
+            generatedAt: string;
+        };
+        PendingDto: {
+            /** Format: int64 */
+            shops: number;
+            /** Format: int64 */
+            masters: number;
+            /** Format: int64 */
+            complaints: number;
+            /** Format: int64 */
+            disputes: number;
+            latest: components["schemas"]["PendingItem"][];
+            /** Format: date-time */
+            generatedAt: string;
+        };
+        PendingItem: {
+            kind: string;
+            /** Format: int64 */
+            id: number;
+            title: string;
+            phone: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        KpiDto: {
+            /** Format: int64 */
+            requestsToday: number;
+            /** Format: int32 */
+            requestsDeltaPct: number | null;
+            /** Format: int32 */
+            haveIn30Pct: number | null;
+            /** Format: int32 */
+            haveIn30DeltaPp: number | null;
+            /** Format: int64 */
+            activeShops: number;
+            /** Format: int64 */
+            activeShopsNewWeek: number;
+            /** Format: int64 */
+            serviceRequestsToday: number;
+            /** Format: int32 */
+            serviceDeltaPct: number | null;
+            /** Format: date-time */
+            generatedAt: string;
+        };
         AdminPageComplaintRowComplaintCounts: {
             items: components["schemas"]["ComplaintRow"][];
             nextCursor: string | null;
@@ -7167,6 +8432,71 @@ export interface components {
             partyName: string | null;
             reporter: components["schemas"]["ReporterDto"];
             text: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AdminPageBroadcastDtoBroadcastCounts: {
+            items: components["schemas"]["BroadcastDto"][];
+            nextCursor: string | null;
+            counts: components["schemas"]["BroadcastCounts"];
+        };
+        BroadcastCounts: {
+            /** Format: int64 */
+            all: number;
+            /** Format: int64 */
+            drafts: number;
+            /** Format: int64 */
+            scheduled: number;
+            /** Format: int64 */
+            sent: number;
+        };
+        EstimateDto: {
+            /** Format: int64 */
+            recipients: number;
+            /** Format: int64 */
+            withDevices: number;
+            label: string;
+        };
+        AdminPageAuditRowAuditCounts: {
+            items: components["schemas"]["AuditRow"][];
+            nextCursor: string | null;
+            counts: components["schemas"]["AuditCounts"];
+        };
+        AuditCounts: {
+            /** Format: int64 */
+            today: number;
+            /** Format: int64 */
+            week: number;
+        };
+        AuditRow: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            adminId: number | null;
+            adminName: string | null;
+            action: string;
+            entityType: string;
+            /** Format: int64 */
+            entityId: number | null;
+            comment: string | null;
+            ip: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AuditEntryDto: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            adminId: number | null;
+            adminName: string | null;
+            action: string;
+            entityType: string;
+            /** Format: int64 */
+            entityId: number | null;
+            before: components["schemas"]["JsonNode"] | null;
+            after: components["schemas"]["JsonNode"] | null;
+            comment: string | null;
+            ip: string | null;
             /** Format: date-time */
             createdAt: string;
         };
@@ -7535,7 +8865,7 @@ export interface operations {
             };
         };
     };
-    unblock_2: {
+    unblock_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -7553,6 +8883,32 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ChatDto"];
+                };
+            };
+        };
+    };
+    setRolePermissions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                role: "SUPER_ADMIN" | "MARKET_ADMIN";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RolePermissionsRequest"];
+            };
+        };
+        responses: {
+            /** @description ROLE_FIXED */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RolesDto"];
                 };
             };
         };
@@ -8136,6 +9492,44 @@ export interface operations {
             };
         };
     };
+    falseHave: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FalseHave"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHOP_NOT_REPLIED */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ALREADY_MARKED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     extend_1: {
         parameters: {
             query?: never;
@@ -8294,6 +9688,42 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PartDetailDto"];
+                };
+            };
+        };
+    };
+    techPassport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OCR_LIMIT */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TechPassportDto"];
+                };
+            };
+            /** @description OCR_UNAVAILABLE — распознавание не настроено или недоступно */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TechPassportDto"];
                 };
             };
         };
@@ -8823,11 +10253,53 @@ export interface operations {
             };
         };
     };
+    upload: {
+        parameters: {
+            query: {
+                /** @description Длина в секундах (у M4A сервер читает сам) */
+                durationSec?: number;
+                /** @description JSON-массив до 100 пиков громкости 0..1 */
+                waveform?: string;
+                purpose: "PART" | "SHOP" | "AVATAR" | "REQUEST" | "REPLY" | "MASTER" | "SERVICE" | "BRAND" | "OFFER";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["VoiceUploadDto"];
+                };
+            };
+            /** @description VOICE_TOO_LONG, DURATION_REQUIRED, BAD_MEDIA_TYPE, FILE_TOO_LARGE, VOICE_NOT_ALLOWED, BAD_WAVEFORM */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["VoiceUploadDto"];
+                };
+            };
+        };
+    };
     uploadVideo: {
         parameters: {
             query?: {
                 durationSec?: number;
-                purpose?: "PART" | "SHOP" | "AVATAR" | "REQUEST" | "REPLY" | "MASTER" | "SERVICE" | "BRAND";
+                purpose?: "PART" | "SHOP" | "AVATAR" | "REQUEST" | "REPLY" | "MASTER" | "SERVICE" | "BRAND" | "OFFER";
             };
             header?: never;
             path?: never;
@@ -8864,10 +10336,50 @@ export interface operations {
             };
         };
     };
-    upload: {
+    uploadPartVideo: {
         parameters: {
             query?: {
-                purpose?: "PART" | "SHOP" | "AVATAR" | "REQUEST" | "REPLY" | "MASTER" | "SERVICE" | "BRAND";
+                durationSec?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    /** Format: binary */
+                    poster?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartVideoUploadDto"];
+                };
+            };
+            /** @description VIDEO_TOO_LONG, DURATION_REQUIRED, BAD_MEDIA_TYPE, FILE_TOO_LARGE */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartVideoUploadDto"];
+                };
+            };
+        };
+    };
+    upload_1: {
+        parameters: {
+            query?: {
+                purpose?: "PART" | "SHOP" | "AVATAR" | "REQUEST" | "REPLY" | "MASTER" | "SERVICE" | "BRAND" | "OFFER";
             };
             header?: never;
             path?: never;
@@ -9093,6 +10605,133 @@ export interface operations {
             };
         };
     };
+    list_3: {
+        parameters: {
+            query?: {
+                side?: "BUYER" | "SHOP";
+                active?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeliveryOrderDto"][];
+                };
+            };
+        };
+    };
+    create_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateOrder"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeliveryOrderDto"];
+                };
+            };
+            /** @description DELIVERY_NOT_AVAILABLE, SELF_ORDER, BAD_DISTRICT, BAD_PHONE */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeliveryOrderDto"];
+                };
+            };
+        };
+    };
+    received: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description BAD_STATUS */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeliveryOrderDto"];
+                };
+            };
+        };
+    };
+    pickedUp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description id заказа */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description BAD_STATUS */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeliveryOrderDto"];
+                };
+            };
+        };
+    };
+    packed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Packed"];
+            };
+        };
+        responses: {
+            /** @description BAD_STATUS */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeliveryOrderDto"];
+                };
+            };
+        };
+    };
     complain: {
         parameters: {
             query?: never;
@@ -9144,7 +10783,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_4: {
         parameters: {
             query?: {
                 as?: "BUYER" | "SHOP" | "MASTER";
@@ -9279,7 +10918,7 @@ export interface operations {
     sendMedia: {
         parameters: {
             query: {
-                type: "TEXT" | "PHOTO" | "VOICE" | "VIDEO" | "REPLY" | "QUICK" | "SYSTEM" | "PART";
+                type: "TEXT" | "PHOTO" | "VOICE" | "VIDEO" | "REPLY" | "QUICK" | "SYSTEM" | "PART" | "DELIVERY";
                 caption?: string;
                 /** @description Для VOICE и VIDEO, секунды */
                 durationSeconds?: number;
@@ -9336,6 +10975,26 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["ComplaintDto"];
                 };
+            };
+        };
+    };
+    opened: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -9433,7 +11092,81 @@ export interface operations {
             };
         };
     };
-    upload_1: {
+    unblock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description NOT_BLOCKED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminUserDetailDto"];
+                };
+            };
+        };
+    };
+    message: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserMessageRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminMessageSentDto"];
+                };
+            };
+        };
+    };
+    block_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description ALREADY_BLOCKED, SELF_BLOCK, STAFF_BLOCK — активный сотрудник админки */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminUserDetailDto"];
+                };
+            };
+        };
+    };
+    upload_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -9482,6 +11215,59 @@ export interface operations {
             };
         };
     };
+    list_7: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StaffDto"][];
+                };
+            };
+        };
+    };
+    create_6: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStaffRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StaffDto"];
+                };
+            };
+            /** @description STAFF_EXISTS */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StaffDto"];
+                };
+            };
+        };
+    };
     warn: {
         parameters: {
             query?: never;
@@ -9508,7 +11294,7 @@ export interface operations {
             };
         };
     };
-    unblock: {
+    unblock_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -9587,7 +11373,7 @@ export interface operations {
             };
         };
     };
-    message: {
+    message_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -9613,7 +11399,7 @@ export interface operations {
             };
         };
     };
-    block_1: {
+    block_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -9753,7 +11539,7 @@ export interface operations {
             };
         };
     };
-    upload_2: {
+    upload_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -9780,7 +11566,7 @@ export interface operations {
             };
         };
     };
-    list_6: {
+    list_9: {
         parameters: {
             query?: {
                 tab?: "ALL" | "PENDING" | "MOBILE" | "BLOCKED" | "REJECTED";
@@ -9807,7 +11593,7 @@ export interface operations {
             };
         };
     };
-    create_5: {
+    create_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -9866,7 +11652,7 @@ export interface operations {
             };
         };
     };
-    unblock_1: {
+    unblock_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -9914,7 +11700,7 @@ export interface operations {
             };
         };
     };
-    message_1: {
+    message_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -9940,7 +11726,7 @@ export interface operations {
             };
         };
     };
-    block_2: {
+    block_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -9995,7 +11781,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PublishMapRequest"];
+            };
+        };
         responses: {
             /** @description BAD_MAP — схема не проходит проверку */
             400: {
@@ -10386,6 +12176,90 @@ export interface operations {
             };
         };
     };
+    delivered: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description BAD_STATUS */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminDeliveryOrderDto"];
+                };
+            };
+        };
+    };
+    courierOrdered: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description BAD_STATUS */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminDeliveryOrderDto"];
+                };
+            };
+        };
+    };
+    cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description BAD_STATUS */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminDeliveryOrderDto"];
+                };
+            };
+        };
+    };
+    refresh_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     resolve_1: {
         parameters: {
             query?: never;
@@ -10430,6 +12304,111 @@ export interface operations {
             };
         };
     };
+    list_12: {
+        parameters: {
+            query?: {
+                status?: "DRAFT" | "SCHEDULED" | "SENDING" | "SENT" | "CANCELLED";
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminPageBroadcastDtoBroadcastCounts"];
+                };
+            };
+        };
+    };
+    create_8: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BroadcastInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BroadcastDto"];
+                };
+            };
+            /** @description BAD_FILTER — фильтр не подходит к аудитории */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BroadcastDto"];
+                };
+            };
+        };
+    };
+    schedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScheduleRequest"];
+            };
+        };
+        responses: {
+            /** @description BROADCAST_STARTED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BroadcastDto"];
+                };
+            };
+        };
+    };
+    cancel_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description BROADCAST_FINISHED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BroadcastDto"];
+                };
+            };
+        };
+    };
     verify_1: {
         parameters: {
             query?: never;
@@ -10454,7 +12433,7 @@ export interface operations {
             };
         };
     };
-    refresh_1: {
+    refresh_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -10890,6 +12869,32 @@ export interface operations {
             };
         };
     };
+    update_6: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateStaffRequest"];
+            };
+        };
+        responses: {
+            /** @description STAFF_SELF, LAST_SUPER_ADMIN */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StaffDto"];
+                };
+            };
+        };
+    };
     deleteContainer: {
         parameters: {
             query?: never;
@@ -11226,6 +13231,54 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AdminBrandDto"];
+                };
+            };
+        };
+    };
+    get_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BroadcastDto"];
+                };
+            };
+        };
+    };
+    update_7: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BroadcastInput"];
+            };
+        };
+        responses: {
+            /** @description BROADCAST_NOT_DRAFT */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BroadcastDto"];
                 };
             };
         };
@@ -12371,7 +14424,49 @@ export interface operations {
             };
         };
     };
+    tariffs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeliveryTariffsDto"];
+                };
+            };
+        };
+    };
     get_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeliveryOrderDto"];
+                };
+            };
+        };
+    };
+    get_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -12457,7 +14552,7 @@ export interface operations {
             };
         };
     };
-    list_4: {
+    list_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -12473,6 +14568,33 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CategoryDto"][];
+                };
+            };
+        };
+    };
+    videos: {
+        parameters: {
+            query?: {
+                carId?: number;
+                brandId?: number;
+                modelId?: number;
+                year?: number;
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["VideoFeedPageDto"];
                 };
             };
         };
@@ -12544,7 +14666,54 @@ export interface operations {
             };
         };
     };
-    get_2: {
+    list_6: {
+        parameters: {
+            query?: {
+                role?: "ALL" | "BUYER" | "SELLER" | "MASTER" | "BLOCKED";
+                q?: string;
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminPageAdminUserRowUserCounts"];
+                };
+            };
+        };
+    };
+    detail_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminUserDetailDto"];
+                };
+            };
+        };
+    };
+    get_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -12586,7 +14755,27 @@ export interface operations {
             };
         };
     };
-    list_5: {
+    roles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RolesDto"];
+                };
+            };
+        };
+    };
+    list_8: {
         parameters: {
             query?: {
                 tab?: "ALL" | "PENDING" | "DISPUTES" | "BLOCKED" | "REJECTED";
@@ -12611,7 +14800,7 @@ export interface operations {
             };
         };
     };
-    detail_3: {
+    detail_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -12629,6 +14818,29 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AdminShopDetailDto"];
+                };
+            };
+        };
+    };
+    shops: {
+        parameters: {
+            query?: {
+                tab?: "ALL" | "PENDING" | "DISPUTES" | "BLOCKED" | "REJECTED";
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
                 };
             };
         };
@@ -12679,6 +14891,32 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AdminServiceRequestDto"];
+                };
+            };
+        };
+    };
+    serviceRequests_1: {
+        parameters: {
+            query?: {
+                period?: "TODAY" | "WEEK" | "MONTH" | "ALL";
+                status?: "ACTIVE" | "AGREED" | "NO_REPLIES" | "EXPIRED" | "CLOSED" | "HIDDEN";
+                noReplies?: boolean;
+                service?: string;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
                 };
             };
         };
@@ -12774,6 +15012,31 @@ export interface operations {
             };
         };
     };
+    partRequests_1: {
+        parameters: {
+            query?: {
+                period?: "TODAY" | "WEEK" | "MONTH" | "ALL";
+                status?: "ACTIVE" | "AGREED" | "NO_REPLIES" | "EXPIRED" | "CLOSED" | "HIDDEN";
+                noReplies?: boolean;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
+                };
+            };
+        };
+    };
     me_1: {
         parameters: {
             query?: never;
@@ -12794,7 +15057,7 @@ export interface operations {
             };
         };
     };
-    detail_4: {
+    detail_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -12812,6 +15075,31 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AdminMasterDetailDto"];
+                };
+            };
+        };
+    };
+    masters: {
+        parameters: {
+            query?: {
+                tab?: "ALL" | "PENDING" | "MOBILE" | "BLOCKED" | "REJECTED";
+                q?: string;
+                service?: string;
+                brandId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
                 };
             };
         };
@@ -12950,7 +15238,180 @@ export interface operations {
             };
         };
     };
-    list_7: {
+    list_10: {
+        parameters: {
+            query?: {
+                status?: "NEW" | "PACKED" | "COURIER_ORDERED" | "PICKED_UP" | "DELIVERED" | "CANCELLED";
+                q?: string;
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminPageAdminDeliveryOrderDtoMapStringLong"];
+                };
+            };
+        };
+    };
+    get_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminDeliveryOrderDto"];
+                };
+            };
+        };
+    };
+    unansweredByBrand: {
+        parameters: {
+            query?: {
+                period?: "WEEK" | "MONTH";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UnansweredByBrandDto"];
+                };
+            };
+        };
+    };
+    topSearched: {
+        parameters: {
+            query?: {
+                period?: "WEEK" | "MONTH";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TopSearchedDto"];
+                };
+            };
+        };
+    };
+    requestsByDay: {
+        parameters: {
+            query?: {
+                range?: "D14" | "D30" | "QUARTER";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RequestsByDayDto"];
+                };
+            };
+        };
+    };
+    pending: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PendingDto"];
+                };
+            };
+        };
+    };
+    kpi: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["KpiDto"];
+                };
+            };
+        };
+    };
+    dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
+                };
+            };
+        };
+    };
+    list_11: {
         parameters: {
             query?: {
                 status?: "OPEN" | "RESOLVED" | "REJECTED";
@@ -12975,7 +15436,7 @@ export interface operations {
             };
         };
     };
-    detail_5: {
+    detail_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -12993,6 +15454,104 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ComplaintDetailDto"];
+                };
+            };
+        };
+    };
+    estimate_2: {
+        parameters: {
+            query: {
+                audience: "ALL" | "BUYERS" | "SELLERS" | "MASTERS";
+                brandIds?: number[];
+                rowIds?: number[];
+                serviceTypes?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["EstimateDto"];
+                };
+            };
+        };
+    };
+    list_13: {
+        parameters: {
+            query?: {
+                adminId?: number;
+                action?: string;
+                entityType?: string;
+                entityId?: number;
+                from?: string;
+                to?: string;
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminPageAuditRowAuditCounts"];
+                };
+            };
+        };
+    };
+    get_6: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuditEntryDto"];
+                };
+            };
+        };
+    };
+    facets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: string[];
+                    };
                 };
             };
         };
