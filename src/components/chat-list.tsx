@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { FlatList, Image, Pressable, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { Avatar, QueryErrorBanner, Screen } from '@/components/ui'
@@ -9,9 +10,13 @@ import { type ChatListAs, useChats } from '@/api/chats'
 import type { ChatListItem } from '@/api/types'
 import { QUICK_TEXT, SYSTEM_TEXT } from './chat-conversation'
 
-/** 16 «Чаты» — the buyer's chats or the box's chats. Rows are kept live by the CHAT event. */
-export function ChatList({ as }: { as: ChatListAs }) {
+/**
+ * 16 «Чаты» — the buyer's chats or the box's chats. Rows are kept live by the CHAT event.
+ * `sides` — a switch between sides (a master: clients and the sellers they asked for parts).
+ */
+export function ChatList({ as: initial, sides }: { as: ChatListAs; sides?: { as: ChatListAs; label: string }[] }) {
 	const c = useColors()
+	const [as, setAs] = useState<ChatListAs>(initial)
 	const chats = useChats(as)
 	const items = flattenPages(chats.data)
 
@@ -19,6 +24,28 @@ export function ChatList({ as }: { as: ChatListAs }) {
 		<Screen padding={0}>
 			<View style={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 12 }}>
 				<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.52, color: c.ink }}>Чаты</Text>
+				{sides ? (
+					<View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
+						{sides.map((side) => {
+							const active = side.as === as
+							return (
+								<Pressable
+									key={side.as}
+									onPress={() => setAs(side.as)}
+									style={{
+										height: 36,
+										paddingHorizontal: 14,
+										borderRadius: 18,
+										backgroundColor: active ? c.brand : c.card,
+										justifyContent: 'center',
+									}}
+								>
+									<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.ink }}>{side.label}</Text>
+								</Pressable>
+							)
+						})}
+					</View>
+				) : null}
 			</View>
 
 			<QueryErrorBanner

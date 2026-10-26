@@ -6,9 +6,11 @@ import { VoicePlayer } from '@/components/voice'
 import { CheckMark, MicOutline, SmallChip, Switch, myOfferLine } from '@/components/master-v23'
 import { AccountStatusBanner } from '@/components/account-status-banner'
 import { fontFamily, raw, useColors } from '@/theme'
-import { formatAgo, formatDistance, minutesLeft } from '@/lib/format'
+import { formatAgo, formatDistance, formatPrice, minutesLeft } from '@/lib/format'
 import { markServiceSeen, serviceName, useMasterFeed, useMasterOffer, useMyMaster, useServiceTypes, useSetAccepting } from '@/api/services'
 import { flattenPages } from '@/api/pagination'
+import { useMyRequests } from '@/api/requests'
+import { LoupeIcon } from '@/components/buyer-v23'
 import type { MasterFeedItem } from '@/api/types'
 
 /** 18 «Заявки» — new requests and the ones already answered; reply by voice, «Не моё» or «Могу помочь». */
@@ -22,6 +24,8 @@ export default function MasterRequestsScreen() {
 	const offer = useMasterOffer()
 	const items = useMemo(() => [...flattenPages(fresh.data), ...flattenPages(answered.data)], [fresh.data, answered.data])
 	const [now, setNow] = useState(() => new Date())
+	// A master or СТО also buys parts — for a client's car [04]; their active part requests are here.
+	const partRequests = flattenPages(useMyRequests('ACTIVE').data)
 
 	// The master saw the card — once per request, for the buyer's «ответили» [17].
 	const seen = useRef(new Set<number>())
@@ -67,6 +71,34 @@ export default function MasterRequestsScreen() {
 					<Switch size="sm" value={isAccepting} disabled={!profile.data || accepting.isPending} onChange={(value) => accepting.mutate(value)} />
 				</Pressable>
 			</View>
+			<Pressable
+				onPress={() => router.push('/search-part')}
+				style={{ borderRadius: 16, backgroundColor: c.card, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}
+			>
+				<View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+					<LoupeIcon size={20} color={c.brandStrong} />
+				</View>
+				<View style={{ flex: 1, gap: 2 }}>
+					<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>Нужна запчасть?</Text>
+					<Text style={{ fontSize: 13.5, fontFamily: fontFamily(400), color: c.muted }}>Для машины клиента — спросим весь рынок</Text>
+				</View>
+			</Pressable>
+			{partRequests.map((request) => (
+				<Pressable
+					key={request.id}
+					onPress={() => router.push({ pathname: '/request', params: { id: String(request.id) } })}
+					style={{ borderRadius: 16, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14, gap: 2 }}
+				>
+					<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>
+						{request.text} · {request.carLabel}
+					</Text>
+					<Text style={{ fontSize: 13.5, fontFamily: fontFamily(600), color: request.haveCount ? c.success : c.muted }}>
+						{request.haveCount
+							? `${request.haveCount} есть${request.minPrice != null ? ` · от ${formatPrice(request.minPrice)}` : ''}`
+							: `Ищем ещё ${minutesLeft(request.expiresAt)} мин`}
+					</Text>
+				</Pressable>
+			))}
 			{/* Requests reach only ACTIVE masters — say why the feed is empty. */}
 			<AccountStatusBanner
 				status={profile.data?.status}

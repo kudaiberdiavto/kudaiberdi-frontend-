@@ -4701,7 +4701,11 @@ export interface components {
         };
         CreateRequest: {
             /** Format: int64 */
-            carId: number;
+            carId?: number;
+            /** Format: int64 */
+            modelId?: number;
+            /** Format: int32 */
+            year?: number;
             text?: string;
             /** Format: int64 */
             categoryId?: number;

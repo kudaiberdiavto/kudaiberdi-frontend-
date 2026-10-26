@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as ImagePicker from 'expo-image-picker'
@@ -24,14 +24,22 @@ import { useAddCar, useCars } from '@/api/garage'
 import { usePhotoUploads } from '@/api/media'
 import { useReadTechPassport } from '@/api/ocr'
 import { useCreateRequest, useRecipientsEstimate } from '@/api/requests'
+import { useClientCar } from '@/store/useClientCar'
+import { useSession } from '@/store/useSession'
 
-/** 04 «Найти запчасть»: car (or a photo of the tech passport), photo + voice + text, ask the whole market. */
+/**
+ * 04 «Найти запчасть»: car (or a photo of the tech passport), photo + voice + text, ask the whole market.
+ * «Другая машина» — a client's car for this request only (masters and СТО have no car of their own).
+ */
 export default function SearchPartScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
 	const params = useLocalSearchParams<{ text?: string; carId?: string }>()
 	const cars = useCars()
-	const [pickedCarId, setCarId] = useState<number | null>(params.carId ? Number(params.carId) : null)
+	const clientCar = useClientCar((s) => s.car)
+	const pickedCarId = useClientCar((s) => s.selected) ?? (params.carId ? Number(params.carId) : null)
+	const setCarId = useClientCar((s) => s.select)
+	const isMaster = useSession((s) => s.role) === 'MASTER'
 	const [text, setText] = useState(params.text ?? '')
 	const uploads = usePhotoUploads('REQUEST', 3)
 	// What the buyer said goes into the field if it's still empty.
@@ -42,15 +50,28 @@ export default function SearchPartScreen() {
 	const addCar = useAddCar()
 	const create = useCreateRequest()
 
+	// The client's car lives only while this screen is open.
+	useEffect(() => () => useClientCar.getState().clear(), [])
+
 	const carList = cars.data ?? []
-	const carId = pickedCarId ?? carList.find((car) => car.isPrimary)?.id ?? carList[0]?.id
-	const estimate = useRecipientsEstimate({ carId, target: 'MARKET' }, Boolean(carId))
+	const useClient = clientCar != null && (pickedCarId === 'client' || carList.length === 0)
+	const carId = useClient
+		? undefined
+		: ((typeof pickedCarId === 'number' ? pickedCarId : undefined) ?? carList.find((car) => car.isPrimary)?.id ?? carList[0]?.id)
+	const hasCar = Boolean(carId) || useClient
+	const estimate = useRecipientsEstimate(
+		useClient && clientCar ? { brandId: clientCar.brand.id, target: 'MARKET' } : { carId, target: 'MARKET' },
+		hasCar
+	)
 	const typed = text.trim()
 	const voiceId = voice.result?.voice.id
 	const hasPart = typed.length >= 3 || uploads.mediaIds.length > 0 || Boolean(voiceId)
 	const busy = uploads.uploading || voice.uploading || voice.recording
 
-	/** Tech passport photo → car in the garage; model not read → the manual picker with what was read. */
+	/**
+	 * Tech passport photo → car in the garage (a master — the client's car, not saved);
+	 * model not read → the manual picker with what was read.
+	 */
 	const scanPassport = async () => {
 		const permission = await ImagePicker.requestCameraPermissionsAsync()
 		const result = permission.granted
@@ -59,7 +80,9 @@ export default function SearchPartScreen() {
 		if (result.canceled) return
 		passport.mutate(result.assets[0].uri, {
 			onSuccess: (read) => {
-				if (read.model && read.year) {
+				if (read.brand && read.model && read.year && isMaster) {
+					useClientCar.getState().set({ brand: read.brand, model: read.model, year: read.year })
+				} else if (read.model && read.year) {
 					addCar.mutate(
 						{
 							modelId: read.model.id,
@@ -75,6 +98,7 @@ export default function SearchPartScreen() {
 					router.push({
 						pathname: '/garage-add',
 						params: {
+							once: isMaster ? '1' : undefined,
 							brand: read.brand ? JSON.stringify(read.brand) : undefined,
 							year: read.year ? String(read.year) : undefined,
 							vin: read.vin ?? undefined,
@@ -84,20 +108,26 @@ export default function SearchPartScreen() {
 					})
 				}
 			},
-			onError: () => router.push('/garage-add'),
+			onError: () => router.push({ pathname: '/garage-add', params: { once: isMaster ? '1' : undefined } }),
 		})
 	}
 
 	const send = () =>
-		carId &&
+		hasCar &&
 		create.mutate(
-			{ carId, text: typed || undefined, mediaIds: uploads.mediaIds, voiceMediaId: voiceId },
+			{
+				...(useClient && clientCar ? { modelId: clientCar.model.id, year: clientCar.year } : { carId }),
+				text: typed || undefined,
+				mediaIds: uploads.mediaIds,
+				voiceMediaId: voiceId,
+			},
 			{ onSuccess: (request) => router.replace({ pathname: '/request', params: { id: String(request.id) } }) }
 		)
 
 	const photo = uploads.photos[0]
 	const recipients = estimate.data?.recipients
-	const brand = estimate.data?.brand ?? carList.find((car) => car.id === carId)?.brand.name
+	const brand =
+		estimate.data?.brand ?? (useClient && clientCar ? clientCar.brand.name : carList.find((car) => car.id === carId)?.brand.name)
 	const passportBusy = passport.isPending || addCar.isPending
 	const error = create.error ?? (passport.error instanceof ApiError && passport.error.code !== 'OCR_UNAVAILABLE' ? passport.error : null)
 
@@ -115,7 +145,7 @@ export default function SearchPartScreen() {
 				<Caps>Для какой машины</Caps>
 				<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 					{carList.map((car) => {
-						const active = car.id === carId
+						const active = !useClient && car.id === carId
 						return (
 							<Pressable
 								key={car.id}
@@ -138,6 +168,45 @@ export default function SearchPartScreen() {
 							</Pressable>
 						)
 					})}
+					{clientCar ? (
+						<Pressable
+							onPress={() => setCarId('client')}
+							style={{
+								height: 40,
+								paddingLeft: 6,
+								paddingRight: 14,
+								borderRadius: 20,
+								backgroundColor: useClient ? c.brandTint : c.card,
+								borderWidth: 2,
+								borderColor: useClient ? c.brand : c.card,
+								flexDirection: 'row',
+								alignItems: 'center',
+								gap: 8,
+							}}
+						>
+							<BrandLogo brand={clientCar.brand} size={28} />
+							<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: useClient ? c.brandStrong : c.ink }}>
+								{clientCar.model.label} · {clientCar.year}
+							</Text>
+						</Pressable>
+					) : null}
+					<Pressable
+						onPress={() => router.push({ pathname: '/garage-add', params: { once: '1' } })}
+						style={{
+							height: 40,
+							paddingHorizontal: 14,
+							borderRadius: 20,
+							borderWidth: 2,
+							borderStyle: 'dashed',
+							borderColor: '#B8C3D3',
+							flexDirection: 'row',
+							alignItems: 'center',
+							gap: 6,
+						}}
+					>
+						<PlusThinIcon size={14} color={c.brandStrong} strokeWidth={2.6} />
+						<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>Другая машина</Text>
+					</Pressable>
 					<Pressable
 						onPress={scanPassport}
 						disabled={passportBusy}
@@ -308,7 +377,7 @@ export default function SearchPartScreen() {
 					label="Спросить весь рынок"
 					height={58}
 					icon={<PaperPlaneIcon size={20} color="#FFFFFF" />}
-					disabled={!carId || !hasPart || busy}
+					disabled={!hasCar || !hasPart || busy}
 					loading={create.isPending}
 					onPress={send}
 				/>

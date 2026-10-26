@@ -7,8 +7,9 @@ import { ChatIcon, ProfileIcon, RequestsIcon } from '@/components/icons'
 
 /** Master tabs (v23): Заявки · Чаты · Профиль. */
 export default function MasterLayout() {
-	// Unread chats with clients — kept live by the UNREAD event.
-	const unread = useUnread().data?.asMaster ?? 0
+	// Unread chats with clients and with sellers (parts for a client's car) — kept live by the UNREAD event.
+	const unreadData = useUnread().data
+	const unread = (unreadData?.asMaster ?? 0) + (unreadData?.asBuyer ?? 0)
 	// New requests without an answer — the badge on «Заявки» [18, 20].
 	const fresh = flattenPages(useMasterFeed('NEW').data).filter((item) => !item.myOffer).length
 

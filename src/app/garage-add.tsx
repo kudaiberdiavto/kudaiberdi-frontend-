@@ -8,6 +8,7 @@ import { fontFamily, useColors } from '@/theme'
 import { useBrands, useModels } from '@/api/directory'
 import { useAddCar } from '@/api/garage'
 import type { Brand, CarModel, CarOrigin, FuelType } from '@/api/types'
+import { useClientCar } from '@/store/useClientCar'
 import { FUELS, ORIGINS } from '@/store/useServiceDraft'
 
 const VOLUMES = [1.3, 1.5, 1.8, 2.0, 2.4, 2.5, 3.0, 3.5, 4.0]
@@ -20,12 +21,23 @@ function yearsOf(model: CarModel | undefined) {
 	return Array.from({ length: Math.max(0, to - from + 1) }, (_, i) => to - i)
 }
 
-/** Add a car to the garage — no mockup; built from screen 28 (brand tiles + model sheet). */
+/**
+ * Add a car to the garage — no mockup; built from screen 28 (brand tiles + model sheet).
+ * `once=1` — «Другая машина» for one request [04] (a client's car at the СТО): brand, model and year only, nothing saved.
+ */
 export default function GarageAddScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
 	// From «Фото техпаспорта» [04] when the model wasn't read: what was read is prefilled.
-	const passport = useLocalSearchParams<{ brand?: string; year?: string; vin?: string; engineVolume?: string; fuel?: string }>()
+	const passport = useLocalSearchParams<{
+		brand?: string
+		year?: string
+		vin?: string
+		engineVolume?: string
+		fuel?: string
+		once?: string
+	}>()
+	const once = passport.once === '1'
 	const [q, setQ] = useState('')
 	const [brand, setBrand] = useState<Brand | null>(() => (passport.brand ? (JSON.parse(passport.brand) as Brand) : null))
 	const [modelId, setModelId] = useState<number | null>(null)
@@ -88,7 +100,7 @@ export default function GarageAddScreen() {
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					Добавить машину
+					{once ? 'Другая машина' : 'Добавить машину'}
 				</Text>
 			</View>
 
@@ -193,12 +205,17 @@ export default function GarageAddScreen() {
 								<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{addCar.error.message}</Text>
 							) : null}
 							<Button
-								label="Добавить в гараж"
+								label={once ? 'Выбрать' : 'Добавить в гараж'}
 								height={52}
 								disabled={!modelId || !year}
 								loading={addCar.isPending}
-								onPress={() =>
-									modelId &&
+								onPress={() => {
+									if (once) {
+										if (brand && model && year) useClientCar.getState().set({ brand, model, year })
+										router.back()
+										return
+									}
+									return modelId &&
 									year &&
 									addCar.mutate(
 										{
@@ -212,7 +229,7 @@ export default function GarageAddScreen() {
 										},
 										{ onSuccess: () => router.back() }
 									)
-								}
+								}}
 							/>
 						</>
 					}
@@ -234,7 +251,7 @@ export default function GarageAddScreen() {
 						</>
 					) : null}
 
-					{year ? (
+					{year && !once ? (
 						<>
 							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ОБЪЁМ, Л · НЕОБЯЗАТЕЛЬНО</Text>
 							<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
