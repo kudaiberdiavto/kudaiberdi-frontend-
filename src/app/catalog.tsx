@@ -7,12 +7,13 @@ import { BrandLogo } from '@/components/ui/brand'
 import { SearchIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
-import { countLabel, formatPlace, formatPrice } from '@/lib/format'
+import { countLabel, formatPlace, formatPrice, plural } from '@/lib/format'
 import { useSearchParts, useSignedIn } from '@/api/catalog'
 import { useCategories } from '@/api/directory'
 import { useCars } from '@/api/garage'
 import type { PartCard } from '@/api/types'
 import { type CatalogSort, toPartFilters, useCatalogFilters } from '@/store/useCatalogFilters'
+import { useSession } from '@/store/useSession'
 
 const SORTS: { value: CatalogSort; label: string }[] = [
 	{ value: 'PRICE_ASC', label: 'Дешевле' },
@@ -37,12 +38,31 @@ export default function CatalogScreen() {
 	}, [text])
 
 	const carList = signedIn ? (cars.data ?? []) : []
+	// A master or СТО has no car of their own — they pick the client's: brand → model.
+	const isMaster = useSession((s) => s.role) === 'MASTER'
 	const carId = f.carId === undefined ? carList.find((car) => car.isPrimary)?.id ?? null : f.carId
 	const search = useSearchParts(toPartFilters({ ...f, carId }))
 	const pages = search.data?.pages
 	const items = pages?.flatMap((page) => page.items) ?? []
 	const total = pages?.[0]?.total
+	const fitsTotal = pages?.[0]?.fitsTotal
 	const appliedCar = pages?.[0]?.appliedCar
+	// Grid rows of two; with a car — fitting parts first, then «Остальные запчасти» (the server sorts them so).
+	const rows: Row[] = []
+	let pending: PartCard[] = []
+	const flush = () => {
+		if (pending.length) rows.push({ kind: 'parts', parts: pending })
+		pending = []
+	}
+	for (const part of items) {
+		if (appliedCar && part.fits === false && !rows.some((row) => row.kind === 'others')) {
+			flush()
+			rows.push({ kind: 'others' })
+		}
+		pending.push(part)
+		if (pending.length === 2) flush()
+	}
+	flush()
 	const sort = SORTS.find((s) => s.value === f.sort) ?? SORTS[0]
 	const nextSort = SORTS[(SORTS.indexOf(sort) + 1) % SORTS.length]
 
@@ -126,7 +146,7 @@ export default function CatalogScreen() {
 							color: carId === null && f.brand ? c.brandStrong : c.ink,
 						}}
 					>
-						{carId === null && f.brand ? `${f.modelLabel ?? f.brand.shortName} ›` : 'Любая марка ›'}
+						{carId === null && f.brand ? `${f.modelLabel ?? f.brand.shortName} ›` : isMaster ? 'Машина клиента ›' : 'Любая марка ›'}
 					</Text>
 				</Pressable>
 			</ScrollView>
@@ -163,10 +183,18 @@ export default function CatalogScreen() {
 						' '
 					) : (
 						<>
-							<Text style={{ fontFamily: fontFamily(700), color: c.ink }}>
-								{countLabel(total, ['запчасть', 'запчасти', 'запчастей'])}
-							</Text>
-							{appliedCar ? ` для ${appliedCar.displayName}` : ''}
+							{appliedCar && fitsTotal != null ? (
+								<>
+									<Text style={{ fontFamily: fontFamily(700), color: c.ink }}>
+										{fitsTotal} {plural(fitsTotal, ['подходит', 'подходят', 'подходят'])}
+									</Text>
+									{` к ${appliedCar.displayName}`}
+								</>
+							) : (
+								<Text style={{ fontFamily: fontFamily(700), color: c.ink }}>
+									{countLabel(total, ['запчасть', 'запчасти', 'запчастей'])}
+								</Text>
+							)}
 						</>
 					)}
 				</Text>
@@ -180,15 +208,28 @@ export default function CatalogScreen() {
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
 			<FlatList
-				data={items}
-				keyExtractor={(item) => String(item.id)}
-				numColumns={2}
+				data={rows}
+				keyExtractor={(row) => (row.kind === 'others' ? 'others' : row.parts.map((part) => part.id).join('-'))}
 				ListHeaderComponent={header}
-				columnWrapperStyle={{ gap: 10 }}
 				contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 16, paddingBottom: 90, gap: 10 }}
 				showsVerticalScrollIndicator={false}
 				onEndReached={() => search.hasNextPage && !search.isFetchingNextPage && search.fetchNextPage()}
-				renderItem={({ item }) => <PartTile part={item} />}
+				renderItem={({ item: row }) =>
+					row.kind === 'others' ? (
+						<Text style={{ paddingTop: 8, fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
+							ОСТАЛЬНЫЕ ЗАПЧАСТИ
+						</Text>
+					) : (
+						<View style={{ flexDirection: 'row', gap: 10 }}>
+							{row.parts.map((part) => (
+								<View key={part.id} style={{ flex: 1 }}>
+									<PartTile part={part} />
+								</View>
+							))}
+							{row.parts.length === 1 ? <View style={{ flex: 1 }} /> : null}
+						</View>
+					)
+				}
 				ListEmptyComponent={
 					search.isSuccess ? (
 						<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted }}>
@@ -230,6 +271,8 @@ export default function CatalogScreen() {
 		</View>
 	)
 }
+
+type Row = { kind: 'parts'; parts: PartCard[] } | { kind: 'others' }
 
 function PartTile({ part }: { part: PartCard }) {
 	return (

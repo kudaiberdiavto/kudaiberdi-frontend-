@@ -83,6 +83,12 @@ export default function MasterRequestsScreen() {
 					<Text style={{ fontSize: 13.5, fontFamily: fontFamily(400), color: c.muted }}>Для машины клиента — спросим весь рынок</Text>
 				</View>
 			</Pressable>
+			<Pressable
+				onPress={() => router.push('/catalog')}
+				style={{ borderRadius: 16, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14 }}
+			>
+				<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>Запчасти в продаже ›</Text>
+			</Pressable>
 			{partRequests.map((request) => (
 				<Pressable
 					key={request.id}

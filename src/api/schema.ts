@@ -6059,6 +6059,8 @@ export interface components {
             items: components["schemas"]["PartCardDto"][];
             /** Format: int64 */
             total: number;
+            /** Format: int64 */
+            fitsTotal: number | null;
             appliedCar: components["schemas"]["AppliedCarDto"] | null;
             nextCursor: string | null;
         };
