@@ -129,6 +129,14 @@ export default function MasterAnswerScreen() {
 						</View>
 					</View>
 
+					{/* The client's voice note — to listen again before answering (not while recording). */}
+					{request?.voice && !voice.recording ? (
+						<View style={{ gap: 6 }}>
+							<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Голос клиента</Text>
+							<VoicePlayer voice={request.voice} background={c.surface} />
+						</View>
+					) : null}
+
 					{voice.recording || voice.uploading ? (
 						<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 10, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 							<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: voice.recording ? c.danger : c.brand, alignItems: 'center', justifyContent: 'center' }}>

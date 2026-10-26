@@ -74,7 +74,11 @@ export function useVoiceRecorder(onRecorded: (voice: RecordedVoice) => void) {
 	}
 
 	const stop = async (send: boolean) => {
-		if (!state.isRecording) return
+		// Leave the recording mode in any case — in it iOS plays voice notes quietly, through the earpiece.
+		if (!state.isRecording) {
+			await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true })
+			return
+		}
 		const duration = recorder.currentTime || seconds
 		await recorder.stop()
 		await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true })
@@ -83,6 +87,14 @@ export function useVoiceRecorder(onRecorded: (voice: RecordedVoice) => void) {
 			onRecorded({ uri, mimeType: audioMime(uri), durationSeconds: duration, waveform: toPeaks(samples.current) })
 		}
 	}
+
+	// The screen closed while recording (swiped away) — back to playback mode.
+	useEffect(
+		() => () => {
+			setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true })
+		},
+		[]
+	)
 
 	// The server rejects voice longer than 60 s — stop and send at the limit.
 	useEffect(() => {
