@@ -149,7 +149,8 @@ export function VideoTile({
 	return (
 		<Pressable onPress={onPress} style={{ width: 118, height: 172, borderRadius: 14, overflow: 'hidden', backgroundColor: '#1F2329' }}>
 			{poster ? <Image source={{ uri: poster }} style={{ position: 'absolute', width: '100%', height: '100%' }} /> : null}
-			<LoopVideo url={video.url} playing={playing} style={{ position: 'absolute', width: '100%', height: '100%' }} />
+			{/* A player only while the tile plays — a player per tile (10 on screen, more off it) slows the phone down. */}
+			{playing ? <LoopVideo url={video.url} playing style={{ position: 'absolute', width: '100%', height: '100%' }} /> : null}
 			<LinearGradient
 				colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.78)']}
 				start={{ x: 0.5, y: 0.35 }}
