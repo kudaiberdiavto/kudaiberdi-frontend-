@@ -3,6 +3,7 @@ import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View 
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Location from 'expo-location'
+import { currentCoords } from '@/lib/locate'
 import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceGrid, Toggle } from '@/components/ui'
 import { ChevronLeftIcon, LocateIcon, MapPinIcon, PhotoIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
@@ -100,7 +101,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 		setLocating(true)
 		try {
 			if (!(await Location.requestForegroundPermissionsAsync()).granted) return
-			const { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced })
+			const coords = await currentCoords()
 			patch({ lat: coords.latitude, lng: coords.longitude })
 			if (!form.address) {
 				const [place] = await Location.reverseGeocodeAsync(coords).catch(() => [])
