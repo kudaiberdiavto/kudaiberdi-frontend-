@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { QueryErrorBanner, ServiceIcon } from '@/components/ui'
 import { BackChevron, CallRow, SmallChip, offerWhen } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
+import { VoicePlayer } from '@/components/voice'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatDistance, formatNumber, minutesLeft, plural } from '@/lib/format'
@@ -126,6 +127,14 @@ export default function ServiceOffersScreen() {
 					</View>
 				) : null}
 				{actionError ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{actionError.message}</Text> : null}
+
+				{/* The buyer's own voice note — not in the mockup, but they should be able to replay what they asked. */}
+				{detail?.voice ? (
+					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 8 }}>
+						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Ваша заявка голосом</Text>
+						<VoicePlayer voice={detail.voice} />
+					</View>
+				) : null}
 
 				<View style={{ flexDirection: 'row', gap: 8 }}>
 					{SORTS.map((option) => {
