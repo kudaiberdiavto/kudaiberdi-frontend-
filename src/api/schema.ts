@@ -2646,26 +2646,6 @@ export interface paths {
         patch: operations["update_2"];
         trace?: never;
     };
-    "/api/v1/my/shop/open": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Тумблер «Бокс закрыт» (21)
-         * @description Может и сотрудник. Закрыт — запросы не приходят
-         */
-        patch: operations["open_1"];
-        trace?: never;
-    };
     "/api/v1/me": {
         parameters: {
             query?: never;
@@ -7116,9 +7096,6 @@ export interface components {
             workDays?: ("MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY")[];
             phone?: string;
             phoneVisible?: boolean;
-        };
-        SetOpen: {
-            isOpen: boolean;
         };
         UpdateMaster: {
             name?: string;
@@ -12697,30 +12674,6 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["UpdateShop"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["MyShopDto"];
-                };
-            };
-        };
-    };
-    open_1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetOpen"];
             };
         };
         responses: {

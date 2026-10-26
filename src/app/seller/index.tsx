@@ -2,13 +2,13 @@ import { FlatList, Image, Pressable, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { BrandLogo, QueryErrorBanner, Screen } from '@/components/ui'
 import { VoicePlayer } from '@/components/voice'
-import { BoltIcon, MicIcon, OpenPill, TickIcon } from '@/components/seller-v23'
+import { BoltIcon, MicIcon, TickIcon } from '@/components/seller-v23'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatAgo, formatNumber, formatRemaining } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
 import { useIncomingRequests, useReplyToRequest } from '@/api/incoming'
-import { useMyShop, useSetShopOpen } from '@/api/shop'
+import { useMyShop } from '@/api/shop'
 import { useDeliveryOrders } from '@/api/delivery'
 import { TruckTile, toRegion } from '@/components/video-v23'
 import { priceDigits } from '@/components/buyer-v23'
@@ -19,21 +19,18 @@ import { AccountStatusBanner } from '@/components/account-status-banner'
 export default function SellerRequestsScreen() {
 	const c = useColors()
 	const shop = useMyShop()
-	const setOpen = useSetShopOpen()
 	const fresh = useIncomingRequests('NEW')
 	const answered = useIncomingRequests('ANSWERED')
 	// Orders with delivery still to pack or hand to the courier — on top.
 	const delivery = useDeliveryOrders('SHOP')
 	const orders = (delivery.data ?? []).filter((order) => order.status !== 'DELIVERED' && order.status !== 'CANCELLED')
 
-	const open = shop.data?.isOpen ?? true
 	const items = [...flattenPages(fresh.data), ...flattenPages(answered.data)]
 
 	return (
 		<Screen padding={0}>
 			<View style={{ height: 60, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), color: c.ink }}>Запросы</Text>
-				<OpenPill open={open} onChange={(value) => shop.data && setOpen.mutate(value)} />
 			</View>
 
 			<FlatList
@@ -60,7 +57,7 @@ export default function SellerRequestsScreen() {
 							action={{ label: 'Выбрать другой контейнер', onPress: () => router.push('/box-select') }}
 						/>
 						<QueryErrorBanner
-							error={fresh.error ?? setOpen.error}
+							error={fresh.error}
 							onRetry={() => fresh.refetch()}
 							offlineText="Нет сети. Покажем запросы, когда появится"
 						/>
@@ -85,7 +82,7 @@ export default function SellerRequestsScreen() {
 						</View>
 						{fresh.isSuccess && answered.isSuccess && items.length === 0 ? (
 							<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted, paddingVertical: 8 }}>
-								{open ? 'Новых запросов нет. Пришлём пуш, как только спросят.' : 'Бокс закрыт — запросы не приходят'}
+								Новых запросов нет. Пришлём пуш, как только спросят.
 							</Text>
 						) : null}
 					</View>

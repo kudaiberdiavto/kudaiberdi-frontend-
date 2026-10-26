@@ -104,43 +104,6 @@ export function Label({ children, right }: { children: string; right?: React.Rea
 	)
 }
 
-/** «Открыт ●» [13] — the box toggle: green pill with a 40×24 switch; grey «Закрыт» when off. */
-export function OpenPill({ open, onChange }: { open: boolean; onChange: (next: boolean) => void }) {
-	const c = useColors()
-	return (
-		<Pressable
-			onPress={() => onChange(!open)}
-			style={{
-				height: 36,
-				paddingLeft: 12,
-				paddingRight: 6,
-				borderRadius: 18,
-				backgroundColor: open ? '#E7F6EC' : c.hairline,
-				flexDirection: 'row',
-				alignItems: 'center',
-				gap: 8,
-			}}
-		>
-			<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: open ? c.success : c.muted }}>
-				{open ? 'Открыт' : 'Закрыт'}
-			</Text>
-			<View style={{ width: 40, height: 24, borderRadius: 12, backgroundColor: open ? c.success : '#BAB6B6' }}>
-				<View
-					style={{
-						position: 'absolute',
-						top: 3,
-						left: open ? 19 : 3,
-						width: 18,
-						height: 18,
-						borderRadius: 9,
-						backgroundColor: '#FFFFFF',
-					}}
-				/>
-			</View>
-		</Pressable>
-	)
-}
-
 /** Brand tile with a check [11]: three in a row. */
 export function BrandTile({ brand, active, onPress }: { brand: Brand; active: boolean; onPress: () => void }) {
 	const c = useColors()

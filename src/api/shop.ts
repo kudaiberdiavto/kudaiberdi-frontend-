@@ -57,24 +57,6 @@ export function useSetShopBrands() {
 	return useShopMutation((brandIds: number[]) => apiFetch<MyShop>('/my/shop/brands', { method: 'PUT', body: { brandIds } }))
 }
 
-/** Toggle «Бокс открыт / закрыт» [11, 21] — a closed box gets no requests. Optimistic. */
-export function useSetShopOpen() {
-	const queryClient = useQueryClient()
-	return useMutation({
-		mutationFn: (isOpen: boolean) => apiFetch<MyShop>('/my/shop/open', { method: 'PATCH', body: { isOpen } }),
-		onMutate: async (isOpen) => {
-			await queryClient.cancelQueries({ queryKey: shopKeys.my })
-			const previous = queryClient.getQueryData<MyShop>(shopKeys.my)
-			if (previous) queryClient.setQueryData<MyShop>(shopKeys.my, { ...previous, isOpen })
-			return { previous }
-		},
-		onError: (_error, _isOpen, context) => {
-			if (context?.previous) queryClient.setQueryData(shopKeys.my, context.previous)
-		},
-		onSuccess: (shop) => queryClient.setQueryData(shopKeys.my, shop),
-	})
-}
-
 // ─── Photos of the place [22]: up to 8, the first is the cover ──────────────
 
 function usePhotosMutation<TVariables>(mutationFn: (variables: TVariables) => Promise<ShopPhoto[]>) {
