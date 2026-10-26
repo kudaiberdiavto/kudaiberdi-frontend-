@@ -323,8 +323,11 @@ function FeedVideo({ url, active, muted, durationSec }: { url: string; active: b
 	const duration = player.duration || durationSec || 1
 	return (
 		<>
-			<VideoView player={player} nativeControls={false} contentFit="cover" style={{ position: 'absolute', width: '100%', height: '100%' }} />
-			<View style={{ position: 'absolute', left: 16, right: 16, bottom: 6, height: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.3)' }}>
+			{/* The native video view takes touches — without this the feed can't be swiped over it. */}
+			<View pointerEvents="none" style={{ position: 'absolute', width: '100%', height: '100%' }}>
+				<VideoView player={player} nativeControls={false} contentFit="cover" style={{ width: '100%', height: '100%' }} />
+			</View>
+			<View pointerEvents="none" style={{ position: 'absolute', left: 16, right: 16, bottom: 6, height: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.3)' }}>
 				<View style={{ width: `${Math.min(100, (currentTime / duration) * 100)}%`, height: 3, borderRadius: 2, backgroundColor: '#FFFFFF' }} />
 			</View>
 		</>

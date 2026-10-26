@@ -118,7 +118,12 @@ export function LoopVideo({ url, playing, muted = true, style }: { url: string; 
 		if (playing) player.play()
 		else player.pause()
 	}, [player, playing])
-	return <VideoView player={player} nativeControls={false} contentFit="cover" style={style} />
+	// pointerEvents none: the native view would take the taps and swipes meant for the tile and the list.
+	return (
+		<View pointerEvents="none" style={style}>
+			<VideoView player={player} nativeControls={false} contentFit="cover" style={{ width: '100%', height: '100%' }} />
+		</View>
+	)
 }
 
 /**
