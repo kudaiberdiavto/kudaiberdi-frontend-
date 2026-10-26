@@ -8,7 +8,7 @@ import { SendIcon } from '@/components/icons'
 import { CameraV23Icon, MicV23Icon, TickIcon } from '@/components/buyer-v23'
 import { VoicePlayer } from '@/components/voice'
 import { TruckTile } from '@/components/video-v23'
-import { RecordingBar, useVoiceRecorder, VideoBubble, VoiceBubble } from '@/components/chat-media'
+import { RecordingBar, useVoiceRecorder, VideoBubble } from '@/components/chat-media'
 import { fontFamily, raw, useColors } from '@/theme'
 import { newIdempotencyKey, resolveUrl } from '@/lib/api'
 import { formatClock, formatPrice, formatWhenAt } from '@/lib/format'
@@ -350,15 +350,17 @@ function Message({
 		? replyText(payload, message.text)
 		: (message.text ?? (message.code ? QUICK_TEXT[message.code] : null) ?? '')
 
-	// The other side's voice note — the pill player from the v23 mockup [07].
-	if (message.type === 'VOICE' && message.mediaUrl && !mine) {
+	// Voice notes — mine and the other side's — the pill player from the v23 mockup [07], as in requests.
+	if (message.type === 'VOICE' && message.mediaUrl) {
 		return (
-			<View style={{ alignSelf: 'flex-start', width: 230, gap: 3 }}>
+			<View style={{ alignSelf: mine ? 'flex-end' : 'flex-start', width: 230, gap: 3, opacity: status === 'sending' ? 0.7 : 1 }}>
 				<VoicePlayer
 					voice={{ url: message.mediaUrl, durationSec: message.durationSeconds ?? 0, waveform: message.waveform ?? [] }}
 					background={c.card}
 				/>
-				<Text style={{ fontSize: 11, fontFamily: fontFamily(400), color: raw.fillInk }}>{formatClock(message.createdAt)}</Text>
+				<Text style={{ fontSize: 11, fontFamily: fontFamily(400), color: raw.fillInk, alignSelf: mine ? 'flex-end' : 'flex-start' }}>
+					{formatClock(message.createdAt)}
+				</Text>
 			</View>
 		)
 	}
@@ -385,14 +387,6 @@ function Message({
 				) : null}
 				{message.type === 'PHOTO' && message.mediaUrl ? (
 					<Image source={{ uri: resolveUrl(message.mediaUrl) }} style={{ width: 220, height: 220, borderRadius: 12 }} />
-				) : null}
-				{message.type === 'VOICE' && message.mediaUrl ? (
-					<VoiceBubble
-						mediaUrl={message.mediaUrl}
-						waveform={message.waveform}
-						durationSeconds={message.durationSeconds}
-						mine={mine}
-					/>
 				) : null}
 				{message.type === 'VIDEO' && message.mediaUrl ? <VideoBubble mediaUrl={message.mediaUrl} /> : null}
 				{body && message.code === 'RESERVED' ? (

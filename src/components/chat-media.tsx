@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 import {
 	RecordingPresets,
 	requestRecordingPermissionsAsync,
 	setAudioModeAsync,
-	useAudioPlayer,
-	useAudioPlayerStatus,
 	useAudioRecorder,
 	useAudioRecorderState,
 } from 'expo-audio'
@@ -127,70 +125,6 @@ export function RecordingBar({ seconds, onCancel }: { seconds: number; onCancel:
 			</Text>
 			<Text onPress={onCancel} style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.danger }}>
 				Отмена
-			</Text>
-		</View>
-	)
-}
-
-/** VOICE message: ▶ / ❚❚, waveform with progress, duration. */
-export function VoiceBubble({
-	mediaUrl,
-	waveform,
-	durationSeconds,
-	mine,
-}: {
-	mediaUrl: string
-	waveform: number[] | null
-	durationSeconds: number | null
-	mine: boolean
-}) {
-	const c = useColors()
-	const player = useAudioPlayer(resolveUrl(mediaUrl), { updateInterval: 50 })
-	const status = useAudioPlayerStatus(player)
-	const duration = status.duration || durationSeconds || 0
-	const progress = duration ? status.currentTime / duration : 0
-	const peaks = waveform?.length ? waveform : Array.from({ length: 28 }, () => 0.35)
-	const fg = mine ? '#FFFFFF' : c.brand
-	const dim = mine ? 'rgba(255,255,255,0.45)' : c.border
-
-	const toggle = () => {
-		if (status.playing) player.pause()
-		else {
-			if (status.didJustFinish || progress >= 0.99) player.seekTo(0)
-			player.play()
-		}
-	}
-
-	return (
-		<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minWidth: 180 }}>
-			<Pressable
-				onPress={toggle}
-				style={{
-					width: 36,
-					height: 36,
-					borderRadius: 18,
-					backgroundColor: mine ? 'rgba(255,255,255,0.22)' : c.brandTint,
-					alignItems: 'center',
-					justifyContent: 'center',
-				}}
-			>
-				<Text style={{ fontSize: 14, fontFamily: fontFamily(800), color: fg }}>{status.playing ? '❚❚' : '▶'}</Text>
-			</Pressable>
-			<View style={{ flex: 1, height: 28, flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-				{peaks.slice(0, 40).map((peak, i, list) => (
-					<View
-						key={i}
-						style={{
-							flex: 1,
-							height: Math.max(3, peak * 28),
-							borderRadius: 2,
-							backgroundColor: progress > 0 && i / list.length < progress ? fg : dim,
-						}}
-					/>
-				))}
-			</View>
-			<Text style={{ fontSize: 12, fontFamily: fontFamily(600), color: mine ? '#FFFFFF' : c.muted }}>
-				{clock(status.playing || status.currentTime ? status.currentTime : duration)}
 			</Text>
 		</View>
 	)
