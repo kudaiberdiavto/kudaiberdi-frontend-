@@ -1,335 +1,232 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, FlatList, Image, Linking, Pressable, Share, Text, View, type ViewToken } from 'react-native'
+import { useRef, useState } from 'react'
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { LinearGradient } from 'expo-linear-gradient'
-import { router, useIsFocused } from 'expo-router'
-import { useEvent } from 'expo'
-import { useVideoPlayer, VideoView } from 'expo-video'
-import { MarketMapTab } from '@/components/market-map-tab'
-import { CallIcon, CONDITION_CHIP, PaperPlaneIcon, TickIcon, priceDigits } from '@/components/buyer-v23'
-import { BookmarkIcon, SoundOffIcon, SoundOnIcon, TruckIcon, YellowChip, setPlayerMuted, useFeedCar } from '@/components/video-v23'
-import { fontFamily, useColors } from '@/theme'
-import { resolveUrl } from '@/lib/api'
-import { flattenPages } from '@/api/pagination'
-import { useSignedIn, useToggleVideoFavorite, useVideoFeed } from '@/api/catalog'
-import type { VideoFeedItem } from '@/api/types'
-import { useMarketTab } from '@/store/useMarketTab'
+import { router } from 'expo-router'
+import { MarketMapLive, type MarketMapLiveHandle } from '@/components/market-map-live'
+import { BrandLogo } from '@/components/ui/brand'
+import { QueryErrorBanner } from '@/components/ui'
+import { Caps, ChevronIcon, CrossIcon, LoupeIcon, TopBar } from '@/components/buyer-v23'
+import { fontFamily, raw, useColors } from '@/theme'
+import { plural } from '@/lib/format'
+import { useBrands, useCategories } from '@/api/directory'
+import { useCars } from '@/api/garage'
+import { useMapHighlight } from '@/api/market'
+import { useSignedIn } from '@/api/catalog'
+import type { Brand } from '@/api/types'
+import { useCatalogFilters } from '@/store/useCatalogFilters'
 
-/** «Рынок»: the video feed (like reels) or «Карта рынка» — the switch on top. */
+type Filter = { kind: 'BRAND'; brand: Brand } | { kind: 'CATEGORY'; id: number; name: string }
+
+/** Rows shown before «Все». */
+const PREVIEW = 4
+
+/** 09 «Рынок»: where your brand (or a part) is sold — rows on the scheme and the list of rows. */
 export default function BuyerMarketScreen() {
+	const c = useColors()
 	const insets = useSafeAreaInsets()
-	const mode = useMarketTab((s) => s.mode)
-	if (mode === 'map') {
-		return (
-			<MarketMapTab
-				header={
-					<View style={{ height: 60, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center' }}>
-						<ModeSwitch dark={false} />
-					</View>
-				}
-			/>
-		)
+	const [picked, setPicked] = useState<Filter | null>(null)
+	const [q, setQ] = useState('')
+	const [all, setAll] = useState(false)
+	const mapRef = useRef<MarketMapLiveHandle>(null)
+
+	const signedIn = useSignedIn()
+	const popular = useBrands({ popular: true })
+	const found = useBrands(q.trim() ? { q: q.trim() } : {})
+	const categories = useCategories()
+	const primaryBrand = useCars().data?.find((car) => car.isPrimary)?.brand
+	// Default — the primary car's brand, else the first popular one.
+	const defaultBrand = (signedIn ? primaryBrand : undefined) ?? popular.data?.[0]
+	const filter: Filter | null = picked ?? (defaultBrand ? { kind: 'BRAND', brand: defaultBrand } : null)
+	const highlight = useMapHighlight(filter?.kind ?? 'BRAND', filter ? (filter.kind === 'BRAND' ? filter.brand.id : filter.id) : undefined)
+	const h = highlight.data
+	const rows = h?.rows ?? []
+	const name = filter ? (filter.kind === 'BRAND' ? filter.brand.name : filter.name) : ''
+
+	// Chips: the selected brand first, then the other popular ones.
+	const chips = [
+		...(filter?.kind === 'BRAND' ? [filter.brand] : []),
+		...(popular.data ?? []).filter((brand) => filter?.kind !== 'BRAND' || brand.id !== filter.brand.id),
+	].slice(0, 8)
+	const query = q.trim().toLowerCase()
+	const brandHits = query ? (found.data ?? []).slice(0, 4) : []
+	const categoryHits = query ? (categories.data ?? []).filter((category) => category.name.toLowerCase().includes(query)).slice(0, 3) : []
+
+	/** Parts for sale with the same brand or category — the catalog (selling parts stays as it was). */
+	const openCatalog = () => {
+		const f = useCatalogFilters.getState()
+		if (filter?.kind === 'BRAND') f.pickBrand(filter.brand, null)
+		if (filter?.kind === 'CATEGORY') f.setCategory(filter.id)
+		router.navigate('/buyer/parts')
 	}
-	return <VideoFeed top={insets.top} />
+
+	const choose = (next: Filter) => {
+		setPicked(next)
+		setQ('')
+		setAll(false)
+	}
+
+	return (
+		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
+			<TopBar title="Рынок" big onBack={false} />
+
+			<ScrollView
+				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
+				showsVerticalScrollIndicator={false}
+				keyboardShouldPersistTaps="handled"
+			>
+				<View
+					style={{
+						height: 48,
+						borderRadius: 14,
+						borderWidth: 2,
+						borderColor: c.border,
+						backgroundColor: c.card,
+						flexDirection: 'row',
+						alignItems: 'center',
+						gap: 10,
+						paddingHorizontal: 14,
+					}}
+				>
+					<LoupeIcon size={20} color={c.muted} />
+					<TextInput
+						value={q}
+						onChangeText={setQ}
+						placeholder="Марка или запчасть"
+						placeholderTextColor="#8C8888"
+						style={{ flex: 1, minWidth: 0, fontSize: 16, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+					/>
+				</View>
+
+				{query ? (
+					<View style={{ borderRadius: 14, backgroundColor: c.card, overflow: 'hidden' }}>
+						{brandHits.map((brand) => (
+							<Pressable
+								key={`brand-${brand.id}`}
+								onPress={() => choose({ kind: 'BRAND', brand })}
+								style={{ paddingVertical: 10, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: 1, borderBottomColor: c.hairline }}
+							>
+								<BrandLogo brand={brand} size={28} />
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>{brand.name}</Text>
+							</Pressable>
+						))}
+						{categoryHits.map((category) => (
+							<Pressable
+								key={`category-${category.id}`}
+								onPress={() => choose({ kind: 'CATEGORY', id: category.id, name: category.name })}
+								style={{ paddingVertical: 12, paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: c.hairline }}
+							>
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>{category.name}</Text>
+							</Pressable>
+						))}
+						{brandHits.length + categoryHits.length === 0 ? (
+							<Text style={{ padding: 14, fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>Ничего не нашли</Text>
+						) : null}
+					</View>
+				) : null}
+
+				<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+					{filter?.kind === 'CATEGORY' ? (
+						<SelectedChip label={filter.name} onClear={() => setPicked(null)} />
+					) : null}
+					{chips.map((brand) => {
+						const active = filter?.kind === 'BRAND' && filter.brand.id === brand.id
+						return (
+							<Pressable
+								key={brand.id}
+								onPress={() => (active ? setPicked(null) : choose({ kind: 'BRAND', brand }))}
+								style={{
+									height: 40,
+									paddingLeft: 6,
+									paddingRight: active ? 12 : 14,
+									borderRadius: 20,
+									backgroundColor: active ? c.brandTint : c.card,
+									borderWidth: 2,
+									borderColor: active ? c.brand : c.border,
+									flexDirection: 'row',
+									alignItems: 'center',
+									gap: 8,
+								}}
+							>
+								<BrandLogo brand={brand} size={28} />
+								<Text style={{ fontSize: 14, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.inkSecondary }}>
+									{brand.shortName ?? brand.name}
+								</Text>
+								{active ? <CrossIcon size={16} color={c.brandStrong} strokeWidth={2.6} /> : null}
+							</Pressable>
+						)
+					})}
+				</ScrollView>
+
+				<View style={{ height: 330, borderRadius: 18, overflow: 'hidden', backgroundColor: raw.mapSurface }}>
+					<MarketMapLive ref={mapRef} highlightedRowIds={h?.rowIds} />
+				</View>
+
+				<QueryErrorBanner error={highlight.error} onRetry={() => highlight.refetch()} />
+
+				{h ? (
+					<>
+						<Caps link={rows.length > PREVIEW ? (all ? 'Свернуть' : 'Все') : undefined} onLink={() => setAll(!all)}>
+							{`${name} — ${rows.length} ${plural(rows.length, ['ряд', 'ряда', 'рядов'])}`}
+						</Caps>
+						{rows.length ? (
+							<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 8 }}>
+								{(all ? rows : rows.slice(0, PREVIEW)).map((row) => (
+									<Pressable
+										key={row.rowId}
+										onPress={() => mapRef.current?.focusOnRow(row.rowId, 18)}
+										style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 }}
+									>
+										<View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+											<Text style={{ fontSize: 15, fontFamily: fontFamily(800), color: c.brandStrong }}>{row.rowCode}</Text>
+										</View>
+										<View style={{ flex: 1, gap: 1 }}>
+											<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>{row.rowLabel}</Text>
+											<Text style={{ fontSize: 13.5, fontFamily: fontFamily(400), color: c.muted }}>
+												{row.containers} {plural(row.containers, ['контейнер', 'контейнера', 'контейнеров'])} с {name}
+											</Text>
+										</View>
+										<ChevronIcon size={20} color="#B8B4B4" />
+									</Pressable>
+								))}
+							</View>
+						) : (
+							<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>Пока никто не продаёт {name} на рынке</Text>
+						)}
+						<Pressable
+							onPress={openCatalog}
+							style={{ height: 52, borderRadius: 14, backgroundColor: c.card, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14 }}
+						>
+							<LoupeIcon size={20} color={c.brand} />
+							<Text style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>Запчасти {name} в продаже</Text>
+							<ChevronIcon size={20} color="#B8B4B4" />
+						</Pressable>
+					</>
+				) : null}
+			</ScrollView>
+		</View>
+	)
 }
 
-/** «Видео | Карта рынка». */
-function ModeSwitch({ dark }: { dark: boolean }) {
+function SelectedChip({ label, onClear }: { label: string; onClear: () => void }) {
 	const c = useColors()
-	const mode = useMarketTab((s) => s.mode)
-	const setMode = useMarketTab((s) => s.setMode)
 	return (
-		<View
+		<Pressable
+			onPress={onClear}
 			style={{
 				height: 40,
-				padding: 4,
+				paddingLeft: 14,
+				paddingRight: 12,
 				borderRadius: 20,
-				backgroundColor: dark ? 'rgba(255,255,255,0.16)' : '#E9E7E6',
+				backgroundColor: c.brandTint,
+				borderWidth: 2,
+				borderColor: c.brand,
 				flexDirection: 'row',
-				gap: 2,
+				alignItems: 'center',
+				gap: 8,
 			}}
 		>
-			{(['video', 'map'] as const).map((value) => {
-				const active = mode === value
-				return (
-					<Pressable
-						key={value}
-						onPress={() => setMode(value)}
-						style={{ height: 32, paddingHorizontal: 14, borderRadius: 16, backgroundColor: active ? '#FFFFFF' : 'transparent', justifyContent: 'center' }}
-					>
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.ink : dark ? '#FFFFFF' : c.ink }}>
-							{value === 'video' ? 'Видео' : 'Карта рынка'}
-						</Text>
-					</Pressable>
-				)
-			})}
-		</View>
-	)
-}
-
-function VideoFeed({ top }: { top: number }) {
-	const { car, byCar, params } = useFeedCar()
-	const setByCar = useMarketTab((s) => s.setByCar)
-	const startPartId = useMarketTab((s) => s.startPartId)
-	const feed = useVideoFeed(params)
-	const items = flattenPages(feed.data)
-	const [height, setHeight] = useState(0)
-	const [index, setIndex] = useState(0)
-	const [muted, setMuted] = useState(true)
-	const focused = useIsFocused()
-	const listRef = useRef<FlatList<VideoFeedItem>>(null)
-
-	// A tile on the home screen was tapped — open the feed on that video.
-	useEffect(() => {
-		if (startPartId === null || !height || !items.length) return
-		const at = items.findIndex((item) => item.partId === startPartId)
-		if (at > 0) listRef.current?.scrollToIndex({ index: at, animated: false })
-		useMarketTab.getState().clearStart()
-	}, [startPartId, height, items])
-
-	// FlatList wants the same callback for its whole life.
-	const onViewable = useCallback(({ viewableItems }: { viewableItems: ViewToken<VideoFeedItem>[] }) => {
-		const first = viewableItems[0]
-		if (first?.index != null) setIndex(first.index)
-	}, [])
-
-	return (
-		<View style={{ flex: 1, backgroundColor: '#000000' }} onLayout={(event) => setHeight(event.nativeEvent.layout.height)}>
-			{height ? (
-				<FlatList
-					ref={listRef}
-					data={items}
-					keyExtractor={(item) => String(item.partId)}
-					pagingEnabled
-					showsVerticalScrollIndicator={false}
-					getItemLayout={(_, i) => ({ length: height, offset: height * i, index: i })}
-					onViewableItemsChanged={onViewable}
-					viewabilityConfig={{ itemVisiblePercentThreshold: 60 }}
-					windowSize={3}
-					initialNumToRender={2}
-					maxToRenderPerBatch={2}
-					onEndReached={() => feed.hasNextPage && !feed.isFetchingNextPage && feed.fetchNextPage()}
-					renderItem={({ item, index: i }) => (
-						<FeedPage
-							item={item}
-							height={height}
-							top={top}
-							active={focused && i === index}
-							near={Math.abs(i - index) <= 1}
-							muted={muted}
-							onToggleSound={() => setMuted(!muted)}
-						/>
-					)}
-					ListEmptyComponent={
-						<View style={{ height, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
-							{feed.isPending ? (
-								<ActivityIndicator color="#FFFFFF" />
-							) : (
-								<Text style={{ fontSize: 16, lineHeight: 22, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
-									{feed.error ? 'Не удалось загрузить видео. Потяните вниз, чтобы повторить' : 'Пока нет видео. Как только продавцы выложат — покажем здесь'}
-								</Text>
-							)}
-						</View>
-					}
-					onRefresh={() => feed.refetch()}
-					refreshing={false}
-				/>
-			) : null}
-
-			<View style={{ position: 'absolute', top: top + 8, left: 16, right: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-				<ModeSwitch dark />
-				{car ? (
-					<Pressable
-						onPress={() => setByCar(!byCar)}
-						style={{
-							height: 40,
-							paddingHorizontal: 14,
-							borderRadius: 20,
-							backgroundColor: 'rgba(255,255,255,0.16)',
-							flexDirection: 'row',
-							alignItems: 'center',
-							gap: 6,
-						}}
-					>
-						{byCar ? <TickIcon size={16} color="#FFFFFF" /> : null}
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{car.model.label}</Text>
-					</Pressable>
-				) : null}
-			</View>
-		</View>
-	)
-}
-
-/** One video of the feed: full screen, plays while active, the seller, the part, «Позвонить» and «Доставка». */
-function FeedPage({
-	item,
-	height,
-	top,
-	active,
-	near,
-	muted,
-	onToggleSound,
-}: {
-	item: VideoFeedItem
-	height: number
-	top: number
-	active: boolean
-	near: boolean
-	muted: boolean
-	onToggleSound: () => void
-}) {
-	const c = useColors()
-	const signedIn = useSignedIn()
-	const favorite = useToggleVideoFavorite()
-	const poster = resolveUrl(item.video.posterUrl)
-	const shop = item.shop
-	const meta = [shop.place, shop.replyMinutes != null ? `отвечает за ${shop.replyMinutes} мин` : null].filter(Boolean).join(' · ')
-	const condition = CONDITION_CHIP[item.condition]
-	const description = [condition, item.fitsLabel].filter(Boolean).join('. ')
-
-	const rail = [
-		{
-			label: 'Сохр.',
-			icon: <BookmarkIcon size={22} color="#FFFFFF" filled={item.isFavorite} />,
-			onPress: () => (signedIn ? favorite.mutate({ partId: item.partId, favorite: !item.isFavorite }) : router.push('/')),
-		},
-		{
-			label: 'Отправ.',
-			icon: <PaperPlaneIcon size={22} color="#FFFFFF" />,
-			onPress: () => Share.share({ message: `${item.title}\nhttps://kudaibergen.kg/p/${item.publicId}` }),
-		},
-		{
-			label: 'Звук',
-			icon: muted ? <SoundOffIcon size={22} color="#FFFFFF" /> : <SoundOnIcon size={22} color="#FFFFFF" />,
-			onPress: onToggleSound,
-		},
-	]
-
-	return (
-		<View style={{ height, backgroundColor: '#000000' }}>
-			{poster ? <Image source={{ uri: poster }} resizeMode="cover" style={{ position: 'absolute', width: '100%', height: '100%' }} /> : null}
-			{near ? <FeedVideo url={item.video.url} active={active} muted={muted} durationSec={item.video.durationSec} /> : null}
-			<LinearGradient
-				colors={['rgba(0,0,0,0.45)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.85)']}
-				locations={[0, 0.18, 0.45, 1]}
-				style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
-				pointerEvents="none"
-			/>
-			<View style={{ height: top }} />
-
-			<View style={{ position: 'absolute', right: 12, bottom: 250, gap: 14, alignItems: 'center' }}>
-				{rail.map((button) => (
-					<Pressable key={button.label} onPress={button.onPress} style={{ alignItems: 'center', gap: 4 }}>
-						<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.16)', alignItems: 'center', justifyContent: 'center' }}>
-							{button.icon}
-						</View>
-						<Text style={{ fontSize: 12, fontFamily: fontFamily(600), color: '#FFFFFF' }}>{button.label}</Text>
-					</Pressable>
-				))}
-			</View>
-
-			<View style={{ position: 'absolute', left: 16, right: 16, bottom: 16, gap: 8 }}>
-				<Pressable
-					onPress={() => router.push({ pathname: '/seller-profile', params: { id: String(shop.id) } })}
-					style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingRight: 64 }}
-				>
-					{shop.avatarUrl ? (
-						<Image source={{ uri: resolveUrl(shop.avatarUrl) }} style={{ width: 32, height: 32, borderRadius: 16 }} />
-					) : (
-						<View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{shop.name.slice(0, 1).toUpperCase()}</Text>
-						</View>
-					)}
-					<View style={{ flex: 1 }}>
-						<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
-							{shop.name}
-						</Text>
-						<Text numberOfLines={1} style={{ fontSize: 12.5, fontFamily: fontFamily(400), color: 'rgba(255,255,255,0.75)' }}>
-							{meta}
-						</Text>
-					</View>
-				</Pressable>
-				<Text style={{ fontSize: 20, lineHeight: 25, fontFamily: fontFamily(800), color: '#FFFFFF', paddingRight: 64 }}>{item.title}</Text>
-				{description ? (
-					<Text numberOfLines={2} style={{ fontSize: 14.5, lineHeight: 19.5, fontFamily: fontFamily(400), color: 'rgba(255,255,255,0.88)', paddingRight: 64 }}>
-						{description}
-					</Text>
-				) : null}
-				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-					<Text style={{ fontSize: 30, fontFamily: fontFamily(800), letterSpacing: -0.6, color: '#FFFFFF' }}>{priceDigits(item.price)} сом</Text>
-					{condition ? (
-						<View style={{ height: 24, paddingHorizontal: 8, borderRadius: 7, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{condition}</Text>
-						</View>
-					) : null}
-				</View>
-				{item.shipsToRegions ? <YellowChip label="Доставка по КР" icon /> : null}
-				<View style={{ flexDirection: 'row', gap: 10, paddingTop: 4 }}>
-					<Pressable
-						onPress={() => shop.phone && Linking.openURL(`tel:${shop.phone.replace(/[^\d+]/g, '')}`)}
-						disabled={!shop.phone}
-						style={{
-							flex: 1,
-							height: 52,
-							borderRadius: 14,
-							backgroundColor: c.success,
-							opacity: shop.phone ? 1 : 0.5,
-							flexDirection: 'row',
-							alignItems: 'center',
-							justifyContent: 'center',
-							gap: 8,
-						}}
-					>
-						<CallIcon size={20} color="#FFFFFF" />
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Позвонить</Text>
-					</Pressable>
-					{item.shipsToRegions ? (
-						<Pressable
-							onPress={() => (signedIn ? router.push({ pathname: '/delivery', params: { partId: String(item.partId) } }) : router.push('/'))}
-							style={{
-								flex: 1,
-								height: 52,
-								borderRadius: 14,
-								backgroundColor: '#FFFFFF',
-								flexDirection: 'row',
-								alignItems: 'center',
-								justifyContent: 'center',
-								gap: 8,
-							}}
-						>
-							<TruckIcon size={20} color={c.ink} />
-							<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Доставка</Text>
-						</Pressable>
-					) : null}
-				</View>
-			</View>
-		</View>
-	)
-}
-
-/** The video itself and the thin progress line under the buttons. */
-function FeedVideo({ url, active, muted, durationSec }: { url: string; active: boolean; muted: boolean; durationSec: number }) {
-	const player = useVideoPlayer(resolveUrl(url), (p) => {
-		p.loop = true
-		p.muted = true
-		p.timeUpdateEventInterval = 0.25
-	})
-	const { currentTime } = useEvent(player, 'timeUpdate', { currentTime: 0, currentLiveTimestamp: null, currentOffsetFromLive: null, bufferedPosition: 0 })
-	useEffect(() => setPlayerMuted(player, muted), [player, muted])
-	useEffect(() => {
-		if (active) player.play()
-		else player.pause()
-	}, [player, active])
-	const duration = player.duration || durationSec || 1
-	return (
-		<>
-			{/* The native video view takes touches — without this the feed can't be swiped over it. */}
-			<View pointerEvents="none" style={{ position: 'absolute', width: '100%', height: '100%' }}>
-				<VideoView player={player} nativeControls={false} contentFit="cover" style={{ width: '100%', height: '100%' }} />
-			</View>
-			<View pointerEvents="none" style={{ position: 'absolute', left: 16, right: 16, bottom: 6, height: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.3)' }}>
-				<View style={{ width: `${Math.min(100, (currentTime / duration) * 100)}%`, height: 3, borderRadius: 2, backgroundColor: '#FFFFFF' }} />
-			</View>
-		</>
+			<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>{label}</Text>
+			<CrossIcon size={16} color={c.brandStrong} strokeWidth={2.6} />
+		</Pressable>
 	)
 }

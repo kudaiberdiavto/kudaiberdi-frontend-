@@ -5,8 +5,8 @@ import { router } from 'expo-router'
 import { ProductCard, QueryErrorBanner } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { SearchIcon } from '@/components/icons'
-import { BackIcon } from '@/components/buyer-v23'
 import { fontFamily, useColors } from '@/theme'
+import { useVideoViewer } from '@/store/useVideoViewer'
 import { resolveUrl } from '@/lib/api'
 import { countLabel, formatPlace, formatPrice, plural } from '@/lib/format'
 import { useSearchParts, useSignedIn } from '@/api/catalog'
@@ -27,7 +27,7 @@ const SORTS: { value: CatalogSort; label: string }[] = [
  * infinite grid. With a car — fitting parts first; without one — all parts. A master has no car of their own:
  * «Выберите марку» (the client's), until then all parts are shown.
  */
-export function CatalogScreen({ onBack }: { onBack?: () => void } = {}) {
+export function CatalogScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
 	const signedIn = useSignedIn()
@@ -73,14 +73,7 @@ export function CatalogScreen({ onBack }: { onBack?: () => void } = {}) {
 
 	const header = (
 		<View style={{ gap: 14, paddingBottom: 14 }}>
-			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				{onBack ? (
-					<Pressable onPress={onBack} hitSlop={10}>
-						<BackIcon color={c.ink} />
-					</Pressable>
-				) : null}
-				<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>Поиск запчастей</Text>
-			</View>
+			<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>Поиск запчастей</Text>
 
 			<View
 				style={{
@@ -262,7 +255,7 @@ export function CatalogScreen({ onBack }: { onBack?: () => void } = {}) {
 					position: 'absolute',
 					left: 16,
 					right: 16,
-					bottom: onBack ? insets.bottom + 12 : 12,
+					bottom: 12,
 					height: 52,
 					borderRadius: 14,
 					backgroundColor: c.ink,
@@ -293,11 +286,18 @@ function PartTile({ part }: { part: PartCard }) {
 			title={part.title}
 			fits={part.fits === true}
 			location={formatPlace(part.shop)}
-			photoUrl={resolveUrl(part.mainPhoto?.thumbUrl ?? part.mainPhoto?.url)}
+			photoUrl={resolveUrl(part.mainPhoto?.thumbUrl ?? part.mainPhoto?.url ?? part.video?.posterUrl)}
 			shopAvatarUrl={resolveUrl(part.shop.avatarUrl)}
 			dimmed={part.stockStatus === 'OUT_OF_STOCK'}
 			favorite={part.isFavorite}
-			onPress={() => router.push({ pathname: '/part', params: { id: String(part.id) } })}
+			videoSec={part.video?.durationSec}
+			onPress={() => {
+				// A part with a video opens the video feed on it — swiping there shows only videos.
+				if (part.video) {
+					useVideoViewer.getState().openVideo(part.id)
+					router.push('/videos')
+				} else router.push({ pathname: '/part', params: { id: String(part.id) } })
+			}}
 		/>
 	)
 }

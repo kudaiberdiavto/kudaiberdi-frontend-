@@ -30,7 +30,7 @@ import { serviceName, useMyServiceRequests, useServiceTypes } from '@/api/servic
 import { useSignedIn, useVideoFeed } from '@/api/catalog'
 import { useDeliveryOrders } from '@/api/delivery'
 import type { Car, DeliveryOrder, RequestSummary, ServiceRequestSummary, VideoFeedItem } from '@/api/types'
-import { useMarketTab } from '@/store/useMarketTab'
+import { useVideoViewer } from '@/store/useVideoViewer'
 
 type Row = { kind: 'part'; request: RequestSummary } | { kind: 'service'; request: ServiceRequestSummary }
 
@@ -221,9 +221,8 @@ function MarketVideos() {
 	if (!items.length) return null
 
 	const openFeed = (partId?: number) => {
-		if (partId) useMarketTab.getState().openVideo(partId)
-		else useMarketTab.getState().setMode('video')
-		router.navigate('/buyer/market')
+		if (partId) useVideoViewer.getState().openVideo(partId)
+		router.push('/videos')
 	}
 
 	return (

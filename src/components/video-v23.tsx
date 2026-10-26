@@ -12,7 +12,7 @@ import { fontFamily } from '@/theme'
 import { useSignedIn } from '@/api/catalog'
 import { useCars } from '@/api/garage'
 import type { DeliveryOrder, Video } from '@/api/types'
-import { useMarketTab } from '@/store/useMarketTab'
+import { useVideoViewer } from '@/store/useVideoViewer'
 
 interface IconProps {
 	size?: number
@@ -193,7 +193,7 @@ export function VideoTile({
 export function useFeedCar() {
 	const signedIn = useSignedIn()
 	const cars = useCars()
-	const byCar = useMarketTab((s) => s.byCar)
+	const byCar = useVideoViewer((s) => s.byCar)
 	const car = signedIn ? (cars.data?.find((item) => item.isPrimary) ?? cars.data?.[0]) : undefined
 	const params = byCar && car ? { brandId: car.brand.id, modelId: car.model.id, year: car.year } : {}
 	return { car, byCar, params }

@@ -1,6 +1,7 @@
 import { Image, Pressable, Text, View } from 'react-native'
 import { CheckIcon, HeartIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
+import Svg, { Path } from 'react-native-svg'
 import { PhotoPlaceholder } from './photo'
 
 /** Карточка товара в сетке — экраны 27, 29 (похожие), 30. 174×243 из specs. */
@@ -15,6 +16,7 @@ export function ProductCard({
 	shopAvatarUrl,
 	dimmed,
 	favorite,
+	videoSec,
 }: {
 	price: string
 	title: string
@@ -29,6 +31,8 @@ export function ProductCard({
 	dimmed?: boolean
 	/** ♥ in the corner, filled when the part is in favorites. */
 	favorite?: boolean
+	/** The part has a video: «▶ 0:15» on the picture (the video's poster). */
+	videoSec?: number
 }) {
 	const c = useColors()
 	return (
@@ -39,6 +43,29 @@ export function ProductCard({
 				) : (
 					<PhotoPlaceholder width={width} height={118} radius={0} />
 				)}
+				{videoSec != null ? (
+					<View
+						style={{
+							position: 'absolute',
+							left: 8,
+							top: 8,
+							height: 24,
+							paddingHorizontal: 8,
+							borderRadius: 12,
+							backgroundColor: 'rgba(0,0,0,0.55)',
+							flexDirection: 'row',
+							alignItems: 'center',
+							gap: 4,
+						}}
+					>
+						<Svg width={10} height={10} viewBox="0 0 24 24" fill="#FFFFFF">
+							<Path d="M8 5.5v13l10-6.5z" />
+						</Svg>
+						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+							{Math.floor(videoSec / 60)}:{String(Math.round(videoSec % 60)).padStart(2, '0')}
+						</Text>
+					</View>
+				) : null}
 				<View
 					style={{
 						position: 'absolute',
