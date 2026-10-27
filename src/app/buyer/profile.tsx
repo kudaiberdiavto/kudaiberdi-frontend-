@@ -9,7 +9,7 @@ import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatE164 } from '@/lib/phone'
 import { useMe, useSetRole, useSettings, useUpdateMe, useUpdateSettings } from '@/api/me'
-import { useCars, useDeleteCar, useMakePrimaryCar } from '@/api/garage'
+import { useCars, useDeleteCar } from '@/api/garage'
 import { toLang, useSession } from '@/store/useSession'
 
 /** «Помощь в WhatsApp» — the support number from the build config (digits, e.g. 996555000000). */
@@ -21,7 +21,6 @@ export default function BuyerProfileScreen() {
 	const insets = useSafeAreaInsets()
 	const me = useMe()
 	const cars = useCars()
-	const makePrimary = useMakePrimaryCar()
 	const deleteCar = useDeleteCar()
 	const askDelete = (id: number, title: string) =>
 		Alert.alert('Удалить машину?', title, [
@@ -69,7 +68,9 @@ export default function BuyerProfileScreen() {
 				{(cars.data ?? []).map((car) => (
 					<Pressable
 						key={car.id}
-						onPress={() => !car.isPrimary && makePrimary.mutate(car.id)}
+						// Tap — «Удалить машину?»; no main car to pick.
+						onPress={() => askDelete(car.id, `${car.title} · ${car.year}`)}
+						disabled={deleteCar.isPending}
 						style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10 }}
 					>
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -78,14 +79,7 @@ export default function BuyerProfileScreen() {
 								<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{car.title}</Text>
 								<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{car.subtitle}</Text>
 							</View>
-							{car.isPrimary ? (
-								<View style={{ height: 26, paddingHorizontal: 9, borderRadius: 8, backgroundColor: c.brandTint, justifyContent: 'center' }}>
-									<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.brandStrong }}>Основная</Text>
-								</View>
-							) : null}
-							<Pressable onPress={() => askDelete(car.id, `${car.title} · ${car.year}`)} hitSlop={10} disabled={deleteCar.isPending}>
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.danger }}>Удалить</Text>
-							</Pressable>
+
 						</View>
 						{car.fromTechPassport ? (
 							<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
