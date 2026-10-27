@@ -147,7 +147,7 @@ export function VideoTile({
 }) {
 	const poster = resolveUrl(video.posterUrl)
 	return (
-		<Pressable onPress={onPress} style={{ width: 118, height: 172, borderRadius: 14, overflow: 'hidden', backgroundColor: '#1F2329' }}>
+		<Pressable onPress={onPress} style={{ width: 142, height: 206, borderRadius: 16, overflow: 'hidden', backgroundColor: '#1F2329' }}>
 			{poster ? <Image source={{ uri: poster }} style={{ position: 'absolute', width: '100%', height: '100%' }} /> : null}
 			{/* A player only while the tile plays — a player per tile (10 on screen, more off it) slows the phone down. */}
 			{playing ? <LoopVideo url={video.url} playing style={{ position: 'absolute', width: '100%', height: '100%' }} /> : null}
@@ -162,24 +162,24 @@ export function VideoTile({
 					position: 'absolute',
 					top: 8,
 					left: 8,
-					height: 20,
-					paddingHorizontal: 6,
-					borderRadius: 6,
+					height: 22,
+					paddingHorizontal: 7,
+					borderRadius: 7,
 					backgroundColor: 'rgba(0,0,0,0.55)',
 					flexDirection: 'row',
 					alignItems: 'center',
 					gap: 3,
 				}}
 			>
-				<PlayIcon size={9} />
-				<Text style={{ fontSize: 11, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{voiceClock(video.durationSec)}</Text>
+				<PlayIcon size={10} />
+				<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{voiceClock(video.durationSec)}</Text>
 			</View>
 			<View style={{ position: 'absolute', left: 8, right: 8, bottom: 8, gap: 2 }}>
-				<Text numberOfLines={2} style={{ fontSize: 13, lineHeight: 16, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+				<Text numberOfLines={2} style={{ fontSize: 15, lineHeight: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
 					{title}
 				</Text>
-				<Text style={{ fontSize: 15, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{priceDigits(price)} с</Text>
-				<Text numberOfLines={1} style={{ fontSize: 11, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.75)' }}>
+				<Text style={{ fontSize: 17, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{priceDigits(price)} с</Text>
+				<Text numberOfLines={1} style={{ fontSize: 12, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.75)' }}>
 					{place}
 				</Text>
 			</View>
