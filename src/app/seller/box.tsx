@@ -95,8 +95,14 @@ export default function SellerBoxScreen() {
 						</Pressable>
 					</View>
 					<View style={{ flexDirection: 'row', gap: 10 }}>
-						<Place label="РЯД" value={data?.location.rowCode ?? ' '} />
-						<Place label="КОНТЕЙНЕР" value={data ? String(data.location.number) : ' '} />
+						{data && !data.location ? (
+							<Place label="АДРЕС" value={data.address ?? ' '} />
+						) : (
+							<>
+								<Place label="РЯД" value={data?.location?.rowCode ?? ' '} />
+								<Place label="КОНТЕЙНЕР" value={data?.location ? String(data.location.number) : ' '} />
+							</>
+						)}
 					</View>
 				</LinearGradient>
 

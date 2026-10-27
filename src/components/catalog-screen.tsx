@@ -9,13 +9,14 @@ import { fontFamily, useColors } from '@/theme'
 import { useVideoViewer } from '@/store/useVideoViewer'
 import { MarketVideos } from '@/components/market-videos'
 import { resolveUrl } from '@/lib/api'
-import { countLabel, formatPlace, formatPrice, plural } from '@/lib/format'
+import { countLabel, formatPrice, plural } from '@/lib/format'
 import { useSearchParts, useSignedIn } from '@/api/catalog'
 import { useCategories } from '@/api/directory'
 import { useCars } from '@/api/garage'
 import type { PartCard } from '@/api/types'
 import { type CatalogSort, toPartFilters, useCatalogFilters } from '@/store/useCatalogFilters'
 import { useSession } from '@/store/useSession'
+import { briefPlace } from '@/lib/shop-place'
 
 const SORTS: { value: CatalogSort; label: string }[] = [
 	{ value: 'PRICE_ASC', label: 'Дешевле' },
@@ -297,7 +298,7 @@ function PartTile({ part }: { part: PartCard }) {
 			price={formatPrice(part.price)}
 			title={part.title}
 			fits={part.fits === true}
-			location={formatPlace(part.shop)}
+			location={briefPlace(part.shop)}
 			photoUrl={resolveUrl(part.mainPhoto?.thumbUrl ?? part.mainPhoto?.url ?? part.video?.posterUrl)}
 			shopAvatarUrl={resolveUrl(part.shop.avatarUrl)}
 			dimmed={part.stockStatus === 'OUT_OF_STOCK'}

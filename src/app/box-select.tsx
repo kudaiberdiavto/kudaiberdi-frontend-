@@ -2,9 +2,11 @@ import { useMemo, useState } from 'react'
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
+import * as Location from 'expo-location'
 import { BottomSheet, BrandLogo, Button, QueryErrorBanner } from '@/components/ui'
 import { BackIcon, BrandTile, Label, PlusIcon, TickIcon } from '@/components/seller-v23'
-import { SearchIcon } from '@/components/icons'
+import { LocateIcon, SearchIcon } from '@/components/icons'
+import { currentCoords } from '@/lib/locate'
 import { fontFamily, raw, useColors } from '@/theme'
 import { useRowContainers, useRows } from '@/api/market'
 import { useBrands } from '@/api/directory'
@@ -20,7 +22,8 @@ const ROW_ORDER = ['18', '16', '14', '12', '10', '8', '6', '4', '1', 'Ц', 'Л',
 const TILES = 5
 
 /**
- * 11 «Ваш контейнер» — registration in one minute: row, container number, brands → POST /shops.
+ * 11 «Где вы продаёте» — registration in one minute: on the Кудайберген market (row, container number) or a shop /
+ * centre elsewhere (name, address, the point by geolocation), then brands → POST /shops.
  * With a shop already — moving to another container (brands are changed in «Мой бокс»).
  */
 export default function BoxSelectScreen() {
@@ -40,6 +43,35 @@ export default function BoxSelectScreen() {
 	const [othersOpen, setOthersOpen] = useState(false)
 	// «Это мой контейнер» — a taken box that is actually yours.
 	const [claim, setClaim] = useState<{ id: number; number: number } | null>(null)
+	// A seller off the market (a Kia / Toyota centre…): name, address and the point.
+	const [onMarket, setOnMarket] = useState(true)
+	const store = !hasShop && !onMarket
+	const [name, setName] = useState('')
+	const [address, setAddress] = useState('')
+	const [point, setPoint] = useState<{ lat: number; lng: number } | null>(null)
+	const [locating, setLocating] = useState(false)
+	const [locateError, setLocateError] = useState<string | null>(null)
+
+	const locate = async () => {
+		setLocating(true)
+		setLocateError(null)
+		try {
+			if (!(await Location.requestForegroundPermissionsAsync()).granted) {
+				setLocateError('Разрешите доступ к геолокации в настройках')
+				return
+			}
+			const coords = await currentCoords()
+			setPoint({ lat: coords.latitude, lng: coords.longitude })
+			if (!address.trim()) {
+				const [place] = await Location.reverseGeocodeAsync(coords).catch(() => [])
+				if (place) setAddress([place.street, place.streetNumber].filter(Boolean).join(' ') || place.name || '')
+			}
+		} catch {
+			setLocateError('Не удалось определить место — попробуйте ещё раз')
+		} finally {
+			setLocating(false)
+		}
+	}
 
 	const sortedRows = useMemo(() => {
 		const rank = (code: string) => (ROW_ORDER.includes(code) ? ROW_ORDER.indexOf(code) : ROW_ORDER.length)
@@ -70,10 +102,31 @@ export default function BoxSelectScreen() {
 	const tiles = [...popular, ...all.filter((b) => picked.includes(b.id) && !popular.some((p) => p.id === b.id))]
 	const toggle = (id: number) => setPicked((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]))
 
-	const ready = Boolean(slot && !taken && (hasShop || picked.length > 0))
+	const ready = store
+		? Boolean(name.trim() && address.trim() && point && picked.length > 0)
+		: Boolean(slot && !taken && (hasShop || picked.length > 0))
 	const error = register.error ?? relocate.error
+	const field = {
+		height: 52,
+		borderRadius: 14,
+		borderWidth: 2,
+		borderColor: c.border,
+		backgroundColor: c.card,
+		paddingHorizontal: 16,
+		fontSize: 16,
+		fontFamily: fontFamily(500),
+		color: c.ink,
+	} as const
 
 	const submit = () => {
+		if (store) {
+			if (!point) return
+			register.mutate(
+				{ name: name.trim(), address: address.trim(), lat: point.lat, lng: point.lng, brandIds: picked },
+				{ onSuccess: () => router.replace('/seller') }
+			)
+			return
+		}
 		if (!slot) return
 		if (hasShop) relocate.mutate(slot.id, { onSuccess: () => router.back() })
 		else register.mutate({ containerId: slot.id, brandIds: picked }, { onSuccess: () => router.replace('/seller') })
@@ -88,7 +141,7 @@ export default function BoxSelectScreen() {
 					</Pressable>
 				) : null}
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					Ваш контейнер
+					{hasShop ? 'Ваш контейнер' : 'Где вы продаёте'}
 				</Text>
 			</View>
 
@@ -99,69 +152,126 @@ export default function BoxSelectScreen() {
 			>
 				<QueryErrorBanner error={rows.error ?? detail.error ?? brands.error} onRetry={() => rows.refetch()} />
 
-				<Label>Ряд</Label>
-				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-					{sortedRows.map((item) => {
-						const active = item.id === activeRowId
-						return (
-							<Pressable
-								key={item.id}
-								onPress={() => setRowId(item.id)}
-								style={{
-									// Seven in a row: (358 − 6 × 6) / 7.
-									width: '12.9%',
-									flexGrow: 1,
-									height: 40,
-									borderRadius: 10,
-									borderWidth: 1.5,
-									borderColor: active ? c.brand : c.border,
-									backgroundColor: active ? c.brand : c.card,
-									alignItems: 'center',
-									justifyContent: 'center',
-								}}
-							>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(active ? 800 : 600), color: active ? '#FFFFFF' : c.ink }}>
-									{item.code}
-								</Text>
-							</Pressable>
-						)
-					})}
-				</View>
-
-				<Label>Номер контейнера</Label>
-				<View
-					style={{
-						height: 56,
-						borderRadius: 14,
-						backgroundColor: c.card,
-						borderWidth: 2,
-						borderColor: placeError ? c.danger : c.brand,
-						paddingHorizontal: 16,
-						justifyContent: 'center',
-					}}
-				>
-					<TextInput
-						value={number}
-						onChangeText={(text) => setNumber(text.replace(/\D/g, '').slice(0, 4))}
-						keyboardType="number-pad"
-						placeholder={row ? `Например, 12` : 'Сначала выберите ряд'}
-						placeholderTextColor={raw.fillInk}
-						style={{ fontSize: 24, fontFamily: fontFamily(800), color: c.ink, padding: 0 }}
-					/>
-				</View>
-				{placeError ? (
-					<View style={{ gap: 4 }}>
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{placeError}</Text>
-						{taken && slot ? (
-							<Text
-								onPress={() => setClaim({ id: slot.id, number: slot.number })}
-								style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}
-							>
-								Это мой контейнер
-							</Text>
-						) : null}
+				{hasShop ? null : (
+					<View style={{ flexDirection: 'row', padding: 4, borderRadius: 14, backgroundColor: raw.fill, gap: 4 }}>
+						{[
+							{ value: true, label: 'На рынке Кудайберген' },
+							{ value: false, label: 'Магазин или центр' },
+						].map((option) => {
+							const active = onMarket === option.value
+							return (
+								<Pressable
+									key={option.label}
+									onPress={() => setOnMarket(option.value)}
+									style={{ flex: 1, height: 40, borderRadius: 11, backgroundColor: active ? c.card : 'transparent', alignItems: 'center', justifyContent: 'center' }}
+								>
+									<Text style={{ fontSize: 14, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.ink : c.muted }}>{option.label}</Text>
+								</Pressable>
+							)
+						})}
 					</View>
-				) : null}
+				)}
+
+				{store ? (
+					<>
+						<Label>Название</Label>
+						<TextInput
+							value={name}
+							onChangeText={(text) => setName(text.slice(0, 60))}
+							placeholder="Например, Kia Центр Бишкек"
+							placeholderTextColor={raw.fillInk}
+							style={field}
+						/>
+						<Label>Адрес</Label>
+						<TextInput
+							value={address}
+							onChangeText={(text) => setAddress(text.slice(0, 160))}
+							placeholder="ул. Ленина 45"
+							placeholderTextColor={raw.fillInk}
+							style={field}
+						/>
+						<Pressable
+							onPress={locate}
+							disabled={locating}
+							style={{ height: 48, borderRadius: 14, backgroundColor: point ? '#E7F6EC' : c.brandTint, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+						>
+							<LocateIcon size={20} color={point ? c.success : c.brandStrong} />
+							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: point ? c.success : c.brandStrong }}>
+								{locating ? 'Определяем…' : point ? 'Точка определена — обновить' : 'Отметить по геолокации'}
+							</Text>
+						</Pressable>
+						<Text style={{ fontSize: 13.5, lineHeight: 17.5, fontFamily: fontFamily(400), color: locateError ? c.danger : c.muted }}>
+							{locateError ?? 'Нажмите, находясь в магазине, — по точке покупатель построит маршрут'}
+						</Text>
+					</>
+				) : (
+					<>
+						<Label>Ряд</Label>
+						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+							{sortedRows.map((item) => {
+								const active = item.id === activeRowId
+								return (
+									<Pressable
+										key={item.id}
+										onPress={() => setRowId(item.id)}
+										style={{
+											// Seven in a row: (358 − 6 × 6) / 7.
+											width: '12.9%',
+											flexGrow: 1,
+											height: 40,
+											borderRadius: 10,
+											borderWidth: 1.5,
+											borderColor: active ? c.brand : c.border,
+											backgroundColor: active ? c.brand : c.card,
+											alignItems: 'center',
+											justifyContent: 'center',
+										}}
+									>
+										<Text style={{ fontSize: 15, fontFamily: fontFamily(active ? 800 : 600), color: active ? '#FFFFFF' : c.ink }}>
+											{item.code}
+										</Text>
+									</Pressable>
+								)
+							})}
+						</View>
+
+						<Label>Номер контейнера</Label>
+						<View
+							style={{
+								height: 56,
+								borderRadius: 14,
+								backgroundColor: c.card,
+								borderWidth: 2,
+								borderColor: placeError ? c.danger : c.brand,
+								paddingHorizontal: 16,
+								justifyContent: 'center',
+							}}
+						>
+							<TextInput
+								value={number}
+								onChangeText={(text) => setNumber(text.replace(/\D/g, '').slice(0, 4))}
+								keyboardType="number-pad"
+								placeholder={row ? `Например, 12` : 'Сначала выберите ряд'}
+								placeholderTextColor={raw.fillInk}
+								style={{ fontSize: 24, fontFamily: fontFamily(800), color: c.ink, padding: 0 }}
+							/>
+						</View>
+						{placeError ? (
+							<View style={{ gap: 4 }}>
+								<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{placeError}</Text>
+								{taken && slot ? (
+									<Text
+										onPress={() => setClaim({ id: slot.id, number: slot.number })}
+										style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}
+									>
+										Это мой контейнер
+									</Text>
+								) : null}
+							</View>
+						) : null}
+
+					</>
+				)}
 
 				{hasShop ? null : (
 					<>

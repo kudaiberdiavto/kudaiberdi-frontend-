@@ -7,11 +7,12 @@ import { BrandLogo } from '@/components/ui/brand'
 import { ChatIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, PhoneIcon, ShareIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
-import { formatDay, formatPlace, formatPrice, formatSide, plural } from '@/lib/format'
+import { formatDay, formatPrice, formatSide, plural } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
 import { usePublicShop, useShop, useShopParts, useShopReviews, useSignedIn, useToggleShopFavorite } from '@/api/catalog'
 import { useOpenChat } from '@/api/chats'
 import { ComplainLink, ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
+import { briefPlace, openShopRoute } from '@/lib/shop-place'
 
 /** Filled rating stars — gold, the empty ones stay grey. */
 const STAR = '#F5A623'
@@ -46,7 +47,7 @@ export default function SellerProfileForBuyerScreen() {
 	const brands = shop?.brands ?? []
 	const counts = shop?.counts
 
-	const route = () => shop && router.push({ pathname: '/route', params: { containerId: String(shop.location.containerId), shopName: shop.name } })
+	const route = () => shop && openShopRoute(shop)
 	const write = () =>
 		shop &&
 		(signedIn
@@ -123,17 +124,22 @@ export default function SellerProfileForBuyerScreen() {
 					</View>
 
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 14 }}>
-						<LocationCard rowLabel={shop?.location.rowCode ?? ' '} boxLabel={shop ? String(shop.location.number) : ' '} />
+						{/* On the market — row and box; a shop / centre elsewhere — its address. */}
+						{shop && !shop.location ? (
+							<Text style={{ fontSize: 16, lineHeight: 21, fontFamily: fontFamily(600), color: c.ink }}>{shop.address}</Text>
+						) : (
+							<LocationCard rowLabel={shop?.location?.rowCode ?? ' '} boxLabel={shop?.location ? String(shop.location.number) : ' '} />
+						)}
 						<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
 							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.inkSecondary }}>
-								{shop ? `${formatSide(shop.location.side)} сторона`.replace(/^./, (ch) => ch.toUpperCase()) : ' '}
+								{shop?.location ? `${formatSide(shop.location.side)} сторона`.replace(/^./, (ch) => ch.toUpperCase()) : shop ? 'Магазин' : ' '}
 							</Text>
 							<Pressable
 								onPress={route}
 								style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: c.brandTint, flexDirection: 'row', alignItems: 'center', gap: 6 }}
 							>
 								<MapPinIcon size={16} color={c.brandStrong} />
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>На карте</Text>
+								<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop && !shop.location ? 'Маршрут' : 'На карте'}</Text>
 							</Pressable>
 						</View>
 					</View>
@@ -233,7 +239,7 @@ export default function SellerProfileForBuyerScreen() {
 									price={formatPrice(part.price)}
 									title={part.title}
 									fits={part.fits === true}
-									location={formatPlace(part.shop)}
+									location={briefPlace(part.shop)}
 									photoUrl={resolveUrl(part.mainPhoto?.thumbUrl ?? part.mainPhoto?.url)}
 									shopAvatarUrl={resolveUrl(part.shop.avatarUrl)}
 									dimmed={part.stockStatus === 'OUT_OF_STOCK'}

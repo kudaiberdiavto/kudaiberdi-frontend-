@@ -5053,7 +5053,7 @@ export interface components {
             blockReason: string | null;
             /** @enum {string} */
             myRole: "OWNER" | "STAFF";
-            location: components["schemas"]["LocationDto"];
+            location: components["schemas"]["LocationDto"] | null;
             pendingLocation: components["schemas"]["LocationDto"] | null;
             verification: components["schemas"]["VerificationDto"];
             open: components["schemas"]["OpenStateDto"];
@@ -5068,6 +5068,12 @@ export interface components {
             /** Format: int32 */
             staffCount: number;
             photos: components["schemas"]["PhotoDto"][];
+            onMarket: boolean;
+            address: string | null;
+            /** Format: double */
+            lat: number | null;
+            /** Format: double */
+            lng: number | null;
         };
         OpenStateDto: {
             openNow: boolean;
@@ -5244,9 +5250,15 @@ export interface components {
             rating: number;
             /** Format: int32 */
             reviewsCount: number;
-            location: components["schemas"]["LocationDto"];
+            location: components["schemas"]["LocationDto"] | null;
             open: components["schemas"]["OpenStateDto"];
             phone: string | null;
+            onMarket: boolean;
+            address: string | null;
+            /** Format: double */
+            lat: number | null;
+            /** Format: double */
+            lng: number | null;
         };
         RolePermissionsRequest: {
             permissions: ("DASHBOARD_VIEW" | "EXPORT_EXCEL" | "SELLERS_VIEW" | "SELLERS_VERIFY" | "SELLERS_BLOCK" | "DISPUTES_RESOLVE" | "MASTERS_VIEW" | "MASTERS_VERIFY" | "MASTERS_BLOCK" | "MASTERS_CREATE" | "MARKET_VIEW" | "MARKET_EDIT" | "MARKET_MAP_PUBLISH" | "TENANTS_IMPORT" | "REQUESTS_VIEW" | "REQUESTS_MANAGE" | "COMPLAINTS_VIEW" | "COMPLAINTS_RESOLVE" | "CONTENT_REMOVE" | "SELLER_WARN" | "DICTIONARIES_VIEW" | "DICTIONARIES_EDIT" | "BROADCASTS_VIEW" | "BROADCASTS_SEND" | "USERS_VIEW" | "USERS_BLOCK" | "PII_VIEW" | "MESSAGE_USERS" | "AUDIT_VIEW" | "STAFF_MANAGE")[];
@@ -5481,7 +5493,12 @@ export interface components {
         };
         CreateShop: {
             /** Format: int64 */
-            containerId: number;
+            containerId?: number;
+            address?: string;
+            /** Format: double */
+            lat?: number;
+            /** Format: double */
+            lng?: number;
             name?: string;
             brandIds: number[];
             categoryIds?: number[];
@@ -5775,14 +5792,16 @@ export interface components {
             name: string;
             avatarUrl: string | null;
             rating: number;
-            row: string;
-            rowLabel: string;
+            row: string | null;
+            rowLabel: string | null;
             /** Format: int32 */
-            container: number;
-            /** @enum {string} */
-            side: "NORTH" | "SOUTH" | "WEST" | "EAST";
+            container: number | null;
+            /** @enum {string|null} */
+            side: "NORTH" | "SOUTH" | "WEST" | "EAST" | null;
             isOpenNow: boolean;
             openTo: components["schemas"]["LocalTime"];
+            onMarket: boolean;
+            address: string | null;
         };
         VideoDto: {
             /** Format: int64 */
@@ -6540,9 +6559,9 @@ export interface components {
             warned: boolean;
             owner: components["schemas"]["AdminShopOwnerDto"];
             shopPhone: string | null;
-            location: components["schemas"]["LocationDto"];
+            location: components["schemas"]["LocationDto"] | null;
             pendingLocation: components["schemas"]["LocationDto"] | null;
-            tenant: components["schemas"]["AdminTenantDto"];
+            tenant: components["schemas"]["AdminTenantDto"] | null;
             /** @enum {string} */
             tenantMatch: "CONTAINER_TAKEN" | "SMS_CONFIRMED" | "IN_TENANT_LIST" | "NOT_IN_LIST" | "AWAITING_CHECK";
             brands: string[];
@@ -6569,6 +6588,12 @@ export interface components {
             /** Format: int64 */
             warnings90d: number;
             sanctions: components["schemas"]["SanctionDto"][];
+            onMarket: boolean;
+            address: string | null;
+            /** Format: double */
+            lat: number | null;
+            /** Format: double */
+            lng: number | null;
         };
         AdminShopOwnerDto: {
             /** Format: int64 */
@@ -7153,6 +7178,11 @@ export interface components {
         };
         UpdateShop: {
             name?: string;
+            address?: string;
+            /** Format: double */
+            lat?: number;
+            /** Format: double */
+            lng?: number;
             openFrom?: components["schemas"]["LocalTime"];
             openTo?: components["schemas"]["LocalTime"];
             workDays?: ("MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY")[];
@@ -7324,7 +7354,7 @@ export interface components {
             rating: number;
             /** Format: int32 */
             reviewsCount: number;
-            location: components["schemas"]["LocationDto"];
+            location: components["schemas"]["LocationDto"] | null;
             open: components["schemas"]["OpenStateDto"];
             brands: components["schemas"]["BrandDto"][];
             categories: components["schemas"]["CategoryDto"][];
@@ -7332,6 +7362,12 @@ export interface components {
             isFavorite: boolean;
             photos: components["schemas"]["PhotoDto"][];
             counts: components["schemas"]["ShopCounts"];
+            onMarket: boolean;
+            address: string | null;
+            /** Format: double */
+            lat: number | null;
+            /** Format: double */
+            lng: number | null;
         };
         ServiceRecipientCounts: {
             /** Format: int64 */
@@ -8054,7 +8090,7 @@ export interface components {
             status: "PENDING_VERIFICATION" | "ACTIVE" | "BLOCKED" | "REJECTED";
             warned: boolean;
             ownerPhone: string;
-            location: components["schemas"]["LocationDto"];
+            location: components["schemas"]["LocationDto"] | null;
             pendingLocation: components["schemas"]["LocationDto"] | null;
             /** @enum {string} */
             tenantMatch: "CONTAINER_TAKEN" | "SMS_CONFIRMED" | "IN_TENANT_LIST" | "NOT_IN_LIST" | "AWAITING_CHECK";
@@ -8064,6 +8100,8 @@ export interface components {
             createdAt: string;
             /** Format: int32 */
             openDisputes: number;
+            onMarket: boolean;
+            address: string | null;
         };
         ShopTabCounts: {
             /** Format: int64 */

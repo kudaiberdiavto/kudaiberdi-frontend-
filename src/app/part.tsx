@@ -7,13 +7,14 @@ import { BrandLogo } from '@/components/ui/brand'
 import { ChatIcon, CheckIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, ShareIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
-import { formatPlace, formatPrice } from '@/lib/format'
+import { formatPrice } from '@/lib/format'
 import { usePart, usePublicPart, useSignedIn, useTogglePartFavorite } from '@/api/catalog'
 import { useOpenChat } from '@/api/chats'
 import type { PartCondition } from '@/api/types'
 import { toPartFilters, useCatalogFilters } from '@/store/useCatalogFilters'
 import { useCars } from '@/api/garage'
 import { ComplainLink, ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
+import { openShopRoute, shopPlace } from '@/lib/shop-place'
 
 const CONDITION: Record<PartCondition, string> = { NEW: 'Новое', USED: 'Б/У', ON_ORDER: 'Под заказ' }
 
@@ -189,7 +190,7 @@ export default function PartScreen() {
 								<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>{shop.name}</Text>
 								<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
 									{shop.reviewsCount ? `★ ${shop.rating.toFixed(1)} · ` : ''}
-									{formatPlace(shop.location)}
+									{shopPlace(shop)}
 								</Text>
 							</View>
 							<Text style={{ fontSize: 20, color: c.muted }}>›</Text>
@@ -231,7 +232,7 @@ export default function PartScreen() {
 			>
 				<Pressable
 					disabled={!shop}
-					onPress={() => shop && router.push({ pathname: '/route', params: { containerId: String(shop.location.containerId), shopName: shop.name } })}
+					onPress={() => shop && openShopRoute(shop)}
 					style={{ flex: 1, height: 54, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 				>
 					<MapPinIcon size={20} color={c.ink} />

@@ -5,6 +5,7 @@ import { BackIcon, BoxOutlineIcon, CallIcon, WrenchIcon } from '@/components/buy
 import { resolveUrl } from '@/lib/api'
 import { fontFamily, useColors } from '@/theme'
 import { useChat } from '@/api/chats'
+import { openShopRoute } from '@/lib/shop-place'
 
 /** 07 — buyer's chat with a shop, or with a master (then `shop = null`, `master` and `serviceRequest`); call in one tap. */
 export default function BuyerChatScreen() {
@@ -54,7 +55,9 @@ export default function BuyerChatScreen() {
 							{typing
 								? 'печатает…'
 								: shop
-									? `${shop.location.rowLabel} · контейнер ${shop.location.number}`
+									? shop.location
+										? `${shop.location.rowLabel} · контейнер ${shop.location.number}`
+										: (shop.address ?? '')
 									: master
 										? master.mobile
 											? 'выездной мастер'
@@ -103,17 +106,7 @@ export default function BuyerChatScreen() {
 				) : null
 			}
 			onAction={(reply) => {
-				if (reply.code === 'ROUTE_TO_BOX' && shop) {
-					router.push({
-						pathname: '/route',
-						params: {
-							containerId: String(shop.location.containerId),
-							shopName: shop.name,
-							chatId: String(chatId),
-							phone: shop.phone ?? undefined,
-						},
-					})
-				}
+				if (reply.code === 'ROUTE_TO_BOX' && shop) openShopRoute(shop, { chatId })
 				// «Купил» — on the request screen: «Нашли запчасть?» [08]
 				if (reply.code === 'CLOSE_REQUEST' && chat?.request) {
 					router.push({ pathname: '/request', params: { id: String(chat.request.id) } })

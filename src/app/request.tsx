@@ -30,6 +30,7 @@ import {
 	useRequestStats,
 } from '@/api/requests'
 import type { Reply } from '@/api/types'
+import { openShopRoute } from '@/lib/shop-place'
 
 type Sort = 'CHEAP' | 'NEAR'
 
@@ -263,7 +264,9 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 	const c = useColors()
 	const shop = reply.shop
 	if (!shop) return null
-	const place = `Ряд ${shop.location.rowCode} · конт. ${shop.location.number}${reply.walkMinutes != null ? ` · ${reply.walkMinutes} мин` : ''}`
+	const place = shop.location
+		? `Ряд ${shop.location.rowCode} · конт. ${shop.location.number}${reply.walkMinutes != null ? ` · ${reply.walkMinutes} мин` : ''}`
+		: (shop.address ?? '')
 	const chips = replyChips(reply)
 	return (
 		<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10, borderWidth: 2, borderColor: best ? c.success : c.card }}>
@@ -322,15 +325,7 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 				</SquareButton>
 				<SquareButton
 					onPress={() =>
-						router.push({
-							pathname: '/route',
-							params: {
-								containerId: String(shop.location.containerId),
-								shopName: shop.name,
-								chatId: reply.chatId ? String(reply.chatId) : undefined,
-								phone: shop.phone ?? undefined,
-							},
-						})
+						openShopRoute(shop, { chatId: reply.chatId })
 					}
 				>
 					<RouteIcon size={22} color={c.brandStrong} />
@@ -383,7 +378,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 				{shop.name}
 			</Text>
 			<Text style={{ fontSize: 12, fontFamily: fontFamily(400), color: c.muted }}>
-				{done ? 'отмечен' : `${shop.location.rowCode} · ${shop.location.number}`}
+				{done ? 'отмечен' : shop.location ? `${shop.location.rowCode} · ${shop.location.number}` : 'магазин'}
 			</Text>
 		</Pressable>
 	)

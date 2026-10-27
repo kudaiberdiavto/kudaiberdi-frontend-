@@ -8,11 +8,11 @@ import { PlayIcon } from '@/components/voice'
 import { YellowChip, formatKgPhone } from '@/components/video-v23'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
-import { formatPlace } from '@/lib/format'
 import { usePart } from '@/api/catalog'
 import { useMe } from '@/api/me'
 import { useCreateDeliveryOrder, useDeliveryTariffs } from '@/api/delivery'
 import type { DeliveryRegion, DeliveryRegionCode } from '@/api/types'
+import { shopPlace } from '@/lib/shop-place'
 
 /**
  * «Доставка» — where to (8 regions), the courier brings it home: address, recipient, phone. No delivery prices in
@@ -85,7 +85,7 @@ export default function DeliveryScreen() {
 								{part.title}
 							</Text>
 							<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
-								{part.shop.name} · {formatPlace(part.shop.location).replace('Бокс', 'конт.')}
+								{part.shop.name} · {shopPlace(part.shop).replace('Бокс', 'конт.')}
 							</Text>
 						</View>
 						{part.price != null ? (
