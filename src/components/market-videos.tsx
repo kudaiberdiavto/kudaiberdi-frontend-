@@ -11,7 +11,7 @@ import { useVideoViewer } from '@/store/useVideoViewer'
 export type VideoFeedCar = Parameters<typeof useVideoFeed>[0]
 
 /**
- * «Видео с рынка» — tiles play by themselves without sound; a tap opens the feed on that video. On the home screen —
+ * Videos from the market (no section title — the tiles speak for themselves): tiles play by themselves without sound; a tap opens the feed on that video. On the home screen —
  * for the main car; in «Запчасти» — for the car picked there (`car`: filters + «для Camry 50»).
  */
 export function MarketVideos({ car: picked }: { car?: { filters: VideoFeedCar; label: string | null } } = {}) {
@@ -39,14 +39,16 @@ export function MarketVideos({ car: picked }: { car?: { filters: VideoFeedCar; l
 	return (
 		<View style={{ gap: 10, paddingTop: 2 }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-				<Text style={{ fontSize: 16, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ВИДЕО С РЫНКА</Text>
+				{/* The car chip gives way when the row is tight — «Смотреть все» always fits. */}
 				{carLabel ? (
-					<View style={{ height: 26, paddingHorizontal: 10, borderRadius: 13, backgroundColor: c.brandTint, justifyContent: 'center' }}>
-						<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>для {carLabel}</Text>
+					<View style={{ flexShrink: 1, height: 26, paddingHorizontal: 10, borderRadius: 13, backgroundColor: c.brandTint, justifyContent: 'center' }}>
+						<Text numberOfLines={1} style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>
+							для {carLabel}
+						</Text>
 					</View>
 				) : null}
 				<View style={{ flex: 1 }} />
-				<Text onPress={() => openFeed()} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.brandStrong }}>
+				<Text onPress={() => openFeed()} style={{ flexShrink: 0, fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>
 					Смотреть все
 				</Text>
 			</View>
