@@ -168,6 +168,7 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 			</ScrollView>
 
 			<View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: bottom + 12, gap: 10 }}>
+				<QueryErrorBanner error={receive.error} />
 				{order.status === 'PICKED_UP' || order.status === 'COURIER_ORDERED' ? (
 					<BigButton label="Получил посылку" tone="green" onPress={() => receive.mutate()} loading={receive.isPending} />
 				) : null}

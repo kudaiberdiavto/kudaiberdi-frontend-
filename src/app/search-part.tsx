@@ -42,9 +42,10 @@ export default function SearchPartScreen() {
 	const isMaster = useSession((s) => s.role) === 'MASTER'
 	const [text, setText] = useState(params.text ?? '')
 	const uploads = usePhotoUploads('REQUEST', 3)
-	// What the buyer said goes into the field if it's still empty.
+	// What the buyer said goes into the field if it's still empty — 3–200 characters, as the server takes it.
 	const voice = useVoiceNote('REQUEST', (result) => {
-		if (result.voice.transcript) setText((current) => (current.trim() ? current : result.voice.transcript ?? ''))
+		const said = result.voice.transcript?.trim() ?? ''
+		if (said.length >= 3) setText((current) => (current.trim() ? current : said.slice(0, 200)))
 	})
 	const passport = useReadTechPassport()
 	const addCar = useAddCar()
@@ -65,7 +66,8 @@ export default function SearchPartScreen() {
 	)
 	const typed = text.trim()
 	const voiceId = voice.result?.voice.id
-	const hasPart = typed.length >= 3 || uploads.mediaIds.length > 0 || Boolean(voiceId)
+	// Typed text must be 3+ characters (the server rejects shorter); without text — a photo or a voice note.
+	const hasPart = typed ? typed.length >= 3 : uploads.mediaIds.length > 0 || Boolean(voiceId)
 	const busy = uploads.uploading || voice.uploading || voice.recording
 
 	/**
@@ -99,6 +101,7 @@ export default function SearchPartScreen() {
 						pathname: '/garage-add',
 						params: {
 							once: isMaster ? '1' : undefined,
+							select: isMaster ? undefined : '1',
 							brand: read.brand ? JSON.stringify(read.brand) : undefined,
 							year: read.year ? String(read.year) : undefined,
 							vin: read.vin ?? undefined,
@@ -108,7 +111,7 @@ export default function SearchPartScreen() {
 					})
 				}
 			},
-			onError: () => router.push({ pathname: '/garage-add', params: { once: isMaster ? '1' : undefined } }),
+			onError: () => router.push({ pathname: '/garage-add', params: isMaster ? { once: '1' } : { select: '1' } }),
 		})
 	}
 

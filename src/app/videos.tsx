@@ -35,13 +35,19 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 	const focused = useIsFocused()
 	const listRef = useRef<FlatList<VideoFeedItem>>(null)
 
-	// A tile on the home screen was tapped — open the feed on that video.
+	// A video was tapped (home, catalog) — open the feed on it. Not on the loaded pages — load more; not in this
+	// feed at all (another car, a search result) — open the part itself instead of an unrelated video.
 	useEffect(() => {
-		if (startPartId === null || !height || !items.length) return
+		if (startPartId === null || !height || feed.isPending || feed.isFetchingNextPage) return
 		const at = items.findIndex((item) => item.partId === startPartId)
-		if (at > 0) listRef.current?.scrollToIndex({ index: at, animated: false })
+		if (at < 0 && feed.hasNextPage) {
+			feed.fetchNextPage()
+			return
+		}
 		useVideoViewer.getState().clearStart()
-	}, [startPartId, height, items])
+		if (at > 0) listRef.current?.scrollToIndex({ index: at, animated: false })
+		else if (at < 0) router.replace({ pathname: '/part', params: { id: String(startPartId) } })
+	}, [startPartId, height, items, feed])
 
 	// FlatList wants the same callback for its whole life.
 	const onViewable = useCallback(({ viewableItems }: { viewableItems: ViewToken<VideoFeedItem>[] }) => {

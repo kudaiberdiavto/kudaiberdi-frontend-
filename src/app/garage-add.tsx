@@ -36,8 +36,10 @@ export default function GarageAddScreen() {
 		engineVolume?: string
 		fuel?: string
 		once?: string
+		select?: string
 	}>()
 	const once = passport.once === '1'
+	// `select=1` — opened from «Найти запчасть» [04]: the added car becomes the request's car.
 	const [q, setQ] = useState('')
 	const [brand, setBrand] = useState<Brand | null>(() => (passport.brand ? (JSON.parse(passport.brand) as Brand) : null))
 	const [modelId, setModelId] = useState<number | null>(null)
@@ -227,7 +229,12 @@ export default function GarageAddScreen() {
 											vin: passport.vin || undefined,
 											fromTechPassport: Boolean(passport.brand) || undefined,
 										},
-										{ onSuccess: () => router.back() }
+										{
+											onSuccess: (car) => {
+												if (passport.select === '1') useClientCar.getState().select(car.id)
+												router.back()
+											},
+										}
 									)
 								}}
 							/>

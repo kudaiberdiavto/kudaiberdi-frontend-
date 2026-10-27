@@ -2,6 +2,7 @@ import '../global.css'
 import { useEffect } from 'react'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
+import { setAudioModeAsync } from 'expo-audio'
 import * as SplashScreen from 'expo-splash-screen'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -38,6 +39,8 @@ export default function RootLayout() {
 
 	useEffect(() => {
 		useSession.getState().boot()
+		// Voice notes play even with the iPhone's silent switch on — otherwise they are mute until the first recording.
+		setAudioModeAsync({ playsInSilentMode: true, allowsRecording: false }).catch(() => {})
 	}, [])
 	useDictionariesVersion()
 

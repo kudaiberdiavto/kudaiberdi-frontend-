@@ -101,22 +101,30 @@ export default function SellerVideoScreen() {
 		setAdding(false)
 	}
 
+	// The draft created by the first tap — if publishing fails, the retry updates it instead of creating a second part.
+	const draftId = useRef<number | null>(null)
 	const submit = async () => {
 		if (!uploaded) return
 		const fitments = models.filter((m) => selected.includes(m.modelId)).map((m) => ({ brandId: m.brandId, modelId: m.modelId }))
-		const part = await save.mutateAsync({
-			body: {
-				title: title.trim(),
-				price: priceValue,
-				condition,
-				quantity: 1,
-				fitments,
-				videoMediaId: uploaded.video.id,
-				shipsToRegions: ships,
-			},
-		})
-		await publish.mutateAsync(part.id)
-		router.back()
+		try {
+			const part = await save.mutateAsync({
+				id: draftId.current ?? undefined,
+				body: {
+					title: title.trim(),
+					price: priceValue,
+					condition,
+					quantity: 1,
+					fitments,
+					videoMediaId: uploaded.video.id,
+					shipsToRegions: ships,
+				},
+			})
+			draftId.current = part.id
+			await publish.mutateAsync(part.id)
+			router.back()
+		} catch {
+			// shown by the error banner (save.error / publish.error)
+		}
 	}
 
 	const label = { fontSize: 13, fontFamily: fontFamily(500), color: c.muted } as const
@@ -362,6 +370,19 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 	const [active, setActive] = useState(false)
 	const [seconds, setSeconds] = useState(0)
 	const started = useRef(0)
+	// Closed while recording (✕ or Android back) — the recording is thrown away, not uploaded.
+	const cancelled = useRef(false)
+	useEffect(
+		() => () => {
+			cancelled.current = true
+		},
+		[]
+	)
+	const close = () => {
+		cancelled.current = true
+		if (active) camera.current?.stopRecording()
+		onClose()
+	}
 
 	useEffect(() => {
 		if (!active) return
@@ -383,7 +404,7 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 		try {
 			const result = await camera.current.recordAsync({ maxDuration: MAX_SEC })
 			const durationSec = Math.max(1, Math.round((Date.now() - started.current) / 1000))
-			if (result?.uri) onDone({ uri: result.uri, mimeType: Platform.OS === 'ios' ? 'video/quicktime' : 'video/mp4', durationSec })
+			if (result?.uri && !cancelled.current) onDone({ uri: result.uri, mimeType: Platform.OS === 'ios' ? 'video/quicktime' : 'video/mp4', durationSec })
 		} finally {
 			setActive(false)
 		}
@@ -419,7 +440,7 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 				</View>
 			)}
 
-			<Pressable onPress={onClose} hitSlop={12} style={{ position: 'absolute', top: insets.top + 12, left: 16 }}>
+			<Pressable onPress={close} hitSlop={12} style={{ position: 'absolute', top: insets.top + 12, left: 16 }}>
 				<CloseIcon size={28} color="#FFFFFF" />
 			</Pressable>
 			{active ? (

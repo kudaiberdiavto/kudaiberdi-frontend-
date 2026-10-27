@@ -5,10 +5,12 @@ import { meKeys } from './keys'
 import type { Car, CreateCarBody } from './types'
 
 /** Primary car first — the server sorts. */
-export function useCars() {
+/** `enabled` — false for a guest (no garage; avoids 401s). */
+export function useCars(enabled = true) {
 	return useQuery({
 		queryKey: meKeys.cars,
 		queryFn: ({ signal }) => apiFetch<Car[]>('/me/cars', { signal }),
+		enabled,
 	})
 }
 

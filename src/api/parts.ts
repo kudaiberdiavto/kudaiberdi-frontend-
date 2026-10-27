@@ -42,6 +42,8 @@ function usePartMutation<TVariables, TResult extends PartDetail | void>(
 			if (part) queryClient.setQueryData(partKeys.myDetail(part.id), part)
 			// Lists and chip counters on 24 changed.
 			queryClient.invalidateQueries({ queryKey: ['parts', 'my'] })
+			// A part with a video shows up in «Видео с рынка» and the feed (or leaves them).
+			queryClient.invalidateQueries({ queryKey: ['videos'] })
 		},
 	})
 }

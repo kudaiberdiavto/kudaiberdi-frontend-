@@ -45,8 +45,9 @@ export default function ServiceNewScreen() {
 	const media = useServiceMedia(MAX_MEDIA)
 	const voice = useVoiceNote('SERVICE', (result) => {
 		// What was said becomes the text if nothing is typed — it is the request's caption anyway.
-		const said = result.voice.transcript?.trim()
-		if (said) setDescription((current) => (current.trim() ? current : said.slice(0, 500)))
+		const said = result.voice.transcript?.trim() ?? ''
+		// Shorter than the server's minimum — keep the field empty: the voice note alone is enough.
+		if (said.length >= MIN_DESCRIPTION) setDescription((current) => (current.trim() ? current : said.slice(0, 500)))
 	})
 	const [point, setPoint] = useState<Point>({ ...MARKET_POINT, label: MARKET_LABEL })
 	const [pickPoint, setPickPoint] = useState(false)
@@ -61,7 +62,8 @@ export default function ServiceNewScreen() {
 
 	const recipients = estimate.data?.recipients
 	const text = description.trim()
-	const described = text.length >= MIN_DESCRIPTION || media.mediaIds.length > 0 || Boolean(voice.result)
+	// Typed text must reach the minimum (the server rejects shorter); without text — media or a voice note.
+	const described = text ? text.length >= MIN_DESCRIPTION : media.mediaIds.length > 0 || Boolean(voice.result)
 	const ready = Boolean(car) && described && !media.uploading && !voice.uploading && !voice.recording && recipients !== 0
 
 	const hint = !car
