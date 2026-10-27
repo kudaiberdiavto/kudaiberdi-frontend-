@@ -17,6 +17,7 @@ import {
 	replyChips,
 } from '@/components/buyer-v23'
 import { VoicePlayer } from '@/components/voice'
+import { MediaStrip, photosAsMedia } from '@/components/media-strip'
 import { fontFamily, useColors } from '@/theme'
 import { minutesLeft, plural } from '@/lib/format'
 import { resolveUrl } from '@/lib/api'
@@ -129,11 +130,12 @@ export default function RequestScreen() {
 				) : null}
 				{extend.error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{extend.error.message}</Text> : null}
 
-				{/* The buyer's own voice note — not in the mockup, but they should be able to replay what they asked. */}
-				{detail?.voice ? (
+				{/* What the buyer attached — voice and photos — not in the mockup, but they should see what they asked. */}
+				{detail?.voice || detail?.photos.length ? (
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 8 }}>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Ваш запрос голосом</Text>
-						<VoicePlayer voice={detail.voice} />
+						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Ваш запрос</Text>
+						{detail.voice ? <VoicePlayer voice={detail.voice} /> : null}
+						<MediaStrip media={photosAsMedia(detail.photos)} />
 					</View>
 				) : null}
 

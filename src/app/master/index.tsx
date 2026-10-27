@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { FlatList, Image, Pressable, Text, View } from 'react-native'
+import { FlatList, Pressable, Text, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
 import { QueryErrorBanner, Screen, ServiceIcon } from '@/components/ui'
-import { PlayIcon, VoicePlayer } from '@/components/voice'
-import { MediaViewer } from '@/components/media-viewer'
-import { resolveUrl } from '@/lib/api'
+import { VoicePlayer } from '@/components/voice'
+import { MediaStrip } from '@/components/media-strip'
 import { CheckMark, MicOutline, UrgentChip, myOfferLine } from '@/components/master-v23'
 import { AccountStatusBanner } from '@/components/account-status-banner'
 import { fontFamily, raw, useColors } from '@/theme'
@@ -13,7 +12,7 @@ import { markServiceSeen, serviceName, useMasterFeed, useMasterOffer, useMyMaste
 import { flattenPages } from '@/api/pagination'
 import { useMyRequests } from '@/api/requests'
 import { LoupeIcon } from '@/components/buyer-v23'
-import type { MasterFeedItem, MediaItem } from '@/api/types'
+import type { MasterFeedItem } from '@/api/types'
 
 /** 18 «Заявки» — new requests and the ones already answered; reply by voice, «Не моё» or «Могу помочь». */
 export default function MasterRequestsScreen() {
@@ -149,8 +148,6 @@ function RequestCard({
 	const car = [item.car.modelLabel, item.car.year].filter(Boolean).join(' · ') || item.car.label
 	const meta = [car, formatDistance(item.distanceM), formatAgo(item.notifiedAt, { short: true, now })].join(' · ')
 	const mine = item.myOffer
-	// The client's photos and videos — tap to open them full screen.
-	const [viewing, setViewing] = useState<MediaItem[] | null>(null)
 
 	return (
 		<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10 }}>
@@ -172,27 +169,8 @@ function RequestCard({
 			<View style={{ gap: 6 }}>
 				<Text style={{ fontSize: 16, lineHeight: 20.8, fontFamily: fontFamily(600), color: c.ink }}>{item.description}</Text>
 				{item.voice ? <VoicePlayer voice={item.voice} /> : null}
-				{item.media.length ? (
-					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-						{item.media.map((media) => (
-							<Pressable key={media.id} onPress={() => setViewing(item.media)}>
-								<Image
-									source={{ uri: resolveUrl(media.thumbUrl ?? (media.kind === 'PHOTO' ? media.url : null)) ?? undefined }}
-									style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: '#1F2329' }}
-								/>
-								{media.kind === 'VIDEO' ? (
-									<View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
-										<View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', justifyContent: 'center' }}>
-											<PlayIcon size={12} />
-										</View>
-									</View>
-								) : null}
-							</Pressable>
-						))}
-					</View>
-				) : null}
+				<MediaStrip media={item.media} />
 			</View>
-			<MediaViewer items={viewing} onClose={() => setViewing(null)} />
 
 			{mine ? (
 				<View

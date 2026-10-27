@@ -6,6 +6,7 @@ import { QueryErrorBanner, ServiceIcon } from '@/components/ui'
 import { BackChevron, CallRow, SmallChip, offerWhen } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
 import { VoicePlayer } from '@/components/voice'
+import { MediaStrip } from '@/components/media-strip'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatDistance, formatNumber, minutesLeft, plural } from '@/lib/format'
@@ -128,11 +129,12 @@ export default function ServiceOffersScreen() {
 				) : null}
 				{actionError ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{actionError.message}</Text> : null}
 
-				{/* The buyer's own voice note — not in the mockup, but they should be able to replay what they asked. */}
-				{detail?.voice ? (
+				{/* What the buyer attached — voice, photos, videos — not in the mockup, but they should see what they sent. */}
+				{detail?.voice || detail?.media.length ? (
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 8 }}>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Ваша заявка голосом</Text>
-						<VoicePlayer voice={detail.voice} />
+						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Ваша заявка</Text>
+						{detail.voice ? <VoicePlayer voice={detail.voice} /> : null}
+						<MediaStrip media={detail.media} />
 					</View>
 				) : null}
 
