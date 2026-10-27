@@ -108,6 +108,7 @@ export const masterKeys = {
 
 export const videoKeys = {
 	feed: (params: object) => ['videos', 'feed', params] as const,
+	comments: (partId: number) => ['videos', 'comments', partId] as const,
 }
 
 export const deliveryKeys = {

@@ -4,7 +4,7 @@ import { apiFetch } from '@/lib/api'
 import { useSession } from '@/store/useSession'
 import { catalogKeys, meKeys, shopKeys, videoKeys } from './keys'
 import { cursorPaging } from './pagination'
-import type { PartDetail, PartSearchResult, ReviewPage, ShopPublic, VideoFeedPage } from './types'
+import type { PartComment, PartCommentPage, PartDetail, PartSearchResult, ReviewPage, ShopPublic, VideoFeedPage } from './types'
 
 /** Filters of GET /parts/search — the same for /parts/search/count and /shops/{id}/parts. */
 export interface PartFilters {
@@ -167,4 +167,39 @@ export function useToggleVideoFavorite() {
 		},
 		onSettled: () => queryClient.invalidateQueries({ queryKey: meKeys.favoriteParts }),
 	})
+}
+
+/** Comments under a video part — newest first. */
+export function usePartComments(partId: number, enabled = true) {
+	return useInfiniteQuery({
+		queryKey: videoKeys.comments(partId),
+		queryFn: ({ pageParam, signal }) =>
+			apiFetch<PartCommentPage>(`/parts/${partId}/comments`, { query: { cursor: pageParam }, signal }),
+		enabled: enabled && partId > 0,
+		...cursorPaging,
+	})
+}
+
+/** After a comment is added or deleted: the list and the «Комм.» counter in the feed. */
+function useCommentMutation<V>(partId: number, mutationFn: (vars: V) => Promise<unknown>) {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: videoKeys.comments(partId) })
+			queryClient.invalidateQueries({ queryKey: ['videos', 'feed'] })
+		},
+	})
+}
+
+export function useAddPartComment(partId: number) {
+	return useCommentMutation(partId, (text: string) =>
+		apiFetch<PartComment>(`/parts/${partId}/comments`, { method: 'POST', body: { text } })
+	)
+}
+
+export function useDeletePartComment(partId: number) {
+	return useCommentMutation(partId, (commentId: number) =>
+		apiFetch<void>(`/parts/${partId}/comments/${commentId}`, { method: 'DELETE' })
+	)
 }

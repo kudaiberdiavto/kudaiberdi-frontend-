@@ -13,6 +13,7 @@ import { flattenPages } from '@/api/pagination'
 import { useSignedIn, useToggleVideoFavorite, useVideoFeed } from '@/api/catalog'
 import type { VideoFeedItem } from '@/api/types'
 import { useOpenChat } from '@/api/chats'
+import { CommentsSheet } from '@/components/comments-sheet'
 import { ChatIcon } from '@/components/icons'
 import { useVideoViewer } from '@/store/useVideoViewer'
 
@@ -166,6 +167,7 @@ function FeedPage({
 				)
 			: router.push('/')
 	const meta = [shop.place, shop.replyMinutes != null ? `отвечает за ${shop.replyMinutes} мин` : null].filter(Boolean).join(' · ')
+	const [commenting, setCommenting] = useState(false)
 	const condition = CONDITION_CHIP[item.condition]
 	const description = [condition, item.fitsLabel].filter(Boolean).join('. ')
 
@@ -174,6 +176,11 @@ function FeedPage({
 			label: 'Сохр.',
 			icon: <BookmarkIcon size={22} color="#FFFFFF" filled={item.isFavorite} />,
 			onPress: () => (signedIn ? favorite.mutate({ partId: item.partId, favorite: !item.isFavorite }) : router.push('/')),
+		},
+		{
+			label: item.commentsCount ? String(item.commentsCount) : 'Комм.',
+			icon: <ChatIcon size={22} color="#FFFFFF" strokeWidth={2.1} />,
+			onPress: () => setCommenting(true),
 		},
 		{
 			label: 'Отправ.',
@@ -285,6 +292,7 @@ function FeedPage({
 					) : null}
 				</View>
 			</View>
+			{commenting ? <CommentsSheet partId={item.partId} title={item.title} onClose={() => setCommenting(false)} /> : null}
 		</View>
 	)
 }
