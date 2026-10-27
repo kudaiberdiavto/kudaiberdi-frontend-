@@ -65,7 +65,7 @@ function arrivalText(order: DeliveryOrder, now = new Date()) {
 	const arrival = new Date(base.getTime() + order.days * 86_400_000)
 	const days = Math.round((new Date(arrival).setHours(0, 0, 0, 0) - new Date(now).setHours(0, 0, 0, 0)) / 86_400_000)
 	const day = days <= 0 ? 'сегодня' : days === 1 ? 'завтра' : days === 2 ? 'послезавтра' : formatDay(arrival)
-	return `Курьер привезёт домой ${day}${order.price != null ? ` · ${priceDigits(order.price)} с` : ''}`
+	return `Курьер привезёт домой ${day}`
 }
 
 const CAPTION: Record<DeliveryOrder['status'], string> = {

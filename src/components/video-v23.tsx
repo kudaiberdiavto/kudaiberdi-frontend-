@@ -202,15 +202,6 @@ export function useFeedCar() {
 
 // ─── Delivery ────────────────────────────────────────────────────────────────
 
-/** «сегодня», «1 день · 350 с», «2 дня · 400 с». */
-export function daysLabel(days: number) {
-	return days === 0 ? 'сегодня' : days === 1 ? '1 день' : `${days} дня`
-}
-
-export function tariffLabel(days: number, price: number | null | undefined) {
-	return days === 0 || price == null ? daysLabel(days) : `${daysLabel(days)} · ${priceDigits(price)} с`
-}
-
 /** Minutes of the Bishkek day (UTC+6, no DST) — the courier's 17:30 cut-off is in market time. */
 export function bishkekMinutes(now = new Date()) {
 	return (now.getUTCHours() * 60 + now.getUTCMinutes() + 6 * 60) % (24 * 60)

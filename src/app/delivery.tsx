@@ -1,23 +1,22 @@
 import { useState } from 'react'
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Image, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BigButton, BubbleIcon, Caps, TopBar, priceDigits } from '@/components/buyer-v23'
+import { BigButton, Caps, TopBar, priceDigits } from '@/components/buyer-v23'
 import { QueryErrorBanner } from '@/components/ui'
 import { PlayIcon } from '@/components/voice'
-import { ClockOutline, YellowChip, beforeCutoff, daysLabel, formatKgPhone, tariffLabel } from '@/components/video-v23'
+import { YellowChip, formatKgPhone } from '@/components/video-v23'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatPlace } from '@/lib/format'
 import { usePart } from '@/api/catalog'
 import { useMe } from '@/api/me'
 import { useCreateDeliveryOrder, useDeliveryTariffs } from '@/api/delivery'
-import type { DeliveryDistrict, DeliveryRegion, DeliveryRegionCode } from '@/api/types'
+import type { DeliveryRegion, DeliveryRegionCode } from '@/api/types'
 
 /**
- * «Доставка: регион и способ» — where to (8 regions, remote districts as chips), the courier brings it home: address,
- * recipient, phone. Price and days of the base tariff up to 5 kg; the courier counts the surcharge. Payment for the
- * part — in the chat with the seller.
+ * «Доставка» — where to (8 regions), the courier brings it home: address, recipient, phone. No delivery prices in
+ * the app: the cost is agreed with Ылдам Экспресс directly.
  */
 export default function DeliveryScreen() {
 	const c = useColors()
@@ -29,29 +28,20 @@ export default function DeliveryScreen() {
 	const create = useCreateDeliveryOrder()
 
 	const [regionCode, setRegionCode] = useState<DeliveryRegionCode | null>(null)
-	const [district, setDistrict] = useState<DeliveryDistrict['code'] | null>(null)
 	const [address, setAddress] = useState('')
 	const [name, setName] = useState<string | null>(null)
 	const [phone, setPhone] = useState<string | null>(null)
 
 	const regions = tariffs.data?.regions ?? []
 	const region = regions.find((item) => item.code === regionCode)
-	const picked = region?.districts.find((item) => item.code === district) ?? null
-	const days = picked?.days ?? region?.days ?? 1
-	const price = picked ? picked.price : (region?.price ?? null)
-	const where = picked?.name ?? region?.inName ?? ''
 	const recipient = name ?? me?.name ?? ''
 	const recipientPhone = phone ?? formatKgPhone(me?.phone)
-	const today = beforeCutoff(tariffs.data?.cutoff ?? '17:30')
-	const remote = regions.flatMap((item) => item.districts)
+	const courierPhone = tariffs.data?.courierPhone
 	const video = part?.video
 	const poster = resolveUrl(video?.posterUrl ?? part?.photos[0]?.thumbUrl ?? null)
 	const ready = Boolean(region && address.trim() && recipient.trim() && recipientPhone.replace(/\D/g, '').length >= 9)
 
-	const choose = (next: DeliveryRegion) => {
-		setRegionCode(next.code)
-		setDistrict(null)
-	}
+	const choose = (next: DeliveryRegion) => setRegionCode(next.code)
 
 	const submit = () =>
 		region &&
@@ -59,7 +49,6 @@ export default function DeliveryScreen() {
 			{
 				partId,
 				region: region.code,
-				district: district ?? undefined,
 				address: address.trim(),
 				recipientName: recipient.trim(),
 				recipientPhone: recipientPhone.replace(/[^\d+]/g, ''),
@@ -128,49 +117,15 @@ export default function DeliveryScreen() {
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: active ? c.brandStrong : c.ink }}>{item.name}</Text>
-								<Text style={{ fontSize: 12.5, fontFamily: fontFamily(500), color: active ? c.brand : c.muted }}>{tariffLabel(item.days, item.price)}</Text>
+								<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: active ? c.brandStrong : c.ink }}>{item.name}</Text>
 							</Pressable>
 						)
 					})}
 				</View>
-				{remote.length ? (
-					<Text style={{ fontSize: 12.5, lineHeight: 17, fontFamily: fontFamily(400), color: c.muted }}>
-						{joinNames(remote.map((item) => item.name))} — отдалённые: {tariffLabel(remote[0].days, remote[0].price).replace(' · ', ', ')}
-					</Text>
-				) : null}
-				{region?.districts.length ? (
-					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-						{[{ code: null, name: `${region.name} и область` }, ...region.districts].map((item) => {
-							const active = district === item.code
-							return (
-								<Pressable
-									key={item.code ?? 'all'}
-									onPress={() => setDistrict(item.code)}
-									style={{
-										height: 34,
-										paddingHorizontal: 12,
-										borderRadius: 17,
-										borderWidth: 1.5,
-										borderColor: active ? c.brand : c.border,
-										backgroundColor: active ? c.brandTint : c.card,
-										justifyContent: 'center',
-									}}
-								>
-									<Text style={{ fontSize: 13.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{item.name}</Text>
-								</Pressable>
-							)
-						})}
-					</View>
-				) : null}
-				{tariffs.data?.surchargeNote ? (
-					<Text style={{ fontSize: 12.5, lineHeight: 17, fontFamily: fontFamily(400), color: c.muted }}>{tariffs.data.surchargeNote}</Text>
-				) : null}
-
 				<View style={{ height: 2 }} />
 				<Caps>Курьер привезёт домой</Caps>
 				<View style={{ gap: 6 }}>
-					<Text style={label}>{region ? `Адрес в ${picked?.name ?? region.inName}` : 'Адрес'}</Text>
+					<Text style={label}>{region ? `Адрес в ${region.inName}` : 'Адрес'}</Text>
 					<TextInput value={address} onChangeText={setAddress} placeholder="ул. Ленина 45, кв. 12" placeholderTextColor="#8C8888" style={input} />
 				</View>
 				<View style={{ flexDirection: 'row', gap: 10 }}>
@@ -193,39 +148,23 @@ export default function DeliveryScreen() {
 			</ScrollView>
 
 			<View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: insets.bottom + 12, gap: 8, backgroundColor: c.surface }}>
-				{region ? (
-					<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-						<Text style={{ flex: 1, fontSize: 14, fontFamily: fontFamily(500), color: c.muted }}>
-							{region.code === 'BISHKEK' ? 'Доставка по Бишкеку' : `Доставка в ${where}`} · {daysLabel(days)}
-						</Text>
-						<Text style={{ fontSize: 15, fontFamily: fontFamily(800), color: c.ink }}>
-							{price != null ? `${priceDigits(price)} с` : 'цену назовёт курьер'}
-						</Text>
+				{/* Prices and days are agreed with the courier service itself. */}
+				<View style={{ borderRadius: 14, backgroundColor: '#FFF4D6', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+					<View style={{ flex: 1, gap: 2 }}>
+						<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>Стоимость — у {tariffs.data?.courierName ?? 'Ылдам Экспресс'}</Text>
+						<Text style={{ fontSize: 14, lineHeight: 19, fontFamily: fontFamily(400), color: c.inkSecondary }}>Цену доставки обговорите с ними</Text>
 					</View>
-				) : (
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.muted }}>Выберите, куда везти</Text>
-				)}
-				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-					<ClockOutline size={16} color={c.success} />
-					<Text style={{ flex: 1, fontSize: 13, fontFamily: fontFamily(600), color: c.success }}>
-						{today
-							? `Закажите до ${tariffs.data?.cutoff ?? '17:30'} — курьер заберёт посылку сегодня`
-							: `После ${tariffs.data?.cutoff ?? '17:30'} — курьер заберёт посылку завтра`}
-					</Text>
-				</View>
-				<View style={{ borderRadius: 12, backgroundColor: c.brandTint, paddingVertical: 10, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-					<BubbleIcon size={18} color={c.brandStrong} />
-					<Text style={{ flex: 1, fontSize: 13.5, fontFamily: fontFamily(600), color: c.brandStrong }}>
-						Как оплатить товар — договоритесь с продавцом в чате
-					</Text>
+					{courierPhone ? (
+						<Pressable
+							onPress={() => Linking.openURL(`tel:${courierPhone.replace(/[^\d+]/g, '')}`)}
+							style={{ height: 40, paddingHorizontal: 14, borderRadius: 12, backgroundColor: c.card, justifyContent: 'center' }}
+						>
+							<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.ink }}>Позвонить</Text>
+						</Pressable>
+					) : null}
 				</View>
 				<BigButton label="Заказать доставку" tone="green" onPress={submit} loading={create.isPending} disabled={!ready} />
 			</View>
 		</KeyboardAvoidingView>
 	)
-}
-
-/** «Чон-Алай, Аксы (Кербен), Ала-Бука и Алай (Гульчо)». */
-function joinNames(names: string[]) {
-	return names.length < 2 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} и ${names[names.length - 1]}`
 }
