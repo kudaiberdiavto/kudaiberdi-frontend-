@@ -236,6 +236,7 @@ export default function SellerProfileForBuyerScreen() {
 							{partItems.map((part) => (
 								<ProductCard
 									key={part.id}
+									width={(width - 32 - 10) / 2}
 									price={formatPrice(part.price)}
 									title={part.title}
 									fits={part.fits === true}

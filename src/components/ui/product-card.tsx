@@ -4,14 +4,14 @@ import { fontFamily, useColors } from '@/theme'
 import Svg, { Path } from 'react-native-svg'
 import { PhotoPlaceholder } from './photo'
 
-/** Карточка товара в сетке — экраны 27, 29 (похожие), 30. 174×243 из specs. */
+/** Карточка товара в сетке — экраны 27, 29 (похожие), 30. По ширине колонки (или `width`), фото квадратное. */
 export function ProductCard({
 	price,
 	title,
 	fits,
 	location,
 	onPress,
-	width = 174,
+	width,
 	photoUrl,
 	shopAvatarUrl,
 	dimmed,
@@ -23,6 +23,7 @@ export function ProductCard({
 	fits?: boolean
 	location: string
 	onPress?: () => void
+	/** Column width; without it — the parent's width. */
 	width?: number
 	/** Main photo (`mainPhoto.thumbUrl`); without it — the drawn placeholder. */
 	photoUrl?: string | null
@@ -36,12 +37,14 @@ export function ProductCard({
 }) {
 	const c = useColors()
 	return (
-		<Pressable onPress={onPress} style={{ width, borderRadius: 16, backgroundColor: c.card, overflow: 'hidden', opacity: dimmed ? 0.6 : 1 }}>
+		<Pressable onPress={onPress} style={{ width: width ?? '100%', borderRadius: 18, backgroundColor: c.card, overflow: 'hidden', opacity: dimmed ? 0.6 : 1 }}>
 			<View>
 				{photoUrl ? (
-					<Image source={{ uri: photoUrl }} style={{ width, height: 118 }} resizeMode="cover" />
+					<Image source={{ uri: photoUrl }} style={{ width: '100%', aspectRatio: 1 }} resizeMode="cover" />
 				) : (
-					<PhotoPlaceholder width={width} height={118} radius={0} />
+					<View style={{ width: '100%', aspectRatio: 1, overflow: 'hidden' }}>
+						<PhotoPlaceholder width={width ?? 200} height={width ?? 200} radius={0} />
+					</View>
 				)}
 				{videoSec != null ? (
 					<View
@@ -83,24 +86,24 @@ export function ProductCard({
 				</View>
 			</View>
 
-			<View style={{ padding: 10, gap: 6 }}>
-				<Text style={{ fontSize: 17, fontFamily: fontFamily(800), color: c.ink }}>{price}</Text>
-				<Text numberOfLines={2} style={{ fontSize: 13, lineHeight: 16.9, fontFamily: fontFamily(400), color: c.inkSecondary }}>
+			<View style={{ padding: 12, gap: 6 }}>
+				<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>{price}</Text>
+				<Text numberOfLines={2} style={{ fontSize: 15, lineHeight: 19.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>
 					{title}
 				</Text>
 				{fits ? (
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-						<CheckIcon size={14} color={c.success} strokeWidth={3} />
-						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: c.success }}>Подходит</Text>
+						<CheckIcon size={16} color={c.success} strokeWidth={3} />
+						<Text style={{ fontSize: 13.5, fontFamily: fontFamily(700), color: c.success }}>Подходит</Text>
 					</View>
 				) : null}
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
 					{shopAvatarUrl ? (
-						<Image source={{ uri: shopAvatarUrl }} style={{ width: 20, height: 20, borderRadius: 10 }} />
+						<Image source={{ uri: shopAvatarUrl }} style={{ width: 22, height: 22, borderRadius: 11 }} />
 					) : (
-						<View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: '#EEEEEE' }} />
+						<View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#EEEEEE' }} />
 					)}
-					<Text style={{ fontSize: 12, fontFamily: fontFamily(400), color: c.muted }}>{location}</Text>
+					<Text numberOfLines={1} style={{ flex: 1, fontSize: 13.5, fontFamily: fontFamily(400), color: c.muted }}>{location}</Text>
 				</View>
 			</View>
 		</Pressable>
