@@ -42,7 +42,7 @@ const HOME_SERVICES: { code: string; label: string; icon: ComponentType<{ size?:
 /** Rows shown before «Все». */
 const PREVIEW = 3
 
-/** 03 Главная: the car, «Найти запчасть», «Видео с рынка», parcels on the way, «Мои запросы», masters. */
+/** 03 Главная: the car, «Найти запчасть», «Нужен мастер?», «Видео с рынка», parcels on the way, «Мои запросы». */
 export default function BuyerHomeScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
@@ -138,6 +138,24 @@ export default function BuyerHomeScreen() {
 					</LinearGradient>
 				</Pressable>
 
+				<Caps>Нужен мастер?</Caps>
+				<View style={{ flexDirection: 'row', gap: 8 }}>
+					{HOME_SERVICES.map(({ code, label, icon: Icon }) => (
+						<ServiceTile
+							key={code}
+							label={label}
+							icon={<Icon size={22} color={c.brandStrong} strokeWidth={2} />}
+							onPress={() => router.push({ pathname: '/service-new', params: { service: code } })}
+						/>
+					))}
+					<ServiceTile
+						label="Все услуги"
+						muted
+						icon={<PlusThinIcon size={22} color={c.ink} />}
+						onPress={() => router.push('/service-new')}
+					/>
+				</View>
+
 				<MarketVideos />
 
 				{parcels.map((order) => (
@@ -177,24 +195,6 @@ export default function BuyerHomeScreen() {
 					</Text>
 				) : null}
 
-				<View style={{ height: 2 }} />
-				<Caps>Нужен мастер?</Caps>
-				<View style={{ flexDirection: 'row', gap: 8 }}>
-					{HOME_SERVICES.map(({ code, label, icon: Icon }) => (
-						<ServiceTile
-							key={code}
-							label={label}
-							icon={<Icon size={22} color={c.brandStrong} strokeWidth={2} />}
-							onPress={() => router.push({ pathname: '/service-new', params: { service: code } })}
-						/>
-					))}
-					<ServiceTile
-						label="Все услуги"
-						muted
-						icon={<PlusThinIcon size={22} color={c.ink} />}
-						onPress={() => router.push('/service-new')}
-					/>
-				</View>
 
 			</ScrollView>
 
