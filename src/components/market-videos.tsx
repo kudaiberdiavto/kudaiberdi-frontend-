@@ -39,14 +39,14 @@ export function MarketVideos({ car: picked }: { car?: { filters: VideoFeedCar; l
 	return (
 		<View style={{ gap: 10, paddingTop: 2 }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-				<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ВИДЕО С РЫНКА</Text>
+				<Text style={{ fontSize: 16, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ВИДЕО С РЫНКА</Text>
 				{carLabel ? (
 					<View style={{ height: 26, paddingHorizontal: 10, borderRadius: 13, backgroundColor: c.brandTint, justifyContent: 'center' }}>
-						<Text style={{ fontSize: 13.5, fontFamily: fontFamily(700), color: c.brandStrong }}>для {carLabel}</Text>
+						<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>для {carLabel}</Text>
 					</View>
 				) : null}
 				<View style={{ flex: 1 }} />
-				<Text onPress={() => openFeed()} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
+				<Text onPress={() => openFeed()} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.brandStrong }}>
 					Смотреть все
 				</Text>
 			</View>
@@ -72,7 +72,7 @@ export function MarketVideos({ car: picked }: { car?: { filters: VideoFeedCar; l
 					/>
 				)}
 			/>
-			<Text style={{ fontSize: 14, lineHeight: 18, fontFamily: fontFamily(400), color: c.muted }}>
+			<Text style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
 				Играют сами без звука — нажмите, чтобы открыть на весь экран
 			</Text>
 		</View>

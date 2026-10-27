@@ -129,8 +129,8 @@ export function ServiceTile({ type, selected, onPress, height = 92 }: { type: Se
 			<ServiceBadge code={type.code} size={40} radius={12} active={selected} />
 			<Text
 				style={{
-					fontSize: 12.5,
-					lineHeight: 14.4,
+					fontSize: 14,
+					lineHeight: 16,
 					fontFamily: fontFamily(selected ? 700 : 600),
 					color: selected ? c.brandStrong : c.ink,
 					textAlign: 'center',

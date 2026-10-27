@@ -122,7 +122,7 @@ export function VoicePlayer({
 					{row(1)}
 				</View>
 			</View>
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted, minWidth: 30, textAlign: 'right' }}>
+			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted, minWidth: 30, textAlign: 'right' }}>
 				{voiceClock(started ? status.currentTime : duration)}
 			</Text>
 		</Pressable>

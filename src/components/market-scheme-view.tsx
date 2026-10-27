@@ -164,7 +164,7 @@ export function MarketSchemeView({ width, height, selectedRowIds = [], onRowPres
 				>
 					<Text
 						style={{
-							fontSize: 12,
+							fontSize: 13,
 							fontFamily: fontFamily(700),
 							color: c.brandStrong,
 						}}

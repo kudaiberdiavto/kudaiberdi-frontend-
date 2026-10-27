@@ -127,7 +127,7 @@ export default function SellerVideoScreen() {
 		}
 	}
 
-	const label = { fontSize: 13, fontFamily: fontFamily(500), color: c.muted } as const
+	const label = { fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted } as const
 
 	return (
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
@@ -146,7 +146,7 @@ export default function SellerVideoScreen() {
 								<View style={{ width: 44, height: 44, borderRadius: 22, borderWidth: 3, borderColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
 									<View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: '#E5484D' }} />
 								</View>
-								<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Снять</Text>
+								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Снять</Text>
 							</View>
 						)}
 						{video ? (
@@ -165,7 +165,7 @@ export default function SellerVideoScreen() {
 								}}
 							>
 								<View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#FFFFFF' }} />
-								<Text style={{ fontSize: 11, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{voiceClock(video.durationSec)}</Text>
+								<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{voiceClock(video.durationSec)}</Text>
 							</View>
 						) : null}
 						{video ? (
@@ -183,20 +183,20 @@ export default function SellerVideoScreen() {
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Переснять</Text>
+								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Переснять</Text>
 							</Pressable>
 						) : null}
 					</Pressable>
 
 					<View style={{ flex: 1, gap: 8 }}>
-						<Text style={{ fontSize: 15, lineHeight: 20, fontFamily: fontFamily(700), color: c.ink }}>
+						<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(700), color: c.ink }}>
 							Снимите деталь 10–15 секунд и скажите вслух, что это и сколько стоит
 						</Text>
-						<Text style={{ fontSize: 13, lineHeight: 17.5, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text style={{ fontSize: 14.5, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
 							Например: «Стойки KYB на Камри пятьдесят, новые, пара — три двести»
 						</Text>
 						{progress !== null ? (
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.brandStrong }}>Загружаем… {Math.round(progress * 100)}%</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.brandStrong }}>Загружаем… {Math.round(progress * 100)}%</Text>
 						) : fromVoice ? (
 							<View
 								style={{
@@ -211,11 +211,11 @@ export default function SellerVideoScreen() {
 								}}
 							>
 								<TickIcon size={13} color={c.brandStrong} />
-								<Text style={{ fontSize: 12.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Заполнили из голоса</Text>
+								<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>Заполнили из голоса</Text>
 							</View>
 						) : null}
 						{uploadError && video ? (
-							<Text onPress={() => upload(video)} style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.danger }}>
+							<Text onPress={() => upload(video)} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.danger }}>
 								Не загрузилось · повторить
 							</Text>
 						) : null}
@@ -236,7 +236,7 @@ export default function SellerVideoScreen() {
 							borderWidth: 1.5,
 							borderColor: c.border,
 							paddingHorizontal: 12,
-							fontSize: 16,
+							fontSize: 17.5,
 							fontFamily: fontFamily(600),
 							color: c.ink,
 						}}
@@ -259,7 +259,7 @@ export default function SellerVideoScreen() {
 										justifyContent: 'center',
 									}}
 								>
-									<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.ink }}>{model.label}</Text>
+									<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.ink }}>{model.label}</Text>
 								</Pressable>
 							)
 						})}
@@ -267,7 +267,7 @@ export default function SellerVideoScreen() {
 							onPress={() => setAdding(true)}
 							style={{ height: 34, paddingHorizontal: 12, borderRadius: 17, borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#B8B4B4', justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.ink }}>+ ещё</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>+ ещё</Text>
 						</Pressable>
 					</View>
 					<View style={{ flexDirection: 'row', gap: 10, paddingTop: 4 }}>
@@ -288,7 +288,7 @@ export default function SellerVideoScreen() {
 									borderWidth: 1.5,
 									borderColor: c.border,
 									paddingHorizontal: 12,
-									fontSize: 17,
+									fontSize: 18.5,
 									fontFamily: fontFamily(700),
 									color: c.ink,
 								}}
@@ -303,7 +303,7 @@ export default function SellerVideoScreen() {
 										onPress={() => setCondition(value)}
 										style={{ flex: 1, borderRadius: 9, backgroundColor: condition === value ? c.card : 'transparent', alignItems: 'center', justifyContent: 'center' }}
 									>
-										<Text style={{ fontSize: 14.5, fontFamily: fontFamily(condition === value ? 700 : 600), color: condition === value ? c.ink : c.muted }}>
+										<Text style={{ fontSize: 16, fontFamily: fontFamily(condition === value ? 700 : 600), color: condition === value ? c.ink : c.muted }}>
 											{value === 'NEW' ? 'Новая' : 'Б/у'}
 										</Text>
 									</Pressable>
@@ -316,8 +316,8 @@ export default function SellerVideoScreen() {
 				<Pressable onPress={() => setShips(!ships)} style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 					<TruckTile />
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>Отправлю в регионы</Text>
-						<Text style={{ fontSize: 13, lineHeight: 17, fontFamily: fontFamily(400), color: c.muted }}>Курьер Ылдам Экспресс заберёт из контейнера</Text>
+						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>Отправлю в регионы</Text>
+						<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>Курьер Ылдам Экспресс заберёт из контейнера</Text>
 					</View>
 					<View
 						style={{
@@ -335,7 +335,7 @@ export default function SellerVideoScreen() {
 					</View>
 				</Pressable>
 
-				<Text style={{ fontSize: 13, lineHeight: 18, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center', paddingHorizontal: 12 }}>
+				<Text style={{ fontSize: 14.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center', paddingHorizontal: 12 }}>
 					Видео увидят покупатели с этими машинами — в ленте и на главной
 				</Text>
 
@@ -426,7 +426,7 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 				<CameraView ref={camera} style={{ flex: 1 }} mode="video" facing="back" />
 			) : (
 				<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 }}>
-					<Text style={{ fontSize: 16, lineHeight: 22, fontFamily: fontFamily(500), color: '#FFFFFF', textAlign: 'center' }}>
+					<Text style={{ fontSize: 17.5, lineHeight: 24, fontFamily: fontFamily(500), color: '#FFFFFF', textAlign: 'center' }}>
 						Разрешите камеру и микрофон — снимите деталь и скажите, что это и сколько стоит
 					</Text>
 					<BigButton
@@ -459,7 +459,7 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 					}}
 				>
 					<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#FFFFFF' }} />
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{voiceClock(seconds)}</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{voiceClock(seconds)}</Text>
 				</View>
 			) : null}
 
@@ -475,7 +475,7 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 					<View style={{ width: active ? 30 : 58, height: active ? 30 : 58, borderRadius: active ? 8 : 29, backgroundColor: '#E5484D' }} />
 				</Pressable>
 			</View>
-			<Text style={{ position: 'absolute', left: 24, right: 24, bottom: insets.bottom + 112, fontSize: 14, lineHeight: 19, fontFamily: fontFamily(500), color: '#FFFFFF', textAlign: 'center' }}>
+			<Text style={{ position: 'absolute', left: 24, right: 24, bottom: insets.bottom + 112, fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: '#FFFFFF', textAlign: 'center' }}>
 				{active ? 'Скажите, что это и сколько стоит' : 'Снимите деталь 10–15 секунд'}
 			</Text>
 		</View>
@@ -497,7 +497,7 @@ function ModelPicker({ onClose, onPick }: { onClose: () => void; onPick: (model:
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 					<Text style={{ flex: 1, fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{brand ? brand.name : 'Какая марка'}</Text>
 					{brand ? (
-						<Text onPress={() => setBrand(null)} style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>
+						<Text onPress={() => setBrand(null)} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 							Другая марка
 						</Text>
 					) : null}
@@ -512,7 +512,7 @@ function ModelPicker({ onClose, onPick }: { onClose: () => void; onPick: (model:
 							onPress={() => onPick({ modelId: model.id, brandId: brand.id, label: model.label })}
 							style={{ height: 52, borderRadius: 12, borderWidth: 1.5, borderColor: c.hairline, paddingHorizontal: 14, justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>{model.label}</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>{model.label}</Text>
 						</Pressable>
 					))}
 				</View>
@@ -523,7 +523,7 @@ function ModelPicker({ onClose, onPick }: { onClose: () => void; onPick: (model:
 						onChangeText={setQ}
 						placeholder="Марка"
 						placeholderTextColor="#8C8888"
-						style={{ height: 48, borderRadius: 12, borderWidth: 1.5, borderColor: c.border, paddingHorizontal: 12, fontSize: 16, fontFamily: fontFamily(500), color: c.ink }}
+						style={{ height: 48, borderRadius: 12, borderWidth: 1.5, borderColor: c.border, paddingHorizontal: 12, fontSize: 17.5, fontFamily: fontFamily(500), color: c.ink }}
 					/>
 					{(brands.data ?? []).map((item) => (
 						<Pressable
@@ -532,7 +532,7 @@ function ModelPicker({ onClose, onPick }: { onClose: () => void; onPick: (model:
 							style={{ height: 52, borderRadius: 12, borderWidth: 1.5, borderColor: c.hairline, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}
 						>
 							<BrandLogo brand={item} size={30} />
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>{item.name}</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>{item.name}</Text>
 						</Pressable>
 					))}
 				</View>

@@ -73,13 +73,13 @@ export const TabButton = forwardRef(function TabButton(
 							justifyContent: 'center',
 						}}
 					>
-						<Text style={{ fontSize: 11, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{badge}</Text>
+						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{badge}</Text>
 					</View>
 				) : null}
 			</View>
 			<Text
 				style={{
-					fontSize: 12,
+					fontSize: 13,
 					fontFamily: fontFamily(isFocused ? 700 : 600),
 					color,
 				}}

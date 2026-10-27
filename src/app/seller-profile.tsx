@@ -114,11 +114,11 @@ export default function SellerProfileForBuyerScreen() {
 
 					<View style={{ gap: 2 }}>
 						<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{shop?.name ?? ' '}</Text>
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
 							{shop
 								? shop.reviewsCount
 									? <><Text style={{ color: STAR }}>★</Text>{` ${shop.rating.toFixed(1)} · ${shop.reviewsCount} ${plural(shop.reviewsCount, ['оценка', 'оценки', 'оценок'])}`}</>
-									: 'Пока нет отзывов'
+									: null
 								: ' '}
 						</Text>
 					</View>
@@ -126,12 +126,12 @@ export default function SellerProfileForBuyerScreen() {
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 14 }}>
 						{/* On the market — row and box; a shop / centre elsewhere — its address. */}
 						{shop && !shop.location ? (
-							<Text style={{ fontSize: 16, lineHeight: 21, fontFamily: fontFamily(600), color: c.ink }}>{shop.address}</Text>
+							<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{shop.address}</Text>
 						) : (
 							<LocationCard rowLabel={shop?.location?.rowCode ?? ' '} boxLabel={shop?.location ? String(shop.location.number) : ' '} />
 						)}
 						<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.inkSecondary }}>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>
 								{shop?.location ? `${formatSide(shop.location.side)} сторона`.replace(/^./, (ch) => ch.toUpperCase()) : shop ? 'Магазин' : ' '}
 							</Text>
 							<Pressable
@@ -139,14 +139,14 @@ export default function SellerProfileForBuyerScreen() {
 								style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: c.brandTint, flexDirection: 'row', alignItems: 'center', gap: 6 }}
 							>
 								<MapPinIcon size={16} color={c.brandStrong} />
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop && !shop.location ? 'Маршрут' : 'На карте'}</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop && !shop.location ? 'Маршрут' : 'На карте'}</Text>
 							</Pressable>
 						</View>
 					</View>
 
 					{brands.length ? (
 						<View style={{ gap: 8 }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ПРОДАЁТ ДЛЯ МАРОК</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ПРОДАЁТ ДЛЯ МАРОК</Text>
 							<View style={{ flexDirection: 'row' }}>
 								{brands.slice(0, VISIBLE_BRANDS).map((brand, i) => (
 									<View key={brand.id} style={{ marginLeft: i === 0 ? 0 : -8 }}>
@@ -165,7 +165,7 @@ export default function SellerProfileForBuyerScreen() {
 											justifyContent: 'center',
 										}}
 									>
-										<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.muted }}>+{brands.length - VISIBLE_BRANDS}</Text>
+										<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.muted }}>+{brands.length - VISIBLE_BRANDS}</Text>
 									</View>
 								) : null}
 							</View>
@@ -179,14 +179,14 @@ export default function SellerProfileForBuyerScreen() {
 							style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: c.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<ChatIcon size={20} color="#FFFFFF" />
-							<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
+							<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
 						</Pressable>
 						<Pressable
 							onPress={route}
 							style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<MapPinIcon size={20} color={c.ink} />
-							<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Маршрут</Text>
+							<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>Маршрут</Text>
 						</Pressable>
 						{/* The phone is shown only when the shop made it visible (or after a chat). */}
 						{shop?.phone ? (
@@ -199,7 +199,7 @@ export default function SellerProfileForBuyerScreen() {
 						) : null}
 					</View>
 					{openChat.error ? (
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{openChat.error.message}</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{openChat.error.message}</Text>
 					) : null}
 
 					<View style={{ flexDirection: 'row', gap: 20 }}>
@@ -220,7 +220,7 @@ export default function SellerProfileForBuyerScreen() {
 							>
 								<Text
 									style={{
-										fontSize: 15,
+										fontSize: 16.5,
 										fontFamily: fontFamily(tab === item.value ? 700 : 600),
 										color: tab === item.value ? c.ink : c.muted,
 									}}
@@ -250,11 +250,11 @@ export default function SellerProfileForBuyerScreen() {
 							))}
 							{parts.hasNextPage ? (
 								<Pressable onPress={() => parts.fetchNextPage()} style={{ width: '100%', paddingVertical: 12, alignItems: 'center' }}>
-									<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>Показать ещё</Text>
+									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Показать ещё</Text>
 								</Pressable>
 							) : null}
 							{parts.isSuccess && partItems.length === 0 ? (
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>Запчасти ещё не выложены</Text>
+								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>Запчасти ещё не выложены</Text>
 							) : null}
 						</View>
 					) : null}
@@ -268,28 +268,25 @@ export default function SellerProfileForBuyerScreen() {
 									style={{ borderRadius: 14, backgroundColor: c.card, padding: 12, gap: 6 }}
 								>
 									<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-										<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: STAR }}>
+										<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: STAR }}>
 											{'★'.repeat(review.stars)}
 											<Text style={{ color: raw.dashed }}>{'★'.repeat(5 - review.stars)}</Text>
 										</Text>
-										<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>{formatDay(review.createdAt)}</Text>
+										<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>{formatDay(review.createdAt)}</Text>
 									</View>
-									<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.inkSecondary }}>
+									<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>
 										{review.buyerName ?? 'Покупатель'}
 										{review.tags.length ? ` · ${review.tags.map((t) => t.label).join(', ')}` : ''}
 									</Text>
 									{review.reply ? (
-										<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>Ответ продавца: {review.reply}</Text>
+										<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>Ответ продавца: {review.reply}</Text>
 									) : null}
 								</Pressable>
 							))}
 							{reviews.hasNextPage ? (
 								<Pressable onPress={() => reviews.fetchNextPage()} style={{ paddingVertical: 12, alignItems: 'center' }}>
-									<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>Показать ещё</Text>
+									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Показать ещё</Text>
 								</Pressable>
-							) : null}
-							{reviews.isSuccess && reviewItems.length === 0 ? (
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>Отзывов пока нет</Text>
 							) : null}
 						</View>
 					) : null}

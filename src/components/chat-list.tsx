@@ -40,7 +40,7 @@ export function ChatList({ as: initial, sides }: { as: ChatListAs; sides?: { as:
 										justifyContent: 'center',
 									}}
 								>
-									<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.ink }}>{side.label}</Text>
+									<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.ink }}>{side.label}</Text>
 								</Pressable>
 							)
 						})}
@@ -64,7 +64,7 @@ export function ChatList({ as: initial, sides }: { as: ChatListAs; sides?: { as:
 				renderItem={({ item, index }) => <ChatRow chat={item} highlight={index === 0} />}
 				ListEmptyComponent={
 					chats.isSuccess ? (
-						<Text style={{ paddingHorizontal: 16, fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text style={{ paddingHorizontal: 16, fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 							{as === 'BUYER'
 								? 'Здесь появятся переписки с продавцами — после ответа «Есть» или «Написать» в карточке.'
 								: as === 'MASTER'
@@ -108,16 +108,16 @@ function ChatRow({ chat, highlight }: { chat: ChatListItem; highlight: boolean }
 
 			<View style={{ flex: 1, gap: 3 }}>
 				<View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-					<Text numberOfLines={1} style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
 						{chat.title}
 					</Text>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
 						{formatChatTime(last?.at ?? chat.updatedAt)}
 					</Text>
 				</View>
 
 				{chat.subtitle ? (
-					<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
 						{chat.subtitle}
 					</Text>
 				) : null}
@@ -125,7 +125,7 @@ function ChatRow({ chat, highlight }: { chat: ChatListItem; highlight: boolean }
 				<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
 					<Text
 						numberOfLines={1}
-						style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(400), color: chat.unread ? c.ink : c.muted }}
+						style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: chat.unread ? c.ink : c.muted }}
 					>
 						{last?.fromMe ? `Вы: ${lastText}` : lastText}
 					</Text>
@@ -141,7 +141,7 @@ function ChatRow({ chat, highlight }: { chat: ChatListItem; highlight: boolean }
 								justifyContent: 'center',
 							}}
 						>
-							<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{chat.unread}</Text>
+							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{chat.unread}</Text>
 						</View>
 					) : null}
 				</View>

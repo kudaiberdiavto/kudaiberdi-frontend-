@@ -80,7 +80,7 @@ export default function PhoneScreen() {
 									backgroundColor: active ? c.brand : 'transparent',
 								}}
 							>
-								<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.muted }}>
+								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.muted }}>
 									{label}
 								</Text>
 							</Pressable>
@@ -112,7 +112,7 @@ export default function PhoneScreen() {
 					<Text style={{ fontSize: 32, lineHeight: 40, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink }}>
 						Кудайберген
 					</Text>
-					<Text numberOfLines={2} style={{ fontSize: 17, lineHeight: 24, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text numberOfLines={2} style={{ fontSize: 18.5, lineHeight: 26.5, fontFamily: fontFamily(400), color: c.muted }}>
 						Автозапчасти и мастера рынка в одном приложении
 					</Text>
 				</>
@@ -152,9 +152,9 @@ export default function PhoneScreen() {
 			}
 			below={
 				error ? (
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text>
 				) : (
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>Отправим SMS с кодом</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>Отправим SMS с кодом</Text>
 				)
 			}
 			footer={<Button label="Получить код" disabled={!isValidLocalPhone(phone)} loading={sendOtp.isPending} onPress={submit} />}

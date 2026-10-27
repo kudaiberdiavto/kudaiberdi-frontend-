@@ -98,11 +98,11 @@ export function CatalogScreen() {
 					placeholder="Стойки, колодки, номер детали…"
 					placeholderTextColor="#7D7979"
 					returnKeyType="search"
-					style={{ flex: 1, minWidth: 0, fontSize: 16, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+					style={{ flex: 1, minWidth: 0, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 				/>
 			</View>
 
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ИЩУ ДЛЯ МАШИНЫ</Text>
+			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ИЩУ ДЛЯ МАШИНЫ</Text>
 
 			<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 				{carList.map((car) => {
@@ -125,7 +125,7 @@ export function CatalogScreen() {
 							}}
 						>
 							<BrandLogo brand={car.brand} size={28} />
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.inkSecondary }}>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.inkSecondary }}>
 								{car.label}
 							</Text>
 						</Pressable>
@@ -149,7 +149,7 @@ export function CatalogScreen() {
 					{carId === null && f.brand ? <BrandLogo brand={f.brand} size={28} /> : null}
 					<Text
 						style={{
-							fontSize: 14,
+							fontSize: 15.5,
 							fontFamily: fontFamily(carId === null && f.brand ? 700 : 600),
 							color: carId === null && f.brand ? c.brandStrong : c.ink,
 						}}
@@ -177,7 +177,7 @@ export function CatalogScreen() {
 								justifyContent: 'center',
 							}}
 						>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: active ? '#FFFFFF' : c.ink }}>{category.name}</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: active ? '#FFFFFF' : c.ink }}>{category.name}</Text>
 						</Pressable>
 					)
 				})}
@@ -196,7 +196,7 @@ export function CatalogScreen() {
 			) : null}
 
 			<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-				<Text numberOfLines={1} style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>
+				<Text numberOfLines={1} style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>
 					{total === undefined ? (
 						' '
 					) : (
@@ -217,7 +217,7 @@ export function CatalogScreen() {
 					)}
 				</Text>
 				<Pressable onPress={() => f.setSort(nextSort.value)}>
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>{sort.label} ▾</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{sort.label} ▾</Text>
 				</Pressable>
 			</View>
 		</View>
@@ -234,7 +234,7 @@ export function CatalogScreen() {
 				onEndReached={() => search.hasNextPage && !search.isFetchingNextPage && search.fetchNextPage()}
 				renderItem={({ item: row }) =>
 					row.kind === 'others' ? (
-						<Text style={{ paddingTop: 8, fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
+						<Text style={{ paddingTop: 8, fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
 							ОСТАЛЬНЫЕ ЗАПЧАСТИ
 						</Text>
 					) : (
@@ -250,7 +250,7 @@ export function CatalogScreen() {
 				}
 				ListEmptyComponent={
 					search.isSuccess ? (
-						<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 							Ничего не нашли. Спросите весь рынок — ответят те, у кого есть.
 						</Text>
 					) : null
@@ -283,8 +283,8 @@ export function CatalogScreen() {
 					elevation: 8,
 				}}
 			>
-				<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: '#FFFFFF' }}>Не нашли? Спросите весь рынок</Text>
-				<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: '#8FB0FF' }}>Спросить →</Text>
+				<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: '#FFFFFF' }}>Не нашли? Спросите весь рынок</Text>
+				<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#8FB0FF' }}>Спросить →</Text>
 			</Pressable>
 		</View>
 	)

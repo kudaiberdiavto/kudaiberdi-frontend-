@@ -133,8 +133,8 @@ export default function CodeScreen() {
 			}
 			below={
 				<>
-					{errorText ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text> : null}
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+					{errorText ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text> : null}
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
 						{secondsLeft > 0 ? (
 							<>
 								Отправить снова через{' '}

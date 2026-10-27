@@ -75,10 +75,10 @@ export default function RouteScreen() {
 						<PlaceBox label="РЯД" value={data.target.rowCode} />
 						<PlaceBox label="КОНТ." value={String(data.target.number)} />
 						<View style={{ flex: 1, gap: 2 }}>
-							<Text numberOfLines={1} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text numberOfLines={1} style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>
 								{params.shopName ?? formatPlace(data.target)}
 							</Text>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
 								≈ {minutes} мин пешком{data.fromSource === 'ENTRANCE' ? ' от входа' : ''}
 							</Text>
 						</View>
@@ -88,9 +88,9 @@ export default function RouteScreen() {
 				{(data?.steps ?? []).map((step, i) => (
 					<View key={step.n} style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
 						<View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(800), color: c.brandStrong }}>{i + 1}</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(800), color: c.brandStrong }}>{i + 1}</Text>
 						</View>
-						<Text style={{ flex: 1, fontSize: 15, lineHeight: 19.5, fontFamily: fontFamily(500), color: c.ink }}>{step.text}</Text>
+						<Text style={{ flex: 1, fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(500), color: c.ink }}>{step.text}</Text>
 					</View>
 				))}
 
@@ -124,8 +124,8 @@ function PlaceBox({ label, value }: { label: string; value: string }) {
 	const c = useColors()
 	return (
 		<View style={{ borderRadius: 14, backgroundColor: c.brand, paddingVertical: 8, paddingHorizontal: 14, alignItems: 'center' }}>
-			<Text style={{ fontSize: 11, fontFamily: fontFamily(700), letterSpacing: 0.88, color: 'rgba(255,255,255,0.85)' }}>{label}</Text>
-			<Text style={{ fontSize: 24, lineHeight: 26, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{value}</Text>
+			<Text style={{ fontSize: 12, fontFamily: fontFamily(700), letterSpacing: 0.88, color: 'rgba(255,255,255,0.85)' }}>{label}</Text>
+			<Text style={{ fontSize: 24, lineHeight: 28.5, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{value}</Text>
 		</View>
 	)
 }

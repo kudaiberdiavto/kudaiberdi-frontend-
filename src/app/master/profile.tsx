@@ -38,10 +38,10 @@ export default function MasterProfileTab() {
 
 	const label = (text: string, action?: () => void) => (
 		<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}>{text}</Text>
+			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}>{text}</Text>
 			<View style={{ flex: 1 }} />
 			{action ? (
-				<Text onPress={action} style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>
+				<Text onPress={action} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 					Изменить
 				</Text>
 			) : null}
@@ -63,10 +63,10 @@ export default function MasterProfileTab() {
 						<Avatar letter={name.replace(/^(СТО|Мастер)\s*«?/, '').charAt(0).toUpperCase()} size={56} radius={28} fontSize={22} />
 					)}
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text numberOfLines={1} style={{ fontSize: 20, lineHeight: 26, fontFamily: fontFamily(700), color: c.ink }}>
+						<Text numberOfLines={1} style={{ fontSize: 20, lineHeight: 28.5, fontFamily: fontFamily(700), color: c.ink }}>
 							{name}
 						</Text>
-						<Text numberOfLines={1} style={{ fontSize: 13.5, lineHeight: 17.5, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text numberOfLines={1} style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
 							{contacts || ' '}
 						</Text>
 					</View>
@@ -95,7 +95,7 @@ export default function MasterProfileTab() {
 								}}
 							>
 								<ServiceIcon code={code} size={18} color={selected ? c.brandStrong : c.muted} />
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(selected ? 700 : 600), color: selected ? c.brandStrong : c.ink }}>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(selected ? 700 : 600), color: selected ? c.brandStrong : c.ink }}>
 									{serviceName(types, code)}
 								</Text>
 							</Pressable>
@@ -107,7 +107,7 @@ export default function MasterProfileTab() {
 				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 					{master?.allBrands ? (
 						<View style={{ height: 40, paddingHorizontal: 14, borderRadius: 20, backgroundColor: c.card, borderWidth: 2, borderColor: c.border, justifyContent: 'center' }}>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.inkSecondary }}>Все марки</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>Все марки</Text>
 						</View>
 					) : (
 						(master?.brands ?? []).map((brand) => (
@@ -127,7 +127,7 @@ export default function MasterProfileTab() {
 								}}
 							>
 								<BrandLogo brand={brand} size={28} />
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.inkSecondary }}>{brand.shortName}</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>{brand.shortName}</Text>
 							</View>
 						))
 					)}
@@ -168,8 +168,8 @@ export default function MasterProfileTab() {
 						<MobileTruck size={22} color={c.brandStrong} />
 					</View>
 					<View style={{ flex: 1, gap: 1 }}>
-						<Text style={{ fontSize: 16, lineHeight: 20.8, fontFamily: fontFamily(700), color: c.ink }}>Выезжаю к клиенту</Text>
-						<Text style={{ fontSize: 13.5, lineHeight: 17.5, fontFamily: fontFamily(400), color: c.muted }}>в радиусе {master?.radiusKm ?? 5} км</Text>
+						<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(700), color: c.ink }}>Выезжаю к клиенту</Text>
+						<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>в радиусе {master?.radiusKm ?? 5} км</Text>
 					</View>
 					<Switch value={master?.mobile ?? false} disabled={!master || save.isPending} onChange={(mobile) => save.mutate({ mobile })} />
 				</View>

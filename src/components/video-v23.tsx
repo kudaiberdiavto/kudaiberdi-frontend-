@@ -88,7 +88,7 @@ export function YellowChip({ label, icon, height = 26 }: { label: string; icon?:
 			}}
 		>
 			{icon ? <TruckIcon size={15} color="#6B4E00" strokeWidth={2.2} /> : null}
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#6B4E00' }}>{label}</Text>
+			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#6B4E00' }}>{label}</Text>
 		</View>
 	)
 }
@@ -172,14 +172,14 @@ export function VideoTile({
 				}}
 			>
 				<PlayIcon size={11} />
-				<Text style={{ fontSize: 13.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{voiceClock(video.durationSec)}</Text>
+				<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{voiceClock(video.durationSec)}</Text>
 			</View>
 			<View style={{ position: 'absolute', left: 10, right: 10, bottom: 10, gap: 3 }}>
-				<Text numberOfLines={2} style={{ fontSize: 17, lineHeight: 21, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+				<Text numberOfLines={2} style={{ fontSize: 18.5, lineHeight: 23, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
 					{title}
 				</Text>
 				<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{priceDigits(price)} с</Text>
-				<Text numberOfLines={1} style={{ fontSize: 13.5, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.75)' }}>
+				<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.75)' }}>
 					{place}
 				</Text>
 			</View>

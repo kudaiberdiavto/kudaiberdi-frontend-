@@ -30,7 +30,7 @@ export function Badge({ label, tone = 'neutral' }: BadgeProps) {
 				justifyContent: 'center',
 			}}
 		>
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: fg }}>{label}</Text>
+			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: fg }}>{label}</Text>
 		</View>
 	)
 }

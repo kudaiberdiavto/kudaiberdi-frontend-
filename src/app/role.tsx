@@ -28,7 +28,7 @@ export default function RoleScreen() {
 				<Text style={{ fontSize: 28, lineHeight: 36.4, fontFamily: fontFamily(800), letterSpacing: -0.28, color: c.ink }}>
 					Что вы хотите?
 				</Text>
-				<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>Можно поменять потом в профиле</Text>
+				<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>Можно поменять потом в профиле</Text>
 				<View style={{ height: 6 }} />
 				{ROLES.map(({ value, title, description, icon: Icon }) => {
 					const selected = role === value
@@ -60,8 +60,8 @@ export default function RoleScreen() {
 								<Icon size={22} color={selected ? '#FFFFFF' : c.brandStrong} />
 							</View>
 							<View style={{ flex: 1, gap: 4 }}>
-								<Text style={{ fontSize: 19, lineHeight: 24.7, fontFamily: fontFamily(700), color: c.ink }}>{title}</Text>
-								<Text style={{ fontSize: 14.5, lineHeight: 18.85, fontFamily: fontFamily(400), color: c.muted }}>{description}</Text>
+								<Text style={{ fontSize: 19, lineHeight: 27, fontFamily: fontFamily(700), color: c.ink }}>{title}</Text>
+								<Text style={{ fontSize: 16, lineHeight: 20.5, fontFamily: fontFamily(400), color: c.muted }}>{description}</Text>
 							</View>
 							<View
 								style={{
@@ -81,7 +81,7 @@ export default function RoleScreen() {
 					)
 				})}
 				{saveRole.error ? (
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{saveRole.error.message}</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{saveRole.error.message}</Text>
 				) : null}
 			</View>
 			<View style={{ paddingTop: 12, paddingHorizontal: 20, paddingBottom: Math.max(insets.bottom, 34) }}>

@@ -208,11 +208,11 @@ export function Caps({ children, link, onLink }: { children: string; link?: stri
 	const c = useColors()
 	return (
 		<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-			<Text style={{ flex: 1, fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
+			<Text style={{ flex: 1, fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
 				{children.toUpperCase()}
 			</Text>
 			{link ? (
-				<Text onPress={onLink} style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>
+				<Text onPress={onLink} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 					{link}
 				</Text>
 			) : null}
@@ -262,7 +262,7 @@ export function BigButton({
 			]}
 		>
 			{loading ? <ActivityIndicator color={color} /> : icon}
-			<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color }}>{label}</Text>
+			<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color }}>{label}</Text>
 		</Pressable>
 	)
 }
@@ -280,7 +280,7 @@ export function MetaChip({ label, tone = 'grey' }: { label: string; tone?: 'gree
 				justifyContent: 'center',
 			}}
 		>
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: tone === 'green' ? c.success : c.ink }}>{label}</Text>
+			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: tone === 'green' ? c.success : c.ink }}>{label}</Text>
 		</View>
 	)
 }

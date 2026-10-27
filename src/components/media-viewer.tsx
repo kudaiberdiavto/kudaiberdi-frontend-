@@ -39,7 +39,7 @@ export function MediaViewer({ items, onClose }: { items: MediaItem[] | null; onC
 					))}
 				</ScrollView>
 				<View style={{ position: 'absolute', top: insets.top + 8, left: 16, right: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{items && items.length > 1 ? `${index + 1} / ${items.length}` : ' '}</Text>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{items && items.length > 1 ? `${index + 1} / ${items.length}` : ' '}</Text>
 					<Pressable onPress={onClose} hitSlop={12} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' }}>
 						<CloseIcon size={18} color="#FFFFFF" />
 					</Pressable>

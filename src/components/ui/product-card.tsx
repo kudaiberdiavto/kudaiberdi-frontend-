@@ -64,7 +64,7 @@ export function ProductCard({
 						<Svg width={10} height={10} viewBox="0 0 24 24" fill="#FFFFFF">
 							<Path d="M8 5.5v13l10-6.5z" />
 						</Svg>
-						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
 							{Math.floor(videoSec / 60)}:{String(Math.round(videoSec % 60)).padStart(2, '0')}
 						</Text>
 					</View>
@@ -88,13 +88,13 @@ export function ProductCard({
 
 			<View style={{ padding: 12, gap: 6 }}>
 				<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>{price}</Text>
-				<Text numberOfLines={2} style={{ fontSize: 15, lineHeight: 19.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>
+				<Text numberOfLines={2} style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>
 					{title}
 				</Text>
 				{fits ? (
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
 						<CheckIcon size={16} color={c.success} strokeWidth={3} />
-						<Text style={{ fontSize: 13.5, fontFamily: fontFamily(700), color: c.success }}>Подходит</Text>
+						<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.success }}>Подходит</Text>
 					</View>
 				) : null}
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -103,7 +103,7 @@ export function ProductCard({
 					) : (
 						<View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#EEEEEE' }} />
 					)}
-					<Text numberOfLines={1} style={{ flex: 1, fontSize: 13.5, fontFamily: fontFamily(400), color: c.muted }}>{location}</Text>
+					<Text numberOfLines={1} style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>{location}</Text>
 				</View>
 			</View>
 		</Pressable>

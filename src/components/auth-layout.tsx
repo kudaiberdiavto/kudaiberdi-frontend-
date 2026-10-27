@@ -41,7 +41,7 @@ export function AuthLayout({
 
 			<View style={{ flex: 1, paddingTop: 8, paddingHorizontal: 24 }}>
 				<View style={{ height: HEADER_HEIGHT, justifyContent: 'flex-end', gap: 12 }}>{header}</View>
-				<Text style={{ marginTop: 28, marginBottom: 10, fontSize: 14, lineHeight: 18, fontFamily: fontFamily(600), color: c.muted }}>
+				<Text style={{ marginTop: 28, marginBottom: 10, fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(600), color: c.muted }}>
 					{label}
 				</Text>
 				{field}

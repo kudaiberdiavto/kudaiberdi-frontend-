@@ -113,7 +113,7 @@ export default function BoxSelectScreen() {
 		borderColor: c.border,
 		backgroundColor: c.card,
 		paddingHorizontal: 16,
-		fontSize: 16,
+		fontSize: 17.5,
 		fontFamily: fontFamily(500),
 		color: c.ink,
 	} as const
@@ -165,7 +165,7 @@ export default function BoxSelectScreen() {
 									onPress={() => setOnMarket(option.value)}
 									style={{ flex: 1, height: 40, borderRadius: 11, backgroundColor: active ? c.card : 'transparent', alignItems: 'center', justifyContent: 'center' }}
 								>
-									<Text style={{ fontSize: 14, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.ink : c.muted }}>{option.label}</Text>
+									<Text style={{ fontSize: 15.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.ink : c.muted }}>{option.label}</Text>
 								</Pressable>
 							)
 						})}
@@ -196,11 +196,11 @@ export default function BoxSelectScreen() {
 							style={{ height: 48, borderRadius: 14, backgroundColor: point ? '#E7F6EC' : c.brandTint, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<LocateIcon size={20} color={point ? c.success : c.brandStrong} />
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: point ? c.success : c.brandStrong }}>
+							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: point ? c.success : c.brandStrong }}>
 								{locating ? 'Определяем…' : point ? 'Точка определена — обновить' : 'Отметить по геолокации'}
 							</Text>
 						</Pressable>
-						<Text style={{ fontSize: 13.5, lineHeight: 17.5, fontFamily: fontFamily(400), color: locateError ? c.danger : c.muted }}>
+						<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: locateError ? c.danger : c.muted }}>
 							{locateError ?? 'Нажмите, находясь в магазине, — по точке покупатель построит маршрут'}
 						</Text>
 					</>
@@ -227,7 +227,7 @@ export default function BoxSelectScreen() {
 											justifyContent: 'center',
 										}}
 									>
-										<Text style={{ fontSize: 15, fontFamily: fontFamily(active ? 800 : 600), color: active ? '#FFFFFF' : c.ink }}>
+										<Text style={{ fontSize: 16.5, fontFamily: fontFamily(active ? 800 : 600), color: active ? '#FFFFFF' : c.ink }}>
 											{item.code}
 										</Text>
 									</Pressable>
@@ -258,11 +258,11 @@ export default function BoxSelectScreen() {
 						</View>
 						{placeError ? (
 							<View style={{ gap: 4 }}>
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{placeError}</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{placeError}</Text>
 								{taken && slot ? (
 									<Text
 										onPress={() => setClaim({ id: slot.id, number: slot.number })}
-										style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}
+										style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}
 									>
 										Это мой контейнер
 									</Text>
@@ -296,16 +296,16 @@ export default function BoxSelectScreen() {
 								}}
 							>
 								<PlusIcon size={20} color={c.brandStrong} />
-								<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>Другие</Text>
+								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Другие</Text>
 							</Pressable>
 						</View>
-						<Text style={{ fontSize: 13.5, lineHeight: 17.5, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
 							Запросы будут приходить только по этим маркам
 						</Text>
 					</>
 				)}
 
-				{error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
+				{error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
 			</ScrollView>
 
 			{othersOpen ? (
@@ -385,7 +385,7 @@ function OtherBrands({
 							onChangeText={setQ}
 							placeholder="Найти марку"
 							placeholderTextColor={raw.fillInk}
-							style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+							style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 						/>
 					</View>
 				</View>
@@ -397,7 +397,7 @@ function OtherBrands({
 				return (
 					<Pressable key={brand.id} onPress={() => onToggle(brand.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 						<BrandLogo brand={brand} size={34} />
-						<Text style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(400), color: c.ink }}>{brand.name}</Text>
+						<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink }}>{brand.name}</Text>
 						<View
 							style={{
 								width: 24,
@@ -452,7 +452,7 @@ function ClaimSheet({
 					{claim.isSuccess ? (
 						<>
 							<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>Заявка на спор отправлена</Text>
-							<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 								Администрация рынка проверит, чей это бокс, и пришлёт пуш с решением.
 							</Text>
 							<Button label="Понятно" onPress={close} />
@@ -460,7 +460,7 @@ function ClaimSheet({
 					) : (
 						<>
 							<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>{box?.place ?? ' '} занят</Text>
-							<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 								Если это ваш бокс, а в приложении его занял другой продавец, — откройте спор. Администрация рынка разберётся.
 							</Text>
 							<TextInput
@@ -469,10 +469,10 @@ function ClaimSheet({
 								placeholder="Комментарий — необязательно: с какого года аренда, договор…"
 								placeholderTextColor={raw.fillInk}
 								multiline
-								style={{ minHeight: 72, borderRadius: 12, borderWidth: 2, borderColor: c.border, paddingVertical: 10, paddingHorizontal: 14, fontSize: 15, fontFamily: fontFamily(400), color: c.ink, textAlignVertical: 'top' }}
+								style={{ minHeight: 72, borderRadius: 12, borderWidth: 2, borderColor: c.border, paddingVertical: 10, paddingHorizontal: 14, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink, textAlignVertical: 'top' }}
 							/>
 							{claim.error ? (
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{claim.error.message}</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{claim.error.message}</Text>
 							) : null}
 							{code === 'CONTAINER_FREE' && box ? (
 								<Button label="Занять этот бокс" variant="secondary" onPress={() => onFree({ id: box.id, number: box.number })} />

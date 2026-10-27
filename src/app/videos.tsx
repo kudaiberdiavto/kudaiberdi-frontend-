@@ -91,7 +91,7 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 							{feed.isPending ? (
 								<ActivityIndicator color="#FFFFFF" />
 							) : (
-								<Text style={{ fontSize: 16, lineHeight: 22, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
+								<Text style={{ fontSize: 17.5, lineHeight: 24, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
 									{feed.error ? 'Не удалось загрузить видео. Потяните вниз, чтобы повторить' : 'Пока нет видео. Как только продавцы выложат — покажем здесь'}
 								</Text>
 							)}
@@ -124,7 +124,7 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 						}}
 					>
 						{byCar ? <TickIcon size={16} color="#FFFFFF" /> : null}
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{car.model.label}</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{car.model.label}</Text>
 					</Pressable>
 				) : null}
 			</View>
@@ -212,7 +212,7 @@ function FeedPage({
 						<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.16)', alignItems: 'center', justifyContent: 'center' }}>
 							{button.icon}
 						</View>
-						<Text style={{ fontSize: 12, fontFamily: fontFamily(600), color: '#FFFFFF' }}>{button.label}</Text>
+						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: '#FFFFFF' }}>{button.label}</Text>
 					</Pressable>
 				))}
 			</View>
@@ -226,21 +226,21 @@ function FeedPage({
 						<Image source={{ uri: resolveUrl(shop.avatarUrl) }} style={{ width: 32, height: 32, borderRadius: 16 }} />
 					) : (
 						<View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{shop.name.slice(0, 1).toUpperCase()}</Text>
+							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{shop.name.slice(0, 1).toUpperCase()}</Text>
 						</View>
 					)}
 					<View style={{ flex: 1 }}>
-						<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+						<Text numberOfLines={1} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
 							{shop.name}
 						</Text>
-						<Text numberOfLines={1} style={{ fontSize: 12.5, fontFamily: fontFamily(400), color: 'rgba(255,255,255,0.75)' }}>
+						<Text numberOfLines={1} style={{ fontSize: 14, fontFamily: fontFamily(400), color: 'rgba(255,255,255,0.75)' }}>
 							{meta}
 						</Text>
 					</View>
 				</Pressable>
-				<Text style={{ fontSize: 20, lineHeight: 25, fontFamily: fontFamily(800), color: '#FFFFFF', paddingRight: 64 }}>{item.title}</Text>
+				<Text style={{ fontSize: 20, lineHeight: 27.5, fontFamily: fontFamily(800), color: '#FFFFFF', paddingRight: 64 }}>{item.title}</Text>
 				{description ? (
-					<Text numberOfLines={2} style={{ fontSize: 14.5, lineHeight: 19.5, fontFamily: fontFamily(400), color: 'rgba(255,255,255,0.88)', paddingRight: 64 }}>
+					<Text numberOfLines={2} style={{ fontSize: 16, lineHeight: 21.5, fontFamily: fontFamily(400), color: 'rgba(255,255,255,0.88)', paddingRight: 64 }}>
 						{description}
 					</Text>
 				) : null}
@@ -248,7 +248,7 @@ function FeedPage({
 					<Text style={{ fontSize: 30, fontFamily: fontFamily(800), letterSpacing: -0.6, color: '#FFFFFF' }}>{priceDigits(item.price)} сом</Text>
 					{condition ? (
 						<View style={{ height: 24, paddingHorizontal: 8, borderRadius: 7, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{condition}</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{condition}</Text>
 						</View>
 					) : null}
 				</View>
@@ -270,7 +270,7 @@ function FeedPage({
 						}}
 					>
 						<ChatIcon size={20} color="#FFFFFF" strokeWidth={2.2} />
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
+						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
 					</Pressable>
 					{item.shipsToRegions ? (
 						<Pressable
@@ -287,7 +287,7 @@ function FeedPage({
 							}}
 						>
 							<TruckIcon size={20} color={c.ink} />
-							<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Доставка</Text>
+							<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>Доставка</Text>
 						</Pressable>
 					) : null}
 				</View>

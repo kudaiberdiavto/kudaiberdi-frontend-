@@ -67,21 +67,21 @@ export default function SellerBrandsScreen() {
 						onChangeText={setQ}
 						placeholder="Найти марку"
 						placeholderTextColor="#7D7979"
-						style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+						style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 					/>
 				</View>
 
 				<QueryErrorBanner error={shop.error ?? all.error ?? save.error} onRetry={() => all.refetch()} />
 
-				<Text style={{ fontSize: 14, lineHeight: 19.6, fontFamily: fontFamily(400), color: c.muted }}>
+				<Text style={{ fontSize: 15.5, lineHeight: 21.5, fontFamily: fontFamily(400), color: c.muted }}>
 					Запросы будут приходить только по этим маркам. Логотипы видят покупатели в вашем профиле.
 				</Text>
 
 				<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
 						{searching ? 'НАЙДЕНО' : 'ПОПУЛЯРНЫЕ'}
 					</Text>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>Выбрано {selected.length}</Text>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Выбрано {selected.length}</Text>
 				</View>
 
 				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -125,7 +125,7 @@ export default function SellerBrandsScreen() {
 									) : null}
 								</View>
 								<Text
-									style={{ fontSize: 12, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}
+									style={{ fontSize: 13, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}
 								>
 									{brand.shortName}
 								</Text>
@@ -135,7 +135,7 @@ export default function SellerBrandsScreen() {
 				</View>
 
 				{!searching ? (
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
 						ВСЕ МАРКИ А–Я
 					</Text>
 				) : null}
@@ -158,7 +158,7 @@ export default function SellerBrandsScreen() {
 								}}
 							>
 								<BrandLogo brand={brand} size={34} />
-								<Text style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(400), color: c.ink }}>{brand.name}</Text>
+								<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink }}>{brand.name}</Text>
 								<View
 									style={{
 										width: 24,
@@ -204,7 +204,7 @@ export default function SellerBrandsScreen() {
 					{save.isPending ? (
 						<ActivityIndicator color="#FFFFFF" />
 					) : (
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
 							Сохранить · {selected.length} {plural(selected.length, ['марка', 'марки', 'марок'])}
 						</Text>
 					)}

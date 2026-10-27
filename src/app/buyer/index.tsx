@@ -64,8 +64,8 @@ export default function BuyerHomeScreen() {
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<View style={{ height: 60, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.muted }}>{name ? `Салам, ${name}` : 'Салам'}</Text>
-					<Text numberOfLines={1} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.muted }}>{name ? `Салам, ${name}` : 'Салам'}</Text>
+					<Text numberOfLines={1} style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>
 						{car ? `${car.title} · ${car.year}` : 'Машина не выбрана'}
 					</Text>
 				</View>
@@ -86,7 +86,7 @@ export default function BuyerHomeScreen() {
 						}}
 					>
 						<PlusThinIcon size={16} color={c.ink} />
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.ink }}>Добавить</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>Добавить</Text>
 					</Pressable>
 				)}
 			</View>
@@ -131,7 +131,7 @@ export default function BuyerHomeScreen() {
 							<Text style={{ fontSize: 23, lineHeight: 29, fontFamily: fontFamily(800), letterSpacing: -0.4, color: '#FFFFFF' }}>
 								Найти запчасть
 							</Text>
-							<Text style={{ fontSize: 13.5, lineHeight: 18, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>
+							<Text style={{ fontSize: 15, lineHeight: 20, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>
 								Фото или голосом — продавцы ответят с ценой
 							</Text>
 						</View>
@@ -154,7 +154,7 @@ export default function BuyerHomeScreen() {
 					offlineText="Нет сети. Покажем запросы, когда появится"
 				/>
 				{requests.isSuccess && services.isSuccess && items.length === 0 ? (
-					<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 						Здесь появятся ваши запросы. Нажмите «Найти запчасть» — продавцы ответят с ценой.
 					</Text>
 				) : null}
@@ -171,7 +171,7 @@ export default function BuyerHomeScreen() {
 							if (requests.hasNextPage) requests.fetchNextPage()
 							if (services.hasNextPage) services.fetchNextPage()
 						}}
-						style={{ textAlign: 'center', paddingVertical: 8, fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}
+						style={{ textAlign: 'center', paddingVertical: 8, fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}
 					>
 						Показать ещё
 					</Text>
@@ -248,7 +248,7 @@ function ServiceTile({ label, icon, muted, onPress }: { label: string; icon: Rea
 			>
 				{icon}
 			</View>
-			<Text numberOfLines={1} style={{ fontSize: 12.5, lineHeight: 14.4, fontFamily: fontFamily(600), color: c.ink, textAlign: 'center' }}>
+			<Text numberOfLines={1} style={{ fontSize: 14, lineHeight: 16, fontFamily: fontFamily(600), color: c.ink, textAlign: 'center' }}>
 				{label}
 			</Text>
 		</Pressable>
@@ -277,12 +277,12 @@ function RequestCard({
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				{tile}
 				<View style={{ flex: 1, gap: 3 }}>
-					<Text numberOfLines={1} style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
 						{title}
 					</Text>
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
 						{live ? <LiveDot /> : null}
-						<Text numberOfLines={1} style={{ flex: 1, fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text numberOfLines={1} style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
 							{status}
 						</Text>
 					</View>

@@ -47,42 +47,42 @@ export function CommentsSheet({ partId, title, onClose }: { partId: number; titl
 
 	return (
 		<ModalSheet onClose={onClose}>
-			<Text numberOfLines={1} style={{ fontSize: 18, fontFamily: fontFamily(800), color: c.ink }}>
+			<Text numberOfLines={1} style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>
 				Комментарии{total ? ` · ${total}` : ''}
 			</Text>
-			<Text numberOfLines={1} style={{ marginTop: -8, fontSize: 13.5, fontFamily: fontFamily(400), color: c.muted }}>
+			<Text numberOfLines={1} style={{ marginTop: -8, fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>
 				{title}
 			</Text>
 
 			<ScrollView style={{ maxHeight: height * 0.45 }} contentContainerStyle={{ gap: 14, paddingVertical: 4 }} keyboardShouldPersistTaps="handled">
 				{comments.isPending ? <ActivityIndicator color={c.muted} /> : null}
 				{comments.isSuccess && !items.length ? (
-					<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 						Пока нет комментариев. Спросите продавца — например, подойдёт ли на вашу машину.
 					</Text>
 				) : null}
 				{items.map((comment) => (
 					<Pressable key={comment.id} onLongPress={() => actions(comment)} delayLongPress={400} style={{ gap: 3 }}>
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.ink }}>{comment.authorName ?? 'Покупатель'}</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>{comment.authorName ?? 'Покупатель'}</Text>
 							{comment.fromSeller ? (
 								<View style={{ height: 20, paddingHorizontal: 6, borderRadius: 6, backgroundColor: c.brandTint, justifyContent: 'center' }}>
-									<Text style={{ fontSize: 11.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Продавец</Text>
+									<Text style={{ fontSize: 12.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Продавец</Text>
 								</View>
 							) : null}
-							<Text style={{ fontSize: 12.5, fontFamily: fontFamily(400), color: c.muted }}>{formatAgo(comment.createdAt, { short: true })}</Text>
+							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{formatAgo(comment.createdAt, { short: true })}</Text>
 						</View>
-						<Text style={{ fontSize: 15, lineHeight: 20, fontFamily: fontFamily(400), color: c.ink }}>{comment.text}</Text>
+						<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(400), color: c.ink }}>{comment.text}</Text>
 					</Pressable>
 				))}
 				{comments.hasNextPage ? (
-					<Text onPress={() => comments.fetchNextPage()} style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong, textAlign: 'center' }}>
+					<Text onPress={() => comments.fetchNextPage()} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong, textAlign: 'center' }}>
 						Показать ещё
 					</Text>
 				) : null}
 			</ScrollView>
 
-			{add.error ? <Text style={{ fontSize: 13.5, fontFamily: fontFamily(500), color: c.danger }}>{add.error.message}</Text> : null}
+			{add.error ? <Text style={{ fontSize: 15, fontFamily: fontFamily(500), color: c.danger }}>{add.error.message}</Text> : null}
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
 				<TextInput
 					value={text}
@@ -99,7 +99,7 @@ export function CommentsSheet({ partId, title, onClose }: { partId: number; titl
 						borderRadius: 24,
 						backgroundColor: c.surface,
 						paddingHorizontal: 16,
-						fontSize: 15,
+						fontSize: 16.5,
 						fontFamily: fontFamily(400),
 						color: c.ink,
 					}}
@@ -116,7 +116,7 @@ export function CommentsSheet({ partId, title, onClose }: { partId: number; titl
 						opacity: !signedIn || value ? 1 : 0.5,
 					}}
 				>
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{signedIn ? 'Отправить' : 'Войти'}</Text>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{signedIn ? 'Отправить' : 'Войти'}</Text>
 				</Pressable>
 			</View>
 			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />

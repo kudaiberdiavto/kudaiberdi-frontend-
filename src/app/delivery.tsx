@@ -63,11 +63,11 @@ export default function DeliveryScreen() {
 		borderColor: c.border,
 		backgroundColor: c.card,
 		paddingHorizontal: 14,
-		fontSize: 16,
+		fontSize: 17.5,
 		fontFamily: fontFamily(500),
 		color: c.ink,
 	} as const
-	const label = { fontSize: 13, fontFamily: fontFamily(500), color: c.muted } as const
+	const label = { fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted } as const
 
 	return (
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
@@ -81,15 +81,15 @@ export default function DeliveryScreen() {
 							{video ? <PlayIcon size={20} /> : null}
 						</View>
 						<View style={{ flex: 1, gap: 2 }}>
-							<Text numberOfLines={2} style={{ fontSize: 16, lineHeight: 20, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text numberOfLines={2} style={{ fontSize: 17.5, lineHeight: 22, fontFamily: fontFamily(700), color: c.ink }}>
 								{part.title}
 							</Text>
-							<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
 								{part.shop.name} · {shopPlace(part.shop).replace('Бокс', 'конт.')}
 							</Text>
 						</View>
 						{part.price != null ? (
-							<Text style={{ fontSize: 17, fontFamily: fontFamily(800), color: c.ink }}>{priceDigits(part.price)} с</Text>
+							<Text style={{ fontSize: 18.5, fontFamily: fontFamily(800), color: c.ink }}>{priceDigits(part.price)} с</Text>
 						) : null}
 					</View>
 				) : null}
@@ -117,7 +117,7 @@ export default function DeliveryScreen() {
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: active ? c.brandStrong : c.ink }}>{item.name}</Text>
+								<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: active ? c.brandStrong : c.ink }}>{item.name}</Text>
 							</Pressable>
 						)
 					})}
@@ -151,15 +151,15 @@ export default function DeliveryScreen() {
 				{/* Prices and days are agreed with the courier service itself. */}
 				<View style={{ borderRadius: 14, backgroundColor: '#FFF4D6', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>Стоимость — у {tariffs.data?.courierName ?? 'Ылдам Экспресс'}</Text>
-						<Text style={{ fontSize: 14, lineHeight: 19, fontFamily: fontFamily(400), color: c.inkSecondary }}>Цену доставки обговорите с ними</Text>
+						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>Стоимость — у {tariffs.data?.courierName ?? 'Ылдам Экспресс'}</Text>
+						<Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(400), color: c.inkSecondary }}>Цену доставки обговорите с ними</Text>
 					</View>
 					{courierPhone ? (
 						<Pressable
 							onPress={() => Linking.openURL(`tel:${courierPhone.replace(/[^\d+]/g, '')}`)}
 							style={{ height: 40, paddingHorizontal: 14, borderRadius: 12, backgroundColor: c.card, justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.ink }}>Позвонить</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>Позвонить</Text>
 						</Pressable>
 					) : null}
 				</View>

@@ -123,7 +123,7 @@ export default function MasterAnswerScreen() {
 						</View>
 						<View style={{ flex: 1, gap: 1 }}>
 							<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), color: c.ink }}>Проверьте и отправьте</Text>
-							<Text numberOfLines={1} style={{ fontSize: 14, lineHeight: 18.2, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text numberOfLines={1} style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
 								{subtitle}
 							</Text>
 						</View>
@@ -132,7 +132,7 @@ export default function MasterAnswerScreen() {
 					{/* The client's voice note — to listen again before answering (not while recording). */}
 					{request?.voice && !voice.recording ? (
 						<View style={{ gap: 6 }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Голос клиента</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Голос клиента</Text>
 							<VoicePlayer voice={request.voice} background={c.surface} />
 						</View>
 					) : null}
@@ -142,12 +142,12 @@ export default function MasterAnswerScreen() {
 							<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: voice.recording ? c.danger : c.brand, alignItems: 'center', justifyContent: 'center' }}>
 								<MicOutline size={22} color="#FFFFFF" />
 							</View>
-							<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>
+							<Text style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(600), color: c.ink }}>
 								{voice.recording ? `Говорите… ${voiceClock(voice.seconds)}` : 'Распознаём…'}
 							</Text>
 							{voice.recording ? (
 								<Pressable onPress={voice.stop} style={{ height: 40, paddingHorizontal: 16, borderRadius: 12, backgroundColor: c.brand, justifyContent: 'center' }}>
-									<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Готово</Text>
+									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Готово</Text>
 								</Pressable>
 							) : null}
 						</View>
@@ -155,10 +155,10 @@ export default function MasterAnswerScreen() {
 						<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 10, gap: 8 }}>
 							<VoicePlayer voice={voice.result.voice} background={c.card} />
 							<View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start', paddingHorizontal: 4 }}>
-								<Text style={{ flex: 1, fontSize: 15, lineHeight: 20.25, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.inkSecondary }}>
+								<Text style={{ flex: 1, fontSize: 16.5, lineHeight: 22.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.inkSecondary }}>
 									{voice.result.voice.transcript ? `«${voice.result.voice.transcript}»` : 'Не удалось разобрать — заполните цену и время сами'}
 								</Text>
-								<Text onPress={voice.start} style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>
+								<Text onPress={voice.start} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 									Перезаписать
 								</Text>
 							</View>
@@ -169,17 +169,17 @@ export default function MasterAnswerScreen() {
 							style={{ height: 48, borderRadius: 14, backgroundColor: c.brandTint, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<MicOutline size={20} color={c.brandStrong} />
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>Сказать голосом</Text>
+							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Сказать голосом</Text>
 						</Pressable>
 					)}
-					{voice.error ? <Text style={{ fontSize: 13, fontFamily: fontFamily(500), color: c.danger }}>{voice.error}</Text> : null}
+					{voice.error ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.danger }}>{voice.error}</Text> : null}
 
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}>
 							{voice.result ? 'Заполнили из голоса' : 'Цена и время'}
 						</Text>
 						<View style={{ flex: 1 }} />
-						{voice.result ? <Text style={{ fontSize: 13, fontFamily: fontFamily(500), color: c.muted }}>можно поправить</Text> : null}
+						{voice.result ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>можно поправить</Text> : null}
 					</View>
 
 					<View
@@ -194,7 +194,7 @@ export default function MasterAnswerScreen() {
 							gap: 8,
 						}}
 					>
-						<Text style={{ fontSize: 18, fontFamily: fontFamily(700), color: c.muted }}>от</Text>
+						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>от</Text>
 						<TextInput
 							value={priceValue ? formatNumber(priceValue) : ''}
 							onChangeText={(value) => setPrice(value.replace(/\D/g, '').slice(0, 7))}
@@ -203,7 +203,7 @@ export default function MasterAnswerScreen() {
 							placeholderTextColor={c.border}
 							style={{ minWidth: 40, fontSize: 32, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink, padding: 0 }}
 						/>
-						<Text style={{ fontSize: 18, fontFamily: fontFamily(700), color: c.muted }}>сом</Text>
+						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>сом</Text>
 						<View style={{ flex: 1 }} />
 						{fromVoice.price && fromVoice.price === priceValue ? <FromVoiceBadge /> : null}
 					</View>
@@ -228,7 +228,7 @@ export default function MasterAnswerScreen() {
 										gap: 6,
 									}}
 								>
-									<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(selected ? 700 : 600), color: selected ? c.brandStrong : c.ink }}>
+									<Text numberOfLines={1} style={{ fontSize: 16.5, fontFamily: fontFamily(selected ? 700 : 600), color: selected ? c.brandStrong : c.ink }}>
 										{timeLabel(value)}
 									</Text>
 									{fromVoice.when === value ? <Sparkle size={14} /> : null}
@@ -237,7 +237,7 @@ export default function MasterAnswerScreen() {
 						})}
 					</View>
 
-					{offer.error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{offer.error.message}</Text> : null}
+					{offer.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{offer.error.message}</Text> : null}
 
 					<Pressable
 						onPress={send}
@@ -254,7 +254,7 @@ export default function MasterAnswerScreen() {
 						}}
 					>
 						<SendPlane size={20} color="#FFFFFF" />
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{offer.isPending ? 'Отправляем…' : 'Отправить клиенту'}</Text>
+						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{offer.isPending ? 'Отправляем…' : 'Отправить клиенту'}</Text>
 					</Pressable>
 				</View>
 			</KeyboardAvoidingView>

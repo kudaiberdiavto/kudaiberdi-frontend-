@@ -33,10 +33,10 @@ export default function SellerChatScreen() {
 						<ChevronLeftIcon size={24} color={c.ink} />
 					</Pressable>
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>
+						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>
 							{chat ? (chat.buyer.name ?? 'Покупатель') : ' '}
 						</Text>
-						<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(400), color: typing ? c.success : c.muted }}>
+						<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: typing ? c.success : c.muted }}>
 							{typing ? 'печатает…' : request ? `${request.text} · ${request.carLabel}` : ' '}
 						</Text>
 					</View>

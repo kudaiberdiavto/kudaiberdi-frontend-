@@ -75,7 +75,7 @@ export function SectionLabel({ children, style }: { children: string; style?: St
 		<View style={style}>
 			<Text
 				style={{
-					fontSize: 13,
+					fontSize: 14.5,
 					fontFamily: fontFamily(700),
 					letterSpacing: 1.04,
 					textTransform: 'uppercase',
@@ -149,7 +149,7 @@ export function Segmented({
 					>
 						<Text
 							style={{
-								fontSize: 14,
+								fontSize: 15.5,
 								fontFamily: fontFamily(active ? activeWeight : 600),
 								color: active ? '#FFFFFF' : (inactiveColor ?? c.inkSecondary),
 							}}
@@ -225,10 +225,10 @@ export function SettingsRow({
 				borderBottomColor: c.surface,
 			}}
 		>
-			<Text style={{ fontSize: 16, fontFamily: fontFamily(400), color: labelColor ?? c.ink }}>{label}</Text>
+			<Text style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: labelColor ?? c.ink }}>{label}</Text>
 			{right ??
 				(value ? (
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(valueWeight), color: valueColor ?? c.muted }}>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(valueWeight), color: valueColor ?? c.muted }}>
 						{value}
 					</Text>
 				) : null)}
@@ -256,7 +256,7 @@ export function LanguageSwitch({ value, onChange }: { value: 'ru' | 'kg'; onChan
 							backgroundColor: active ? c.brand : 'transparent',
 						}}
 					>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.muted }}>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.muted }}>
 							{code === 'ru' ? 'Русский' : 'Кыргызча'}
 						</Text>
 					</Pressable>
@@ -279,7 +279,7 @@ export function LocationCard({
 	const c = useColors()
 	const cell = (title: string, value: string) => (
 		<View style={{ flex: 1, borderRadius: 12, backgroundColor: c.surface, paddingVertical: 8, paddingHorizontal: 12, gap: 2 }}>
-			<Text style={{ fontSize: 11, fontFamily: fontFamily(700), letterSpacing: 0.88, color: c.muted }}>{title}</Text>
+			<Text style={{ fontSize: 12, fontFamily: fontFamily(700), letterSpacing: 0.88, color: c.muted }}>{title}</Text>
 			<Text style={{ fontSize: 26, lineHeight: 29.9, fontFamily: fontFamily(800), color: c.ink }}>{value}</Text>
 		</View>
 	)
@@ -324,7 +324,7 @@ export function Stepper({
 	return (
 		<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
 			{step('−', () => onChange(Math.max(min, value - 1)), value <= min)}
-			<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>{value}</Text>
+			<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>{value}</Text>
 			{step('+', () => onChange(Math.min(max, value + 1)), value >= max)}
 		</View>
 	)

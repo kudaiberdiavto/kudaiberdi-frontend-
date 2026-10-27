@@ -40,7 +40,7 @@ export default function CameraScreen() {
 	if (!permission.granted) {
 		return (
 			<View style={{ flex: 1, backgroundColor: '#0B0B0C', alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 }}>
-				<Text style={{ fontSize: 16, color: '#FFFFFF', textAlign: 'center' }}>Нужен доступ к камере, чтобы сфотографировать запчасть</Text>
+				<Text style={{ fontSize: 17.5, color: '#FFFFFF', textAlign: 'center' }}>Нужен доступ к камере, чтобы сфотографировать запчасть</Text>
 				<Button label="Разрешить камеру" onPress={requestPermission} />
 			</View>
 		)
@@ -110,7 +110,7 @@ export default function CameraScreen() {
 				>
 					<CloseIcon size={20} color="#FFFFFF" />
 				</Pressable>
-				<Text style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{title}</Text>
+				<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{title}</Text>
 				<Pressable
 					onPress={() => setTorch((v) => !v)}
 					style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' }}
@@ -148,7 +148,7 @@ export default function CameraScreen() {
 			{mode === 1 && (recognize.isPending || recognize.data || recognize.error) ? (
 				<View style={{ position: 'absolute', left: 16, right: 16, top: 491, gap: 8 }}>
 					<View style={{ alignSelf: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.55)' }}>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: '#FFFFFF' }}>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: '#FFFFFF' }}>
 							{recognize.isPending
 								? 'Распознаём номер…'
 								: recognize.error
@@ -173,8 +173,8 @@ export default function CameraScreen() {
 										gap: 2,
 									}}
 								>
-									<Text style={{ fontSize: 15, fontFamily: fontFamily(800), color: '#201F1D' }}>{candidate.oem}</Text>
-									<Text style={{ fontSize: 11, fontFamily: fontFamily(600), color: '#605D5D' }}>
+									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: '#201F1D' }}>{candidate.oem}</Text>
+									<Text style={{ fontSize: 12, fontFamily: fontFamily(600), color: '#605D5D' }}>
 										{candidate.partsFound
 											? `есть у ${candidate.partsFound} ${plural(candidate.partsFound, ['продавца', 'продавцов', 'продавцов'])}`
 											: 'новый номер'}
@@ -198,7 +198,7 @@ export default function CameraScreen() {
 						justifyContent: 'center',
 					}}
 				>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: '#FFFFFF' }}>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: '#FFFFFF' }}>
 						{mode === 1 && draft.oemNumber ? `Номер: ${draft.oemNumber}` : HINTS[mode]}
 					</Text>
 				</View>
@@ -243,7 +243,7 @@ export default function CameraScreen() {
 			<View style={{ position: 'absolute', left: 16, right: 16, top: 637, flexDirection: 'row', justifyContent: 'space-between' }}>
 				{MODES.map((label, i) => (
 					<Pressable key={label} onPress={() => setMode(i)}>
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: mode === i ? '#FFD54A' : 'rgba(255,255,255,0.55)' }}>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: mode === i ? '#FFD54A' : 'rgba(255,255,255,0.55)' }}>
 							{label}
 						</Text>
 					</Pressable>
@@ -296,7 +296,7 @@ export default function CameraScreen() {
 						justifyContent: 'center',
 					}}
 				>
-					<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Готово</Text>
+					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Готово</Text>
 				</Pressable>
 			</View>
 		</View>

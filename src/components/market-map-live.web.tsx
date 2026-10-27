@@ -289,11 +289,11 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 						},
 					]}
 				>
-					<Text style={{ fontSize: 15, color: c.ink, textAlign: 'center' }}>
+					<Text style={{ fontSize: 16.5, color: c.ink, textAlign: 'center' }}>
 						{status === 'loading' ? 'Загружаю карту…' : 'Карта не загрузилась'}
 					</Text>
 					{status === 'error' ? (
-						<Text selectable style={{ fontSize: 13, color: c.danger, textAlign: 'center' }}>
+						<Text selectable style={{ fontSize: 14.5, color: c.danger, textAlign: 'center' }}>
 							{errorText}
 						</Text>
 					) : null}

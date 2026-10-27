@@ -22,7 +22,7 @@ export default function QrLink() {
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, padding: 24, justifyContent: 'center', gap: 14 }}>
 			<QueryErrorBanner error={qr.error} onRetry={() => qr.refetch()} />
-			<Text style={{ fontSize: 16, fontFamily: fontFamily(600), color: c.muted, textAlign: 'center' }}>
+			<Text style={{ fontSize: 17.5, fontFamily: fontFamily(600), color: c.muted, textAlign: 'center' }}>
 				{qr.error ? 'QR-код не относится к рынку' : 'Открываем место на рынке…'}
 			</Text>
 			{qr.error ? <Button label="На главную" onPress={() => router.replace('/buyer')} /> : null}

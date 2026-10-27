@@ -167,7 +167,7 @@ export default function SearchPartScreen() {
 								}}
 							>
 								<BrandLogo brand={car.brand} size={28} />
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: active ? c.brandStrong : c.ink }}>{car.label}</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: active ? c.brandStrong : c.ink }}>{car.label}</Text>
 							</Pressable>
 						)
 					})}
@@ -188,7 +188,7 @@ export default function SearchPartScreen() {
 							}}
 						>
 							<BrandLogo brand={clientCar.brand} size={28} />
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: useClient ? c.brandStrong : c.ink }}>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: useClient ? c.brandStrong : c.ink }}>
 								{clientCar.model.label} · {clientCar.year}
 							</Text>
 						</Pressable>
@@ -208,7 +208,7 @@ export default function SearchPartScreen() {
 						}}
 					>
 						<PlusThinIcon size={14} color={c.brandStrong} strokeWidth={2.6} />
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>Другая машина</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Другая машина</Text>
 					</Pressable>
 					<Pressable
 						onPress={scanPassport}
@@ -226,7 +226,7 @@ export default function SearchPartScreen() {
 						}}
 					>
 						{passportBusy ? <ActivityIndicator size="small" color={c.brandStrong} /> : <PassportIcon size={18} color={c.brandStrong} />}
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 							{passportBusy ? 'Читаем техпаспорт…' : 'Фото техпаспорта'}
 						</Text>
 					</Pressable>
@@ -262,7 +262,7 @@ export default function SearchPartScreen() {
 							</Pressable>
 							{uploads.photos.length > 1 ? (
 								<View style={{ position: 'absolute', top: 8, left: 8, height: 24, paddingHorizontal: 8, borderRadius: 12, backgroundColor: 'rgba(32,31,29,0.6)', justifyContent: 'center' }}>
-									<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{uploads.photos.length} фото</Text>
+									<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{uploads.photos.length} фото</Text>
 								</View>
 							) : null}
 							{uploads.canAdd ? (
@@ -282,7 +282,7 @@ export default function SearchPartScreen() {
 									}}
 								>
 									<PlusThinIcon size={12} color={c.ink} strokeWidth={2.8} />
-									<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: c.ink }}>Ещё фото</Text>
+									<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.ink }}>Ещё фото</Text>
 								</Pressable>
 							) : null}
 						</View>
@@ -291,15 +291,15 @@ export default function SearchPartScreen() {
 							<View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
 								<CameraV23Icon size={26} color={c.brandStrong} />
 							</View>
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>Сфотать деталь</Text>
+							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>Сфотать деталь</Text>
 						</DashedTile>
 					)}
 
 					{voice.result ? (
 						<View style={{ flex: 1, height: 132, borderRadius: 18, backgroundColor: c.card, padding: 12, justifyContent: 'space-between' }}>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>Голосом</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Голосом</Text>
 							<VoicePlayer voice={voice.result.voice} height={40} />
-							<Text onPress={voice.reset} style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.muted }}>
+							<Text onPress={voice.reset} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.muted }}>
 								Перезаписать
 							</Text>
 						</View>
@@ -322,13 +322,13 @@ export default function SearchPartScreen() {
 							>
 								{voice.uploading ? <ActivityIndicator color="#FFFFFF" /> : <MicV23Icon size={26} color="#FFFFFF" />}
 							</View>
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
 								{voice.uploading ? 'Слушаем…' : voice.recording ? `Готово · ${voiceClock(voice.seconds)}` : 'Сказать голосом'}
 							</Text>
 						</DashedTile>
 					)}
 				</View>
-				{voice.error ? <Text style={{ fontSize: 13, fontFamily: fontFamily(500), color: c.danger }}>{voice.error}</Text> : null}
+				{voice.error ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.danger }}>{voice.error}</Text> : null}
 
 				<TextInput
 					value={text}
@@ -343,19 +343,19 @@ export default function SearchPartScreen() {
 						borderColor: c.border,
 						backgroundColor: c.card,
 						paddingHorizontal: 14,
-						fontSize: 16,
+						fontSize: 17.5,
 						fontFamily: fontFamily(400),
 						color: c.ink,
 					}}
 				/>
-				<Text style={{ fontSize: 13.5, lineHeight: 17.5, fontFamily: fontFamily(400), color: c.muted }}>
+				<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
 					Не знаете названия? Просто сфотайте деталь или скажите своими словами.
 				</Text>
 
 				{brand ? (
 					<View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start', borderRadius: 14, backgroundColor: c.brandTint, paddingVertical: 12, paddingHorizontal: 14 }}>
 						<PaperPlaneIcon size={18} color={c.brandStrong} strokeWidth={2.2} />
-						<Text style={{ flex: 1, fontSize: 14, lineHeight: 19.6, fontFamily: fontFamily(400), color: '#1D2B53' }}>
+						<Text style={{ flex: 1, fontSize: 15.5, lineHeight: 21.5, fontFamily: fontFamily(400), color: '#1D2B53' }}>
 							Спросим <Text style={{ fontFamily: fontFamily(700) }}>всех продавцов {brand}</Text> на рынке
 							{recipients != null ? ` — ${recipients} ${plural(recipients, ['контейнер', 'контейнера', 'контейнеров'])}` : ''}. Обычно
 							отвечают за 5–10 минут.
@@ -363,7 +363,7 @@ export default function SearchPartScreen() {
 					</View>
 				) : null}
 
-				{error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
+				{error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
 			</ScrollView>
 
 			<View

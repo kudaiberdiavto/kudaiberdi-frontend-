@@ -102,14 +102,14 @@ export default function ServiceOffersScreen() {
 							<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: active ? c.success : c.border }} />
 						</View>
 						<View style={{ flex: 1, gap: 2 }}>
-							<Text style={{ fontSize: 15, lineHeight: 19.5, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>
 								{active
 									? `Ищем ещё ${left} ${plural(left, ['минуту', 'минуты', 'минут'])}`
 									: data.status === 'CLOSED'
 										? 'Заявка закрыта'
 										: 'Время вышло'}
 							</Text>
-							<Text style={{ fontSize: 13.5, lineHeight: 17.5, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
 								Спросили {asked} {plural(asked, ['мастера', 'мастеров', 'мастеров'])} · ответили {answered}
 							</Text>
 						</View>
@@ -120,19 +120,19 @@ export default function ServiceOffersScreen() {
 								onPress={() => (answered || !detail?.canWiden ? extend.mutate(30) : widen.mutate(undefined))}
 								style={{ height: 36, paddingHorizontal: 12, borderRadius: 12, backgroundColor: c.brandTint, justifyContent: 'center' }}
 							>
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 									{answered || !detail?.canWiden ? 'Ещё 30 мин' : `+5 км`}
 								</Text>
 							</Pressable>
 						) : null}
 					</View>
 				) : null}
-				{actionError ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{actionError.message}</Text> : null}
+				{actionError ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{actionError.message}</Text> : null}
 
 				{/* What the buyer attached — voice, photos, videos — not in the mockup, but they should see what they sent. */}
 				{detail?.voice || detail?.media.length ? (
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 8 }}>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Ваша заявка</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Ваша заявка</Text>
 						{detail.voice ? <VoicePlayer voice={detail.voice} /> : null}
 						<MediaStrip media={detail.media} />
 					</View>
@@ -155,7 +155,7 @@ export default function ServiceOffersScreen() {
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: selected ? '#FFFFFF' : c.ink }}>{option.label}</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: selected ? '#FFFFFF' : c.ink }}>{option.label}</Text>
 							</Pressable>
 						)
 					})}
@@ -171,7 +171,7 @@ export default function ServiceOffersScreen() {
 				))}
 
 				{offers.isSuccess && list.length === 0 ? (
-					<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center', paddingVertical: 24 }}>
+					<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center', paddingVertical: 24 }}>
 						{all.length
 							? 'На сегодня никто не свободен — посмотрите все ответы'
 							: active
@@ -206,24 +206,24 @@ function OfferCard({ offer, best, onComplain }: { offer: ServiceOffer; best: boo
 					<Image source={{ uri: resolveUrl(master.avatarUrl) }} style={{ width: 44, height: 44, borderRadius: 22 }} />
 				) : (
 					<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.brandStrong }}>{name.replace(/^(СТО|Мастер)\s*«?/, '').slice(0, 1)}</Text>
+						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{name.replace(/^(СТО|Мастер)\s*«?/, '').slice(0, 1)}</Text>
 					</View>
 				)}
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text numberOfLines={1} style={{ fontSize: 16, lineHeight: 20.8, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(700), color: c.ink }}>
 						{name}
 					</Text>
-					<Text numberOfLines={1} style={{ fontSize: 13.5, lineHeight: 17.5, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text numberOfLines={1} style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
 						{offerPlace(offer)}
 					</Text>
 				</View>
 				{offer.priceFrom ? (
 					<View style={{ alignItems: 'flex-end' }}>
 						<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), letterSpacing: -0.22, color: c.ink }}>
-							<Text style={{ fontSize: 12, fontFamily: fontFamily(600), color: c.muted, letterSpacing: 0 }}>от </Text>
+							<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted, letterSpacing: 0 }}>от </Text>
 							{formatNumber(offer.priceFrom)}
 						</Text>
-						<Text style={{ fontSize: 12, lineHeight: 15.6, fontFamily: fontFamily(600), color: c.muted }}>сом</Text>
+						<Text style={{ fontSize: 13, lineHeight: 17, fontFamily: fontFamily(600), color: c.muted }}>сом</Text>
 					</View>
 				) : null}
 			</Pressable>

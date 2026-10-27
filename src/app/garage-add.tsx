@@ -80,7 +80,7 @@ export default function GarageAddScreen() {
 				justifyContent: 'center',
 			}}
 		>
-			<Text style={{ fontSize: 14, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
+			<Text style={{ fontSize: 15.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
 				{label}
 			</Text>
 		</Pressable>
@@ -126,7 +126,7 @@ export default function GarageAddScreen() {
 						onChangeText={setQ}
 						placeholder="Марка: Toyota, мерс, бэха…"
 						placeholderTextColor="#7D7979"
-						style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+						style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 					/>
 				</View>
 
@@ -134,7 +134,7 @@ export default function GarageAddScreen() {
 
 				{popular.length ? (
 					<>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
 							ПОПУЛЯРНЫЕ
 						</Text>
 						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -157,7 +157,7 @@ export default function GarageAddScreen() {
 										}}
 									>
 										<BrandLogo brand={b} size={40} />
-										<Text style={{ fontSize: 12, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
+										<Text style={{ fontSize: 13, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
 											{b.shortName}
 										</Text>
 									</Pressable>
@@ -168,7 +168,7 @@ export default function GarageAddScreen() {
 				) : null}
 
 				{rest.length ? (
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
 						{q.trim() ? 'НАЙДЕНО' : 'ВСЕ МАРКИ А–Я'}
 					</Text>
 				) : null}
@@ -187,7 +187,7 @@ export default function GarageAddScreen() {
 						}}
 					>
 						<BrandLogo brand={b} size={32} />
-						<Text style={{ fontSize: 16, fontFamily: fontFamily(600), color: c.ink }}>{b.name}</Text>
+						<Text style={{ fontSize: 17.5, fontFamily: fontFamily(600), color: c.ink }}>{b.name}</Text>
 					</Pressable>
 				))}
 			</ScrollView>
@@ -204,7 +204,7 @@ export default function GarageAddScreen() {
 					footer={
 						<>
 							{addCar.error ? (
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{addCar.error.message}</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{addCar.error.message}</Text>
 							) : null}
 							<Button
 								label={once ? 'Выбрать' : 'Добавить в гараж'}
@@ -241,7 +241,7 @@ export default function GarageAddScreen() {
 						</>
 					}
 				>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>МОДЕЛЬ</Text>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>МОДЕЛЬ</Text>
 					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 						{(models.data ?? []).map((m) => chip(m.label, m.id === modelId, () => {
 							setModelId(m.id)
@@ -251,7 +251,7 @@ export default function GarageAddScreen() {
 
 					{model ? (
 						<>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ГОД</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ГОД</Text>
 							<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 								{yearsOf(model).map((y) => chip(String(y), y === year, () => setYear(y), y))}
 							</ScrollView>
@@ -260,15 +260,15 @@ export default function GarageAddScreen() {
 
 					{year && !once ? (
 						<>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ОБЪЁМ, Л · НЕОБЯЗАТЕЛЬНО</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ОБЪЁМ, Л · НЕОБЯЗАТЕЛЬНО</Text>
 							<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 								{VOLUMES.map((v) => chip(v.toFixed(1), v === engineVolume, () => setEngineVolume(v === engineVolume ? null : v), v))}
 							</ScrollView>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ТОПЛИВО</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ТОПЛИВО</Text>
 							<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 								{FUELS.map((f) => chip(f.label, f.value === fuel, () => setFuel(f.value === fuel ? null : f.value), f.value))}
 							</View>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ОТКУДА МАШИНА</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ОТКУДА МАШИНА</Text>
 							<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 								{ORIGINS.filter((o) => o.value !== 'UNKNOWN').map((o) => chip(o.label, o.value === origin, () => setOrigin(o.value === origin ? null : o.value), o.value))}
 							</View>

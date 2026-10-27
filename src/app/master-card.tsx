@@ -80,11 +80,11 @@ export default function MasterCardScreen() {
 
 					<View style={{ gap: 4 }}>
 						<Text style={{ fontSize: 24, fontFamily: fontFamily(700), color: c.ink }}>{master?.name ?? ' '}</Text>
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
 							{master
 								? master.reviewsCount
 									? <><Text style={{ color: STAR }}>★</Text>{` ${master.rating.toFixed(1)} · ${master.reviewsCount} ${plural(master.reviewsCount, ['оценка', 'оценки', 'оценок'])}`}</>
-									: 'Новый мастер — отзывов пока нет'
+									: null
 								: ' '}
 						</Text>
 					</View>
@@ -108,8 +108,8 @@ export default function MasterCardScreen() {
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 14, backgroundColor: c.card, padding: 14 }}>
 							<MapPinIcon size={20} color={c.brandStrong} />
 							<View style={{ flex: 1, gap: 2 }}>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>{master.address}</Text>
-								<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
+								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>{master.address}</Text>
+								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
 									{master.mobile ? `Выезжает к клиенту · до ${master.radiusKm} км` : `Принимает в радиусе ${master.radiusKm} км`}
 								</Text>
 							</View>
@@ -123,7 +123,7 @@ export default function MasterCardScreen() {
 								{master.services.map((service) => (
 									<View key={service.code} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 										<ServiceBadge code={service.code} size={32} radius={9} />
-										<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>
+										<Text style={{ fontSize: 16.5, fontFamily: fontFamily(600), color: c.ink }}>
 											{types.find((t) => t.code === service.code)?.name ?? service.name}
 										</Text>
 									</View>
@@ -138,7 +138,7 @@ export default function MasterCardScreen() {
 							<View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
 								{master.allBrands ? <Chip label="Все марки" height={34} radius={17} color={c.ink} /> : master.brands.map((brand) => <BrandLogo key={brand.id} brand={brand} size={34} />)}
 							</View>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>Откуда машины: {origins}</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>Откуда машины: {origins}</Text>
 						</>
 					) : null}
 
@@ -161,13 +161,13 @@ export default function MasterCardScreen() {
 							style={{ borderRadius: 14, backgroundColor: c.card, padding: 12, gap: 6 }}
 						>
 							<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: STAR }}>
+								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: STAR }}>
 									{'★'.repeat(review.stars)}
 									<Text style={{ color: raw.dashed }}>{'★'.repeat(5 - review.stars)}</Text>
 								</Text>
-								<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>{formatDay(review.createdAt)}</Text>
+								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>{formatDay(review.createdAt)}</Text>
 							</View>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.inkSecondary }}>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>
 								{review.buyerName ?? 'Клиент'}
 								{review.tags.length ? ` · ${review.tags.map((t) => t.label).join(', ')}` : ''}
 							</Text>

@@ -127,7 +127,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction }: P
 			{pinned}
 
 			{voice.error || media.error ? (
-				<Text style={{ marginHorizontal: 16, marginTop: 8, fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>
+				<Text style={{ marginHorizontal: 16, marginTop: 8, fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>
 					{voice.error ?? media.error?.message}
 				</Text>
 			) : null}
@@ -192,7 +192,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction }: P
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(positive ? 700 : 600), color: positive ? c.success : c.ink }}>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(positive ? 700 : 600), color: positive ? c.success : c.ink }}>
 									{reply.text}
 								</Text>
 							</Pressable>
@@ -242,7 +242,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction }: P
 							borderRadius: 22,
 							backgroundColor: c.surface,
 							paddingHorizontal: 16,
-							fontSize: 16,
+							fontSize: 17.5,
 							fontFamily: fontFamily(400),
 							color: c.ink,
 						}}
@@ -304,7 +304,7 @@ function Message({
 	if (message.code === 'HIDDEN_BY_ADMIN') {
 		return (
 			<View style={{ alignSelf: mine ? 'flex-end' : 'flex-start', borderRadius: 16, borderWidth: 1.5, borderColor: c.border, borderStyle: 'dashed', paddingVertical: 10, paddingHorizontal: 14 }}>
-				<Text style={{ fontSize: 14, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.muted }}>Сообщение скрыто администрацией</Text>
+				<Text style={{ fontSize: 15.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.muted }}>Сообщение скрыто администрацией</Text>
 			</View>
 		)
 	}
@@ -322,9 +322,9 @@ function Message({
 			>
 				<TruckTile size={40} />
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(800), color: c.ink }}>Заказ с доставкой</Text>
-					{message.text ? <Text style={{ fontSize: 13, lineHeight: 17, fontFamily: fontFamily(500), color: c.inkSecondary }}>{message.text}</Text> : null}
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>{shopSide ? 'Открыть заказ ›' : 'Где посылка ›'}</Text>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: c.ink }}>Заказ с доставкой</Text>
+					{message.text ? <Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(500), color: c.inkSecondary }}>{message.text}</Text> : null}
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{shopSide ? 'Открыть заказ ›' : 'Где посылка ›'}</Text>
 				</View>
 			</Pressable>
 		)
@@ -333,7 +333,7 @@ function Message({
 	if (message.side === 'SYSTEM' || message.type === 'SYSTEM') {
 		return (
 			<View style={{ alignSelf: 'center', borderRadius: 10, backgroundColor: c.brandTint, paddingVertical: 6, paddingHorizontal: 12 }}>
-				<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.brandStrong }}>
+				<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.brandStrong }}>
 					{message.text ?? SYSTEM_TEXT[message.code ?? ''] ?? ''}
 				</Text>
 			</View>
@@ -358,7 +358,7 @@ function Message({
 					voice={{ url: message.mediaUrl, durationSec: message.durationSeconds ?? 0, waveform: message.waveform ?? [] }}
 					background={c.card}
 				/>
-				<Text style={{ fontSize: 11, fontFamily: fontFamily(400), color: raw.fillInk, alignSelf: mine ? 'flex-end' : 'flex-start' }}>
+				<Text style={{ fontSize: 12, fontFamily: fontFamily(400), color: raw.fillInk, alignSelf: mine ? 'flex-end' : 'flex-start' }}>
 					{formatClock(message.createdAt)}
 				</Text>
 			</View>
@@ -381,7 +381,7 @@ function Message({
 				}}
 			>
 				{about ? (
-					<Text numberOfLines={1} style={{ fontSize: 12, fontFamily: fontFamily(600), color: mine ? 'rgba(255,255,255,0.8)' : c.muted }}>
+					<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(600), color: mine ? 'rgba(255,255,255,0.8)' : c.muted }}>
 						{about}
 					</Text>
 				) : null}
@@ -392,16 +392,16 @@ function Message({
 				{body && message.code === 'RESERVED' ? (
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
 						<TickIcon size={18} color={c.success} strokeWidth={2.8} />
-						<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: mine ? '#FFFFFF' : c.ink }}>{body}</Text>
+						<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: mine ? '#FFFFFF' : c.ink }}>{body}</Text>
 					</View>
 				) : body ? (
-					<Text style={{ fontSize: 16, lineHeight: 21.6, fontFamily: fontFamily(400), color: mine ? '#FFFFFF' : c.ink }}>{body}</Text>
+					<Text style={{ fontSize: 17.5, lineHeight: 24, fontFamily: fontFamily(400), color: mine ? '#FFFFFF' : c.ink }}>{body}</Text>
 				) : null}
 				{price && !partReply && (message.type === 'REPLY' || message.type === 'PART') ? (
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(800), color: mine ? '#FFFFFF' : c.ink }}>{price}</Text>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: mine ? '#FFFFFF' : c.ink }}>{price}</Text>
 				) : null}
 				{message.type === 'REPLY' && (offerPrice || offerAt) ? (
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(800), color: mine ? '#FFFFFF' : c.ink }}>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: mine ? '#FFFFFF' : c.ink }}>
 						{offerPrice}
 						{offerPrice && offerAt ? ' · ' : ''}
 						{offerAt ? <Text style={{ fontFamily: fontFamily(700), color: mine ? '#FFFFFF' : c.success }}>{offerAt}</Text> : null}
@@ -412,7 +412,7 @@ function Message({
 				onPress={status === 'failed' ? onRetry : undefined}
 				style={{
 					alignSelf: mine ? 'flex-end' : 'flex-start',
-					fontSize: 11,
+					fontSize: 12,
 					fontFamily: fontFamily(status === 'failed' ? 700 : 400),
 					color: status === 'failed' ? c.danger : raw.fillInk,
 				}}

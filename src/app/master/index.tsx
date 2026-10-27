@@ -61,8 +61,8 @@ export default function MasterRequestsScreen() {
 					<LoupeIcon size={20} color={c.brandStrong} />
 				</View>
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>Нужна запчасть?</Text>
-					<Text style={{ fontSize: 13.5, fontFamily: fontFamily(400), color: c.muted }}>Для машины клиента — спросим весь рынок</Text>
+					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>Нужна запчасть?</Text>
+					<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>Для машины клиента — спросим весь рынок</Text>
 				</View>
 			</Pressable>
 			{partRequests.map((request) => (
@@ -71,10 +71,10 @@ export default function MasterRequestsScreen() {
 					onPress={() => router.push({ pathname: '/request', params: { id: String(request.id) } })}
 					style={{ borderRadius: 16, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14, gap: 2 }}
 				>
-					<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
 						{request.text} · {request.carLabel}
 					</Text>
-					<Text style={{ fontSize: 13.5, fontFamily: fontFamily(600), color: request.haveCount ? c.success : c.muted }}>
+					<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: request.haveCount ? c.success : c.muted }}>
 						{request.haveCount
 							? `${request.haveCount} есть${request.minPrice != null ? ` · от ${formatPrice(request.minPrice)}` : ''}`
 							: `Ищем ещё ${minutesLeft(request.expiresAt)} мин`}
@@ -90,7 +90,7 @@ export default function MasterRequestsScreen() {
 			/>
 			<QueryErrorBanner error={fresh.error ?? answered.error ?? offer.error} onRetry={() => (fresh.refetch(), answered.refetch())} />
 			{fresh.isSuccess && answered.isSuccess && items.length === 0 ? (
-				<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted, paddingTop: 16 }}>
+				<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted, paddingTop: 16 }}>
 					Новых заявок нет. Пришлём пуш, как только клиенту понадобится ваша услуга.
 				</Text>
 			) : null}
@@ -156,10 +156,10 @@ function RequestCard({
 					<ServiceIcon code={item.service.code} size={22} color={c.brandStrong} strokeWidth={2.2} />
 				</View>
 				<View style={{ flex: 1, gap: 1 }}>
-					<Text numberOfLines={1} style={{ fontSize: 15, lineHeight: 19.5, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>
 						{title}
 					</Text>
-					<Text numberOfLines={1} style={{ fontSize: 13, lineHeight: 16.9, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text numberOfLines={1} style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>
 						{meta}
 					</Text>
 				</View>
@@ -167,7 +167,7 @@ function RequestCard({
 			</View>
 
 			<View style={{ gap: 6 }}>
-				<Text style={{ fontSize: 16, lineHeight: 20.8, fontFamily: fontFamily(600), color: c.ink }}>{item.description}</Text>
+				<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{item.description}</Text>
 				{item.voice ? <VoicePlayer voice={item.voice} /> : null}
 				<MediaStrip media={item.media} />
 			</View>
@@ -186,12 +186,12 @@ function RequestCard({
 					}}
 				>
 					{mine.answer === 'CAN_HELP' ? <CheckMark size={18} color={c.success} strokeWidth={2.8} /> : null}
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: mine.answer === 'CAN_HELP' ? c.success : c.muted }}>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: mine.answer === 'CAN_HELP' ? c.success : c.muted }}>
 						{mine.answer === 'CAN_HELP' ? myOfferLine(mine.priceFrom, mine.availableAt, mine.createdAt) : 'Вы ответили «Не моё»'}
 					</Text>
 				</View>
 			) : !open ? (
-				<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.muted, textAlign: 'center', paddingVertical: 12 }}>Время на ответ вышло</Text>
+				<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.muted, textAlign: 'center', paddingVertical: 12 }}>Время на ответ вышло</Text>
 			) : (
 				<>
 					<Pressable
@@ -214,21 +214,21 @@ function RequestCard({
 						<View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
 							<MicOutline size={20} color="#FFFFFF" />
 						</View>
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Ответить голосом</Text>
+						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Ответить голосом</Text>
 					</Pressable>
-					<Text style={{ fontSize: 13, lineHeight: 16.9, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
+					<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
 						Например: «Могу сегодня в три, от полутора тысяч»
 					</Text>
 					<View style={{ flexDirection: 'row', gap: 8 }}>
 						<Pressable onPress={onSkip} style={{ flex: 1, height: 44, borderRadius: 14, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>Не моё</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>Не моё</Text>
 						</Pressable>
 						<Pressable
 							onPress={onHelp}
 							style={{ flex: 1, height: 44, borderRadius: 14, backgroundColor: '#E7F6EC', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<CheckMark size={20} color={c.success} />
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.success }}>Могу помочь</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.success }}>Могу помочь</Text>
 						</Pressable>
 					</View>
 				</>

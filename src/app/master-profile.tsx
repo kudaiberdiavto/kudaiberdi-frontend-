@@ -116,7 +116,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 							onChangeText={(name) => patch({ name: name.slice(0, 60) })}
 							placeholder="СТО «Ходовик» или Мастер Эрлан"
 							placeholderTextColor={raw.fillInk}
-							style={{ height: 48, borderRadius: 12, backgroundColor: c.card, borderWidth: 2, borderColor: c.border, paddingHorizontal: 14, fontSize: 15, fontFamily: fontFamily(400), color: c.ink }}
+							style={{ height: 48, borderRadius: 12, backgroundColor: c.card, borderWidth: 2, borderColor: c.border, paddingHorizontal: 14, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}
 						/>
 					</>
 				) : null}
@@ -145,11 +145,11 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 							justifyContent: 'center',
 						}}
 					>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>Все марки</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Все марки</Text>
 					</Pressable>
 					{!pickBrands ? (
 						<Pressable onPress={() => setPickBrands(true)} style={{ height: 34, paddingHorizontal: 12, borderRadius: 17, backgroundColor: c.card, justifyContent: 'center' }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>Выбрать…</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Выбрать…</Text>
 						</Pressable>
 					) : null}
 				</View>
@@ -192,12 +192,12 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 								onChangeText={(address) => patch({ address })}
 								placeholder="Адрес: улица, дом, бокс"
 								placeholderTextColor={raw.fillInk}
-								style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(400), color: c.ink }}
+								style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}
 							/>
 						</View>
 						<Pressable onPress={locate} disabled={locating} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 36 }}>
 							{locating ? <ActivityIndicator color={c.brandStrong} /> : <LocateIcon size={18} color={c.brandStrong} />}
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>
+							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 								{form.lat !== null ? 'Точка определена · обновить' : 'Определить по геолокации'}
 							</Text>
 						</Pressable>
@@ -214,14 +214,14 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 					>
 						<MapPinIcon size={20} color={c.brandStrong} />
 						<View style={{ flex: 1, gap: 2 }}>
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>{form.address}</Text>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>Принимаю заявки в радиусе {form.radiusKm} км</Text>
+							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>{form.address}</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>Принимаю заявки в радиусе {form.radiusKm} км</Text>
 						</View>
 					</Pressable>
 				)}
 
 				<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 12, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14 }}>
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.ink }}>Выезжаю к клиенту</Text>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}>Выезжаю к клиенту</Text>
 					<Toggle value={form.mobile} onChange={(mobile) => patch({ mobile })} />
 				</View>
 
@@ -232,7 +232,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 					keyboardType="phone-pad"
 					placeholder="+996 555 123 456"
 					placeholderTextColor={raw.fillInk}
-					style={{ height: 48, borderRadius: 12, backgroundColor: c.card, borderWidth: 2, borderColor: c.border, paddingHorizontal: 14, fontSize: 15, fontFamily: fontFamily(400), color: c.ink }}
+					style={{ height: 48, borderRadius: 12, backgroundColor: c.card, borderWidth: 2, borderColor: c.border, paddingHorizontal: 14, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}
 				/>
 
 				{initial ? <MasterMedia master={initial} /> : null}
@@ -289,7 +289,7 @@ function MasterMedia({ master: initial }: { master: MyMaster }) {
 						</View>
 					)}
 				</Pressable>
-				<Text style={{ flex: 1, fontSize: 13, lineHeight: 18, fontFamily: fontFamily(400), color: c.muted }}>
+				<Text style={{ flex: 1, fontSize: 14.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
 					Аватар — его видят клиенты в откликах. Ниже фото работ и места, первое — обложка.
 				</Text>
 			</View>
@@ -308,12 +308,12 @@ function MasterMedia({ master: initial }: { master: MyMaster }) {
 						style={{ width: 76, height: 76, borderRadius: 12, borderWidth: 2, borderStyle: 'dashed', borderColor: raw.mapRowBorder, alignItems: 'center', justifyContent: 'center', gap: 4 }}
 					>
 						<PhotoIcon size={20} color={c.brandStrong} />
-						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: c.brandStrong }}>Фото</Text>
+						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>Фото</Text>
 					</Pressable>
 				) : null}
 			</View>
-			{master.photos.length ? <Text style={{ fontSize: 12, fontFamily: fontFamily(400), color: c.muted }}>Удержите фото, чтобы удалить</Text> : null}
-			{error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
+			{master.photos.length ? <Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>Удержите фото, чтобы удалить</Text> : null}
+			{error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
 		</>
 	)
 }

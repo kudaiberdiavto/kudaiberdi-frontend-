@@ -112,7 +112,7 @@ export default function PartScreen() {
 							justifyContent: 'center',
 						}}
 					>
-						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
 							{photoIndex + 1} / {photos.length}
 						</Text>
 					</View>
@@ -125,7 +125,7 @@ export default function PartScreen() {
 				<Text style={{ fontSize: 28, fontFamily: fontFamily(800), letterSpacing: -0.28, color: c.ink }}>
 					{formatPrice(part?.price) || ' '}
 				</Text>
-				<Text style={{ fontSize: 17, fontFamily: fontFamily(400), color: c.inkSecondary }}>{part?.title ?? ' '}</Text>
+				<Text style={{ fontSize: 18.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>{part?.title ?? ' '}</Text>
 
 				{part?.fit ? (
 					<View
@@ -144,14 +144,14 @@ export default function PartScreen() {
 						) : (
 							<View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: c.border }} />
 						)}
-						<Text style={{ flex: 1, fontSize: 14, fontFamily: fontFamily(400), color: part.fit.fits ? '#14532D' : c.danger }}>
+						<Text style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(400), color: part.fit.fits ? '#14532D' : c.danger }}>
 							<Text style={{ fontFamily: fontFamily(700) }}>{part.fit.fits ? 'Подходит' : 'Не подходит'}</Text> к вашей{' '}
 							{part.fit.carLabel}
 						</Text>
 						{part.fit.fits ? <CheckIcon size={18} color={c.success} strokeWidth={3} /> : null}
 					</View>
 				) : part?.fitments.length ? (
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
 						Подходит: {part.fitments.map((f) => f.label).join(', ')}
 					</Text>
 				) : null}
@@ -159,16 +159,16 @@ export default function PartScreen() {
 				{part ? (
 					<View style={{ flexDirection: 'row', gap: 8 }}>
 						<View style={{ flex: 1, borderRadius: 12, backgroundColor: c.card, padding: 10, gap: 3 }}>
-							<Text style={{ fontSize: 12, fontFamily: fontFamily(400), color: c.muted }}>Состояние</Text>
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>Состояние</Text>
+							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
 								{part.condition ? CONDITION[part.condition] : '—'}
 							</Text>
 						</View>
 						<View style={{ flex: 1, borderRadius: 12, backgroundColor: c.card, padding: 10, gap: 3 }}>
-							<Text style={{ fontSize: 12, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
 								{part.stockStatus === 'IN_STOCK' ? 'В наличии' : 'Наличие'}
 							</Text>
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: part.stockStatus === 'IN_STOCK' ? c.ink : c.danger }}>
+							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: part.stockStatus === 'IN_STOCK' ? c.ink : c.danger }}>
 								{part.stockStatus === 'IN_STOCK' ? `${part.quantity} шт` : 'Нет'}
 							</Text>
 						</View>
@@ -187,8 +187,8 @@ export default function PartScreen() {
 								<View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: raw.fill }} />
 							)}
 							<View style={{ flex: 1, gap: 2 }}>
-								<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>{shop.name}</Text>
-								<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
+								<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>{shop.name}</Text>
+								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
 									{shop.reviewsCount ? `★ ${shop.rating.toFixed(1)} · ` : ''}
 									{shopPlace(shop)}
 								</Text>
@@ -211,7 +211,7 @@ export default function PartScreen() {
 				) : null}
 
 				{openChat.error ? (
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{openChat.error.message}</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{openChat.error.message}</Text>
 				) : null}
 
 				{part ? <ComplainLink onPress={() => setComplaint({ type: 'PART', targetId: part.id })} /> : null}
@@ -236,7 +236,7 @@ export default function PartScreen() {
 					style={{ flex: 1, height: 54, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 				>
 					<MapPinIcon size={20} color={c.ink} />
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Как пройти</Text>
+					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>Как пройти</Text>
 				</Pressable>
 				<Pressable
 					disabled={!shop || openChat.isPending}
@@ -254,7 +254,7 @@ export default function PartScreen() {
 					}}
 				>
 					<ChatIcon size={20} color="#FFFFFF" />
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
+					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
 				</Pressable>
 			</View>
 		</View>

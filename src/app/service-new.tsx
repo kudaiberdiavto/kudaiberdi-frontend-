@@ -112,7 +112,7 @@ export default function ServiceNewScreen() {
 	}
 
 	const label = (value: string) => (
-		<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}>{value}</Text>
+		<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}>{value}</Text>
 	)
 
 	return (
@@ -165,7 +165,7 @@ export default function ServiceNewScreen() {
 								</View>
 								<Text
 									numberOfLines={1}
-									style={{ fontSize: 12.5, lineHeight: 14.4, fontFamily: fontFamily(selected ? 700 : 600), color: selected ? c.brandStrong : c.ink }}
+									style={{ fontSize: 14, lineHeight: 16, fontFamily: fontFamily(selected ? 700 : 600), color: selected ? c.brandStrong : c.ink }}
 								>
 									{item.label}
 								</Text>
@@ -193,14 +193,14 @@ export default function ServiceNewScreen() {
 							}}
 						>
 							<BrandLogo brand={car.brand} size={28} />
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>{car.label}</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{car.label}</Text>
 						</Pressable>
 					) : cars.isSuccess ? (
 						<Pressable
 							onPress={() => router.push('/garage-add')}
 							style={{ height: 40, paddingHorizontal: 14, borderRadius: 20, borderWidth: 2, borderStyle: 'dashed', borderColor: raw.mapRowBorder, justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>+ Добавить машину</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>+ Добавить машину</Text>
 						</Pressable>
 					) : (
 						<View style={{ height: 40 }} />
@@ -226,17 +226,17 @@ export default function ServiceNewScreen() {
 						}}
 					>
 						<CameraOutline size={26} color={c.brandStrong} />
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.ink }}>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>
 							{media.items.length ? `Фото / видео · ${media.items.length}` : 'Фото / видео'}
 						</Text>
 					</Pressable>
 					<View style={{ flex: 1, height: 92, borderRadius: 16, backgroundColor: c.card, justifyContent: 'center', gap: 6, paddingHorizontal: 10 }}>
 						<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: voice.recording ? c.danger : c.success }}>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: voice.recording ? c.danger : c.success }}>
 								{voice.recording ? 'Говорите…' : 'Голосом'}
 							</Text>
 							{voice.result && !voice.recording ? (
-								<Text onPress={voice.start} style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>
+								<Text onPress={voice.start} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 									Заново
 								</Text>
 							) : null}
@@ -274,7 +274,7 @@ export default function ServiceNewScreen() {
 										<MicOutline size={16} color="#FFFFFF" />
 									)}
 								</View>
-								<Text style={{ flex: 1, fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>
+								<Text style={{ flex: 1, fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>
 									{voice.uploading ? 'Загружаем…' : voice.recording ? `${voiceClock(voice.seconds)} · стоп` : 'Записать'}
 								</Text>
 							</Pressable>
@@ -301,12 +301,12 @@ export default function ServiceNewScreen() {
 								}}
 							>
 								{item.previewUri ? <Image source={{ uri: item.previewUri }} style={{ position: 'absolute', width: 56, height: 56 }} /> : null}
-								{item.kind === 'VIDEO' ? <Text style={{ fontSize: 12, color: '#FFFFFF' }}>▶</Text> : null}
+								{item.kind === 'VIDEO' ? <Text style={{ fontSize: 13, color: '#FFFFFF' }}>▶</Text> : null}
 							</Pressable>
 						))}
 					</View>
 				) : null}
-				{voice.error ? <Text style={{ fontSize: 13, fontFamily: fontFamily(500), color: c.danger }}>{voice.error}</Text> : null}
+				{voice.error ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.danger }}>{voice.error}</Text> : null}
 
 				<TextInput
 					value={description}
@@ -323,7 +323,7 @@ export default function ServiceNewScreen() {
 						paddingHorizontal: 14,
 						paddingTop: 13,
 						paddingBottom: 11,
-						fontSize: 15,
+						fontSize: 16.5,
 						fontFamily: fontFamily(400),
 						color: c.ink,
 					}}
@@ -331,10 +331,10 @@ export default function ServiceNewScreen() {
 
 				<View style={{ height: 48, borderRadius: 14, backgroundColor: c.card, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14 }}>
 					<PinOutline size={20} color={c.brandStrong} />
-					<Text numberOfLines={1} style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(400), color: c.ink }}>
+					<Text numberOfLines={1} style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}>
 						{point.label}
 					</Text>
-					<Text onPress={() => setPickPoint(true)} style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>
+					<Text onPress={() => setPickPoint(true)} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 						Изменить
 					</Text>
 				</View>
@@ -352,9 +352,9 @@ export default function ServiceNewScreen() {
 				}}
 			>
 				{create.error ? (
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger, textAlign: 'center' }}>{create.error.message}</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger, textAlign: 'center' }}>{create.error.message}</Text>
 				) : (
-					<Text style={{ fontSize: 13.5, lineHeight: 17.5, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>{hint}</Text>
+					<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>{hint}</Text>
 				)}
 				<Pressable
 					onPress={send}
@@ -371,7 +371,7 @@ export default function ServiceNewScreen() {
 					}}
 				>
 					<SendPlane size={20} color="#FFFFFF" />
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{create.isPending ? 'Отправляем…' : 'Найти мастера'}</Text>
+					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{create.isPending ? 'Отправляем…' : 'Найти мастера'}</Text>
 				</Pressable>
 			</View>
 
@@ -396,8 +396,8 @@ export default function ServiceNewScreen() {
 							}}
 						>
 							<BrandLogo brand={item.brand} size={32} />
-							<Text style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(600), color: c.ink }}>{item.title}</Text>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{item.year}</Text>
+							<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(600), color: c.ink }}>{item.title}</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>{item.year}</Text>
 						</Pressable>
 					))}
 					<Text
@@ -405,7 +405,7 @@ export default function ServiceNewScreen() {
 							setPickCar(false)
 							router.push('/garage-add')
 						}}
-						style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong, textAlign: 'center', paddingVertical: 8 }}
+						style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong, textAlign: 'center', paddingVertical: 8 }}
 					>
 						+ Добавить машину
 					</Text>
@@ -425,10 +425,10 @@ export default function ServiceNewScreen() {
 							style={{ height: 52, borderRadius: 14, backgroundColor: c.surface, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14 }}
 						>
 							<PinOutline size={20} color={c.brandStrong} />
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(600), color: c.ink }}>{option.title}</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(600), color: c.ink }}>{option.title}</Text>
 						</Pressable>
 					))}
-					{locateError ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{locateError}</Text> : null}
+					{locateError ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{locateError}</Text> : null}
 				</ModalSheet>
 			) : null}
 		</View>

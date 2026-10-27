@@ -44,13 +44,13 @@ export function AccountStatusBanner({
 
 	return (
 		<View style={{ borderRadius: 12, backgroundColor: bad ? c.dangerTint : c.brandTint, padding: 12, gap: 4 }}>
-			<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: bad ? c.danger : c.brandStrong }}>{title}</Text>
-			<Text style={{ fontSize: 13, lineHeight: 18, fontFamily: fontFamily(400), color: c.inkSecondary }}>
+			<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: bad ? c.danger : c.brandStrong }}>{title}</Text>
+			<Text style={{ fontSize: 14.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.inkSecondary }}>
 				{reason && status === 'REJECTED' ? `Причина: ${reason}` : text}
 			</Text>
 			{action && status === 'REJECTED' ? (
 				<Pressable onPress={action.onPress} hitSlop={8} style={{ paddingTop: 4 }}>
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>{action.label} ›</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{action.label} ›</Text>
 				</Pressable>
 			) : null}
 		</View>

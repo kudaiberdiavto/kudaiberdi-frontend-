@@ -54,7 +54,7 @@ function Sheet({ target, onClose }: { target: ComplaintTarget; onClose: () => vo
 							<CheckIcon size={28} color={c.success} />
 						</View>
 						<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>Жалоба отправлена</Text>
-						<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 							Администрация проверит и пришлёт пуш с решением.
 						</Text>
 						<Button label="Готово" onPress={onClose} />
@@ -79,7 +79,7 @@ function Sheet({ target, onClose }: { target: ComplaintTarget; onClose: () => vo
 											justifyContent: 'center',
 										}}
 									>
-										<Text style={{ fontSize: 15, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{r.label}</Text>
+										<Text style={{ fontSize: 16.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{r.label}</Text>
 									</Pressable>
 								)
 							})}
@@ -97,13 +97,13 @@ function Sheet({ target, onClose }: { target: ComplaintTarget; onClose: () => vo
 								borderColor: c.border,
 								paddingVertical: 10,
 								paddingHorizontal: 14,
-								fontSize: 15,
+								fontSize: 16.5,
 								fontFamily: fontFamily(400),
 								color: c.ink,
 								textAlignVertical: 'top',
 							}}
 						/>
-						{complain.error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{complain.error.message}</Text> : null}
+						{complain.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{complain.error.message}</Text> : null}
 						<Button
 							label="Отправить"
 							disabled={!reason}
@@ -123,7 +123,7 @@ export function ComplainLink({ onPress, label = 'Пожаловаться' }: { 
 	return (
 		<Pressable onPress={onPress} hitSlop={8} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'center', paddingVertical: 12 }}>
 			<FlagIcon size={16} color={c.muted} />
-			<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.muted }}>{label}</Text>
+			<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.muted }}>{label}</Text>
 		</Pressable>
 	)
 }

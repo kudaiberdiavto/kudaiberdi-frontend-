@@ -106,11 +106,11 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 					end={{ x: 0.75, y: 1 }}
 					style={{ borderRadius: 20, padding: 16, gap: 6 }}
 				>
-					<Text style={{ fontSize: 12, fontFamily: fontFamily(700), letterSpacing: 1, color: 'rgba(255,255,255,0.85)' }}>
+					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1, color: 'rgba(255,255,255,0.85)' }}>
 						{CAPTION[order.status].toUpperCase()}
 					</Text>
 					<Text style={{ fontSize: 24, fontFamily: fontFamily(800), letterSpacing: -0.4, color: '#FFFFFF' }}>{routeTitle(order)}</Text>
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.9)' }}>{arrivalText(order)}</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.9)' }}>{arrivalText(order)}</Text>
 					<View style={{ flexDirection: 'row', gap: 6, paddingTop: 6 }}>
 						{[0, 1, 2, 3, 4].map((i) => (
 							<View key={i} style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: i < filled ? '#FFFFFF' : 'rgba(255,255,255,0.3)' }} />
@@ -144,8 +144,8 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 									{i < steps.length - 1 ? <View style={{ flex: 1, width: 2, minHeight: 14, backgroundColor: i < lastDone ? c.success : '#E4E1DF' }} /> : null}
 								</View>
 								<View style={{ flex: 1, paddingBottom: i < steps.length - 1 ? 12 : 0, gap: 1 }}>
-									<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: now ? c.brandStrong : done ? c.ink : c.muted }}>{step.title}</Text>
-									{line ? <Text style={{ fontSize: 12.5, fontFamily: fontFamily(400), color: c.muted }}>{line}</Text> : null}
+									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: now ? c.brandStrong : done ? c.ink : c.muted }}>{step.title}</Text>
+									{line ? <Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{line}</Text> : null}
 								</View>
 							</View>
 						)
@@ -154,15 +154,15 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 
 				<View style={{ borderRadius: 16, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center' }}>
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(500), color: c.muted }}>Трек-номер</Text>
-						<Text style={{ fontSize: 16, fontFamily: fontFamily(800), color: c.ink }}>{order.number}</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>Трек-номер</Text>
+						<Text style={{ fontSize: 17.5, fontFamily: fontFamily(800), color: c.ink }}>{order.number}</Text>
 					</View>
 					{/* No clipboard module in the app — the share sheet has «Скопировать». */}
 					<Pressable
 						onPress={() => Share.share({ message: order.number })}
 						style={{ height: 38, paddingHorizontal: 14, borderRadius: 19, borderWidth: 1.5, borderColor: c.border, justifyContent: 'center' }}
 					>
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.ink }}>Скопировать</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>Скопировать</Text>
 					</Pressable>
 				</View>
 			</ScrollView>
@@ -178,7 +178,7 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 							onPress={() => router.push({ pathname: '/chat', params: { chatId: String(order.chatId) } })}
 							style={{ flex: 1, height: 52, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Чат с продавцом</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Чат с продавцом</Text>
 						</Pressable>
 					) : null}
 					{courierPhone ? (
@@ -186,11 +186,11 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 							onPress={() => Linking.openURL(`tel:${courierPhone.replace(/[^\d+]/g, '')}`)}
 							style={{ flex: 1, height: 52, borderRadius: 14, borderWidth: 1.5, borderColor: c.border, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>Курьер Ылдам</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>Курьер Ылдам</Text>
 						</Pressable>
 					) : null}
 				</View>
-				<Text style={{ fontSize: 13, lineHeight: 17, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
+				<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
 					Пришло не то? Не принимайте у курьера и напишите нам в чат
 				</Text>
 			</View>
@@ -236,11 +236,11 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 					justifyContent: 'center',
 				}}
 			>
-				{done ? <TickIcon size={14} color="#FFFFFF" /> : <Text style={{ fontSize: 14, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{n}</Text>}
+				{done ? <TickIcon size={14} color="#FFFFFF" /> : <Text style={{ fontSize: 15.5, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{n}</Text>}
 			</View>
 			<View style={{ flex: 1, gap: 3 }}>
-				<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>{title}</Text>
-				<Text style={{ fontSize: 13, lineHeight: 17, fontFamily: fontFamily(400), color: c.muted }}>{body}</Text>
+				<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{title}</Text>
+				<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>{body}</Text>
 				{extra}
 			</View>
 		</View>
@@ -250,11 +250,11 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 		<>
 			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 				<View style={{ borderRadius: 18, backgroundColor: '#FCEBB0', padding: 16, gap: 4 }}>
-					<Text style={{ fontSize: 12, fontFamily: fontFamily(700), letterSpacing: 1, color: '#7A5A00' }}>
+					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1, color: '#7A5A00' }}>
 						{`${caption} · в ${toRegion(destination)}`.toUpperCase()}
 					</Text>
-					<Text style={{ fontSize: 18, lineHeight: 23, fontFamily: fontFamily(800), color: c.ink }}>{order.part.title}</Text>
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.inkSecondary }}>
+					<Text style={{ fontSize: 20, lineHeight: 25.5, fontFamily: fontFamily(800), color: c.ink }}>{order.part.title}</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>
 						{priceDigits(order.part.price)} сом · покупатель {buyerName}
 					</Text>
 				</View>
@@ -278,7 +278,7 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 									gap: 8,
 								}}
 							>
-								<Text style={{ fontSize: 13.5, fontFamily: fontFamily(500), color: c.muted }}>Вес, кг</Text>
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(500), color: c.muted }}>Вес, кг</Text>
 								<TextInput
 									value={weight}
 									onChangeText={setWeight}
@@ -286,7 +286,7 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 									keyboardType="decimal-pad"
 									placeholder="0"
 									placeholderTextColor="#B8B4B4"
-									style={{ width: 44, fontSize: 15, fontFamily: fontFamily(700), color: c.ink, padding: 0, textAlign: 'center' }}
+									style={{ width: 44, fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink, padding: 0, textAlign: 'center' }}
 								/>
 							</View>
 							<Pressable
@@ -316,7 +316,7 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 								>
 									{fragile ? <TickIcon size={11} color="#FFFFFF" /> : null}
 								</View>
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.ink }}>Хрупкое</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>Хрупкое</Text>
 							</Pressable>
 						</View>
 					)}
@@ -329,8 +329,8 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 						<ClockOutline size={20} color={c.brandStrong} />
 					</View>
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(500), color: c.muted }}>Курьер</Text>
-						<Text style={{ fontSize: 16, lineHeight: 21, fontFamily: fontFamily(700), color: c.ink }}>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>Курьер</Text>
+						<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(700), color: c.ink }}>
 							{order.status === 'DELIVERED'
 								? 'Покупатель получил посылку'
 								: handed
@@ -346,8 +346,8 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 						style={{ borderRadius: 12, backgroundColor: c.brandTint, paddingVertical: 10, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 8 }}
 					>
 						<BubbleIcon size={18} color={c.brandStrong} />
-						<Text style={{ flex: 1, fontSize: 13.5, fontFamily: fontFamily(600), color: c.brandStrong }}>Оплату договоритесь с покупателем в чате</Text>
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>Чат</Text>
+						<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(600), color: c.brandStrong }}>Оплату договоритесь с покупателем в чате</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Чат</Text>
 					</Pressable>
 				) : null}
 

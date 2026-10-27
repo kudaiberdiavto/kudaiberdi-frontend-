@@ -60,7 +60,7 @@ export default function BuyerProfileScreen() {
 					)}
 					<View style={{ flex: 1, gap: 2 }}>
 						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{user ? (user.name ?? 'Без имени') : ' '}</Text>
-						<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>{user ? formatE164(user.phone) : ' '}</Text>
+						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>{user ? formatE164(user.phone) : ' '}</Text>
 					</View>
 				</View>
 
@@ -76,15 +76,15 @@ export default function BuyerProfileScreen() {
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 							<BrandLogo brand={car.brand} size={44} />
 							<View style={{ flex: 1, gap: 2 }}>
-								<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{car.title}</Text>
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{car.subtitle}</Text>
+								<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>{car.title}</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>{car.subtitle}</Text>
 							</View>
 
 						</View>
 						{car.fromTechPassport ? (
 							<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
 								<PassportIcon size={18} color={c.success} strokeWidth={2.2} />
-								<Text style={{ flex: 1, fontSize: 13.5, fontFamily: fontFamily(500), color: c.success }}>
+								<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(500), color: c.success }}>
 									Техпаспорт сфотан — продавцы видят точную модель
 								</Text>
 							</View>
@@ -106,7 +106,7 @@ export default function BuyerProfileScreen() {
 					}}
 				>
 					<PlusThinIcon size={18} color={c.brandStrong} strokeWidth={2.6} />
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>Добавить машину</Text>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Добавить машину</Text>
 				</Pressable>
 
 				<View style={{ height: 4 }} />
@@ -121,7 +121,7 @@ export default function BuyerProfileScreen() {
 										onPress={() => changeLang(value)}
 										style={{ width: 40, borderRadius: 15, backgroundColor: active ? c.brand : 'transparent', alignItems: 'center', justifyContent: 'center' }}
 									>
-										<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.muted }}>{value === 'ru' ? 'RU' : 'KG'}</Text>
+										<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.muted }}>{value === 'ru' ? 'RU' : 'KG'}</Text>
 									</Pressable>
 								)
 							})}
@@ -138,7 +138,7 @@ export default function BuyerProfileScreen() {
 				{/* Not in the mockup, but without it there is no way out of the account. */}
 				<Text
 					onPress={() => useSession.getState().signOut()}
-					style={{ marginTop: 20, textAlign: 'center', fontSize: 15, fontFamily: fontFamily(600), color: c.muted }}
+					style={{ marginTop: 20, textAlign: 'center', fontSize: 16.5, fontFamily: fontFamily(600), color: c.muted }}
 				>
 					Выйти
 				</Text>
@@ -154,7 +154,7 @@ function MenuRow({ icon, label, onPress, children }: { icon: ReactNode; label: s
 	return (
 		<Pressable onPress={onPress} disabled={!onPress} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 }}>
 			<View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' }}>{icon}</View>
-			<Text style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(600), color: c.ink }}>{label}</Text>
+			<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(600), color: c.ink }}>{label}</Text>
 			{children ?? <ChevronIcon size={20} color="#B8B4B4" />}
 		</Pressable>
 	)

@@ -44,14 +44,14 @@ export default function BuyerChatScreen() {
 						<Image source={{ uri: avatar }} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.surface }} />
 					) : (
 						<View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>{name.slice(0, 1).toUpperCase()}</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{name.slice(0, 1).toUpperCase()}</Text>
 						</View>
 					)}
 					<View style={{ flex: 1, gap: 1 }}>
-						<Text numberOfLines={1} style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>
+						<Text numberOfLines={1} style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
 							{name}
 						</Text>
-						<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(500), color: typing ? c.success : c.brandStrong }}>
+						<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: typing ? c.success : c.brandStrong }}>
 							{typing
 								? 'печатает…'
 								: shop
@@ -97,8 +97,8 @@ export default function BuyerChatScreen() {
 							{chat?.serviceRequest ? <WrenchIcon size={20} color={c.brandStrong} /> : <BoxOutlineIcon size={20} color={c.brandStrong} />}
 						</View>
 						<View style={{ flexShrink: 1, gap: 1 }}>
-							<Text style={{ fontSize: 12, fontFamily: fontFamily(600), color: c.muted }}>{chat?.serviceRequest ? 'Ваша заявка' : 'Ваш запрос'}</Text>
-							<Text numberOfLines={1} style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.ink }}>
+							<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>{chat?.serviceRequest ? 'Ваша заявка' : 'Ваш запрос'}</Text>
+							<Text numberOfLines={1} style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>
 								{request.text} · {request.carLabel}
 							</Text>
 						</View>

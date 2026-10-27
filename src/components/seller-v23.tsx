@@ -90,7 +90,7 @@ export function Label({ children, right }: { children: string; right?: React.Rea
 	return (
 		<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 			<Text
-				style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}
+				style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}
 			>
 				{children}
 			</Text>
@@ -124,7 +124,7 @@ export function BrandTile({ brand, active, onPress }: { brand: Brand; active: bo
 			}}
 		>
 			<BrandLogo brand={brand} size={36} />
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
+			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
 				{brand.shortName}
 			</Text>
 			{active ? (
@@ -167,7 +167,7 @@ export function BrandPill({ brand }: { brand: Brand }) {
 			}}
 		>
 			<BrandLogo brand={brand} size={28} />
-			<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.inkSecondary }}>{brand.shortName}</Text>
+			<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>{brand.shortName}</Text>
 		</View>
 	)
 }

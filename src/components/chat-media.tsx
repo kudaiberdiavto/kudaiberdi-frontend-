@@ -120,10 +120,10 @@ export function RecordingBar({ seconds, onCancel }: { seconds: number; onCancel:
 			}}
 		>
 			<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: c.danger }} />
-			<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>
+			<Text style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(600), color: c.ink }}>
 				Запись {clock(seconds)} / {clock(MAX_VOICE_SECONDS)}
 			</Text>
-			<Text onPress={onCancel} style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.danger }}>
+			<Text onPress={onCancel} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.danger }}>
 				Отмена
 			</Text>
 		</View>

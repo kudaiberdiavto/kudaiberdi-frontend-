@@ -86,7 +86,7 @@ export function BrandChip({
 			}}
 		>
 			<BrandLogo brand={brand} size={height - 16} />
-			<Text style={{ fontSize: 14, fontFamily: fontFamily(selected ? 700 : 600), color: selected ? c.brandStrong : c.inkSecondary }}>
+			<Text style={{ fontSize: 15.5, fontFamily: fontFamily(selected ? 700 : 600), color: selected ? c.brandStrong : c.inkSecondary }}>
 				{label ?? brand.name}
 			</Text>
 		</Pressable>

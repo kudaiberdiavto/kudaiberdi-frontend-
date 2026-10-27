@@ -93,7 +93,7 @@ export function FromVoiceBadge() {
 	return (
 		<View style={{ height: 24, paddingHorizontal: 8, borderRadius: 12, backgroundColor: '#F1ECFF', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
 			<Sparkle />
-			<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#5B3FD1' }}>из голоса</Text>
+			<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#5B3FD1' }}>из голоса</Text>
 		</View>
 	)
 }
@@ -146,7 +146,7 @@ export function CallRow({ onCall, onChat, onRoute }: { onCall?: () => void; onCh
 				}}
 			>
 				<PhoneOutline size={20} color="#FFFFFF" />
-				<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Позвонить</Text>
+				<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Позвонить</Text>
 			</Pressable>
 			{/* «Написать» — green like «Позвонить» */}
 			{square(<ChatBubble size={22} color={c.success} />, onChat, '#E7F6EC')}
@@ -161,7 +161,7 @@ export function SmallChip({ label, tone }: { label: string; tone: 'green' | 'gre
 	const colors = { green: ['#E7F6EC', c.success], grey: [c.surface, c.ink], red: ['#FDECEC', c.danger] }[tone]
 	return (
 		<View style={{ height: 26, paddingHorizontal: 9, borderRadius: 8, backgroundColor: colors[0], justifyContent: 'center' }}>
-			<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(600), color: colors[1] }}>
+			<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: colors[1] }}>
 				{label}
 			</Text>
 		</View>
@@ -188,7 +188,7 @@ export function UrgentChip({ label = 'Срочно' }: { label?: string }) {
 			]}
 		>
 			<View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: '#FFFFFF' }} />
-			<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+			<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
 				{label}
 			</Text>
 		</Animated.View>

@@ -82,8 +82,8 @@ export default function SellerBoxScreen() {
 							)}
 						</View>
 						<View style={{ flex: 1, gap: 2 }}>
-							<Text style={{ fontSize: 18, lineHeight: 23.4, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{data?.name ?? ' '}</Text>
-							<Text style={{ fontSize: 14, lineHeight: 18.2, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.8)' }}>
+							<Text style={{ fontSize: 20, lineHeight: 25.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{data?.name ?? ' '}</Text>
+							<Text style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.8)' }}>
 								{data?.phone ? formatE164(data.phone) : 'Телефон не указан'}
 							</Text>
 						</View>
@@ -91,7 +91,7 @@ export default function SellerBoxScreen() {
 							onPress={() => data && setEditing(true)}
 							style={{ height: 32, paddingHorizontal: 12, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.18)', justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Изменить</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Изменить</Text>
 						</Pressable>
 					</View>
 					<View style={{ flexDirection: 'row', gap: 10 }}>
@@ -114,7 +114,7 @@ export default function SellerBoxScreen() {
 				</View>
 
 				<View style={{ borderRadius: 14, backgroundColor: '#FFF7E6', paddingVertical: 10, paddingHorizontal: 14 }}>
-					<Text style={{ fontSize: 13.5, lineHeight: 18.9, fontFamily: fontFamily(400), color: '#7A4B00' }}>
+					<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: '#7A4B00' }}>
 						{pausedUntil
 							? `Запросы не приходят до ${formatDay(pausedUntil)}: 3 покупателя отметили «сказали есть, а не было».`
 							: 'Если 3 покупателя отметят «сказали есть, а не было» — запросы не будут приходить 7 дней.'}
@@ -124,7 +124,7 @@ export default function SellerBoxScreen() {
 				<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10 }}>
 					<Label
 						right={
-							<Text onPress={() => router.push('/seller-brands')} style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>
+							<Text onPress={() => router.push('/seller-brands')} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 								Изменить
 							</Text>
 						}
@@ -174,7 +174,7 @@ export default function SellerBoxScreen() {
 function Place({ label, value }: { label: string; value: string }) {
 	return (
 		<View style={{ flex: 1, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.16)', paddingVertical: 8, paddingHorizontal: 12 }}>
-			<Text style={{ fontSize: 11, fontFamily: fontFamily(700), letterSpacing: 1.1, color: 'rgba(255,255,255,0.8)' }}>{label}</Text>
+			<Text style={{ fontSize: 12, fontFamily: fontFamily(700), letterSpacing: 1.1, color: 'rgba(255,255,255,0.8)' }}>{label}</Text>
 			<Text style={{ fontSize: 34, lineHeight: 35.7, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{value}</Text>
 		</View>
 	)
@@ -185,7 +185,7 @@ function Stat({ value, label, color }: { value: string; label: string; color?: s
 	return (
 		<View style={{ flex: 1, borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 2 }}>
 			<Text style={{ fontSize: 24, lineHeight: 31.2, fontFamily: fontFamily(800), letterSpacing: -0.24, color: color ?? c.ink }}>{value}</Text>
-			<Text style={{ fontSize: 13, lineHeight: 16.9, fontFamily: fontFamily(500), color: c.muted }}>{label}</Text>
+			<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(500), color: c.muted }}>{label}</Text>
 		</View>
 	)
 }
@@ -211,7 +211,7 @@ function EditSheet({ shop, onClose }: { shop: MyShop; onClose: () => void }) {
 		borderColor: c.border,
 		backgroundColor: c.card,
 		paddingHorizontal: 16,
-		fontSize: 17,
+		fontSize: 18.5,
 		fontFamily: fontFamily(600),
 		color: c.ink,
 	} as const
@@ -227,17 +227,17 @@ function EditSheet({ shop, onClose }: { shop: MyShop; onClose: () => void }) {
 				<TextInput value={name} onChangeText={setName} maxLength={60} placeholder="Автодеталь Азамат" placeholderTextColor={raw.fillInk} style={field} />
 				<Label>Телефон для покупателей</Label>
 				<View style={{ ...field, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.muted }}>{COUNTRY_CODE}</Text>
+					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.muted }}>{COUNTRY_CODE}</Text>
 					<TextInput
 						value={phone}
 						onChangeText={(text) => setPhone(formatLocalPhone(text))}
 						keyboardType="phone-pad"
 						placeholder="700 11 22 33"
 						placeholderTextColor={raw.fillInk}
-						style={{ flex: 1, fontSize: 17, fontFamily: fontFamily(600), color: c.ink, padding: 0 }}
+						style={{ flex: 1, fontSize: 18.5, fontFamily: fontFamily(600), color: c.ink, padding: 0 }}
 					/>
 				</View>
-				{update.error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{update.error.message}</Text> : null}
+				{update.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{update.error.message}</Text> : null}
 			</BottomSheet>
 		</KeyboardAvoidingView>
 	)

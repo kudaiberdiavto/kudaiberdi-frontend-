@@ -79,8 +79,8 @@ export default function SellerAnswerScreen() {
 				<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 					{data ? <BrandLogo brand={data.car.brand} size={32} /> : null}
 					<View style={{ flex: 1, gap: 1 }}>
-						<Text style={{ fontSize: 15, lineHeight: 19.5, fontFamily: fontFamily(700), color: c.ink }}>{data?.car.label ?? ' '}</Text>
-						<Text style={{ fontSize: 14, lineHeight: 18.2, fontFamily: fontFamily(400), color: c.muted }}>{data?.text ?? ' '}</Text>
+						<Text style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>{data?.car.label ?? ' '}</Text>
+						<Text style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>{data?.text ?? ' '}</Text>
 					</View>
 				</View>
 			</View>
@@ -112,7 +112,7 @@ export default function SellerAnswerScreen() {
 						</View>
 						<View style={{ flex: 1, gap: 1 }}>
 							<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), color: c.ink }}>Проверьте и отправьте</Text>
-							<Text numberOfLines={1} style={{ fontSize: 14, lineHeight: 18.2, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text numberOfLines={1} style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
 								{data ? `${data.text} · ${data.car.modelLabel}` : ' '}
 							</Text>
 						</View>
@@ -124,10 +124,10 @@ export default function SellerAnswerScreen() {
 						<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 10, gap: 8 }}>
 							<VoicePlayer voice={voice} background={c.card} />
 							<View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start', paddingHorizontal: 4 }}>
-								<Text style={{ flex: 1, fontSize: 15, lineHeight: 20.25, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.inkSecondary }}>
+								<Text style={{ flex: 1, fontSize: 16.5, lineHeight: 22.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.inkSecondary }}>
 									{voice.transcript ? `«${voice.transcript}»` : 'Не разобрали слова — заполните цену сами'}
 								</Text>
-								<Text onPress={rerecord} style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>
+								<Text onPress={rerecord} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 									Перезаписать
 								</Text>
 							</View>
@@ -146,14 +146,14 @@ export default function SellerAnswerScreen() {
 							}}
 						>
 							<MicIcon size={20} color={c.brandStrong} />
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>Сказать голосом</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Сказать голосом</Text>
 						</Pressable>
 					)}
-					{note.error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{note.error}</Text> : null}
+					{note.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{note.error}</Text> : null}
 
 					<Label
 						right={
-							heard ? <Text style={{ fontSize: 13, fontFamily: fontFamily(500), color: c.muted }}>можно поправить</Text> : undefined
+							heard ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>можно поправить</Text> : undefined
 						}
 					>
 						{heard ? 'Заполнили из голоса' : 'Ваш ответ'}
@@ -179,7 +179,7 @@ export default function SellerAnswerScreen() {
 							placeholderTextColor={raw.fillInk}
 							style={{ minWidth: 40, fontSize: 32, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink, padding: 0 }}
 						/>
-						<Text style={{ fontSize: 18, fontFamily: fontFamily(700), color: c.muted }}>сом</Text>
+						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>сом</Text>
 						<View style={{ flex: 1 }} />
 						{priceFromVoice ? <FromVoice /> : null}
 					</View>
@@ -193,7 +193,7 @@ export default function SellerAnswerScreen() {
 						<Choice label="Копия" active={original === false} fromVoice={heard?.original === false} onPress={() => setOriginal(false)} />
 					</View>
 
-					{reply.error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text> : null}
+					{reply.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text> : null}
 
 					<Pressable
 						disabled={!(amount > 0) || reply.isPending || note.recording || note.uploading}
@@ -210,7 +210,7 @@ export default function SellerAnswerScreen() {
 						}}
 					>
 						<PlaneIcon size={20} color="#FFFFFF" />
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Отправить покупателю</Text>
+						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Отправить покупателю</Text>
 					</Pressable>
 				</View>
 			</KeyboardAvoidingView>
@@ -223,7 +223,7 @@ function FromVoice() {
 	return (
 		<View style={{ height: 24, paddingHorizontal: 8, borderRadius: 12, backgroundColor: VIOLET_TINT, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
 			<SparkleIcon size={13} color={VIOLET} />
-			<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: VIOLET }}>из голоса</Text>
+			<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: VIOLET }}>из голоса</Text>
 		</View>
 	)
 }
@@ -246,7 +246,7 @@ function Choice({ label, active, fromVoice, onPress }: { label: string; active: 
 				gap: 6,
 			}}
 		>
-			<Text style={{ fontSize: 16, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{label}</Text>
+			<Text style={{ fontSize: 17.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{label}</Text>
 			{active && fromVoice ? <SparkleIcon size={14} color={VIOLET} /> : null}
 		</Pressable>
 	)
@@ -270,7 +270,7 @@ function Recording({ seconds, uploading, onDone, onCancel }: { seconds: number; 
 				}}
 			>
 				<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: uploading ? c.brand : c.danger }} />
-				<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>
+				<Text style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(600), color: c.ink }}>
 					{uploading ? 'Слушаем…' : `Говорите · ${voiceClock(seconds)}`}
 				</Text>
 				{uploading ? null : (
@@ -278,16 +278,16 @@ function Recording({ seconds, uploading, onDone, onCancel }: { seconds: number; 
 						onPress={onDone}
 						style={{ height: 32, paddingHorizontal: 14, borderRadius: 16, backgroundColor: c.success, justifyContent: 'center' }}
 					>
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Готово</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Готово</Text>
 					</Pressable>
 				)}
 			</View>
 			{uploading ? null : (
 				<View style={{ flexDirection: 'row', paddingHorizontal: 4 }}>
-					<Text style={{ flex: 1, fontSize: 13, lineHeight: 17, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text style={{ flex: 1, fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>
 						Например: «Есть, оригинал, пара — три двести»
 					</Text>
-					<Text onPress={onCancel} style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.danger }}>
+					<Text onPress={onCancel} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.danger }}>
 						Отмена
 					</Text>
 				</View>

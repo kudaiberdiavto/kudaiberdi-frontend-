@@ -54,7 +54,7 @@ export default function SellerProductsScreen() {
 					}}
 				>
 					<ReelsIcon size={20} color={c.brandStrong} strokeWidth={2.2} />
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>Видео</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Видео</Text>
 				</Pressable>
 				<Pressable
 					onPress={() => newPart('/camera')}
@@ -94,7 +94,7 @@ export default function SellerProductsScreen() {
 								onChangeText={setQ}
 								placeholder="Поиск по моим запчастям"
 								placeholderTextColor="#7D7979"
-								style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+								style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 							/>
 						</View>
 
@@ -116,7 +116,7 @@ export default function SellerProductsScreen() {
 											justifyContent: 'center',
 										}}
 									>
-										<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: active ? '#FFFFFF' : c.ink }}>{item.label}</Text>
+										<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: active ? '#FFFFFF' : c.ink }}>{item.label}</Text>
 									</Pressable>
 								)
 							})}
@@ -125,7 +125,7 @@ export default function SellerProductsScreen() {
 						<QueryErrorBanner error={parts.error ?? summary.error} onRetry={() => parts.refetch()} />
 
 						{s ? (
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
 								Покупатели посмотрели ваши запчасти{' '}
 								<Text style={{ fontFamily: fontFamily(700), color: c.ink }}>
 									{formatNumber(s.viewsWeek)} {plural(s.viewsWeek, ['раз', 'раза', 'раз'])}
@@ -135,7 +135,7 @@ export default function SellerProductsScreen() {
 						) : null}
 
 						{parts.isSuccess && items.length === 0 ? (
-							<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 								{q.trim() ? 'Ничего не нашли' : 'Выложите запчасти — покупатели найдут их в поиске и на карте рынка.'}
 							</Text>
 						) : null}
@@ -166,7 +166,7 @@ export default function SellerProductsScreen() {
 				}}
 			>
 				<PlusIcon size={22} color="#FFFFFF" strokeWidth={2.6} />
-				<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Выложить запчасть</Text>
+				<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Выложить запчасть</Text>
 			</Pressable>
 		</Screen>
 	)
@@ -195,17 +195,17 @@ function PartRow({ part }: { part: MyPartItem }) {
 				<PhotoPlaceholder width={80} height={80} radius={10} />
 			)}
 			<View style={{ flex: 1, gap: 6 }}>
-				<Text numberOfLines={2} style={{ fontSize: 15, lineHeight: 18.75, fontFamily: fontFamily(700), color: c.ink }}>
+				<Text numberOfLines={2} style={{ fontSize: 16.5, lineHeight: 20.5, fontFamily: fontFamily(700), color: c.ink }}>
 					{part.title || 'Без названия'}
 				</Text>
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-					<Text numberOfLines={1} style={{ flexShrink: 1, fontSize: 13, fontFamily: fontFamily(400), color: c.inkSecondary }}>
+					<Text numberOfLines={1} style={{ flexShrink: 1, fontSize: 14.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>
 						{part.fitmentLabels.join(', ') || 'Машины не указаны'}
 					</Text>
 					{part.brands[0] ? <BrandLogo brand={part.brands[0]} size={18} /> : null}
 				</View>
 				<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(800), color: c.ink }}>{formatPrice(part.price) || '—'}</Text>
+					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(800), color: c.ink }}>{formatPrice(part.price) || '—'}</Text>
 					<Badge label={badge.label} tone={badge.tone} />
 				</View>
 			</View>

@@ -76,12 +76,12 @@ export default function SellerRequestsScreen() {
 							}}
 						>
 							<BoltIcon size={18} color={c.brandStrong} />
-							<Text style={{ flex: 1, fontSize: 14, fontFamily: fontFamily(400), color: '#1D2B53' }}>
+							<Text style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(400), color: '#1D2B53' }}>
 								Кто отвечает быстрее — тот выше в списке у покупателя
 							</Text>
 						</View>
 						{fresh.isSuccess && answered.isSuccess && items.length === 0 ? (
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted, paddingVertical: 8 }}>
+							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted, paddingVertical: 8 }}>
 								Новых запросов нет. Пришлём пуш, как только спросят.
 							</Text>
 						) : null}
@@ -109,13 +109,13 @@ function DeliveryCard({ order }: { order: DeliveryOrder }) {
 		>
 			<TruckTile size={44} />
 			<View style={{ flex: 1, gap: 2 }}>
-				<Text style={{ fontSize: 12, fontFamily: fontFamily(700), letterSpacing: 1, color: '#7A5A00' }}>
+				<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1, color: '#7A5A00' }}>
 					{`${order.status === 'NEW' ? 'Новый заказ' : 'Заказ с доставкой'} · в ${toRegion(order.districtName ?? order.regionName)}`.toUpperCase()}
 				</Text>
-				<Text numberOfLines={1} style={{ fontSize: 16, fontFamily: fontFamily(800), color: c.ink }}>
+				<Text numberOfLines={1} style={{ fontSize: 17.5, fontFamily: fontFamily(800), color: c.ink }}>
 					{order.part.title}
 				</Text>
-				<Text numberOfLines={1} style={{ fontSize: 13.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>
+				<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.inkSecondary }}>
 					{priceDigits(order.part.price)} сом · {status}
 				</Text>
 			</View>
@@ -137,8 +137,8 @@ function RequestCard({ request }: { request: IncomingRequest }) {
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				<BrandLogo brand={request.car.brand} size={32} />
 				<View style={{ flex: 1, gap: 1 }}>
-					<Text style={{ fontSize: 15, lineHeight: 19.5, fontFamily: fontFamily(700), color: c.ink }}>{request.car.label}</Text>
-					<Text style={{ fontSize: 13, lineHeight: 16.9, fontFamily: fontFamily(400), color: c.muted }}>{meta}</Text>
+					<Text style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>{request.car.label}</Text>
+					<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>{meta}</Text>
 				</View>
 			</View>
 
@@ -150,7 +150,7 @@ function RequestCard({ request }: { request: IncomingRequest }) {
 					/>
 				) : null}
 				<View style={{ flex: 1, gap: 6 }}>
-					<Text style={{ fontSize: 16, lineHeight: 20.8, fontFamily: fontFamily(600), color: c.ink }}>{request.text}</Text>
+					<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{request.text}</Text>
 					{request.voice ? <VoicePlayer voice={request.voice} /> : null}
 				</View>
 			</View>
@@ -168,7 +168,7 @@ function RequestCard({ request }: { request: IncomingRequest }) {
 					}}
 				>
 					<TickIcon size={18} color={c.success} strokeWidth={2.8} />
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.success }}>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.success }}>
 						{request.soldHere
 							? 'Купили у вас'
 							: mine.answer === 'HAVE'
@@ -207,13 +207,13 @@ function RequestCard({ request }: { request: IncomingRequest }) {
 						>
 							<MicIcon size={20} color="#FFFFFF" />
 						</View>
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Ответить голосом</Text>
+						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Ответить голосом</Text>
 					</Pressable>
-					<Text style={{ fontSize: 13, lineHeight: 16.9, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
+					<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
 						Например: «Есть, оригинал, пара — три двести»
 					</Text>
 					{reply.error ? (
-						<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text>
 					) : null}
 					<View style={{ flexDirection: 'row', gap: 8 }}>
 						<Pressable
@@ -229,7 +229,7 @@ function RequestCard({ request }: { request: IncomingRequest }) {
 								opacity: reply.isPending ? 0.4 : 1,
 							}}
 						>
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>Нет</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>Нет</Text>
 						</Pressable>
 						<Pressable
 							onPress={() => router.push({ pathname: '/seller-answer', params: { id: String(request.id) } })}
@@ -245,7 +245,7 @@ function RequestCard({ request }: { request: IncomingRequest }) {
 							}}
 						>
 							<TickIcon size={20} color={c.success} />
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.success }}>Есть</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.success }}>Есть</Text>
 						</Pressable>
 					</View>
 				</>

@@ -103,14 +103,14 @@ export default function RequestScreen() {
 							<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: active ? c.success : c.border }} />
 						</View>
 						<View style={{ flex: 1, gap: 2 }}>
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
 								{closed
 									? 'Запрос закрыт'
 									: active
 										? `Ищем ещё ${left} ${plural(left, ['минуту', 'минуты', 'минут'])}`
 										: 'Время вышло'}
 							</Text>
-							<Text style={{ fontSize: 13.5, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>
 								Спросили {askedCount} {plural(askedCount, ['продавца', 'продавцов', 'продавцов'])} · ответили {answered}
 							</Text>
 						</View>
@@ -123,18 +123,18 @@ export default function RequestScreen() {
 								{extend.isPending ? (
 									<ActivityIndicator size="small" color={c.brandStrong} />
 								) : (
-									<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>Ещё 30 мин</Text>
+									<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Ещё 30 мин</Text>
 								)}
 							</Pressable>
 						) : null}
 					</View>
 				) : null}
-				{extend.error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{extend.error.message}</Text> : null}
+				{extend.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{extend.error.message}</Text> : null}
 
 				{/* What the buyer attached — voice and photos — not in the mockup, but they should see what they asked. */}
 				{detail?.voice || detail?.photos.length ? (
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 8 }}>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Ваш запрос</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Ваш запрос</Text>
 						{detail.voice ? <VoicePlayer voice={detail.voice} /> : null}
 						<MediaStrip media={photosAsMedia(detail.photos)} />
 					</View>
@@ -150,7 +150,7 @@ export default function RequestScreen() {
 					<Text
 						onPress={() => setTab('HAVE')}
 						style={{
-							fontSize: 13,
+							fontSize: 14.5,
 							fontFamily: fontFamily(tab === 'HAVE' ? 700 : 600),
 							letterSpacing: tab === 'HAVE' ? 1.04 : 0,
 							color: c.muted,
@@ -162,7 +162,7 @@ export default function RequestScreen() {
 					<Text
 						onPress={() => setTab('NOT_HAVE')}
 						style={{
-							fontSize: 13,
+							fontSize: 14.5,
 							fontFamily: fontFamily(tab === 'NOT_HAVE' ? 700 : 600),
 							letterSpacing: tab === 'NOT_HAVE' ? 1.04 : 0,
 							color: c.muted,
@@ -175,7 +175,7 @@ export default function RequestScreen() {
 				{tab === 'HAVE' ? (
 					<>
 						{replies.isSuccess && have.length === 0 ? (
-							<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 								{active ? 'Ждём ответов — обычно отвечают за 5–10 минут.' : 'Пока никто не ответил «Есть».'}
 							</Text>
 						) : null}
@@ -184,7 +184,7 @@ export default function RequestScreen() {
 						))}
 						{have.length > 0 && !closed ? (
 							<Pressable onPress={() => setSheet(true)} style={{ alignItems: 'center', paddingVertical: 10 }}>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>Нашли запчасть?</Text>
+								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Нашли запчасть?</Text>
 							</Pressable>
 						) : null}
 					</>
@@ -200,13 +200,13 @@ export default function RequestScreen() {
 									borderTopColor: c.hairline,
 								}}
 							>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>
+								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(600), color: c.ink }}>
 									{place.row ? `Ряд ${place.row}` : 'Ряд —'} · конт. {place.container ?? '—'}
 								</Text>
 							</View>
 						))}
 						{(stats.data?.notHave ?? []).length === 0 ? (
-							<Text style={{ paddingVertical: 14, fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>Никто не ответил «Нет»</Text>
+							<Text style={{ paddingVertical: 14, fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>Никто не ответил «Нет»</Text>
 						) : null}
 					</View>
 				)}
@@ -241,7 +241,7 @@ function SortChip({ label, active, onPress }: { label: string; active: boolean; 
 				justifyContent: 'center',
 			}}
 		>
-			<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: active ? '#FFFFFF' : c.ink }}>{label}</Text>
+			<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: active ? '#FFFFFF' : c.ink }}>{label}</Text>
 		</Pressable>
 	)
 }
@@ -273,17 +273,17 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				<ShopAvatar name={shop.name} url={shop.avatarUrl} />
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text numberOfLines={1} style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
 						{shop.name}
 					</Text>
-					<Text style={{ fontSize: 13.5, fontFamily: fontFamily(400), color: c.muted }}>{place}</Text>
+					<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>{place}</Text>
 				</View>
 				{reply.price != null ? (
 					<View style={{ alignItems: 'flex-end' }}>
 						<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), letterSpacing: -0.22, color: c.ink }}>
 							{priceDigits(reply.price)}
 						</Text>
-						<Text style={{ fontSize: 12, fontFamily: fontFamily(600), color: c.muted }}>сом</Text>
+						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>сом</Text>
 					</View>
 				) : null}
 			</View>
@@ -293,14 +293,14 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 						const green = index === 0 && reply.condition === 'NEW'
 						return (
 							<View key={chip} style={{ height: 26, paddingHorizontal: 9, borderRadius: 8, backgroundColor: green ? '#E7F6EC' : c.surface, justifyContent: 'center' }}>
-								<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: green ? c.success : c.ink }}>{chip}</Text>
+								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: green ? c.success : c.ink }}>{chip}</Text>
 							</View>
 						)
 					})}
 				</View>
 			) : null}
 			{reply.voice ? <VoicePlayer voice={reply.voice} tone="green" /> : null}
-			{reply.message ? <Text style={{ fontSize: 14, lineHeight: 19, fontFamily: fontFamily(400), color: c.inkSecondary }}>{reply.message}</Text> : null}
+			{reply.message ? <Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(400), color: c.inkSecondary }}>{reply.message}</Text> : null}
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
 				<Pressable
 					onPress={() => shop.phone && Linking.openURL(`tel:${shop.phone}`)}
@@ -318,7 +318,7 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 					}}
 				>
 					<CallIcon size={20} color="#FFFFFF" strokeWidth={2.4} />
-					<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Позвонить</Text>
+					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Позвонить</Text>
 				</Pressable>
 				<SquareButton onPress={() => reply.chatId && router.push({ pathname: '/chat', params: { chatId: String(reply.chatId) } })}>
 					<BubbleIcon size={22} color={c.brandStrong} />
@@ -374,10 +374,10 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 			}}
 		>
 			<ShopAvatar name={shop.name} url={shop.avatarUrl} size={40} />
-			<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(700), color: selected ? c.brandStrong : c.ink, textAlign: 'center' }}>
+			<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: selected ? c.brandStrong : c.ink, textAlign: 'center' }}>
 				{shop.name}
 			</Text>
-			<Text style={{ fontSize: 12, fontFamily: fontFamily(400), color: c.muted }}>
+			<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
 				{done ? 'отмечен' : shop.location ? `${shop.location.rowCode} · ${shop.location.number}` : 'магазин'}
 			</Text>
 		</Pressable>
@@ -401,7 +401,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 								<View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}>
 									<TickIcon size={22} color="#FFFFFF" strokeWidth={2.2} />
 								</View>
-								<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Да, купил — у кого?</Text>
+								<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>Да, купил — у кого?</Text>
 							</View>
 							<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 								{shops.map((shop) =>
@@ -432,7 +432,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 					</>
 				) : (
 					<>
-						<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 							Выберите продавца. Если так отметят три покупателя — запросы ему не будут приходить 7 дней.
 						</Text>
 						<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
@@ -448,7 +448,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 						<SheetRow icon={<LoupeIcon size={22} color={c.brandStrong} />} title="Готово" subtitle="Вернуться к ответам" onPress={onClose} />
 					</>
 				)}
-				{error ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
+				{error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
 			</View>
 		</BottomSheet>
 	)
@@ -477,8 +477,8 @@ function SheetRow({
 				{icon}
 			</View>
 			<View style={{ flex: 1, gap: 2 }}>
-				<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{title}</Text>
-				<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{subtitle}</Text>
+				<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>{title}</Text>
+				<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>{subtitle}</Text>
 			</View>
 			<ChevronIcon size={20} color="#B8B4B4" />
 		</Pressable>

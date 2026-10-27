@@ -129,7 +129,7 @@ export default function NewPartScreen() {
 							justifyContent: 'center',
 						}}
 					>
-						<Text style={{ fontSize: 11, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Главное</Text>
+						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Главное</Text>
 					</View>
 				) : null}
 			</Pressable>
@@ -155,7 +155,7 @@ export default function NewPartScreen() {
 				</Text>
 				{!published ? (
 					<Pressable disabled={save.isPending || uploading} onPress={onDraft}>
-						<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.muted }}>Черновик</Text>
+						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(600), color: c.muted }}>Черновик</Text>
 					</Pressable>
 				) : null}
 			</View>
@@ -184,20 +184,20 @@ export default function NewPartScreen() {
 							}}
 						>
 							<CameraIcon size={24} color={c.brandStrong} />
-							<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: c.brandStrong }}>
+							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>
 								{draft.photos.length ? 'Ещё фото' : 'Фото'}
 							</Text>
 						</Pressable>
 					) : null}
 				</View>
 				{draft.photos.length > 3 ? (
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(500), color: c.muted }}>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>
 						Ещё {draft.photos.length - 3} фото · всего {draft.photos.length} из {MAX_PART_PHOTOS}
 					</Text>
 				) : null}
 
 				<View style={{ gap: 6 }}>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Название</Text>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Название</Text>
 					<View
 						style={{
 							height: 52,
@@ -215,16 +215,16 @@ export default function NewPartScreen() {
 							maxLength={120}
 							placeholder="Например: Стойка передняя KYB, левая"
 							placeholderTextColor={raw.fillInk}
-							style={{ fontSize: 16, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+							style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 						/>
 					</View>
 					{draft.oemNumber ? (
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(500), color: c.muted }}>Номер детали: {draft.oemNumber}</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>Номер детали: {draft.oemNumber}</Text>
 					) : null}
 				</View>
 
 				<View style={{ gap: 8 }}>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Подходит к машинам</Text>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Подходит к машинам</Text>
 					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 						{draft.fitments.map((fitment, index) => (
 							<View
@@ -243,7 +243,7 @@ export default function NewPartScreen() {
 								}}
 							>
 								{fitment.brand ? <BrandLogo brand={fitment.brand} size={28} /> : null}
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>{fitment.label}</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{fitment.label}</Text>
 								<Pressable
 									onPress={() => draft.removeFitment(index)}
 									style={{ width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}
@@ -267,13 +267,13 @@ export default function NewPartScreen() {
 							}}
 						>
 							<PlusIcon size={16} color={c.brandStrong} />
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>Машина</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Машина</Text>
 						</Pressable>
 					</View>
 				</View>
 
 				<View style={{ gap: 6 }}>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Категория</Text>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Категория</Text>
 					<Pressable
 						onPress={() => setPickCategory((v) => !v)}
 						style={{
@@ -288,10 +288,10 @@ export default function NewPartScreen() {
 							justifyContent: 'space-between',
 						}}
 					>
-						<Text style={{ fontSize: 16, fontFamily: fontFamily(400), color: category ? c.ink : raw.fillInk }}>
+						<Text style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: category ? c.ink : raw.fillInk }}>
 							{category?.name ?? 'Выберите категорию'}
 						</Text>
-						<Text style={{ fontSize: 16, color: c.muted }}>{pickCategory ? '⌃' : '›'}</Text>
+						<Text style={{ fontSize: 17.5, color: c.muted }}>{pickCategory ? '⌃' : '›'}</Text>
 					</Pressable>
 					{pickCategory ? (
 						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingTop: 4 }}>
@@ -315,7 +315,7 @@ export default function NewPartScreen() {
 											justifyContent: 'center',
 										}}
 									>
-										<Text style={{ fontSize: 14, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.inkSecondary }}>
+										<Text style={{ fontSize: 15.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.inkSecondary }}>
 											{cat.name}
 										</Text>
 									</Pressable>
@@ -326,7 +326,7 @@ export default function NewPartScreen() {
 				</View>
 
 				<View style={{ gap: 6 }}>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Состояние</Text>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Состояние</Text>
 					<Segmented
 						items={CONDITIONS.map((item) => item.label)}
 						value={CONDITIONS.findIndex((item) => item.value === draft.condition)}
@@ -339,7 +339,7 @@ export default function NewPartScreen() {
 
 				<View style={{ flexDirection: 'row', gap: 16 }}>
 					<View style={{ flex: 1.4, gap: 6 }}>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Цена</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Цена</Text>
 						<View
 							style={{
 								height: 52,
@@ -359,13 +359,13 @@ export default function NewPartScreen() {
 								keyboardType="numeric"
 								placeholder="0"
 								placeholderTextColor={raw.fillInk}
-								style={{ flex: 1, minWidth: 0, fontSize: 16, fontFamily: fontFamily(700), color: c.ink, padding: 0 }}
+								style={{ flex: 1, minWidth: 0, fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink, padding: 0 }}
 							/>
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(400), color: c.muted }}>сом</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: c.muted }}>сом</Text>
 						</View>
 					</View>
 					<View style={{ flex: 1, gap: 6 }}>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>Сколько штук</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Сколько штук</Text>
 						<View
 							style={{
 								height: 52,
@@ -395,7 +395,7 @@ export default function NewPartScreen() {
 				}}
 			>
 				{errorText ? (
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text>
 				) : null}
 				<Pressable
 					disabled={save.isPending || publish.isPending || uploading}
@@ -409,7 +409,7 @@ export default function NewPartScreen() {
 						opacity: save.isPending || publish.isPending || uploading ? 0.4 : 1,
 					}}
 				>
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
 						{uploading ? 'Загружаем фото…' : published ? 'Сохранить' : 'Опубликовать'}
 					</Text>
 				</Pressable>

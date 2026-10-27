@@ -30,7 +30,7 @@ export function NoticeBanner({
 			]}
 		>
 			<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.danger }} />
-			<Text style={{ flex: 1, fontSize: 14, fontFamily: fontFamily(600), color: c.ink }}>{text}</Text>
+			<Text style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>{text}</Text>
 		</Pressable>
 	)
 }

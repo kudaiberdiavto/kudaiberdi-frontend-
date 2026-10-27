@@ -19,7 +19,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(props: Props, ref
 	if (Real) return <Real {...props} ref={ref} />
 	return (
 		<View style={[StyleSheet.absoluteFill, { backgroundColor: raw.mapSurface, alignItems: 'center', justifyContent: 'center' }]}>
-			<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: raw.mapLabel, textAlign: 'center', paddingHorizontal: 32 }}>
+			<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: raw.mapLabel, textAlign: 'center', paddingHorizontal: 32 }}>
 				Карта работает в сборке приложения, в Expo Go её нет
 			</Text>
 		</View>
