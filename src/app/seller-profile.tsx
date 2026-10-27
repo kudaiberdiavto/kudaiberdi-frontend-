@@ -232,7 +232,7 @@ export default function SellerProfileForBuyerScreen() {
 					</View>
 
 					{tab === 'parts' ? (
-						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingBottom: 24 }}>
+						<View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 10, rowGap: 20, paddingBottom: 24 }}>
 							{partItems.map((part) => (
 								<ProductCard
 									key={part.id}

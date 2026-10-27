@@ -4,12 +4,16 @@ import { fontFamily, useColors } from '@/theme'
 import Svg, { Path } from 'react-native-svg'
 import { PhotoPlaceholder } from './photo'
 
-/** Карточка товара в сетке — экраны 27, 29 (похожие), 30. По ширине колонки (или `width`), фото квадратное. */
+/**
+ * Карточка товара в сетке — как на маркетплейсах: квадратное фото со скруглением без подложки (♥, «✓ Подходит»,
+ * «▶ 0:15» на фото), под ним цена, название и магазин. По ширине колонки (или `width`).
+ */
 export function ProductCard({
 	price,
 	title,
 	fits,
 	location,
+	shopName,
 	onPress,
 	width,
 	photoUrl,
@@ -22,6 +26,8 @@ export function ProductCard({
 	title: string
 	fits?: boolean
 	location: string
+	/** «Автодеталь Азамат» before the place. */
+	shopName?: string
 	onPress?: () => void
 	/** Column width; without it — the parent's width. */
 	width?: number
@@ -37,8 +43,8 @@ export function ProductCard({
 }) {
 	const c = useColors()
 	return (
-		<Pressable onPress={onPress} style={{ width: width ?? '100%', borderRadius: 18, backgroundColor: c.card, overflow: 'hidden', opacity: dimmed ? 0.6 : 1 }}>
-			<View>
+		<Pressable onPress={onPress} style={{ width: width ?? '100%', gap: 8, opacity: dimmed ? 0.6 : 1 }}>
+			<View style={{ borderRadius: 16, overflow: 'hidden', backgroundColor: c.card }}>
 				{photoUrl ? (
 					<Image source={{ uri: photoUrl }} style={{ width: '100%', aspectRatio: 1 }} resizeMode="cover" />
 				) : (
@@ -84,26 +90,37 @@ export function ProductCard({
 				>
 					<HeartIcon size={16} color={favorite ? c.danger : c.ink} filled={favorite} />
 				</View>
-			</View>
-
-			<View style={{ padding: 12, gap: 6 }}>
-				<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>{price}</Text>
-				<Text numberOfLines={2} style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>
-					{title}
-				</Text>
 				{fits ? (
-					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-						<CheckIcon size={16} color={c.success} strokeWidth={3} />
-						<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.success }}>Подходит</Text>
+					<View
+						style={{
+							position: 'absolute',
+							left: 8,
+							bottom: 8,
+							height: 26,
+							paddingHorizontal: 8,
+							borderRadius: 13,
+							backgroundColor: c.success,
+							flexDirection: 'row',
+							alignItems: 'center',
+							gap: 4,
+						}}
+					>
+						<CheckIcon size={14} color="#FFFFFF" strokeWidth={3} />
+						<Text style={{ fontSize: 13.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Подходит</Text>
 					</View>
 				) : null}
-				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-					{shopAvatarUrl ? (
-						<Image source={{ uri: shopAvatarUrl }} style={{ width: 22, height: 22, borderRadius: 11 }} />
-					) : (
-						<View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#EEEEEE' }} />
-					)}
-					<Text numberOfLines={1} style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>{location}</Text>
+			</View>
+
+			<View style={{ paddingHorizontal: 2, gap: 4 }}>
+				<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>{price}</Text>
+				<Text numberOfLines={2} style={{ fontSize: 16, lineHeight: 21, fontFamily: fontFamily(400), color: c.ink }}>
+					{title}
+				</Text>
+				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 2 }}>
+					{shopAvatarUrl ? <Image source={{ uri: shopAvatarUrl }} style={{ width: 20, height: 20, borderRadius: 10 }} /> : null}
+					<Text numberOfLines={1} style={{ flex: 1, fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+						{[shopName, location].filter(Boolean).join(' · ')}
+					</Text>
 				</View>
 			</View>
 		</Pressable>

@@ -234,7 +234,7 @@ export function CatalogScreen() {
 				data={rows}
 				keyExtractor={(row) => (row.kind === 'others' ? 'others' : row.parts.map((part) => part.id).join('-'))}
 				ListHeaderComponent={header}
-				contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 16, paddingBottom: 90, gap: 10 }}
+				contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 16, paddingBottom: 90, gap: 20 }}
 				showsVerticalScrollIndicator={false}
 				onEndReached={() => search.hasNextPage && !search.isFetchingNextPage && search.fetchNextPage()}
 				renderItem={({ item: row }) =>
@@ -243,7 +243,7 @@ export function CatalogScreen() {
 							ОСТАЛЬНЫЕ ЗАПЧАСТИ
 						</Text>
 					) : (
-						<View style={{ flexDirection: 'row', gap: 10 }}>
+						<View style={{ flexDirection: 'row', gap: 12 }}>
 							{row.parts.map((part) => (
 								<View key={part.id} style={{ flex: 1 }}>
 									<PartTile part={part} />
@@ -304,6 +304,7 @@ function PartTile({ part }: { part: PartCard }) {
 			title={part.title}
 			fits={part.fits === true}
 			location={briefPlace(part.shop)}
+			shopName={part.shop.name}
 			photoUrl={resolveUrl(part.mainPhoto?.thumbUrl ?? part.mainPhoto?.url ?? part.video?.posterUrl)}
 			shopAvatarUrl={resolveUrl(part.shop.avatarUrl)}
 			dimmed={part.stockStatus === 'OUT_OF_STOCK'}
