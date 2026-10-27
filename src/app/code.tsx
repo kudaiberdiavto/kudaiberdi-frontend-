@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Keyboard, Pressable, Text, TextInput, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ChevronLeftIcon } from '@/components/icons'
+import { AUTH_FIELD_HEIGHT, AuthLayout } from '@/components/auth-layout'
 import { fontFamily, useColors } from '@/theme'
 import { ApiError } from '@/lib/api'
 import { formatE164 } from '@/lib/phone'
@@ -17,7 +17,6 @@ function formatCountdown(seconds: number) {
 
 export default function CodeScreen() {
 	const c = useColors()
-	const insets = useSafeAreaInsets()
 	const params = useLocalSearchParams<{ phone: string; resendIn?: string; debugCode?: string }>()
 	const phone = params.phone
 	// Dev backend returns the code in `debugCode` — prefill it instead of waiting for an SMS.
@@ -67,8 +66,8 @@ export default function CodeScreen() {
 			: error?.message
 
 	return (
-		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<View style={{ paddingVertical: 8, paddingHorizontal: 16 }}>
+		<AuthLayout
+			topBar={
 				<Pressable
 					onPress={() => router.back()}
 					style={{
@@ -82,77 +81,73 @@ export default function CodeScreen() {
 				>
 					<ChevronLeftIcon size={22} color={c.ink} strokeWidth={2.6} />
 				</Pressable>
-			</View>
-
-			<View style={{ flex: 1, paddingTop: 32, paddingHorizontal: 24, paddingBottom: 24, gap: 28 }}>
-				<View style={{ gap: 8 }}>
-					<Text style={{ fontSize: 28, fontFamily: fontFamily(700), letterSpacing: -0.56, color: c.ink }}>
-						Код из SMS
-					</Text>
-					<Text style={{ fontSize: 16, fontFamily: fontFamily(400), color: c.muted }}>Отправили на {formatE164(phone)}</Text>
-				</View>
-
-				<Pressable onPress={() => inputRef.current?.focus()} style={{ flexDirection: 'row', gap: 12 }}>
-					{Array.from({ length: CODE_LENGTH }).map((_, index) => {
-						const digit = code[index]
-						const isActive = index === code.length
-						return (
-							<View
-								key={index}
-								style={{
-									flex: 1,
-									height: 76,
-									borderRadius: 14,
-									borderWidth: 2,
-									borderColor: error ? c.danger : isActive ? c.brand : c.border,
-									backgroundColor: c.card,
-									alignItems: 'center',
-									justifyContent: 'center',
-								}}
-							>
-								{digit ? (
-									<Text style={{ fontSize: 32, fontFamily: fontFamily(700), color: c.ink }}>{digit}</Text>
-								) : isActive ? (
-									<View style={{ width: 2, height: 32, backgroundColor: c.brand }} />
-								) : null}
-							</View>
-						)
-					})}
-				</Pressable>
-
-				<TextInput
-					ref={inputRef}
-					value={code}
-					onChangeText={(text) => {
-						if (verify.isPending) return
-						verify.reset()
-						setCode(text.replace(/\D/g, '').slice(0, CODE_LENGTH))
-					}}
-					keyboardType="number-pad"
-					maxLength={CODE_LENGTH}
-					style={{ position: 'absolute', width: 0, height: 0, opacity: 0 }}
-				/>
-
-				{errorText && (
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text>
-				)}
-
-				<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>
-					{secondsLeft > 0 ? (
-						<>
-							Отправить снова через{' '}
-							<Text style={{ fontFamily: fontFamily(700), color: c.ink }}>{formatCountdown(secondsLeft)}</Text>
-						</>
-					) : (
-						<Text
-							onPress={resend.isPending ? undefined : sendAgain}
-							style={{ fontFamily: fontFamily(700), color: c.brandStrong }}
-						>
-							Отправить код снова
-						</Text>
-					)}
+			}
+			header={
+				<Text style={{ fontSize: 32, lineHeight: 40, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink }}>
+					Код из SMS
 				</Text>
-			</View>
-		</View>
+			}
+			label={`Отправили на ${formatE164(phone)}`}
+			field={
+				<>
+					<Pressable onPress={() => inputRef.current?.focus()} style={{ flexDirection: 'row', gap: 12 }}>
+						{Array.from({ length: CODE_LENGTH }).map((_, index) => {
+							const digit = code[index]
+							const isActive = index === code.length
+							return (
+								<View
+									key={index}
+									style={{
+										flex: 1,
+										height: AUTH_FIELD_HEIGHT,
+										borderRadius: 14,
+										borderWidth: 2,
+										borderColor: error ? c.danger : isActive ? c.brand : c.border,
+										backgroundColor: c.card,
+										alignItems: 'center',
+										justifyContent: 'center',
+									}}
+								>
+									{digit ? (
+										<Text style={{ fontSize: 28, fontFamily: fontFamily(700), color: c.ink }}>{digit}</Text>
+									) : isActive ? (
+										<View style={{ width: 2, height: 28, backgroundColor: c.brand }} />
+									) : null}
+								</View>
+							)
+						})}
+					</Pressable>
+					<TextInput
+						ref={inputRef}
+						value={code}
+						onChangeText={(text) => {
+							if (verify.isPending) return
+							verify.reset()
+							setCode(text.replace(/\D/g, '').slice(0, CODE_LENGTH))
+						}}
+						keyboardType="number-pad"
+						maxLength={CODE_LENGTH}
+						style={{ position: 'absolute', width: 0, height: 0, opacity: 0 }}
+					/>
+				</>
+			}
+			below={
+				<>
+					{errorText ? <Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text> : null}
+					<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+						{secondsLeft > 0 ? (
+							<>
+								Отправить снова через{' '}
+								<Text style={{ fontFamily: fontFamily(700), color: c.ink }}>{formatCountdown(secondsLeft)}</Text>
+							</>
+						) : (
+							<Text onPress={resend.isPending ? undefined : sendAgain} style={{ fontFamily: fontFamily(700), color: c.brandStrong }}>
+								Отправить код снова
+							</Text>
+						)}
+					</Text>
+				</>
+			}
+		/>
 	)
 }

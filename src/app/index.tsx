@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Keyboard, Platform, Pressable, Text, TextInput, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Keyboard, Pressable, Text, TextInput, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Button } from '@/components/ui'
+import { AUTH_FIELD_HEIGHT, AuthLayout } from '@/components/auth-layout'
 import { LoupeIcon } from '@/components/buyer-v23'
 import { fontFamily, useColors } from '@/theme'
 import { COUNTRY_CODE, formatLocalPhone, isValidLocalPhone, toE164 } from '@/lib/phone'
@@ -18,7 +18,6 @@ const LANGS = [
 
 export default function PhoneScreen() {
 	const c = useColors()
-	const insets = useSafeAreaInsets()
 	const signedIn = useSession((s) => s.status === 'authed')
 	const role = useSession((s) => s.role)
 	const onboarded = useSession((s) => s.onboarded)
@@ -52,16 +51,12 @@ export default function PhoneScreen() {
 	const error = sendOtp.error instanceof ApiError && sendOtp.error.code !== 'OTP_COOLDOWN' ? sendOtp.error : null
 
 	return (
-		<Pressable
-			accessible={false}
-			// Tap outside the field hides the keyboard (native only — on web it would steal the input's focus).
-			onPress={Platform.OS === 'web' ? undefined : Keyboard.dismiss}
-			style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}
-		>
-			{/* RU / KG right away [01] */}
-			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
+		<AuthLayout
+			topBar={
+				// RU / KG right away [01]
 				<View
 					style={{
+						marginLeft: 'auto',
 						height: 34,
 						borderRadius: 17,
 						backgroundColor: c.card,
@@ -92,41 +87,41 @@ export default function PhoneScreen() {
 						)
 					})}
 				</View>
-			</View>
-
-			<View style={{ flex: 1, paddingTop: 4, paddingHorizontal: 24, paddingBottom: 16, gap: 12 }}>
-				<LinearGradient
-					colors={['#2155E6', '#1D46BF']}
-					start={{ x: 0.2, y: 0 }}
-					end={{ x: 0.8, y: 1 }}
-					style={{
-						width: 72,
-						height: 72,
-						borderRadius: 22,
-						alignItems: 'center',
-						justifyContent: 'center',
-						shadowColor: '#2155E6',
-						shadowOpacity: 0.3,
-						shadowOffset: { width: 0, height: 10 },
-						shadowRadius: 12,
-						elevation: 8,
-					}}
-				>
-					<LoupeIcon size={36} color="#FFFFFF" strokeWidth={2.6} />
-				</LinearGradient>
-				<Text
-					style={{ marginTop: 8, fontSize: 32, lineHeight: 41.6, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink }}
-				>
-					Кудайберген
-				</Text>
-				<Text style={{ fontSize: 17, lineHeight: 24.65, fontFamily: fontFamily(400), color: c.muted }}>
-					Автозапчасти и мастера рынка в одном приложении
-				</Text>
-				<View style={{ height: 8 }} />
-				<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.muted }}>Номер телефона</Text>
+			}
+			header={
+				<>
+					<LinearGradient
+						colors={['#2155E6', '#1D46BF']}
+						start={{ x: 0.2, y: 0 }}
+						end={{ x: 0.8, y: 1 }}
+						style={{
+							width: 72,
+							height: 72,
+							borderRadius: 22,
+							alignItems: 'center',
+							justifyContent: 'center',
+							shadowColor: '#2155E6',
+							shadowOpacity: 0.3,
+							shadowOffset: { width: 0, height: 10 },
+							shadowRadius: 12,
+							elevation: 8,
+						}}
+					>
+						<LoupeIcon size={36} color="#FFFFFF" strokeWidth={2.6} />
+					</LinearGradient>
+					<Text style={{ fontSize: 32, lineHeight: 40, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink }}>
+						Кудайберген
+					</Text>
+					<Text numberOfLines={2} style={{ fontSize: 17, lineHeight: 24, fontFamily: fontFamily(400), color: c.muted }}>
+						Автозапчасти и мастера рынка в одном приложении
+					</Text>
+				</>
+			}
+			label="Номер телефона"
+			field={
 				<View
 					style={{
-						height: 60,
+						height: AUTH_FIELD_HEIGHT,
 						borderRadius: 14,
 						borderWidth: 2,
 						borderColor: error ? c.danger : c.brand,
@@ -154,21 +149,15 @@ export default function PhoneScreen() {
 						style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(400), letterSpacing: 0.4, color: c.ink, padding: 0 }}
 					/>
 				</View>
-				{error ? (
+			}
+			below={
+				error ? (
 					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text>
 				) : (
 					<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>Отправим SMS с кодом</Text>
-				)}
-			</View>
-
-			<View style={{ paddingTop: 12, paddingHorizontal: 24, paddingBottom: Math.max(insets.bottom, 34) }}>
-				<Button
-					label="Получить код"
-					disabled={!isValidLocalPhone(phone)}
-					loading={sendOtp.isPending}
-					onPress={submit}
-				/>
-			</View>
-		</Pressable>
+				)
+			}
+			footer={<Button label="Получить код" disabled={!isValidLocalPhone(phone)} loading={sendOtp.isPending} onPress={submit} />}
+		/>
 	)
 }
