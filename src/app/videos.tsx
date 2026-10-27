@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, FlatList, Image, Linking, Pressable, Share, Text, View, type ViewToken } from 'react-native'
+import { ActivityIndicator, FlatList, Image, Pressable, Share, Text, View, type ViewToken } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router, useIsFocused } from 'expo-router'
 import { useEvent } from 'expo'
 import { useVideoPlayer, VideoView } from 'expo-video'
-import { BackIcon, CallIcon, CONDITION_CHIP, PaperPlaneIcon, TickIcon, priceDigits } from '@/components/buyer-v23'
+import { BackIcon, CONDITION_CHIP, PaperPlaneIcon, TickIcon, priceDigits } from '@/components/buyer-v23'
 import { BookmarkIcon, SoundOffIcon, SoundOnIcon, TruckIcon, YellowChip, setPlayerMuted, useFeedCar } from '@/components/video-v23'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { flattenPages } from '@/api/pagination'
 import { useSignedIn, useToggleVideoFavorite, useVideoFeed } from '@/api/catalog'
 import type { VideoFeedItem } from '@/api/types'
+import { useOpenChat } from '@/api/chats'
+import { ChatIcon } from '@/components/icons'
 import { useVideoViewer } from '@/store/useVideoViewer'
 
 /**
@@ -129,7 +131,7 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 	)
 }
 
-/** One video of the feed: full screen, plays while active, the seller, the part, «Позвонить» and «Доставка». */
+/** One video of the feed: full screen, plays while active, the seller, the part, «Написать» and «Доставка». */
 function FeedPage({
 	item,
 	height,
@@ -154,6 +156,15 @@ function FeedPage({
 	const favorite = useToggleVideoFavorite()
 	const poster = resolveUrl(item.video.posterUrl)
 	const shop = item.shop
+	const openChat = useOpenChat()
+	// «Написать» — the chat with the box about this part (a guest signs in first).
+	const write = () =>
+		signedIn
+			? openChat.mutate(
+					{ shopId: shop.id, partId: item.partId },
+					{ onSuccess: (chat) => router.push({ pathname: '/chat', params: { chatId: String(chat.id) } }) }
+				)
+			: router.push('/')
 	const meta = [shop.place, shop.replyMinutes != null ? `отвечает за ${shop.replyMinutes} мин` : null].filter(Boolean).join(' · ')
 	const condition = CONDITION_CHIP[item.condition]
 	const description = [condition, item.fitsLabel].filter(Boolean).join('. ')
@@ -237,22 +248,22 @@ function FeedPage({
 				{item.shipsToRegions ? <YellowChip label="Доставка по КР" icon /> : null}
 				<View style={{ flexDirection: 'row', gap: 10, paddingTop: 4 }}>
 					<Pressable
-						onPress={() => shop.phone && Linking.openURL(`tel:${shop.phone.replace(/[^\d+]/g, '')}`)}
-						disabled={!shop.phone}
+						onPress={write}
+						disabled={openChat.isPending}
 						style={{
 							flex: 1,
 							height: 52,
 							borderRadius: 14,
 							backgroundColor: c.success,
-							opacity: shop.phone ? 1 : 0.5,
+							opacity: openChat.isPending ? 0.7 : 1,
 							flexDirection: 'row',
 							alignItems: 'center',
 							justifyContent: 'center',
 							gap: 8,
 						}}
 					>
-						<CallIcon size={20} color="#FFFFFF" />
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Позвонить</Text>
+						<ChatIcon size={20} color="#FFFFFF" strokeWidth={2.2} />
+						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
 					</Pressable>
 					{item.shipsToRegions ? (
 						<Pressable
