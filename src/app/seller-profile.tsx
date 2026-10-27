@@ -13,6 +13,9 @@ import { usePublicShop, useShop, useShopParts, useShopReviews, useSignedIn, useT
 import { useOpenChat } from '@/api/chats'
 import { ComplainLink, ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
 
+/** Filled rating stars — gold, the empty ones stay grey. */
+const STAR = '#F5A623'
+
 type Tab = 'parts' | 'photos' | 'reviews'
 const VISIBLE_BRANDS = 4
 
@@ -39,7 +42,8 @@ export default function SellerProfileForBuyerScreen() {
 
 	const photos = shop?.photos ?? []
 	const partItems = flattenPages(parts.data)
-	const reviewItems = flattenPages(reviews.data)
+	// Only reviews with something said (tags, the seller's reply) — a bare rating is in the ★ average above.
+	const reviewItems = flattenPages(reviews.data).filter((review) => review.tags.length > 0 || review.reply)
 	const brands = shop?.brands ?? []
 	const counts = shop?.counts
 
@@ -129,7 +133,7 @@ export default function SellerProfileForBuyerScreen() {
 						<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
 							{shop
 								? shop.reviewsCount
-									? `★ ${shop.rating.toFixed(1)} · ${shop.reviewsCount} ${plural(shop.reviewsCount, ['отзыв', 'отзыва', 'отзывов'])}`
+									? <><Text style={{ color: STAR }}>★</Text>{` ${shop.rating.toFixed(1)} · ${shop.reviewsCount} ${plural(shop.reviewsCount, ['оценка', 'оценки', 'оценок'])}`}</>
 									: 'Пока нет отзывов'
 								: ' '}
 						</Text>
@@ -214,7 +218,7 @@ export default function SellerProfileForBuyerScreen() {
 							[
 								{ value: 'parts', label: `Запчасти ${counts?.parts ?? ''}` },
 								{ value: 'photos', label: `Фото ${counts?.photos ?? ''}` },
-								{ value: 'reviews', label: `Отзывы ${counts?.reviews ?? ''}` },
+								{ value: 'reviews', label: 'Отзывы' },
 							] as const
 						).map((item) => (
 							<Pressable
@@ -290,7 +294,7 @@ export default function SellerProfileForBuyerScreen() {
 									style={{ borderRadius: 14, backgroundColor: c.card, padding: 12, gap: 6 }}
 								>
 									<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-										<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>
+										<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: STAR }}>
 											{'★'.repeat(review.stars)}
 											<Text style={{ color: raw.dashed }}>{'★'.repeat(5 - review.stars)}</Text>
 										</Text>

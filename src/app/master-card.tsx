@@ -12,6 +12,9 @@ import { useMasterByLink, useMasterPublic, useMasterReviews, useServiceTypes } f
 import { ORIGINS } from '@/store/useServiceDraft'
 import { ComplainLink, ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
 
+/** Filled rating stars — gold, the empty ones stay grey. */
+const STAR = '#F5A623'
+
 /**
  * Master profile for the client — no mockup; built from the shop profile [30].
  * `id` (from an offer [37]) or `publicId` from a share link /m/{publicId}.
@@ -25,6 +28,8 @@ export default function MasterCardScreen() {
 	const query = params.publicId ? byLink : byId
 	const master = query.data
 	const reviews = useMasterReviews(master?.id ?? 0)
+	// Only reviews with tags — a bare rating is in the ★ average at the top.
+	const commented = (reviews.data ?? []).filter((review) => review.tags.length > 0)
 	const types = useServiceTypes().data
 	const openChat = useOpenChat()
 	const [complaint, setComplaint] = useState<ComplaintTarget | null>(null)
@@ -78,7 +83,7 @@ export default function MasterCardScreen() {
 						<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
 							{master
 								? master.reviewsCount
-									? `★ ${master.rating.toFixed(1)} · ${master.reviewsCount} ${plural(master.reviewsCount, ['отзыв', 'отзыва', 'отзывов'])}`
+									? <><Text style={{ color: STAR }}>★</Text>{` ${master.rating.toFixed(1)} · ${master.reviewsCount} ${plural(master.reviewsCount, ['оценка', 'оценки', 'оценок'])}`}</>
 									: 'Новый мастер — отзывов пока нет'
 								: ' '}
 						</Text>
@@ -148,15 +153,15 @@ export default function MasterCardScreen() {
 						</>
 					) : null}
 
-					{master ? <SectionLabel>{`Отзывы · ${master.reviewsCount}`}</SectionLabel> : null}
-					{(reviews.data ?? []).map((review) => (
+					{master && commented.length ? <SectionLabel>{`Отзывы · ${commented.length}`}</SectionLabel> : null}
+					{commented.map((review) => (
 						<Pressable
 							key={review.id}
 							onLongPress={() => setComplaint({ type: 'MASTER_REVIEW', targetId: review.id })}
 							style={{ borderRadius: 14, backgroundColor: c.card, padding: 12, gap: 6 }}
 						>
 							<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.ink }}>
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: STAR }}>
 									{'★'.repeat(review.stars)}
 									<Text style={{ color: raw.dashed }}>{'★'.repeat(5 - review.stars)}</Text>
 								</Text>
@@ -168,9 +173,6 @@ export default function MasterCardScreen() {
 							</Text>
 						</Pressable>
 					))}
-					{reviews.isSuccess && !reviews.data.length ? (
-						<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>Отзывов пока нет</Text>
-					) : null}
 					{master ? <ComplainLink onPress={() => setComplaint({ type: 'MASTER', targetId: master.id })} label="Пожаловаться на мастера" /> : null}
 				</View>
 			</ScrollView>
