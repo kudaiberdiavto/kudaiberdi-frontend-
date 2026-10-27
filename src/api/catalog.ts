@@ -4,7 +4,7 @@ import { apiFetch } from '@/lib/api'
 import { useSession } from '@/store/useSession'
 import { catalogKeys, meKeys, shopKeys, videoKeys } from './keys'
 import { cursorPaging } from './pagination'
-import type { PartComment, PartCommentPage, PartDetail, PartSearchResult, ReviewPage, ShopPublic, VideoFeedPage } from './types'
+import type { PartComment, PartCommentPage, PartDetail, ShopCardPage, PartSearchResult, ReviewPage, ShopPublic, VideoFeedPage } from './types'
 
 /** Filters of GET /parts/search — the same for /parts/search/count and /shops/{id}/parts. */
 export interface PartFilters {
@@ -202,4 +202,14 @@ export function useDeletePartComment(partId: number) {
 	return useCommentMutation(partId, (commentId: number) =>
 		apiFetch<void>(`/parts/${partId}/comments/${commentId}`, { method: 'DELETE' })
 	)
+}
+
+/** «Все магазины»: действующие магазины рынка и центры, поиск по названию. */
+export function useShopList(q: string) {
+	return useInfiniteQuery({
+		queryKey: shopKeys.list({ q: q.trim() }),
+		queryFn: ({ pageParam, signal }) =>
+			apiFetch<ShopCardPage>('/shops', { query: { q: q.trim() || undefined, cursor: pageParam }, signal }),
+		...cursorPaging,
+	})
 }

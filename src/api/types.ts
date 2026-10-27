@@ -99,6 +99,7 @@ export type QrResolve = Schemas['QrResolveDto']
 
 // ─── Shops ───────────────────────────────────────────────────────────────────
 export type ShopCard = Schemas['ShopCardDto']
+export type ShopCardPage = Schemas['CursorPageShopCardDto']
 export type MyShop = Schemas['MyShopDto']
 export type ShopStats = Schemas['ShopStatsDto']
 export type ShopPhoto = Schemas['ShopPhotoDto']

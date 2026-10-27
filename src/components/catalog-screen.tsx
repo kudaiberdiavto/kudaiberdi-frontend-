@@ -76,7 +76,12 @@ export function CatalogScreen() {
 
 	const header = (
 		<View style={{ gap: 14, paddingBottom: 14 }}>
-			<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>Поиск запчастей</Text>
+			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>Поиск запчастей</Text>
+				<Pressable onPress={() => router.push('/shops')} hitSlop={8}>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Магазины ›</Text>
+				</Pressable>
+			</View>
 
 			<View
 				style={{
