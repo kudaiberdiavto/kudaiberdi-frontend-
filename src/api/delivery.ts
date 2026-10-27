@@ -1,7 +1,8 @@
 // Delivery by Ылдам Экспресс: tariffs, the buyer's order («Доставка», «Где посылка») and the seller's side
 // («Заказ с доставкой»: «Упаковал», «Курьер забрал»). The admin orders the courier — not in the app.
+import { useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { apiFetch } from '@/lib/api'
+import { apiFetch, newIdempotencyKey } from '@/lib/api'
 import { deliveryKeys } from './keys'
 import type { CreateDeliveryOrderBody, DeliveryOrder, DeliveryPackedBody, DeliveryTariffs } from './types'
 
@@ -46,7 +47,14 @@ function useOrderMutation<V>(mutationFn: (vars: V) => Promise<DeliveryOrder>) {
 
 /** «Заказать доставку». */
 export function useCreateDeliveryOrder() {
-	return useOrderMutation((body: CreateDeliveryOrderBody) => apiFetch<DeliveryOrder>('/delivery-orders', { method: 'POST', body }))
+	// One key per order: a double tap or a retry after a lost response does not create a second order.
+	const idempotencyKey = useRef<string | null>(null)
+	return useOrderMutation(async (body: CreateDeliveryOrderBody) => {
+		idempotencyKey.current ??= newIdempotencyKey()
+		const order = await apiFetch<DeliveryOrder>('/delivery-orders', { method: 'POST', body, idempotencyKey: idempotencyKey.current })
+		idempotencyKey.current = null
+		return order
+	})
 }
 
 /** «Упаковал — жду курьера»: weight and «Хрупкое» go to the courier's form. */
