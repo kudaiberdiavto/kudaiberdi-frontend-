@@ -95,7 +95,6 @@ export default function PhoneScreen() {
 			</View>
 
 			<View style={{ flex: 1, paddingTop: 4, paddingHorizontal: 24, paddingBottom: 16, gap: 12 }}>
-				<View style={{ height: 40 }} />
 				<LinearGradient
 					colors={['#2155E6', '#1D46BF']}
 					start={{ x: 0.2, y: 0 }}
@@ -121,10 +120,10 @@ export default function PhoneScreen() {
 					Кудайберген
 				</Text>
 				<Text style={{ fontSize: 17, lineHeight: 24.65, fontFamily: fontFamily(400), color: c.muted }}>
-					Запчасть с рынка — без хождения по рядам. Спросите один раз, продавцы ответят с ценой.
+					Автозапчасти и мастера рынка в одном приложении
 				</Text>
-				<View style={{ height: 24 }} />
-				<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.muted }}>Ваш номер телефона</Text>
+				<View style={{ height: 8 }} />
+				<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.muted }}>Номер телефона</Text>
 				<View
 					style={{
 						height: 60,
@@ -158,7 +157,7 @@ export default function PhoneScreen() {
 				{error ? (
 					<Text style={{ fontSize: 14, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text>
 				) : (
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>Пароль не нужен — пришлём код по SMS</Text>
+					<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>Отправим SMS с кодом</Text>
 				)}
 			</View>
 
