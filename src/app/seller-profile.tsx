@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { LocationCard, ProductCard, QueryErrorBanner } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
-import { ChatIcon, ChevronLeftIcon, GalleryIcon, HeartIcon, MapPinIcon, PhoneIcon, ShareIcon } from '@/components/icons'
+import { ChatIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, PhoneIcon, ShareIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatDay, formatPlace, formatPrice, formatSide, plural } from '@/lib/format'
@@ -16,7 +16,7 @@ import { ComplainLink, ComplaintSheet, type ComplaintTarget } from '@/components
 /** Filled rating stars — gold, the empty ones stay grey. */
 const STAR = '#F5A623'
 
-type Tab = 'parts' | 'photos' | 'reviews'
+type Tab = 'parts' | 'reviews'
 const VISIBLE_BRANDS = 4
 
 /** 30 — shop profile for buyers. `id`, or `publicId` from a share link /s/{publicId}. */
@@ -34,13 +34,12 @@ export default function SellerProfileForBuyerScreen() {
 
 	const [tab, setTab] = useState<Tab>('parts')
 	const [complaint, setComplaint] = useState<ComplaintTarget | null>(null)
-	const [cover, setCover] = useState(0)
 	const parts = useShopParts(shopId)
 	const reviews = useShopReviews(shopId, tab === 'reviews')
 	const favorite = useToggleShopFavorite(shopId)
 	const openChat = useOpenChat()
 
-	const photos = shop?.photos ?? []
+	const banner = shop?.photos[0]
 	const partItems = flattenPages(parts.data)
 	// Only reviews with something said (tags, the seller's reply) — a bare rating is in the ★ average above.
 	const reviewItems = flattenPages(reviews.data).filter((review) => review.tags.length > 0 || review.reply)
@@ -60,17 +59,9 @@ export default function SellerProfileForBuyerScreen() {
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<View>
-					{photos.length ? (
-						<ScrollView
-							horizontal
-							pagingEnabled
-							showsHorizontalScrollIndicator={false}
-							onMomentumScrollEnd={(e) => setCover(Math.round(e.nativeEvent.contentOffset.x / width))}
-						>
-							{photos.map((photo) => (
-								<Image key={photo.id} source={{ uri: resolveUrl(photo.url) }} style={{ width, height: 210 }} resizeMode="cover" />
-							))}
-						</ScrollView>
+					{/* One banner — the box's first photo; no gallery. */}
+					{banner ? (
+						<Image source={{ uri: resolveUrl(banner.url) }} style={{ width, height: 210 }} resizeMode="cover" />
 					) : (
 						<View style={{ width: '100%', height: 210, backgroundColor: raw.fill }} />
 					)}
@@ -89,14 +80,6 @@ export default function SellerProfileForBuyerScreen() {
 							<ChevronLeftIcon size={24} color={c.ink} />
 						</Pressable>
 						<View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-							{photos.length ? (
-								<View style={{ height: 28, paddingHorizontal: 10, borderRadius: 14, backgroundColor: 'rgba(32,31,29,0.6)', flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-									<GalleryIcon size={14} color="#FFFFFF" />
-									<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
-										{cover + 1} / {photos.length}
-									</Text>
-								</View>
-							) : null}
 							{signedIn && shop ? (
 								<Pressable onPress={() => favorite.mutate(!shop.isFavorite)} style={roundButton}>
 									<HeartIcon size={20} color={shop.isFavorite ? c.danger : c.ink} filled={shop.isFavorite} />
@@ -217,7 +200,6 @@ export default function SellerProfileForBuyerScreen() {
 						{(
 							[
 								{ value: 'parts', label: `Запчасти ${counts?.parts ?? ''}` },
-								{ value: 'photos', label: `Фото ${counts?.photos ?? ''}` },
 								{ value: 'reviews', label: 'Отзывы' },
 							] as const
 						).map((item) => (
@@ -266,21 +248,6 @@ export default function SellerProfileForBuyerScreen() {
 							) : null}
 							{parts.isSuccess && partItems.length === 0 ? (
 								<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>Запчасти ещё не выложены</Text>
-							) : null}
-						</View>
-					) : null}
-
-					{tab === 'photos' ? (
-						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingBottom: 24 }}>
-							{photos.map((photo) => (
-								<Image
-									key={photo.id}
-									source={{ uri: resolveUrl(photo.thumbUrl ?? photo.url) }}
-									style={{ width: (width - 32 - 16) / 3, height: (width - 32 - 16) / 3, borderRadius: 12 }}
-								/>
-							))}
-							{photos.length === 0 ? (
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>Фото места пока нет</Text>
 							) : null}
 						</View>
 					) : null}
