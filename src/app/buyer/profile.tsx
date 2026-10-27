@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { Image, Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { Alert, Image, Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { BottomSheet, QueryErrorBanner, SettingsRow, Toggle } from '@/components/ui'
@@ -9,7 +9,7 @@ import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatE164 } from '@/lib/phone'
 import { useMe, useSetRole, useSettings, useUpdateMe, useUpdateSettings } from '@/api/me'
-import { useCars, useMakePrimaryCar } from '@/api/garage'
+import { useCars, useDeleteCar, useMakePrimaryCar } from '@/api/garage'
 import { toLang, useSession } from '@/store/useSession'
 
 /** «Помощь в WhatsApp» — the support number from the build config (digits, e.g. 996555000000). */
@@ -22,6 +22,12 @@ export default function BuyerProfileScreen() {
 	const me = useMe()
 	const cars = useCars()
 	const makePrimary = useMakePrimaryCar()
+	const deleteCar = useDeleteCar()
+	const askDelete = (id: number, title: string) =>
+		Alert.alert('Удалить машину?', title, [
+			{ text: 'Отмена', style: 'cancel' },
+			{ text: 'Удалить', style: 'destructive', onPress: () => deleteCar.mutate(id) },
+		])
 	const updateMe = useUpdateMe()
 	const setRole = useSetRole()
 	const lang = useSession((s) => s.lang)
@@ -43,7 +49,7 @@ export default function BuyerProfileScreen() {
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<TopBar title="Профиль" big onBack={false} />
 			<ScrollView contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} showsVerticalScrollIndicator={false}>
-				<QueryErrorBanner error={me.error ?? setRole.error} onRetry={() => me.refetch()} />
+				<QueryErrorBanner error={me.error ?? setRole.error ?? deleteCar.error} onRetry={() => me.refetch()} />
 
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingTop: 4, paddingBottom: 8 }}>
 					{user?.avatarUrl ? (
@@ -77,6 +83,9 @@ export default function BuyerProfileScreen() {
 									<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.brandStrong }}>Основная</Text>
 								</View>
 							) : null}
+							<Pressable onPress={() => askDelete(car.id, `${car.title} · ${car.year}`)} hitSlop={10} disabled={deleteCar.isPending}>
+								<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.danger }}>Удалить</Text>
+							</Pressable>
 						</View>
 						{car.fromTechPassport ? (
 							<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
