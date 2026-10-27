@@ -106,9 +106,9 @@ export default function RouteScreen() {
 					/>
 					<BigButton
 						label="Написать"
-						tone="grey"
+						tone="blue"
 						height={52}
-						icon={<BubbleIcon size={20} color={c.ink} strokeWidth={2.4} />}
+						icon={<BubbleIcon size={20} color="#FFFFFF" strokeWidth={2.4} />}
 						disabled={!chatId}
 						onPress={() => router.push({ pathname: '/chat', params: { chatId: String(chatId) } })}
 						style={{ flex: 1 }}
