@@ -5,7 +5,7 @@ import { QueryErrorBanner, Screen, ServiceIcon } from '@/components/ui'
 import { PlayIcon, VoicePlayer } from '@/components/voice'
 import { MediaViewer } from '@/components/media-viewer'
 import { resolveUrl } from '@/lib/api'
-import { CheckMark, MicOutline, SmallChip, myOfferLine } from '@/components/master-v23'
+import { CheckMark, MicOutline, UrgentChip, myOfferLine } from '@/components/master-v23'
 import { AccountStatusBanner } from '@/components/account-status-banner'
 import { fontFamily, raw, useColors } from '@/theme'
 import { formatAgo, formatDistance, formatPrice, minutesLeft } from '@/lib/format'
@@ -166,7 +166,7 @@ function RequestCard({
 						{meta}
 					</Text>
 				</View>
-				{item.urgent ? <SmallChip label="Срочно" tone="red" /> : null}
+				{item.urgent ? <UrgentChip /> : null}
 			</View>
 
 			<View style={{ gap: 6 }}>

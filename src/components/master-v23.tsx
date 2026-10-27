@@ -1,9 +1,10 @@
 // Shared pieces of the v23 service flow [16–20]: icons from the mockup, the green «Позвонить» row,
 // the switch, the modal sheet and the time labels of a master's offer.
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { KeyboardAvoidingView, Modal, Platform, Pressable, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Circle, Path, Rect } from 'react-native-svg'
+import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated'
 import { fontFamily, useColors } from '@/theme'
 import { formatClock, formatNumber } from '@/lib/format'
 
@@ -163,6 +164,33 @@ export function SmallChip({ label, tone }: { label: string; tone: 'green' | 'gre
 				{label}
 			</Text>
 		</View>
+	)
+}
+
+/**
+ * «Срочно» — SOS: solid red with a white dot, blinking (fades to 35 % and back, ~1 s) so an urgent request
+ * stands out in the feed at a glance.
+ */
+export function UrgentChip({ label = 'Срочно' }: { label?: string }) {
+	const c = useColors()
+	const opacity = useSharedValue(1)
+	useEffect(() => {
+		opacity.value = withRepeat(withTiming(0.35, { duration: 500, easing: Easing.inOut(Easing.quad) }), -1, true)
+		return () => cancelAnimation(opacity)
+	}, [opacity])
+	const blink = useAnimatedStyle(() => ({ opacity: opacity.value }))
+	return (
+		<Animated.View
+			style={[
+				{ height: 26, paddingHorizontal: 9, borderRadius: 8, backgroundColor: c.danger, flexDirection: 'row', alignItems: 'center', gap: 5 },
+				blink,
+			]}
+		>
+			<View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: '#FFFFFF' }} />
+			<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+				{label}
+			</Text>
+		</Animated.View>
 	)
 }
 
