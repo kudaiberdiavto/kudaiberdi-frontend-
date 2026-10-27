@@ -3,8 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
-import { BottomSheet, QueryErrorBanner } from '@/components/ui'
-import { BrandLogo } from '@/components/ui/brand'
+import { QueryErrorBanner } from '@/components/ui'
 import {
 	BoxOutlineIcon,
 	Caps,
@@ -13,7 +12,6 @@ import {
 	LoupeIcon,
 	MetaChip,
 	PlusThinIcon,
-	TickIcon,
 	TowIcon,
 	WheelIcon,
 	WrenchIcon,
@@ -24,13 +22,13 @@ import { MarketVideos } from '@/components/market-videos'
 import { fontFamily, useColors } from '@/theme'
 import { minutesLeft, plural } from '@/lib/format'
 import { useMe } from '@/api/me'
-import { useCars, useMakePrimaryCar } from '@/api/garage'
+import { useCars } from '@/api/garage'
 import { useMyRequests } from '@/api/requests'
 import { flattenPages } from '@/api/pagination'
 import { serviceName, useMyServiceRequests, useServiceTypes } from '@/api/services'
 import { useSignedIn } from '@/api/catalog'
 import { useDeliveryOrders } from '@/api/delivery'
-import type { Car, DeliveryOrder, RequestSummary, ServiceRequestSummary } from '@/api/types'
+import type { DeliveryOrder, RequestSummary, ServiceRequestSummary } from '@/api/types'
 
 type Row = { kind: 'part'; request: RequestSummary } | { kind: 'service'; request: ServiceRequestSummary }
 
@@ -53,7 +51,6 @@ export default function BuyerHomeScreen() {
 	const requests = useMyRequests()
 	const services = useMyServiceRequests()
 	const [all, setAll] = useState(false)
-	const [picking, setPicking] = useState(false)
 	const parcels = useDeliveryOrders('BUYER', useSignedIn()).data ?? []
 	// Parts requests and service requests in one list, newest first.
 	const items: Row[] = [
@@ -72,23 +69,26 @@ export default function BuyerHomeScreen() {
 						{car ? `${car.title} · ${car.year}` : 'Машина не выбрана'}
 					</Text>
 				</View>
-				<Pressable
-					onPress={() => (cars.data?.length ? setPicking(true) : router.push('/garage-add'))}
-					style={{
-						height: 36,
-						paddingHorizontal: 12,
-						borderRadius: 18,
-						backgroundColor: c.card,
-						borderWidth: 1.5,
-						borderColor: c.border,
-						flexDirection: 'row',
-						alignItems: 'center',
-						gap: 6,
-					}}
-				>
-					{car ? <BrandLogo brand={car.brand} size={22} /> : <PlusThinIcon size={16} color={c.ink} />}
-					<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.ink }}>{car ? 'Сменить' : 'Добавить'}</Text>
-				</Pressable>
+				{/* No car yet — «Добавить»; switching cars is not on the home screen. */}
+				{car ? null : (
+					<Pressable
+						onPress={() => router.push('/garage-add')}
+						style={{
+							height: 36,
+							paddingHorizontal: 12,
+							borderRadius: 18,
+							backgroundColor: c.card,
+							borderWidth: 1.5,
+							borderColor: c.border,
+							flexDirection: 'row',
+							alignItems: 'center',
+							gap: 6,
+						}}
+					>
+						<PlusThinIcon size={16} color={c.ink} />
+						<Text style={{ fontSize: 14, fontFamily: fontFamily(600), color: c.ink }}>Добавить</Text>
+					</Pressable>
+				)}
 			</View>
 
 			<ScrollView
@@ -198,7 +198,6 @@ export default function BuyerHomeScreen() {
 
 			</ScrollView>
 
-			{picking && cars.data ? <CarPicker cars={cars.data} onClose={() => setPicking(false)} /> : null}
 		</View>
 	)
 }
@@ -368,61 +367,3 @@ function ServiceRow({ request }: { request: ServiceRequestSummary }) {
 	)
 }
 
-/** «Сменить» — another car from the garage becomes the main one, or add a new one. */
-function CarPicker({ cars, onClose }: { cars: Car[]; onClose: () => void }) {
-	const c = useColors()
-	const makePrimary = useMakePrimaryCar()
-	return (
-		<BottomSheet
-			onClose={onClose}
-			header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>Для какой машины</Text>}
-		>
-			<View style={{ gap: 8 }}>
-				{cars.map((car) => (
-					<Pressable
-						key={car.id}
-						onPress={() => makePrimary.mutate(car.id, { onSuccess: onClose })}
-						style={{
-							height: 60,
-							borderRadius: 14,
-							borderWidth: 2,
-							borderColor: car.isPrimary ? c.brand : c.hairline,
-							backgroundColor: car.isPrimary ? c.brandTint : c.card,
-							paddingHorizontal: 12,
-							flexDirection: 'row',
-							alignItems: 'center',
-							gap: 10,
-						}}
-					>
-						<BrandLogo brand={car.brand} size={32} />
-						<View style={{ flex: 1 }}>
-							<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.ink }}>{car.title}</Text>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>{car.subtitle}</Text>
-						</View>
-						{car.isPrimary ? <TickIcon size={18} color={c.brand} /> : null}
-					</Pressable>
-				))}
-				<Pressable
-					onPress={() => {
-						onClose()
-						router.push('/garage-add')
-					}}
-					style={{
-						height: 52,
-						borderRadius: 14,
-						borderWidth: 2,
-						borderStyle: 'dashed',
-						borderColor: '#B8C3D3',
-						flexDirection: 'row',
-						alignItems: 'center',
-						justifyContent: 'center',
-						gap: 8,
-					}}
-				>
-					<PlusThinIcon size={18} color={c.brandStrong} />
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>Добавить машину</Text>
-				</Pressable>
-			</View>
-		</BottomSheet>
-	)
-}
