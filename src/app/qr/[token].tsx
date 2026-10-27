@@ -16,7 +16,8 @@ export default function QrLink() {
 	if (qr.data?.type === 'CONTAINER' && qr.data.container) {
 		return <Redirect href={{ pathname: '/route', params: { containerId: String(qr.data.container.containerId) } }} />
 	}
-	if (qr.data?.type === 'ROW') return <Redirect href="/buyer/market" />
+	// The market map is hidden for now — a row's QR opens the home screen.
+	if (qr.data?.type === 'ROW') return <Redirect href="/buyer" />
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, padding: 24, justifyContent: 'center', gap: 14 }}>
@@ -24,7 +25,7 @@ export default function QrLink() {
 			<Text style={{ fontSize: 16, fontFamily: fontFamily(600), color: c.muted, textAlign: 'center' }}>
 				{qr.error ? 'QR-код не относится к рынку' : 'Открываем место на рынке…'}
 			</Text>
-			{qr.error ? <Button label="К карте рынка" onPress={() => router.replace('/buyer/market')} /> : null}
+			{qr.error ? <Button label="На главную" onPress={() => router.replace('/buyer')} /> : null}
 		</View>
 	)
 }

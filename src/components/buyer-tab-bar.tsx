@@ -1,12 +1,11 @@
 import { router } from 'expo-router'
 import { TabBarContainer, TabButton } from '@/components/tab-bar'
 import { useUnread } from '@/api/chats'
-import { ChatIcon, HomeIcon, MarketIcon, ProfileIcon, SearchIcon } from '@/components/icons'
+import { ChatIcon, HomeIcon, ProfileIcon, SearchIcon } from '@/components/icons'
 
 const TABS = [
 	{ name: 'home', href: '/buyer', icon: HomeIcon, label: 'Главная' },
 	{ name: 'parts', href: '/buyer/parts', icon: SearchIcon, label: 'Запчасти' },
-	{ name: 'market', href: '/buyer/market', icon: MarketIcon, label: 'Рынок' },
 	{ name: 'chats', href: '/buyer/chats', icon: ChatIcon, label: 'Чаты' },
 	{ name: 'profile', href: '/buyer/profile', icon: ProfileIcon, label: 'Профиль' },
 ] as const
