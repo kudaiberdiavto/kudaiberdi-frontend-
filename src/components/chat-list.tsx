@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { FlatList, Image, Pressable, Text, View } from 'react-native'
 import { router } from 'expo-router'
-import { Avatar, QueryErrorBanner, Screen } from '@/components/ui'
+import { Avatar, EmptyState, QueryErrorBanner, Screen } from '@/components/ui'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatChatTime } from '@/lib/format'
@@ -62,17 +62,8 @@ export function ChatList({ as: initial, sides }: { as: ChatListAs; sides?: { as:
 				onRefresh={() => chats.refetch()}
 				refreshing={false}
 				renderItem={({ item, index }) => <ChatRow chat={item} highlight={index === 0} />}
-				ListEmptyComponent={
-					chats.isSuccess ? (
-						<Text style={{ paddingHorizontal: 16, fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-							{as === 'BUYER'
-								? 'Здесь появятся переписки с продавцами — после ответа «Есть» или «Написать» в карточке.'
-								: as === 'MASTER'
-									? 'Здесь появятся переписки с клиентами — после вашего отклика «Могу помочь».'
-									: 'Здесь появятся переписки с покупателями — после вашего ответа «Есть».'}
-						</Text>
-					) : null
-				}
+				contentContainerStyle={{ flexGrow: 1 }}
+				ListEmptyComponent={chats.isSuccess ? <EmptyState title="Чатов пока нет" /> : null}
 			/>
 		</Screen>
 	)

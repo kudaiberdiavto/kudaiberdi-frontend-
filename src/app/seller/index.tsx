@@ -1,6 +1,6 @@
 import { FlatList, Image, Pressable, Text, View } from 'react-native'
 import { router } from 'expo-router'
-import { BrandLogo, QueryErrorBanner, Screen } from '@/components/ui'
+import { BrandLogo, EmptyState, QueryErrorBanner, Screen } from '@/components/ui'
 import { VoicePlayer } from '@/components/voice'
 import { MicIcon, TickIcon } from '@/components/seller-v23'
 import { fontFamily, useColors } from '@/theme'
@@ -36,7 +36,12 @@ export default function SellerRequestsScreen() {
 			<FlatList
 				data={items}
 				keyExtractor={(item) => String(item.id)}
-				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
+				contentContainerStyle={{ flexGrow: 1, paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
+				ListEmptyComponent={
+					fresh.isSuccess && answered.isSuccess && !orders.length ? (
+						<EmptyState title="Новых запросов нет" text="Пришлём пуш, как только спросят" />
+					) : null
+				}
 				showsVerticalScrollIndicator={false}
 				onEndReached={() => {
 					if (fresh.hasNextPage && !fresh.isFetchingNextPage) fresh.fetchNextPage()
@@ -64,11 +69,6 @@ export default function SellerRequestsScreen() {
 						{orders.map((order) => (
 							<DeliveryCard key={order.id} order={order} />
 						))}
-						{fresh.isSuccess && answered.isSuccess && items.length === 0 ? (
-							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted, paddingVertical: 8 }}>
-								Новых запросов нет. Пришлём пуш, как только спросят.
-							</Text>
-						) : null}
 					</View>
 				}
 				renderItem={({ item }) => <RequestCard request={item} />}

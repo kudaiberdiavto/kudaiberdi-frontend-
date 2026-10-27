@@ -9,7 +9,7 @@ export { Badge } from './badge'
 export { BrandChip, BrandLogo } from './brand'
 export { PhotoPlaceholder } from './photo'
 export { ProductCard } from './product-card'
-export { NoticeBanner, QueryErrorBanner } from './notice'
+export { EmptyState, NoticeBanner, QueryErrorBanner } from './notice'
 export { BottomSheet } from './sheet'
 
 interface ScreenProps {

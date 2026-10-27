@@ -51,3 +51,14 @@ export function QueryErrorBanner({
 	const text = isNetworkError(error) ? offlineText : ((error as Error).message ?? 'Не удалось загрузить')
 	return <NoticeBanner text={text} onPress={onRetry} style={style} />
 }
+
+/** An empty list: a title and a line, centred in the free space (the list needs `contentContainerStyle.flexGrow: 1`). */
+export function EmptyState({ title, text }: { title: string; text?: string }) {
+	const c = useColors()
+	return (
+		<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 60, gap: 8 }}>
+			<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink, textAlign: 'center' }}>{title}</Text>
+			{text ? <Text style={{ fontSize: 17, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>{text}</Text> : null}
+		</View>
+	)
+}

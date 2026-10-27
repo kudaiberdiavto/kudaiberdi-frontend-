@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
-import { QueryErrorBanner, Screen, ServiceIcon } from '@/components/ui'
+import { EmptyState, QueryErrorBanner, Screen, ServiceIcon } from '@/components/ui'
 import { VoicePlayer } from '@/components/voice'
 import { MediaStrip } from '@/components/media-strip'
 import { CheckMark, MicOutline, UrgentChip, myOfferLine } from '@/components/master-v23'
@@ -89,11 +89,6 @@ export default function MasterRequestsScreen() {
 				action={{ label: 'Изменить профиль', onPress: () => router.push('/master-profile') }}
 			/>
 			<QueryErrorBanner error={fresh.error ?? answered.error ?? offer.error} onRetry={() => (fresh.refetch(), answered.refetch())} />
-			{fresh.isSuccess && answered.isSuccess && items.length === 0 ? (
-				<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted, paddingTop: 16 }}>
-					Новых заявок нет. Пришлём пуш, как только клиенту понадобится ваша услуга.
-				</Text>
-			) : null}
 		</View>
 	)
 
@@ -103,7 +98,12 @@ export default function MasterRequestsScreen() {
 				data={items}
 				keyExtractor={(item) => String(item.id)}
 				ListHeaderComponent={header}
-				contentContainerStyle={{ gap: 10, paddingBottom: 16 }}
+				contentContainerStyle={{ flexGrow: 1, gap: 10, paddingBottom: 16 }}
+				ListEmptyComponent={
+					fresh.isSuccess && answered.isSuccess ? (
+						<EmptyState title="Новых заявок нет" text="Пришлём пуш, как только клиенту понадобится ваша услуга" />
+					) : null
+				}
 				showsVerticalScrollIndicator={false}
 				onEndReached={() => {
 					if (fresh.hasNextPage && !fresh.isFetchingNextPage) fresh.fetchNextPage()
@@ -150,16 +150,16 @@ function RequestCard({
 	const mine = item.myOffer
 
 	return (
-		<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10 }}>
-			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<View style={{ width: 36, height: 36, borderRadius: 14, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-					<ServiceIcon code={item.service.code} size={22} color={c.brandStrong} strokeWidth={2.2} />
+		<View style={{ borderRadius: 20, backgroundColor: c.card, padding: 16, gap: 12 }}>
+			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+				<View style={{ width: 46, height: 46, borderRadius: 15, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+					<ServiceIcon code={item.service.code} size={26} color={c.brandStrong} strokeWidth={2.2} />
 				</View>
-				<View style={{ flex: 1, gap: 1 }}>
-					<Text numberOfLines={1} style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>
+				<View style={{ flex: 1, gap: 2 }}>
+					<Text numberOfLines={1} style={{ fontSize: 19, lineHeight: 24, fontFamily: fontFamily(700), color: c.ink }}>
 						{title}
 					</Text>
-					<Text numberOfLines={1} style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text numberOfLines={1} style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
 						{meta}
 					</Text>
 				</View>
@@ -167,7 +167,7 @@ function RequestCard({
 			</View>
 
 			<View style={{ gap: 6 }}>
-				<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{item.description}</Text>
+				<Text style={{ fontSize: 20, lineHeight: 26, fontFamily: fontFamily(600), color: c.ink }}>{item.description}</Text>
 				{item.voice ? <VoicePlayer voice={item.voice} /> : null}
 				<MediaStrip media={item.media} />
 			</View>
