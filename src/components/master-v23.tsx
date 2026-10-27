@@ -119,11 +119,11 @@ export function Switch({ value, onChange, size = 'md', disabled }: { value: bool
 /** Green «Позвонить» + chat + route squares [17]. */
 export function CallRow({ onCall, onChat, onRoute }: { onCall?: () => void; onChat?: () => void; onRoute?: () => void }) {
 	const c = useColors()
-	const square = (icon: ReactNode, onPress?: () => void) => (
+	const square = (icon: ReactNode, onPress?: () => void, tint: string = c.brandTint) => (
 		<Pressable
 			onPress={onPress}
 			disabled={!onPress}
-			style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center', opacity: onPress ? 1 : 0.5 }}
+			style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: tint, alignItems: 'center', justifyContent: 'center', opacity: onPress ? 1 : 0.5 }}
 		>
 			{icon}
 		</Pressable>
@@ -148,7 +148,8 @@ export function CallRow({ onCall, onChat, onRoute }: { onCall?: () => void; onCh
 				<PhoneOutline size={20} color="#FFFFFF" />
 				<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Позвонить</Text>
 			</Pressable>
-			{square(<ChatBubble size={22} color={c.brandStrong} />, onChat)}
+			{/* «Написать» — green like «Позвонить» */}
+			{square(<ChatBubble size={22} color={c.success} />, onChat, '#E7F6EC')}
 			{square(<RouteOutline size={22} color={c.brandStrong} />, onRoute)}
 		</View>
 	)

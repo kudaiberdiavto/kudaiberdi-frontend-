@@ -244,7 +244,7 @@ export default function PartScreen() {
 						flex: 1.3,
 						height: 54,
 						borderRadius: 14,
-						backgroundColor: c.brand,
+						backgroundColor: c.success,
 						flexDirection: 'row',
 						alignItems: 'center',
 						justifyContent: 'center',

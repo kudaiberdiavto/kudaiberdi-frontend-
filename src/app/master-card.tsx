@@ -93,14 +93,14 @@ export default function MasterCardScreen() {
 						<View style={{ flexDirection: 'row', gap: 8 }}>
 							<Button
 								label="Позвонить"
-								variant="secondary"
+								variant="success"
 								icon={PhoneIcon}
 								height={48}
 								style={{ flex: 1 }}
 								disabled={!master.phone}
 								onPress={() => master.phone && Linking.openURL(`tel:${master.phone}`)}
 							/>
-							<Button label="Написать" icon={ChatIcon} height={48} style={{ flex: 1.4 }} loading={openChat.isPending} onPress={write} />
+							<Button label="Написать" variant="success" icon={ChatIcon} height={48} style={{ flex: 1.4 }} loading={openChat.isPending} onPress={write} />
 						</View>
 					) : null}
 

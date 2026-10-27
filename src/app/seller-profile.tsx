@@ -187,7 +187,7 @@ export default function SellerProfileForBuyerScreen() {
 						<Pressable
 							onPress={write}
 							disabled={!shop || openChat.isPending}
-							style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: c.brand, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+							style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: c.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<ChatIcon size={20} color="#FFFFFF" />
 							<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>

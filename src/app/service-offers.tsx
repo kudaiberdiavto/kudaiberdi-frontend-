@@ -236,11 +236,8 @@ function OfferCard({ offer, best, onComplain }: { offer: ServiceOffer; best: boo
 			<CallRow
 				onCall={master?.phone ? () => Linking.openURL(`tel:${master.phone}`) : undefined}
 				onChat={offer.chatId ? () => router.push({ pathname: '/chat', params: { chatId: String(offer.chatId) } }) : undefined}
-				onRoute={
-					master?.address && !master.mobile
-						? () => Linking.openURL(`https://2gis.kg/bishkek/search/${encodeURIComponent(master.address)}`)
-						: undefined
-				}
+				// 2GIS: a route from here to the master's point (opens the 2GIS app if installed).
+				onRoute={master ? () => Linking.openURL(`https://2gis.kg/bishkek/directions/points/%7C${master.lng}%2C${master.lat}`) : undefined}
 			/>
 		</Pressable>
 	)

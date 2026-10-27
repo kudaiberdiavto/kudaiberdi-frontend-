@@ -3,7 +3,8 @@ import { ActivityIndicator, Pressable, Text, type StyleProp, type ViewStyle } fr
 import type { IconProps } from '@/components/icons'
 import { fontFamily, useColors, raw } from '@/theme'
 
-type Variant = 'primary' | 'secondary' | 'outline'
+/** `success` — green: «Позвонить», «Написать». */
+type Variant = 'primary' | 'secondary' | 'outline' | 'success'
 
 interface ButtonProps {
 	label: string
@@ -34,8 +35,8 @@ export function Button({
 	style,
 }: ButtonProps) {
 	const c = useColors()
-	const bg = variant === 'primary' ? c.brand : variant === 'secondary' ? raw.fill : 'transparent'
-	const fg = variant === 'primary' ? '#FFFFFF' : variant === 'secondary' ? c.ink : c.inkSecondary
+	const bg = variant === 'primary' ? c.brand : variant === 'success' ? c.success : variant === 'secondary' ? raw.fill : 'transparent'
+	const fg = variant === 'primary' || variant === 'success' ? '#FFFFFF' : variant === 'secondary' ? c.ink : c.inkSecondary
 
 	return (
 		<Pressable

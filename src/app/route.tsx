@@ -106,7 +106,7 @@ export default function RouteScreen() {
 					/>
 					<BigButton
 						label="Написать"
-						tone="blue"
+						tone="green"
 						height={52}
 						icon={<BubbleIcon size={20} color="#FFFFFF" strokeWidth={2.4} />}
 						disabled={!chatId}

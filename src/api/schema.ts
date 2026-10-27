@@ -52,7 +52,7 @@ export interface paths {
         put: operations["update"];
         post?: never;
         /** Удалить шаблон */
-        delete: operations["delete_1"];
+        delete: operations["delete_2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -669,6 +669,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/parts/{partId}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Комментарии под видео товара
+         * @description Новые сверху, по 20. Без входа — тоже.
+         */
+        get: operations["list"];
+        put?: never;
+        /**
+         * Написать комментарий
+         * @description До 500 символов. Продавцу бокса — пуш.
+         */
+        post: operations["add"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/parts/{id}/restore": {
         parameters: {
             query?: never;
@@ -887,7 +911,7 @@ export interface paths {
             cookie?: never;
         };
         /** Шаблоны ответов бокса */
-        get: operations["list"];
+        get: operations["list_1"];
         put?: never;
         /**
          * Добавить шаблон
@@ -1208,13 +1232,13 @@ export interface paths {
          * Мой гараж (экран 04)
          * @description Основная машина первой; чипы на экранах 06 и 27
          */
-        get: operations["list_2"];
+        get: operations["list_3"];
         put?: never;
         /**
          * Добавить машину
          * @description Первая машина становится основной. Не больше 10 машин
          */
-        post: operations["add"];
+        post: operations["add_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1310,7 +1334,7 @@ export interface paths {
          * @description side = BUYER — мои как покупателя («Посылка KDB-… · В пути» на главной), SHOP — заказы моего бокса
          *     (сверху «Запросов» продавца). active = true — без полученных и отменённых. До 50, новые сверху.
          */
-        get: operations["list_3"];
+        get: operations["list_4"];
         put?: never;
         /**
          * Заказать доставку
@@ -1420,7 +1444,7 @@ export interface paths {
          *     as=MASTER — мои чаты как мастера.
          *     Свежие сверху; closed-запросы — requestClosed=true (рисовать серым).
          */
-        get: operations["list_4"];
+        get: operations["list_5"];
         put?: never;
         /**
          * Открыть чат с магазином («Написать» на 07, 29, 30)
@@ -1727,7 +1751,7 @@ export interface paths {
             cookie?: never;
         };
         /** Сотрудники */
-        get: operations["list_7"];
+        get: operations["list_8"];
         put?: never;
         /**
          * Добавить сотрудника
@@ -1988,7 +2012,7 @@ export interface paths {
          * Список мастеров с табами
          * @description service — код услуги, brandId — работает с маркой (или со всеми), q — название, адрес, цифры телефона. counts — по табам с учётом фильтров
          */
-        get: operations["list_9"];
+        get: operations["list_10"];
         put?: never;
         /**
          * Добавить мастера вручную
@@ -2409,7 +2433,7 @@ export interface paths {
          * История рассылок
          * @description Заголовок, кому, получили, % открыли
          */
-        get: operations["list_12"];
+        get: operations["list_13"];
         put?: never;
         /** Черновик рассылки */
         post: operations["create_8"];
@@ -2615,7 +2639,7 @@ export interface paths {
         put?: never;
         post?: never;
         /** Удалить (только владелец бокса) */
-        delete: operations["delete"];
+        delete: operations["delete_1"];
         options?: never;
         head?: never;
         /**
@@ -2705,7 +2729,7 @@ export interface paths {
          * Удалить машину
          * @description Если удалена основная — основной становится следующая
          */
-        delete: operations["delete_2"];
+        delete: operations["delete_3"];
         options?: never;
         head?: never;
         /** Изменить или переименовать машину */
@@ -3444,7 +3468,7 @@ export interface paths {
          * Мои запчасти (24)
          * @description filter: ALL (без архива), IN_STOCK, OUT_OF_STOCK, DRAFT, ARCHIVED; q — название или номер
          */
-        get: operations["list_1"];
+        get: operations["list_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3986,7 +4010,7 @@ export interface paths {
          * Категории запчастей
          * @description Чипы на экранах 10, 15, 26, 27. Язык — Accept-Language
          */
-        get: operations["list_5"];
+        get: operations["list_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4088,7 +4112,7 @@ export interface paths {
          * Пользователи
          * @description role: BUYER / SELLER / MASTER / BLOCKED; q — имя или цифры телефона
          */
-        get: operations["list_6"];
+        get: operations["list_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4179,7 +4203,7 @@ export interface paths {
          * Список продавцов с табами
          * @description q — название, цифры телефона владельца или «14 12». counts — по всем табам с учётом q
          */
-        get: operations["list_8"];
+        get: operations["list_9"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4558,7 +4582,7 @@ export interface paths {
          * Заказы с доставкой
          * @description status — таб; q — номер, товар или цифры телефона. counts — {all, NEW, PACKED, COURIER_ORDERED, PICKED_UP, DELIVERED, CANCELLED} с учётом q. Живые изменения — admin:requests {type: DELIVERY_CHANGED, payload: {id, number, event, sellerName, at}}
          */
-        get: operations["list_10"];
+        get: operations["list_11"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4706,7 +4730,7 @@ export interface paths {
          * Лента жалоб
          * @description status: OPEN (новые) / RESOLVED / REJECTED, не задан — все. counts — по статусам с учётом type
          */
-        get: operations["list_11"];
+        get: operations["list_12"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4763,7 +4787,7 @@ export interface paths {
          * Журнал
          * @description Фильтры: adminId, action, entityType, entityId, from, to (ISO UTC). counts — сегодня и за 7 дней с учётом фильтров
          */
-        get: operations["list_13"];
+        get: operations["list_14"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4804,6 +4828,26 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/parts/{partId}/comments/{commentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Удалить комментарий
+         * @description Свой — автор, любой под своим товаром — продавец бокса.
+         */
+        delete: operations["delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -4894,7 +4938,7 @@ export interface paths {
         put?: never;
         post?: never;
         /** Удалить запчасть (модерация) */
-        delete: operations["delete_3"];
+        delete: operations["delete_4"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5178,6 +5222,10 @@ export interface components {
             mobile: boolean;
             isOpenNow: boolean;
             phone: string | null;
+            /** Format: double */
+            lat: number;
+            /** Format: double */
+            lng: number;
         };
         PinnedRequestDto: {
             /** Format: int64 */
@@ -5842,6 +5890,20 @@ export interface components {
             video: components["schemas"]["VideoDto"] | null;
             shipsToRegions: boolean;
         };
+        PartCommentInput: {
+            text: string;
+        };
+        PartCommentDto: {
+            /** Format: int64 */
+            id: number;
+            text: string;
+            authorName: string | null;
+            fromSeller: boolean;
+            mine: boolean;
+            canDelete: boolean;
+            /** Format: date-time */
+            createdAt: string;
+        };
         ModelDto: {
             /** Format: int64 */
             id: number;
@@ -6109,7 +6171,7 @@ export interface components {
             /** Format: int64 */
             authorId: number | null;
             /** @enum {string} */
-            type: "CONTAINER_CLAIM" | "SHOP" | "PART" | "SHOP_PHOTO" | "REVIEW" | "MASTER_REVIEW" | "CHAT" | "CHAT_MESSAGE" | "MASTER" | "SERVICE_OFFER";
+            type: "CONTAINER_CLAIM" | "SHOP" | "PART" | "SHOP_PHOTO" | "REVIEW" | "MASTER_REVIEW" | "CHAT" | "CHAT_MESSAGE" | "MASTER" | "SERVICE_OFFER" | "PART_COMMENT";
             /** Format: int64 */
             targetId: number;
             text: string | null;
@@ -6208,7 +6270,7 @@ export interface components {
         };
         CreateComplaintRequest: {
             /** @enum {string} */
-            type: "CONTAINER_CLAIM" | "SHOP" | "PART" | "SHOP_PHOTO" | "REVIEW" | "MASTER_REVIEW" | "CHAT" | "CHAT_MESSAGE" | "MASTER" | "SERVICE_OFFER";
+            type: "CONTAINER_CLAIM" | "SHOP" | "PART" | "SHOP_PHOTO" | "REVIEW" | "MASTER_REVIEW" | "CHAT" | "CHAT_MESSAGE" | "MASTER" | "SERVICE_OFFER" | "PART_COMMENT";
             /** Format: int64 */
             targetId: number;
             /** @enum {string} */
@@ -6908,7 +6970,7 @@ export interface components {
             /** Format: int64 */
             id: number;
             /** @enum {string} */
-            type: "CONTAINER_CLAIM" | "SHOP" | "PART" | "SHOP_PHOTO" | "REVIEW" | "MASTER_REVIEW" | "CHAT" | "CHAT_MESSAGE" | "MASTER" | "SERVICE_OFFER";
+            type: "CONTAINER_CLAIM" | "SHOP" | "PART" | "SHOP_PHOTO" | "REVIEW" | "MASTER_REVIEW" | "CHAT" | "CHAT_MESSAGE" | "MASTER" | "SERVICE_OFFER" | "PART_COMMENT";
             /** @enum {string} */
             reason: "FAKE_ORIGINAL" | "REVIEW_WITHOUT_PURCHASE" | "SPAM_FRAUD" | "WRONG_PLACE" | "RUDE" | "OTHER";
             /** @enum {string} */
@@ -6933,7 +6995,7 @@ export interface components {
         };
         ComplaintSubjectDto: {
             /** @enum {string} */
-            type: "CONTAINER_CLAIM" | "SHOP" | "PART" | "SHOP_PHOTO" | "REVIEW" | "MASTER_REVIEW" | "CHAT" | "CHAT_MESSAGE" | "MASTER" | "SERVICE_OFFER";
+            type: "CONTAINER_CLAIM" | "SHOP" | "PART" | "SHOP_PHOTO" | "REVIEW" | "MASTER_REVIEW" | "CHAT" | "CHAT_MESSAGE" | "MASTER" | "SERVICE_OFFER" | "PART_COMMENT";
             /** Format: int64 */
             id: number;
             title: string;
@@ -7412,6 +7474,12 @@ export interface components {
             token: string;
             /** Format: int64 */
             expiresInSeconds: number;
+        };
+        PartCommentPageDto: {
+            items: components["schemas"]["PartCommentDto"][];
+            nextCursor: string | null;
+            /** Format: int64 */
+            total: number;
         };
         ShopStatsDto: {
             /** @enum {string} */
@@ -7920,6 +7988,8 @@ export interface components {
             fitsLabel: string | null;
             shipsToRegions: boolean;
             isFavorite: boolean;
+            /** Format: int32 */
+            commentsCount: number;
             shop: components["schemas"]["VideoShopDto"];
         };
         VideoFeedPageDto: {
@@ -8398,7 +8468,7 @@ export interface components {
             /** Format: int64 */
             id: number;
             /** @enum {string} */
-            type: "CONTAINER_CLAIM" | "SHOP" | "PART" | "SHOP_PHOTO" | "REVIEW" | "MASTER_REVIEW" | "CHAT" | "CHAT_MESSAGE" | "MASTER" | "SERVICE_OFFER";
+            type: "CONTAINER_CLAIM" | "SHOP" | "PART" | "SHOP_PHOTO" | "REVIEW" | "MASTER_REVIEW" | "CHAT" | "CHAT_MESSAGE" | "MASTER" | "SERVICE_OFFER" | "PART_COMMENT";
             /** @enum {string} */
             reason: "FAKE_ORIGINAL" | "REVIEW_WITHOUT_PURCHASE" | "SPAM_FRAUD" | "WRONG_PLACE" | "RUDE" | "OTHER";
             /** @enum {string} */
@@ -8592,7 +8662,7 @@ export interface operations {
             };
         };
     };
-    delete_1: {
+    delete_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -9603,6 +9673,66 @@ export interface operations {
             };
         };
     };
+    list: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                partId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartCommentPageDto"];
+                };
+            };
+        };
+    };
+    add: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PartCommentInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartCommentDto"];
+                };
+            };
+            /** @description COMMENT_LIMIT — больше 30 в час */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PartCommentDto"];
+                };
+            };
+        };
+    };
     restore: {
         parameters: {
             query?: never;
@@ -9875,7 +10005,7 @@ export interface operations {
             };
         };
     };
-    list: {
+    list_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -10426,7 +10556,7 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -10446,7 +10576,7 @@ export interface operations {
             };
         };
     };
-    add: {
+    add_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -10582,7 +10712,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_4: {
         parameters: {
             query?: {
                 side?: "BUYER" | "SHOP";
@@ -10760,7 +10890,7 @@ export interface operations {
             };
         };
     };
-    list_4: {
+    list_5: {
         parameters: {
             query?: {
                 as?: "BUYER" | "SHOP" | "MASTER";
@@ -11192,7 +11322,7 @@ export interface operations {
             };
         };
     };
-    list_7: {
+    list_8: {
         parameters: {
             query?: never;
             header?: never;
@@ -11543,7 +11673,7 @@ export interface operations {
             };
         };
     };
-    list_9: {
+    list_10: {
         parameters: {
             query?: {
                 tab?: "ALL" | "PENDING" | "MOBILE" | "BLOCKED" | "REJECTED";
@@ -12281,7 +12411,7 @@ export interface operations {
             };
         };
     };
-    list_12: {
+    list_13: {
         parameters: {
             query?: {
                 status?: "DRAFT" | "SCHEDULED" | "SENDING" | "SENT" | "CANCELLED";
@@ -12591,7 +12721,7 @@ export interface operations {
             };
         };
     };
-    delete: {
+    delete_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -12776,7 +12906,7 @@ export interface operations {
             };
         };
     };
-    delete_2: {
+    delete_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -13885,7 +14015,7 @@ export interface operations {
             };
         };
     };
-    list_1: {
+    list_2: {
         parameters: {
             query?: {
                 filter?: "ALL" | "IN_STOCK" | "OUT_OF_STOCK" | "DRAFT" | "ARCHIVED";
@@ -14505,7 +14635,7 @@ export interface operations {
             };
         };
     };
-    list_5: {
+    list_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -14619,7 +14749,7 @@ export interface operations {
             };
         };
     };
-    list_6: {
+    list_7: {
         parameters: {
             query?: {
                 role?: "ALL" | "BUYER" | "SELLER" | "MASTER" | "BLOCKED";
@@ -14728,7 +14858,7 @@ export interface operations {
             };
         };
     };
-    list_8: {
+    list_9: {
         parameters: {
             query?: {
                 tab?: "ALL" | "PENDING" | "DISPUTES" | "BLOCKED" | "REJECTED";
@@ -15191,7 +15321,7 @@ export interface operations {
             };
         };
     };
-    list_10: {
+    list_11: {
         parameters: {
             query?: {
                 status?: "NEW" | "PACKED" | "COURIER_ORDERED" | "PICKED_UP" | "DELIVERED" | "CANCELLED";
@@ -15364,11 +15494,11 @@ export interface operations {
             };
         };
     };
-    list_11: {
+    list_12: {
         parameters: {
             query?: {
                 status?: "OPEN" | "RESOLVED" | "REJECTED";
-                type?: "CONTAINER_CLAIM" | "SHOP" | "PART" | "SHOP_PHOTO" | "REVIEW" | "MASTER_REVIEW" | "CHAT" | "CHAT_MESSAGE" | "MASTER" | "SERVICE_OFFER";
+                type?: "CONTAINER_CLAIM" | "SHOP" | "PART" | "SHOP_PHOTO" | "REVIEW" | "MASTER_REVIEW" | "CHAT" | "CHAT_MESSAGE" | "MASTER" | "SERVICE_OFFER" | "PART_COMMENT";
                 cursor?: string;
                 limit?: number;
             };
@@ -15436,7 +15566,7 @@ export interface operations {
             };
         };
     };
-    list_13: {
+    list_14: {
         parameters: {
             query?: {
                 adminId?: number;
@@ -15506,6 +15636,27 @@ export interface operations {
                         [key: string]: string[];
                     };
                 };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                partId: number;
+                commentId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -15593,7 +15744,7 @@ export interface operations {
             };
         };
     };
-    delete_3: {
+    delete_4: {
         parameters: {
             query?: never;
             header?: never;
