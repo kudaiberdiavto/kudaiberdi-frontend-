@@ -192,9 +192,6 @@ export default function SellerVideoScreen() {
 						<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(700), color: c.ink }}>
 							Снимите деталь 10–15 секунд и скажите вслух, что это и сколько стоит
 						</Text>
-						<Text style={{ fontSize: 14.5, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
-							Например: «Стойки KYB на Камри пятьдесят, новые, пара — три двести»
-						</Text>
 						{progress !== null ? (
 							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.brandStrong }}>Загружаем… {Math.round(progress * 100)}%</Text>
 						) : fromVoice ? (
@@ -335,9 +332,6 @@ export default function SellerVideoScreen() {
 					</View>
 				</Pressable>
 
-				<Text style={{ fontSize: 14.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center', paddingHorizontal: 12 }}>
-					Видео увидят покупатели с этими машинами — в ленте и на главной
-				</Text>
 
 				<QueryErrorBanner error={save.error ?? publish.error} />
 			</ScrollView>

@@ -200,9 +200,9 @@ export default function BoxSelectScreen() {
 								{locating ? 'Определяем…' : point ? 'Точка определена — обновить' : 'Отметить по геолокации'}
 							</Text>
 						</Pressable>
-						<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: locateError ? c.danger : c.muted }}>
-							{locateError ?? 'Нажмите, находясь в магазине, — по точке покупатель построит маршрут'}
-						</Text>
+						{locateError ? (
+							<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.danger }}>{locateError}</Text>
+						) : null}
 					</>
 				) : (
 					<>
@@ -299,9 +299,6 @@ export default function BoxSelectScreen() {
 								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Другие</Text>
 							</Pressable>
 						</View>
-						<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
-							Запросы будут приходить только по этим маркам
-						</Text>
 					</>
 				)}
 

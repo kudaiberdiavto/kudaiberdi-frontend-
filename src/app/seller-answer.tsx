@@ -284,9 +284,7 @@ function Recording({ seconds, uploading, onDone, onCancel }: { seconds: number; 
 			</View>
 			{uploading ? null : (
 				<View style={{ flexDirection: 'row', paddingHorizontal: 4 }}>
-					<Text style={{ flex: 1, fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>
-						Например: «Есть, оригинал, пара — три двести»
-					</Text>
+					<View style={{ flex: 1 }} />
 					<Text onPress={onCancel} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.danger }}>
 						Отмена
 					</Text>

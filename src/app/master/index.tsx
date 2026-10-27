@@ -216,9 +216,6 @@ function RequestCard({
 						</View>
 						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Ответить голосом</Text>
 					</Pressable>
-					<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
-						Например: «Могу сегодня в три, от полутора тысяч»
-					</Text>
 					<View style={{ flexDirection: 'row', gap: 8 }}>
 						<Pressable onPress={onSkip} style={{ flex: 1, height: 44, borderRadius: 14, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}>
 							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>Не моё</Text>

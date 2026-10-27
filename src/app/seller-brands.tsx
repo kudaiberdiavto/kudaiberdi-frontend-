@@ -73,9 +73,6 @@ export default function SellerBrandsScreen() {
 
 				<QueryErrorBanner error={shop.error ?? all.error ?? save.error} onRetry={() => all.refetch()} />
 
-				<Text style={{ fontSize: 15.5, lineHeight: 21.5, fontFamily: fontFamily(400), color: c.muted }}>
-					Запросы будут приходить только по этим маркам. Логотипы видят покупатели в вашем профиле.
-				</Text>
 
 				<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
 					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>

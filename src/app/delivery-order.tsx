@@ -190,9 +190,6 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 						</Pressable>
 					) : null}
 				</View>
-				<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
-					Пришло не то? Не принимайте у курьера и напишите нам в чат
-				</Text>
 			</View>
 		</>
 	)

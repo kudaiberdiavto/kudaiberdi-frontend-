@@ -2,7 +2,7 @@ import { FlatList, Image, Pressable, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { BrandLogo, QueryErrorBanner, Screen } from '@/components/ui'
 import { VoicePlayer } from '@/components/voice'
-import { BoltIcon, MicIcon, TickIcon } from '@/components/seller-v23'
+import { MicIcon, TickIcon } from '@/components/seller-v23'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatAgo, formatNumber, formatRemaining } from '@/lib/format'
@@ -64,22 +64,6 @@ export default function SellerRequestsScreen() {
 						{orders.map((order) => (
 							<DeliveryCard key={order.id} order={order} />
 						))}
-						<View
-							style={{
-								borderRadius: 14,
-								backgroundColor: c.brandTint,
-								paddingVertical: 10,
-								paddingHorizontal: 14,
-								flexDirection: 'row',
-								alignItems: 'center',
-								gap: 8,
-							}}
-						>
-							<BoltIcon size={18} color={c.brandStrong} />
-							<Text style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(400), color: '#1D2B53' }}>
-								Кто отвечает быстрее — тот выше в списке у покупателя
-							</Text>
-						</View>
 						{fresh.isSuccess && answered.isSuccess && items.length === 0 ? (
 							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted, paddingVertical: 8 }}>
 								Новых запросов нет. Пришлём пуш, как только спросят.
@@ -209,9 +193,6 @@ function RequestCard({ request }: { request: IncomingRequest }) {
 						</View>
 						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Ответить голосом</Text>
 					</Pressable>
-					<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
-						Например: «Есть, оригинал, пара — три двести»
-					</Text>
 					{reply.error ? (
 						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text>
 					) : null}

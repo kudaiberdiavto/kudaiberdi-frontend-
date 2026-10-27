@@ -72,9 +72,6 @@ export function MarketVideos({ car: picked }: { car?: { filters: VideoFeedCar; l
 					/>
 				)}
 			/>
-			<Text style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
-				Играют сами без звука — нажмите, чтобы открыть на весь экран
-			</Text>
 		</View>
 	)
 }
