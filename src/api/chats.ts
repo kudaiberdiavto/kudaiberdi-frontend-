@@ -1,7 +1,7 @@
 // Chats [08, 13, 16]: list, history, sending, read receipts, quick replies.
 // Live delivery comes over Centrifugo (src/lib/realtime.tsx, useChatChannel).
 import { type InfiniteData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { apiFetch, compressPhoto, fileFormData, newIdempotencyKey } from '@/lib/api'
+import { apiFetch, compressPhoto, fileFormData, newIdempotencyKey, uploadForm } from '@/lib/api'
 import { chatKeys } from './keys'
 import { cursorPaging } from './pagination'
 import type { Chat, ChatListItem, ChatListPage, ChatMessage, MessagePage, QuickReply, SendMessageBody, Unread } from './types'
@@ -155,17 +155,19 @@ export function useSendMedia(chatId: number, mySide: ChatSide) {
 			const uri = photo ? await compressPhoto(media.uri) : media.uri
 			const mime = photo ? 'image/jpeg' : media.mimeType
 			const extension = mime.split('/')[1]?.split(';')[0] || 'bin'
-			const form = await fileFormData(
-				uri,
-				{ name: `${media.type.toLowerCase()}.${extension}`, type: mime },
-				{
-					type: media.type,
-					durationSeconds: media.durationSeconds ? String(Math.round(media.durationSeconds)) : undefined,
-					waveform: media.waveform ? JSON.stringify(media.waveform) : undefined,
-					clientId,
-				}
-			)
-			return apiFetch<ChatMessage>(`/chats/${chatId}/messages/media`, { method: 'POST', body: form })
+			const makeForm = () =>
+				fileFormData(
+					uri,
+					{ name: `${media.type.toLowerCase()}.${extension}`, type: mime },
+					{
+						type: media.type,
+						durationSeconds: media.durationSeconds ? String(Math.round(media.durationSeconds)) : undefined,
+						waveform: media.waveform ? JSON.stringify(media.waveform) : undefined,
+						clientId,
+					}
+				)
+			// XHR, not fetch: no 20 s timeout — a video from the gallery uploads longer than that.
+			return uploadForm<ChatMessage>(`/chats/${chatId}/messages/media`, makeForm)
 		},
 		onMutate: ({ clientId, ...media }) => {
 			const optimistic: ChatMessage = {

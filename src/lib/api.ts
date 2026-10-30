@@ -304,10 +304,10 @@ export function imageFormData(uri: string, fields: Record<string, string> = {}) 
 const photoFormData = (uri: string, purpose: MediaPurpose) => imageFormData(uri, { purpose })
 
 /**
- * Multipart POST with upload progress (fetch has none, so XHR) and one retry after a token refresh.
- * `makeForm` is called again for the retry — a FormData can't be sent twice.
+ * Multipart POST with upload progress (fetch has none, so XHR) and one retry after a token refresh; no 20 s timeout
+ * — a video on market internet takes longer. `makeForm` is called again for the retry — a FormData can't be sent twice.
  */
-async function uploadForm<T>(
+export async function uploadForm<T>(
 	path: string,
 	makeForm: () => Promise<FormData>,
 	options: { onProgress?: (fraction: number) => void; signal?: AbortSignal } = {}

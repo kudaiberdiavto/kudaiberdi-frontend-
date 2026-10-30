@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react'
-import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
+import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { QueryErrorBanner } from '@/components/ui'
@@ -101,7 +101,13 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 
 	/** Photo or video from the gallery. */
 	const attach = async () => {
-		const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images', 'videos'], quality: 1 })
+		// Medium video quality and up to 60 s: a long 4K clip from the gallery is over the 100 MB limit.
+		const result = await ImagePicker.launchImageLibraryAsync({
+			mediaTypes: ['images', 'videos'],
+			quality: 1,
+			videoMaxDuration: 60,
+			videoQuality: ImagePicker.UIImagePickerControllerQualityType.Medium,
+		})
 		if (result.canceled) return
 		const asset = result.assets[0]
 		const video = asset.type === 'video'
@@ -176,7 +182,13 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 			/>
 
 			{quick.data?.length && canWrite ? (
-				<View style={{ paddingHorizontal: 16, paddingBottom: 10, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+				<ScrollView
+					horizontal
+					showsHorizontalScrollIndicator={false}
+					keyboardShouldPersistTaps="handled"
+					style={{ flexGrow: 0 }}
+					contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 10, gap: 8 }}
+				>
 					{quick.data.map((reply) => {
 						const positive = reply.code ? POSITIVE.has(reply.code) : false
 						return (
@@ -184,8 +196,8 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 								key={`${reply.code ?? reply.templateId}-${reply.text}`}
 								onPress={() => pressQuick(reply)}
 								style={{
-									height: 44,
-									paddingHorizontal: 12,
+									height: 40,
+									paddingHorizontal: 14,
 									borderRadius: 20,
 									borderWidth: 2,
 									borderColor: positive ? c.success : c.border,
@@ -200,7 +212,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 							</Pressable>
 						)
 					})}
-				</View>
+				</ScrollView>
 			) : null}
 
 			<View

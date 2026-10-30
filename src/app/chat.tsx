@@ -42,31 +42,43 @@ export default function BuyerChatScreen() {
 					<Pressable onPress={() => router.back()} hitSlop={10}>
 						<BackIcon color={c.ink} />
 					</Pressable>
-					{avatar ? (
-						<Image source={{ uri: avatar }} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.surface }} />
-					) : (
-						<View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{name.slice(0, 1).toUpperCase()}</Text>
+					{/* Avatar and name — the shop's profile (or the master's card). */}
+					<Pressable
+						onPress={() =>
+							shop
+								? router.push({ pathname: '/seller-profile', params: { id: String(shop.id) } })
+								: master
+									? router.push({ pathname: '/master-card', params: { id: String(master.id) } })
+									: undefined
+						}
+						style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }}
+					>
+						{avatar ? (
+							<Image source={{ uri: avatar }} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.surface }} />
+						) : (
+							<View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+								<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{name.slice(0, 1).toUpperCase()}</Text>
+							</View>
+						)}
+						<View style={{ flex: 1, gap: 1 }}>
+							<Text numberOfLines={1} style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
+								{name}
+							</Text>
+							<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: typing ? c.success : c.brandStrong }}>
+								{typing
+									? 'печатает…'
+									: shop
+										? shop.location
+											? `${shop.location.rowLabel} · контейнер ${shop.location.number}`
+											: (shop.address ?? '')
+										: master
+											? master.mobile
+												? 'выездной мастер'
+												: master.address
+											: ' '}
+							</Text>
 						</View>
-					)}
-					<View style={{ flex: 1, gap: 1 }}>
-						<Text numberOfLines={1} style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
-							{name}
-						</Text>
-						<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: typing ? c.success : c.brandStrong }}>
-							{typing
-								? 'печатает…'
-								: shop
-									? shop.location
-										? `${shop.location.rowLabel} · контейнер ${shop.location.number}`
-										: (shop.address ?? '')
-									: master
-										? master.mobile
-											? 'выездной мастер'
-											: master.address
-										: ' '}
-						</Text>
-					</View>
+					</Pressable>
 					{phone ? (
 						<Pressable
 							onPress={() => Linking.openURL(`tel:${phone}`)}
