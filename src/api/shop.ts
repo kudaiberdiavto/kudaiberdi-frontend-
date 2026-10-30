@@ -52,6 +52,11 @@ export function useUpdateShop() {
 	return useShopMutation((body: UpdateShopBody) => apiFetch<MyShop>('/my/shop', { method: 'PATCH', body }))
 }
 
+/** Avatar of the box: `mediaId` from POST /media/photos (purpose AVATAR). */
+export function useSetShopAvatar() {
+	return useShopMutation((mediaId: number) => apiFetch<MyShop>('/my/shop/avatar', { method: 'PUT', body: { mediaId } }))
+}
+
 /** «Марки, которые продаю» [23] — requests come only for these. */
 export function useSetShopBrands() {
 	return useShopMutation((brandIds: number[]) => apiFetch<MyShop>('/my/shop/brands', { method: 'PUT', body: { brandIds } }))

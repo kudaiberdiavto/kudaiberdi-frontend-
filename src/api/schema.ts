@@ -7620,6 +7620,7 @@ export interface components {
             stockStatus: "IN_STOCK" | "OUT_OF_STOCK";
             /** Format: int32 */
             views: number;
+            videoPosterUrl: string | null;
         };
         MyPartsSummaryDto: {
             /** Format: int64 */
