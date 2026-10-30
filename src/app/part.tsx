@@ -167,10 +167,10 @@ export default function PartScreen() {
 						</View>
 						<View style={{ flex: 1, borderRadius: 12, backgroundColor: c.card, padding: 10, gap: 3 }}>
 							<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
-								{part.stockStatus === 'IN_STOCK' ? 'В наличии' : 'Наличие'}
+								Наличие
 							</Text>
 							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: part.stockStatus === 'IN_STOCK' ? c.ink : c.danger }}>
-								{part.stockStatus === 'IN_STOCK' ? `${part.quantity} шт` : 'Нет'}
+								{part.stockStatus === 'IN_STOCK' ? 'Есть' : 'Нет'}
 							</Text>
 						</View>
 					</View>
