@@ -140,7 +140,7 @@ export default function SellerProfileForBuyerScreen() {
 								style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: c.brandTint, flexDirection: 'row', alignItems: 'center', gap: 6 }}
 							>
 								<MapPinIcon size={16} color={c.brandStrong} />
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>На карте</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop && !shop.location ? '2ГИС' : 'На карте'}</Text>
 							</Pressable>
 						</View>
 					</View>
@@ -187,7 +187,7 @@ export default function SellerProfileForBuyerScreen() {
 							style={{ flex: 1, height: 48, paddingHorizontal: 10, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<MapPinIcon size={20} color={c.ink} />
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? 'На карте' : 'Маршрут'}</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? '2ГИС' : 'Маршрут'}</Text>
 						</Pressable>
 						{/* The phone, then WhatsApp at the edge — only when the shop made the number visible (or after a chat). */}
 						{shop?.phone ? (
