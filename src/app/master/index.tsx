@@ -217,15 +217,15 @@ function RequestCard({
 						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Ответить голосом</Text>
 					</Pressable>
 					<View style={{ flexDirection: 'row', gap: 8 }}>
-						<Pressable onPress={onSkip} style={{ flex: 1, height: 44, borderRadius: 14, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>Не моё</Text>
+						<Pressable onPress={onSkip} style={{ flex: 1, height: 50, borderRadius: 14, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Не моё</Text>
 						</Pressable>
 						<Pressable
 							onPress={onHelp}
-							style={{ flex: 1, height: 44, borderRadius: 14, backgroundColor: '#E7F6EC', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+							style={{ flex: 1, height: 50, borderRadius: 14, backgroundColor: '#E7F6EC', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<CheckMark size={20} color={c.success} />
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.success }}>Могу помочь</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.success }}>Могу помочь</Text>
 						</Pressable>
 					</View>
 				</>

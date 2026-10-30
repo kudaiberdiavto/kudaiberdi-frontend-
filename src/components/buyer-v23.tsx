@@ -262,7 +262,7 @@ export function BigButton({
 			]}
 		>
 			{loading ? <ActivityIndicator color={color} /> : icon}
-			<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color }}>{label}</Text>
+			<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 18.5, fontFamily: fontFamily(700), color }}>{label}</Text>
 		</Pressable>
 	)
 }

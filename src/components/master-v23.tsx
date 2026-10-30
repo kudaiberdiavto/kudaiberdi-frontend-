@@ -146,7 +146,7 @@ export function CallRow({ onCall, onChat, onRoute }: { onCall?: () => void; onCh
 				}}
 			>
 				<PhoneOutline size={20} color="#FFFFFF" />
-				<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Позвонить</Text>
+				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Позвонить</Text>
 			</Pressable>
 			{/* «Написать» — green like «Позвонить» */}
 			{square(<ChatBubble size={22} color={c.success} />, onChat, '#E7F6EC')}

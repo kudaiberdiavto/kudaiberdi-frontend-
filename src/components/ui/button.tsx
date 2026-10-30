@@ -51,6 +51,7 @@ export function Button({
 					alignItems: 'center',
 					justifyContent: 'center',
 					gap: 8,
+					paddingHorizontal: 12,
 					opacity: disabled ? 0.4 : 1,
 				},
 				variant === 'outline' && { borderWidth: 2, borderColor: c.border },
@@ -62,7 +63,7 @@ export function Button({
 			) : (
 				<>
 					{Icon ? <Icon size={20} color={fg} strokeWidth={2.2} /> : null}
-					<Text style={{ fontSize, fontFamily: fontFamily(700), color: fg }}>{label}</Text>
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize, fontFamily: fontFamily(700), color: fg }}>{label}</Text>
 				</>
 			)}
 		</Pressable>

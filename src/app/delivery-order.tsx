@@ -176,17 +176,17 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 					{order.chatId ? (
 						<Pressable
 							onPress={() => router.push({ pathname: '/chat', params: { chatId: String(order.chatId) } })}
-							style={{ flex: 1, height: 52, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}
+							style={{ flex: 1, height: 52, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Чат с продавцом</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Чат с продавцом</Text>
 						</Pressable>
 					) : null}
 					{courierPhone ? (
 						<Pressable
 							onPress={() => Linking.openURL(`tel:${courierPhone.replace(/[^\d+]/g, '')}`)}
-							style={{ flex: 1, height: 52, borderRadius: 14, borderWidth: 1.5, borderColor: c.border, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}
+							style={{ flex: 1, height: 52, paddingHorizontal: 10, borderRadius: 14, borderWidth: 1.5, borderColor: c.border, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>Курьер Ылдам</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Курьер Ылдам</Text>
 						</Pressable>
 					) : null}
 				</View>

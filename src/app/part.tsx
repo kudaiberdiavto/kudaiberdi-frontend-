@@ -237,22 +237,13 @@ export default function PartScreen() {
 					style={{ flex: 1, height: 54, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 				>
 					<MapPinIcon size={20} color={c.ink} />
-					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>Как пройти</Text>
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Как пройти</Text>
 				</Pressable>
-				{/* WhatsApp — «Я из приложения Кудайберген. Меня интересует «…»» (only when the shop's number is visible). */}
-				{shop?.phone ? (
-					<Pressable
-						onPress={() => shop.phone && openWhatsApp(shop.phone, part?.title)}
-						style={{ width: 54, height: 54, borderRadius: 14, backgroundColor: '#25D366', alignItems: 'center', justifyContent: 'center' }}
-					>
-						<WhatsAppIcon size={26} color="#FFFFFF" />
-					</Pressable>
-				) : null}
 				<Pressable
 					disabled={!shop || openChat.isPending}
 					onPress={write}
 					style={{
-						flex: 1.3,
+						flex: 1,
 						height: 54,
 						borderRadius: 14,
 						backgroundColor: c.success,
@@ -264,8 +255,17 @@ export default function PartScreen() {
 					}}
 				>
 					<ChatIcon size={20} color="#FFFFFF" />
-					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
 				</Pressable>
+				{/* WhatsApp at the right edge — «Я из приложения Кудайберген. Меня интересует «…»» (only when the shop's number is visible). */}
+				{shop?.phone ? (
+					<Pressable
+						onPress={() => shop.phone && openWhatsApp(shop.phone, part?.title)}
+						style={{ width: 54, height: 54, borderRadius: 14, backgroundColor: '#25D366', alignItems: 'center', justifyContent: 'center' }}
+					>
+						<WhatsAppIcon size={26} color="#FFFFFF" />
+					</Pressable>
+				) : null}
 			</View>
 		</View>
 	)

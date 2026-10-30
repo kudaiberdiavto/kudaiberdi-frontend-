@@ -246,7 +246,7 @@ function Choice({ label, active, fromVoice, onPress }: { label: string; active: 
 				gap: 6,
 			}}
 		>
-			<Text style={{ fontSize: 17.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{label}</Text>
+			<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{label}</Text>
 			{active && fromVoice ? <SparkleIcon size={14} color={VIOLET} /> : null}
 		</Pressable>
 	)

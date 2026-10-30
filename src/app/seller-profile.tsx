@@ -180,30 +180,30 @@ export default function SellerProfileForBuyerScreen() {
 							style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: c.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<ChatIcon size={20} color="#FFFFFF" />
-							<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
 						</Pressable>
 						<Pressable
 							onPress={route}
 							style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<MapPinIcon size={20} color={c.ink} />
-							<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>Маршрут</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Маршрут</Text>
 						</Pressable>
-						{/* WhatsApp and the phone — only when the shop made the number visible (or after a chat). */}
-						{shop?.phone ? (
-							<Pressable
-								onPress={() => shop.phone && openWhatsApp(shop.phone)}
-								style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#25D366', alignItems: 'center', justifyContent: 'center' }}
-							>
-								<WhatsAppIcon size={24} color="#FFFFFF" />
-							</Pressable>
-						) : null}
+						{/* The phone, then WhatsApp at the edge — only when the shop made the number visible (or after a chat). */}
 						{shop?.phone ? (
 							<Pressable
 								onPress={() => Linking.openURL(`tel:${shop.phone}`)}
 								style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}
 							>
 								<PhoneIcon size={20} color={c.ink} />
+							</Pressable>
+						) : null}
+						{shop?.phone ? (
+							<Pressable
+								onPress={() => shop.phone && openWhatsApp(shop.phone)}
+								style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#25D366', alignItems: 'center', justifyContent: 'center' }}
+							>
+								<WhatsAppIcon size={24} color="#FFFFFF" />
 							</Pressable>
 						) : null}
 					</View>
