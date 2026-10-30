@@ -84,9 +84,7 @@ export default function BuyerProfileScreen() {
 						{car.fromTechPassport ? (
 							<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
 								<PassportIcon size={18} color={c.success} strokeWidth={2.2} />
-								<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(500), color: c.success }}>
-									Техпаспорт сфотан — продавцы видят точную модель
-								</Text>
+								<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(500), color: c.success }}>По техпаспорту</Text>
 							</View>
 						) : null}
 					</Pressable>

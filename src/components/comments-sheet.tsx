@@ -56,11 +56,6 @@ export function CommentsSheet({ partId, title, onClose }: { partId: number; titl
 
 			<ScrollView style={{ maxHeight: height * 0.45 }} contentContainerStyle={{ gap: 14, paddingVertical: 4 }} keyboardShouldPersistTaps="handled">
 				{comments.isPending ? <ActivityIndicator color={c.muted} /> : null}
-				{comments.isSuccess && !items.length ? (
-					<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-						Пока нет комментариев. Спросите продавца — например, подойдёт ли на вашу машину.
-					</Text>
-				) : null}
 				{items.map((comment) => (
 					<Pressable key={comment.id} onLongPress={() => actions(comment)} delayLongPress={400} style={{ gap: 3 }}>
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { FlatList, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { ProductCard, QueryErrorBanner } from '@/components/ui'
+import { EmptyState, ProductCard, QueryErrorBanner } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { SearchIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
@@ -229,7 +229,7 @@ export function CatalogScreen() {
 				data={rows}
 				keyExtractor={(row) => (row.kind === 'others' ? 'others' : row.parts.map((part) => part.id).join('-'))}
 				ListHeaderComponent={header}
-				contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 16, paddingBottom: 90, gap: 20 }}
+				contentContainerStyle={{ flexGrow: 1, paddingTop: insets.top + 12, paddingHorizontal: 16, paddingBottom: 90, gap: 20 }}
 				showsVerticalScrollIndicator={false}
 				onEndReached={() => search.hasNextPage && !search.isFetchingNextPage && search.fetchNextPage()}
 				renderItem={({ item: row }) =>
@@ -250,9 +250,7 @@ export function CatalogScreen() {
 				}
 				ListEmptyComponent={
 					search.isSuccess ? (
-						<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-							Ничего не нашли. Спросите весь рынок — ответят те, у кого есть.
-						</Text>
+						<EmptyState title="Ничего не нашли" icon={SearchIcon} />
 					) : null
 				}
 			/>

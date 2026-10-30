@@ -136,7 +136,7 @@ export default function SellerProductsScreen() {
 
 						{parts.isSuccess && items.length === 0 ? (
 							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-								{q.trim() ? 'Ничего не нашли' : 'Выложите запчасти — покупатели найдут их в поиске и на карте рынка.'}
+								{q.trim() ? 'Ничего не нашли' : 'Товаров нет'}
 							</Text>
 						) : null}
 					</View>

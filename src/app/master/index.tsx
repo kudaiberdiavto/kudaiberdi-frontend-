@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
 import { EmptyState, QueryErrorBanner, Screen, ServiceIcon } from '@/components/ui'
+import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
 import { MediaStrip } from '@/components/media-strip'
 import { CheckMark, MicOutline, UrgentChip, myOfferLine } from '@/components/master-v23'
@@ -62,7 +63,6 @@ export default function MasterRequestsScreen() {
 				</View>
 				<View style={{ flex: 1, gap: 2 }}>
 					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>Нужна запчасть?</Text>
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>Для машины клиента — спросим весь рынок</Text>
 				</View>
 			</Pressable>
 			{partRequests.map((request) => (
@@ -101,7 +101,7 @@ export default function MasterRequestsScreen() {
 				contentContainerStyle={{ flexGrow: 1, gap: 10, paddingBottom: 16 }}
 				ListEmptyComponent={
 					fresh.isSuccess && answered.isSuccess ? (
-						<EmptyState title="Новых заявок нет" text="Пришлём пуш, как только клиенту понадобится ваша услуга" />
+						<EmptyState title="Новых заявок нет" icon={RequestsIcon} />
 					) : null
 				}
 				showsVerticalScrollIndicator={false}

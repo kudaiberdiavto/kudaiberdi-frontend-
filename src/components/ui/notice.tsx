@@ -1,4 +1,6 @@
+import type { ComponentType } from 'react'
 import { Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-native'
+import type { IconProps } from '@/components/icons'
 import { isNetworkError } from '@/lib/api'
 import { fontFamily, useColors } from '@/theme'
 
@@ -52,13 +54,17 @@ export function QueryErrorBanner({
 	return <NoticeBanner text={text} onPress={onRetry} style={style} />
 }
 
-/** An empty list: a title and a line, centred in the free space (the list needs `contentContainerStyle.flexGrow: 1`). */
-export function EmptyState({ title, text }: { title: string; text?: string }) {
+/** An empty list: an icon in a tinted circle and a short title, centred in the free space (the list needs `contentContainerStyle.flexGrow: 1`). */
+export function EmptyState({ title, icon: Icon }: { title: string; icon?: ComponentType<IconProps> }) {
 	const c = useColors()
 	return (
-		<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 60, gap: 8 }}>
+		<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 60, gap: 16 }}>
+			{Icon ? (
+				<View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+					<Icon size={44} color={c.brandStrong} strokeWidth={1.8} />
+				</View>
+			) : null}
 			<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink, textAlign: 'center' }}>{title}</Text>
-			{text ? <Text style={{ fontSize: 17, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>{text}</Text> : null}
 		</View>
 	)
 }

@@ -289,9 +289,6 @@ function MasterMedia({ master: initial }: { master: MyMaster }) {
 						</View>
 					)}
 				</Pressable>
-				<Text style={{ flex: 1, fontSize: 14.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
-					Аватар — его видят клиенты в откликах. Ниже фото работ и места, первое — обложка.
-				</Text>
 			</View>
 			<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 				{master.photos.map((photo) => (

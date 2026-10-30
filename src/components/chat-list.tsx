@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { FlatList, Image, Pressable, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { Avatar, EmptyState, QueryErrorBanner, Screen } from '@/components/ui'
+import { ChatIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatChatTime } from '@/lib/format'
@@ -63,7 +64,7 @@ export function ChatList({ as: initial, sides }: { as: ChatListAs; sides?: { as:
 				refreshing={false}
 				renderItem={({ item, index }) => <ChatRow chat={item} highlight={index === 0} />}
 				contentContainerStyle={{ flexGrow: 1 }}
-				ListEmptyComponent={chats.isSuccess ? <EmptyState title="Чатов пока нет" /> : null}
+				ListEmptyComponent={chats.isSuccess ? <EmptyState title="Чатов нет" icon={ChatIcon} /> : null}
 			/>
 		</Screen>
 	)

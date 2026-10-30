@@ -172,11 +172,7 @@ export default function ServiceOffersScreen() {
 
 				{offers.isSuccess && list.length === 0 ? (
 					<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center', paddingVertical: 24 }}>
-						{all.length
-							? 'На сегодня никто не свободен — посмотрите все ответы'
-							: active
-								? 'Ждём ответы мастеров. Пришлём пуш, как только кто-то ответит.'
-								: 'Никто не ответил. Подождите ещё или поищите дальше.'}
+						{all.length ? 'На сегодня никто не свободен' : active ? 'Ждём ответы мастеров' : 'Никто не ответил'}
 					</Text>
 				) : null}
 			</ScrollView>

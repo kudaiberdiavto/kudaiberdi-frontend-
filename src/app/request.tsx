@@ -176,7 +176,7 @@ export default function RequestScreen() {
 					<>
 						{replies.isSuccess && have.length === 0 ? (
 							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-								{active ? 'Ждём ответов — обычно отвечают за 5–10 минут.' : 'Пока никто не ответил «Есть».'}
+								{active ? 'Ждём ответов' : 'Никто не ответил «Есть»'}
 							</Text>
 						) : null}
 						{shown.map((reply, index) => (
@@ -432,9 +432,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 					</>
 				) : (
 					<>
-						<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-							Выберите продавца. Если так отметят три покупателя — запросы ему не будут приходить 7 дней.
-						</Text>
+						<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>Выберите продавца</Text>
 						<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 							{shops.map((shop) =>
 								shopCard(

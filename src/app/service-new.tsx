@@ -69,8 +69,8 @@ export default function ServiceNewScreen() {
 		: recipients === 0
 			? 'Рядом нет мастеров, которые берутся за это — попробуйте другую точку'
 			: recipients !== undefined
-					? `Спросим ${recipients} ${plural(recipients, ['мастера', 'мастеров', 'мастеров'])} рядом — обычно отвечают за 10 минут`
-					: 'Обычно мастера отвечают за 10 минут'
+					? `Спросим ${recipients} ${plural(recipients, ['мастера', 'мастеров', 'мастеров'])} рядом`
+					: ''
 
 	const locate = async () => {
 		setLocating(true)

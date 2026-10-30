@@ -1,6 +1,7 @@
 import { FlatList, Image, Pressable, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { BrandLogo, EmptyState, QueryErrorBanner, Screen } from '@/components/ui'
+import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
 import { MicIcon, TickIcon } from '@/components/seller-v23'
 import { fontFamily, useColors } from '@/theme'
@@ -39,7 +40,7 @@ export default function SellerRequestsScreen() {
 				contentContainerStyle={{ flexGrow: 1, paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
 				ListEmptyComponent={
 					fresh.isSuccess && answered.isSuccess && !orders.length ? (
-						<EmptyState title="Новых запросов нет" text="Пришлём пуш, как только спросят" />
+						<EmptyState title="Новых запросов нет" icon={RequestsIcon} />
 					) : null
 				}
 				showsVerticalScrollIndicator={false}

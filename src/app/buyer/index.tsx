@@ -171,11 +171,6 @@ export default function BuyerHomeScreen() {
 					onRetry={() => requests.refetch()}
 					offlineText="Нет сети. Покажем запросы, когда появится"
 				/>
-				{requests.isSuccess && services.isSuccess && items.length === 0 ? (
-					<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-						Здесь появятся ваши запросы. Нажмите «Найти запчасть» — продавцы ответят с ценой.
-					</Text>
-				) : null}
 				{(all ? items : items.slice(0, PREVIEW)).map((item) =>
 					item.kind === 'part' ? (
 						<RequestRow key={`part-${item.request.id}`} request={item.request} />

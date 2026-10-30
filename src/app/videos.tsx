@@ -91,7 +91,7 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 								<ActivityIndicator color="#FFFFFF" />
 							) : (
 								<Text style={{ fontSize: 17.5, lineHeight: 24, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
-									{feed.error ? 'Не удалось загрузить видео. Потяните вниз, чтобы повторить' : 'Пока нет видео. Как только продавцы выложат — покажем здесь'}
+									{feed.error ? 'Не удалось загрузить видео' : 'Видео нет'}
 								</Text>
 							)}
 						</View>

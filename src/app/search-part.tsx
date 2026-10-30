@@ -348,9 +348,6 @@ export default function SearchPartScreen() {
 						color: c.ink,
 					}}
 				/>
-				<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
-					Не знаете названия? Просто сфотайте деталь или скажите своими словами.
-				</Text>
 
 				{brand ? (
 					<View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start', borderRadius: 14, backgroundColor: c.brandTint, paddingVertical: 12, paddingHorizontal: 14 }}>

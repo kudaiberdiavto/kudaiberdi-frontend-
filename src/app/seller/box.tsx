@@ -113,13 +113,14 @@ export default function SellerBoxScreen() {
 					<Stat value={s ? String(s.falseHave) : '—'} label="«не было»" color={s && s.falseHave > 0 ? c.danger : undefined} />
 				</View>
 
-				<View style={{ borderRadius: 14, backgroundColor: '#FFF7E6', paddingVertical: 10, paddingHorizontal: 14 }}>
-					<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: '#7A4B00' }}>
-						{pausedUntil
-							? `Запросы не приходят до ${formatDay(pausedUntil)}: 3 покупателя отметили «сказали есть, а не было».`
-							: 'Если 3 покупателя отметят «сказали есть, а не было» — запросы не будут приходить 7 дней.'}
-					</Text>
-				</View>
+				{/* Only while paused — the rule itself is not explained up front. */}
+				{pausedUntil ? (
+					<View style={{ borderRadius: 14, backgroundColor: '#FFF7E6', paddingVertical: 10, paddingHorizontal: 14 }}>
+						<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: '#7A4B00' }}>
+							Запросы не приходят до {formatDay(pausedUntil)}: 3 покупателя отметили «сказали есть, а не было».
+						</Text>
+					</View>
+				) : null}
 
 				<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10 }}>
 					<Label
