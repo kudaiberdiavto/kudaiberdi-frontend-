@@ -4,7 +4,8 @@ import { router } from 'expo-router'
 import Svg, { Path } from 'react-native-svg'
 import { BottomSheet, Button, EmptyState, LanguageSwitch, PhotoPlaceholder, QueryErrorBanner, Screen, SettingsRow, Toggle } from '@/components/ui'
 import { PlusIcon, TagIcon } from '@/components/icons'
-import { BrandPill, Label } from '@/components/seller-v23'
+import { Label } from '@/components/seller-v23'
+import { BrandLogo } from '@/components/ui/brand'
 import { AccountStatusBanner } from '@/components/account-status-banner'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
@@ -61,9 +62,9 @@ export default function SellerBoxScreen() {
 				<Pressable onPress={() => avatarUpload.pick('library')} disabled={avatarBusy}>
 					<View
 						style={{
-							width: 88,
-							height: 88,
-							borderRadius: 44,
+							width: 80,
+							height: 80,
+							borderRadius: 40,
 							overflow: 'hidden',
 							backgroundColor: c.brandTint,
 							alignItems: 'center',
@@ -73,7 +74,7 @@ export default function SellerBoxScreen() {
 						{data?.avatarUrl ? (
 							<Image source={{ uri: resolveUrl(data.avatarUrl) }} style={{ width: '100%', height: '100%' }} />
 						) : (
-							<Text style={{ fontSize: 34, fontFamily: fontFamily(700), color: c.brandStrong }}>{data?.name.charAt(0).toUpperCase() ?? ' '}</Text>
+							<Text style={{ fontSize: 30, fontFamily: fontFamily(700), color: c.brandStrong }}>{data?.name.charAt(0).toUpperCase() ?? ' '}</Text>
 						)}
 						{avatarBusy ? (
 							<View
@@ -92,24 +93,7 @@ export default function SellerBoxScreen() {
 							</View>
 						) : null}
 					</View>
-					<View
-						style={{
-							position: 'absolute',
-							right: -2,
-							bottom: -2,
-							width: 30,
-							height: 30,
-							borderRadius: 15,
-							borderWidth: 3,
-							borderColor: c.surface,
-							backgroundColor: c.brand,
-							alignItems: 'center',
-							justifyContent: 'center',
-						}}
-					>
-						<PlusIcon size={14} color="#FFFFFF" strokeWidth={3} />
-					</View>
-				</Pressable>
+</Pressable>
 				<View style={{ flex: 1, flexDirection: 'row' }}>
 					<Counter value={summary.data ? String(summary.data.all) : '—'} label="товаров" />
 					<Counter value={data?.reviewsCount ? data.rating.toFixed(1) : '—'} label="рейтинг" star={Boolean(data?.reviewsCount)} />
@@ -117,10 +101,9 @@ export default function SellerBoxScreen() {
 				</View>
 			</View>
 
-			<View style={{ gap: 3 }}>
-				<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>{data?.name ?? ' '}</Text>
+			<View style={{ gap: 2 }}>
 				{place ? (
-					<Text numberOfLines={2} style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(400), color: c.inkSecondary }}>
+					<Text numberOfLines={2} style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: c.ink }}>
 						{place}
 					</Text>
 				) : null}
@@ -130,14 +113,20 @@ export default function SellerBoxScreen() {
 			{data?.brands.length ? (
 				<Pressable onPress={() => router.push('/seller-brands')} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
 					{data.brands.map((brand) => (
-						<BrandPill key={brand.id} brand={brand} />
+						<View
+							key={brand.id}
+							style={{ height: 30, paddingLeft: 4, paddingRight: 10, borderRadius: 15, backgroundColor: c.card, flexDirection: 'row', alignItems: 'center', gap: 6 }}
+						>
+							<BrandLogo brand={brand} size={22} />
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.ink }}>{brand.name}</Text>
+						</View>
 					))}
 				</Pressable>
 			) : null}
 
 			<View style={{ flexDirection: 'row', gap: 8 }}>
-				<Button label="Изменить" variant="secondary" height={44} fontSize={16} style={{ flex: 1 }} onPress={() => data && setEditing(true)} />
-				<Button label="Выложить" variant="secondary" height={44} fontSize={16} icon={PlusIcon} style={{ flex: 1 }} onPress={newPart} />
+				<Button label="Изменить" variant="secondary" height={40} radius={10} fontSize={15.5} style={{ flex: 1 }} onPress={() => data && setEditing(true)} />
+				<Button label="Выложить" variant="secondary" height={40} radius={10} fontSize={15.5} icon={PlusIcon} style={{ flex: 1 }} onPress={newPart} />
 			</View>
 		</View>
 	)
@@ -145,7 +134,7 @@ export default function SellerBoxScreen() {
 	return (
 		<Screen padding={0}>
 			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-				<Text numberOfLines={1} style={{ flex: 1, fontSize: 24, fontFamily: fontFamily(700), letterSpacing: -0.24, color: c.ink }}>
+				<Text numberOfLines={1} style={{ flex: 1, fontSize: 22, fontFamily: fontFamily(700), letterSpacing: -0.22, color: c.ink }}>
 					{data?.name ?? 'Мой бокс'}
 				</Text>
 				<Pressable onPress={() => setMenu(true)} hitSlop={10} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
@@ -192,7 +181,7 @@ function Counter({ value, label, star }: { value: string; label: string; star?: 
 	const c = useColors()
 	return (
 		<View style={{ flex: 1, alignItems: 'center', gap: 2 }}>
-			<Text numberOfLines={1} style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>
+			<Text numberOfLines={1} style={{ fontSize: 19, fontFamily: fontFamily(700), color: c.ink }}>
 				{star ? <Text style={{ color: '#F5A623' }}>★ </Text> : null}
 				{value}
 			</Text>
