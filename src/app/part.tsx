@@ -237,7 +237,7 @@ export default function PartScreen() {
 					style={{ flex: 1, height: 54, paddingHorizontal: 10, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 				>
 					<MapPinIcon size={20} color={c.ink} />
-					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Как пройти</Text>
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? 'На карте' : 'Как пройти'}</Text>
 				</Pressable>
 				<Pressable
 					disabled={!shop || openChat.isPending}

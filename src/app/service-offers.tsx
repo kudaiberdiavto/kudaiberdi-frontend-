@@ -10,6 +10,7 @@ import { MediaStrip } from '@/components/media-strip'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatDistance, formatNumber, minutesLeft, plural } from '@/lib/format'
+import { open2gis } from '@/lib/shop-place'
 import { useExtendServiceRequest, useServiceOffers, useServiceRequest, useServiceStats, useWidenServiceRequest } from '@/api/services'
 import type { ServiceOffer } from '@/api/types'
 
@@ -232,8 +233,8 @@ function OfferCard({ offer, best, onComplain }: { offer: ServiceOffer; best: boo
 			<CallRow
 				onCall={master?.phone ? () => Linking.openURL(`tel:${master.phone}`) : undefined}
 				onChat={offer.chatId ? () => router.push({ pathname: '/chat', params: { chatId: String(offer.chatId) } }) : undefined}
-				// 2GIS: a route from here to the master's point (opens the 2GIS app if installed).
-				onRoute={master ? () => Linking.openURL(`https://2gis.kg/bishkek/directions/points/%7C${master.lng}%2C${master.lat}`) : undefined}
+				// 2GIS: the master's address on the map (opens the 2GIS app if installed).
+				onRoute={master ? () => open2gis(master) : undefined}
 			/>
 		</Pressable>
 	)

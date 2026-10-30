@@ -18,8 +18,8 @@ export function shopPlace(shop: ShopPlace) {
 }
 
 /**
- * «Маршрут»: on the market — the route between the rows (/route); a shop off the market — a route in 2GIS to its
- * point (opens the 2GIS app if it's installed).
+ * «Маршрут»: on the market — the route between the rows (/route); a shop off the market — its address on the 2GIS
+ * map (opens the 2GIS app if it's installed).
  */
 export function openShopRoute(shop: ShopPlace, extra: { chatId?: number | null } = {}) {
 	if (shop.location) {
@@ -32,10 +32,17 @@ export function openShopRoute(shop: ShopPlace, extra: { chatId?: number | null }
 				phone: shop.phone ?? undefined,
 			},
 		})
-	} else if (shop.lat != null && shop.lng != null) {
-		Linking.openURL(`https://2gis.kg/bishkek/directions/points/%7C${shop.lng}%2C${shop.lat}`)
-	} else if (shop.address) {
-		Linking.openURL(`https://2gis.kg/bishkek/search/${encodeURIComponent(shop.address)}`)
+	} else {
+		open2gis(shop)
+	}
+}
+
+/** The place on the 2GIS map — the building card with its address, no route; without a point — a search by the address. */
+export function open2gis(place: { lat?: number | null; lng?: number | null; address?: string | null }) {
+	if (place.lat != null && place.lng != null) {
+		Linking.openURL(`https://2gis.kg/bishkek/geo/${place.lng}%2C${place.lat}`)
+	} else if (place.address) {
+		Linking.openURL(`https://2gis.kg/bishkek/search/${encodeURIComponent(place.address)}`)
 	}
 }
 
