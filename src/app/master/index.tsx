@@ -4,7 +4,7 @@ import { Redirect, router } from 'expo-router'
 import { EmptyState, QueryErrorBanner, Screen, ServiceIcon } from '@/components/ui'
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
-import { MediaStrip } from '@/components/media-strip'
+import { MediaGallery, MediaStrip } from '@/components/media-strip'
 import { CheckMark, MicOutline, UrgentChip, myOfferLine } from '@/components/master-v23'
 import { AccountStatusBanner } from '@/components/account-status-banner'
 import { fontFamily, raw, useColors } from '@/theme'
@@ -127,7 +127,8 @@ export default function MasterRequestsScreen() {
 	)
 }
 
-function RequestCard({
+/** A request card; `full` — on its own screen: photos and videos large, no tap-through. */
+export function RequestCard({
 	item,
 	title,
 	open,
@@ -135,7 +136,9 @@ function RequestCard({
 	onVoice,
 	onHelp,
 	onSkip,
+	full,
 }: {
+	full?: boolean
 	item: MasterFeedItem
 	title: string
 	open: boolean
@@ -150,7 +153,11 @@ function RequestCard({
 	const mine = item.myOffer
 
 	return (
-		<View style={{ borderRadius: 20, backgroundColor: c.card, padding: 16, gap: 12 }}>
+		<Pressable
+			disabled={full}
+			onPress={() => router.push({ pathname: '/master-request', params: { id: String(item.id) } })}
+			style={{ borderRadius: 20, backgroundColor: c.card, padding: 16, gap: 12 }}
+		>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				<View style={{ width: 46, height: 46, borderRadius: 15, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
 					<ServiceIcon code={item.service.code} size={26} color={c.brandStrong} strokeWidth={2.2} />
@@ -169,7 +176,7 @@ function RequestCard({
 			<View style={{ gap: 6 }}>
 				<Text style={{ fontSize: 20, lineHeight: 26, fontFamily: fontFamily(600), color: c.ink }}>{item.description}</Text>
 				{item.voice ? <VoicePlayer voice={item.voice} /> : null}
-				<MediaStrip media={item.media} />
+				{full ? <MediaGallery media={item.media} /> : <MediaStrip media={item.media} />}
 			</View>
 
 			{mine ? (
@@ -230,6 +237,6 @@ function RequestCard({
 					</View>
 				</>
 			)}
-		</View>
+		</Pressable>
 	)
 }

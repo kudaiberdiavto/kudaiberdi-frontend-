@@ -1,11 +1,11 @@
-import { FlatList, Image, Pressable, Text, View } from 'react-native'
+import { FlatList, Pressable, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { BrandLogo, EmptyState, QueryErrorBanner, Screen } from '@/components/ui'
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
+import { MediaGallery, MediaStrip, photosAsMedia } from '@/components/media-strip'
 import { MicIcon, TickIcon } from '@/components/seller-v23'
 import { fontFamily, useColors } from '@/theme'
-import { resolveUrl } from '@/lib/api'
 import { formatAgo, formatNumber, formatRemaining } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
 import { useIncomingRequests, useReplyToRequest } from '@/api/incoming'
@@ -108,17 +108,21 @@ function DeliveryCard({ order }: { order: DeliveryOrder }) {
 	)
 }
 
-function RequestCard({ request }: { request: IncomingRequest }) {
+/** A request card; `full` — on its own screen: photos large, no tap-through. */
+export function RequestCard({ request, full }: { request: IncomingRequest; full?: boolean }) {
 	const c = useColors()
 	const reply = useReplyToRequest(request.id)
 	const mine = request.myReply
-	const photo = request.photos[0]
 	const meta = mine
 		? formatAgo(request.notifiedAt)
 		: `${formatAgo(request.notifiedAt)} · ${formatRemaining(request.expiresAt)}`
 
 	return (
-		<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10 }}>
+		<Pressable
+			disabled={full}
+			onPress={() => router.push({ pathname: '/incoming-request', params: { id: String(request.id) } })}
+			style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10 }}
+		>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				<BrandLogo brand={request.car.brand} size={32} />
 				<View style={{ flex: 1, gap: 1 }}>
@@ -127,17 +131,10 @@ function RequestCard({ request }: { request: IncomingRequest }) {
 				</View>
 			</View>
 
-			<View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
-				{photo ? (
-					<Image
-						source={{ uri: resolveUrl(photo.thumbUrl) }}
-						style={{ width: 64, height: 64, borderRadius: 12, backgroundColor: c.surface }}
-					/>
-				) : null}
-				<View style={{ flex: 1, gap: 6 }}>
-					<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{request.text}</Text>
-					{request.voice ? <VoicePlayer voice={request.voice} /> : null}
-				</View>
+			<View style={{ gap: 8 }}>
+				<Text style={{ fontSize: full ? 20 : 17.5, lineHeight: full ? 26 : 23, fontFamily: fontFamily(600), color: c.ink }}>{request.text}</Text>
+				{request.voice ? <VoicePlayer voice={request.voice} /> : null}
+				{full ? <MediaGallery media={photosAsMedia(request.photos)} /> : <MediaStrip media={photosAsMedia(request.photos)} />}
 			</View>
 
 			{mine ? (
@@ -232,6 +229,6 @@ function RequestCard({ request }: { request: IncomingRequest }) {
 					</View>
 				</>
 			)}
-		</View>
+		</Pressable>
 	)
 }
