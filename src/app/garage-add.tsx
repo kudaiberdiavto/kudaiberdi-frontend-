@@ -9,6 +9,7 @@ import { useBrands, useModels } from '@/api/directory'
 import { useAddCar } from '@/api/garage'
 import type { Brand, CarModel, CarOrigin, FuelType } from '@/api/types'
 import { useClientCar } from '@/store/useClientCar'
+import { SelectField, SelectSheet } from '@/components/select-sheet'
 import { FUELS, ORIGINS } from '@/store/useServiceDraft'
 
 const VOLUMES = [1.3, 1.5, 1.8, 2.0, 2.4, 2.5, 3.0, 3.5, 4.0]
@@ -48,6 +49,7 @@ export default function GarageAddScreen() {
 	const [engineVolume, setEngineVolume] = useState<number | null>(passport.engineVolume ? Number(passport.engineVolume) : null)
 	const [fuel, setFuel] = useState<FuelType | null>((passport.fuel as FuelType | undefined) ?? null)
 	const [origin, setOrigin] = useState<CarOrigin | null>(null)
+	const [picking, setPicking] = useState<'model' | 'year' | null>(null)
 
 	const all = useBrands(q.trim() ? { q: q.trim() } : {})
 	const models = useModels(brand?.id)
@@ -241,22 +243,15 @@ export default function GarageAddScreen() {
 						</>
 					}
 				>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>МОДЕЛЬ</Text>
-					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-						{(models.data ?? []).map((m) => chip(m.label, m.id === modelId, () => {
-							setModelId(m.id)
-							setYear(null)
-						}, m.id))}
-					</View>
-
-					{model ? (
-						<>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ГОД</Text>
-							<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-								{yearsOf(model).map((y) => chip(String(y), y === year, () => setYear(y), y))}
-							</ScrollView>
-						</>
-					) : null}
+					{/* Dropdowns with search — a brand has dozens of models. */}
+					<SelectField label="Модель" value={model?.label} placeholder="Выберите модель" onPress={() => setPicking('model')} />
+					<SelectField
+						label="Год"
+						value={year ? String(year) : null}
+						placeholder="Выберите год"
+						disabled={!model}
+						onPress={() => setPicking('year')}
+					/>
 
 					{year && !once ? (
 						<>
@@ -275,6 +270,33 @@ export default function GarageAddScreen() {
 						</>
 					) : null}
 				</BottomSheet>
+			) : null}
+
+			{picking === 'model' ? (
+				<SelectSheet
+					title="Модель"
+					searchPlaceholder={`Модель ${brand?.name ?? ''}`.trim()}
+					options={(models.data ?? []).map((m) => ({
+						key: m.id,
+						label: m.label,
+						sub: m.yearFrom ? `${m.yearFrom}–${m.yearTo ?? 'н. в.'}` : null,
+					}))}
+					selected={modelId}
+					onPick={(id) => {
+						setModelId(id)
+						setYear(null)
+					}}
+					onClose={() => setPicking(null)}
+				/>
+			) : null}
+			{picking === 'year' && model ? (
+				<SelectSheet
+					title="Год"
+					options={yearsOf(model).map((y) => ({ key: y, label: String(y) }))}
+					selected={year}
+					onPick={setYear}
+					onClose={() => setPicking(null)}
+				/>
 			) : null}
 		</View>
 	)
