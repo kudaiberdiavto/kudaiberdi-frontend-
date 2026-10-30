@@ -273,7 +273,7 @@ export function CatalogScreen() {
 					paddingHorizontal: 16,
 					flexDirection: 'row',
 					alignItems: 'center',
-					justifyContent: 'space-between',
+					gap: 12,
 					shadowColor: '#201F1D',
 					shadowOpacity: 0.25,
 					shadowOffset: { width: 0, height: 8 },
@@ -281,7 +281,9 @@ export function CatalogScreen() {
 					elevation: 8,
 				}}
 			>
-				<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: '#FFFFFF' }}>Не нашли? Спросите весь рынок</Text>
+				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(400), color: '#FFFFFF' }}>
+					Не нашли? Спросите весь рынок
+				</Text>
 				<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#8FB0FF' }}>Спросить →</Text>
 			</Pressable>
 		</View>
