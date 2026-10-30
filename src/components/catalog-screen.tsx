@@ -292,7 +292,8 @@ export function CatalogScreen() {
 
 type Row = { kind: 'parts'; parts: PartCard[] } | { kind: 'others' }
 
-function PartTile({ part }: { part: PartCard }) {
+/** A part in a grid — the catalog and «Похожие» on the part card. A video part opens the feed on it. */
+export function PartTile({ part }: { part: PartCard }) {
 	return (
 		<ProductCard
 			price={formatPrice(part.price)}

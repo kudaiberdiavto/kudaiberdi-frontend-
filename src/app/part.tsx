@@ -9,7 +9,11 @@ import { openWhatsApp } from '@/lib/whatsapp'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatPrice } from '@/lib/format'
-import { usePart, usePublicPart, useSignedIn, useTogglePartFavorite } from '@/api/catalog'
+import { type PartFilters, usePart, usePublicPart, useSearchParts, useSignedIn, useTogglePartFavorite } from '@/api/catalog'
+import { flattenPages } from '@/api/pagination'
+import { useVideoViewer } from '@/store/useVideoViewer'
+import { PlayIcon } from '@/components/voice'
+import { PartTile } from '@/components/catalog-screen'
 import { useOpenChat } from '@/api/chats'
 import type { PartCondition } from '@/api/types'
 import { toPartFilters, useCatalogFilters } from '@/store/useCatalogFilters'
@@ -70,6 +74,21 @@ export default function PartScreen() {
 							<Image key={photo.id} source={{ uri: resolveUrl(photo.url) }} style={{ width, height: 320 }} resizeMode="cover" />
 						))}
 					</ScrollView>
+				) : part?.video?.posterUrl ? (
+					// A video part without photos: the video's poster, ▶ opens the feed on it.
+					<Pressable
+						onPress={() => {
+							useVideoViewer.getState().openVideo(part.id)
+							router.push('/videos')
+						}}
+					>
+						<Image source={{ uri: resolveUrl(part.video.posterUrl) }} style={{ width, height: 320 }} resizeMode="cover" />
+						<View style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
+							<View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', justifyContent: 'center' }}>
+								<PlayIcon size={26} />
+							</View>
+						</View>
+					</Pressable>
 				) : (
 					<PhotoPlaceholder width={undefined} height={320} radius={0} style={{ width: '100%' }} />
 				)}
@@ -157,63 +176,53 @@ export default function PartScreen() {
 					</Text>
 				) : null}
 
-				{part ? (
-					<View style={{ flexDirection: 'row', gap: 8 }}>
-						<View style={{ flex: 1, borderRadius: 12, backgroundColor: c.card, padding: 10, gap: 3 }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>Состояние</Text>
-							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
-								{part.condition ? CONDITION[part.condition] : '—'}
-							</Text>
-						</View>
-						<View style={{ flex: 1, borderRadius: 12, backgroundColor: c.card, padding: 10, gap: 3 }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
-								Наличие
-							</Text>
-							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: part.stockStatus === 'IN_STOCK' ? c.ink : c.danger }}>
-								{part.stockStatus === 'IN_STOCK' ? 'Есть' : 'Нет'}
-							</Text>
-						</View>
+				{part && (part.condition || part.stockStatus !== 'IN_STOCK') ? (
+					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+						{part.condition ? (
+							<View style={{ height: 30, paddingHorizontal: 12, borderRadius: 15, backgroundColor: c.card, justifyContent: 'center' }}>
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>{CONDITION[part.condition]}</Text>
+							</View>
+						) : null}
+						{/* Only when it ran out — in stock is the norm, not worth a line. */}
+						{part.stockStatus !== 'IN_STOCK' ? (
+							<View style={{ height: 30, paddingHorizontal: 12, borderRadius: 15, backgroundColor: '#FDECEC', justifyContent: 'center' }}>
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.danger }}>Нет в наличии</Text>
+							</View>
+						) : null}
 					</View>
 				) : null}
 
 				{shop ? (
 					<Pressable
 						onPress={() => router.push({ pathname: '/seller-profile', params: { id: String(shop.id) } })}
-						style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 12 }}
+						style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4 }}
 					>
-						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-							{shop.avatarUrl ? (
-								<Image source={{ uri: resolveUrl(shop.avatarUrl) }} style={{ width: 48, height: 48, borderRadius: 24 }} />
-							) : (
-								<View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: raw.fill }} />
-							)}
-							<View style={{ flex: 1, gap: 2 }}>
-								<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>{shop.name}</Text>
-								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
-									{shop.reviewsCount ? `★ ${shop.rating.toFixed(1)} · ` : ''}
-									{shopPlace(shop)}
-								</Text>
+						{shop.avatarUrl ? (
+							<Image source={{ uri: resolveUrl(shop.avatarUrl) }} style={{ width: 44, height: 44, borderRadius: 22 }} />
+						) : (
+							<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+								<Text style={{ fontSize: 18, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop.name.charAt(0).toUpperCase()}</Text>
 							</View>
-							<Text style={{ fontSize: 20, color: c.muted }}>›</Text>
+						)}
+						<View style={{ flex: 1, gap: 2 }}>
+							<Text numberOfLines={1} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>
+								{shop.name}
+							</Text>
+							<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
+								{shop.reviewsCount ? <Text style={{ color: '#F5A623' }}>★ </Text> : null}
+								{shop.reviewsCount ? `${shop.rating.toFixed(1)} · ` : ''}
+								{shopPlace(shop)}
+							</Text>
 						</View>
-						{part?.shopPhotos.length ? (
-							<View style={{ flexDirection: 'row', gap: 8 }}>
-								{part.shopPhotos.slice(0, 3).map((photo) => (
-									<Image
-										key={photo.id}
-										source={{ uri: resolveUrl(photo.thumbUrl ?? photo.url) }}
-										style={{ flex: 1, height: 56, borderRadius: 10 }}
-										resizeMode="cover"
-									/>
-								))}
-							</View>
-						) : null}
+						<Text style={{ fontSize: 22, color: c.muted }}>›</Text>
 					</Pressable>
 				) : null}
 
 				{openChat.error ? (
 					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{openChat.error.message}</Text>
 				) : null}
+
+				{part ? <Similar partId={part.id} categoryId={part.category?.id} car={{ carId, brandId, modelId }} /> : null}
 
 				{part ? <ComplainLink onPress={() => setComplaint({ type: 'PART', targetId: part.id })} /> : null}
 			</ScrollView>
@@ -267,6 +276,28 @@ export default function PartScreen() {
 						<WhatsAppIcon size={26} color="#FFFFFF" />
 					</Pressable>
 				) : null}
+			</View>
+		</View>
+	)
+}
+
+/** «Похожие запчасти»: the same category (for the chosen car, if any), otherwise just other parts — two columns. */
+function Similar({ partId, categoryId, car }: { partId: number; categoryId?: number; car: Pick<PartFilters, 'carId' | 'brandId' | 'modelId'> }) {
+	const c = useColors()
+	const search = useSearchParts({ ...car, categoryId })
+	const items = flattenPages(search.data)
+		.filter((item) => item.id !== partId)
+		.slice(0, 6)
+	if (!items.length) return null
+	return (
+		<View style={{ gap: 12, paddingTop: 8 }}>
+			<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>Похожие запчасти</Text>
+			<View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 12, rowGap: 18 }}>
+				{items.map((item) => (
+					<View key={item.id} style={{ width: '47.8%' }}>
+						<PartTile part={item} />
+					</View>
+				))}
 			</View>
 		</View>
 	)

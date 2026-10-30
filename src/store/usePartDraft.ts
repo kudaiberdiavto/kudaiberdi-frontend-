@@ -112,7 +112,8 @@ export const usePartDraft = create<PartDraft>((set, get) => {
 				categoryId: part.category?.id,
 				condition: part.condition ?? 'NEW',
 				price: part.price ? String(part.price) : '',
-				quantity: part.quantity || 1,
+				// A draft starts in stock; a published part keeps 0 = «нет в наличии».
+				quantity: part.status === 'DRAFT' ? part.quantity || 1 : part.quantity,
 				oemNumber: part.oemNumber ?? undefined,
 				fitments: part.fitments.map((f) => ({
 					brandId: f.brand.id,

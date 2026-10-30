@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { QueryErrorBanner, Segmented, Stepper } from '@/components/ui'
+import { QueryErrorBanner, Segmented, Toggle } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { CameraIcon, ChevronLeftIcon, CloseIcon, PlusIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
@@ -338,7 +338,7 @@ export default function NewPartScreen() {
 				</View>
 
 				<View style={{ flexDirection: 'row', gap: 16 }}>
-					<View style={{ flex: 1.4, gap: 6 }}>
+					<View style={{ flex: 1, gap: 6 }}>
 						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Цена</Text>
 						<View
 							style={{
@@ -364,22 +364,22 @@ export default function NewPartScreen() {
 							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: c.muted }}>сом</Text>
 						</View>
 					</View>
-					<View style={{ flex: 1, gap: 6 }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Сколько штук</Text>
-						<View
-							style={{
-								height: 52,
-								borderRadius: 12,
-								borderWidth: 2,
-								borderColor: c.border,
-								backgroundColor: c.card,
-								paddingHorizontal: 6,
-								justifyContent: 'center',
-							}}
-						>
-							<Stepper value={draft.quantity} onChange={(quantity) => draft.set({ quantity })} min={0} max={999} />
-						</View>
-					</View>
+				</View>
+
+				{/* No count of pieces — just whether it's there; out of stock = quantity 0. */}
+				<View
+					style={{
+						height: 56,
+						borderRadius: 12,
+						backgroundColor: c.card,
+						paddingHorizontal: 14,
+						flexDirection: 'row',
+						alignItems: 'center',
+						justifyContent: 'space-between',
+					}}
+				>
+					<Text style={{ fontSize: 17, fontFamily: fontFamily(600), color: c.ink }}>Есть в наличии</Text>
+					<Toggle value={draft.quantity > 0} onChange={(on) => draft.set({ quantity: on ? 1 : 0 })} />
 				</View>
 			</ScrollView>
 
