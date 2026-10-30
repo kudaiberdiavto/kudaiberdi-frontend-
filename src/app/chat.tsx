@@ -1,6 +1,6 @@
 import { Image, Linking, Pressable, Text, View } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
-import { ChatConversation } from '@/components/chat-conversation'
+import { ChatConversation, presenceLabel } from '@/components/chat-conversation'
 import { BackIcon, BoxOutlineIcon, CallIcon, WrenchIcon } from '@/components/buyer-v23'
 import { resolveUrl } from '@/lib/api'
 import { fontFamily, useColors } from '@/theme'
@@ -20,6 +20,16 @@ export default function BuyerChatScreen() {
 	const phone = shop?.phone ?? master?.phone ?? null
 	const avatar = resolveUrl(shop?.avatarUrl ?? master?.avatarUrl ?? null)
 	const name = shop?.name ?? master?.name ?? ' '
+	const presence = presenceLabel(chat?.online, chat?.lastSeenAt)
+	const place = shop
+		? shop.location
+			? `${shop.location.rowLabel} · конт. ${shop.location.number}`
+			: (shop.address ?? '')
+		: master
+			? master.mobile
+				? 'выездной мастер'
+				: master.address
+			: ''
 
 	return (
 		<ChatConversation
@@ -65,18 +75,16 @@ export default function BuyerChatScreen() {
 								{name}
 							</Text>
 							<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: typing ? c.success : c.brandStrong }}>
-								{typing
-									? 'печатает…'
-									: shop
-										? shop.location
-											? `${shop.location.rowLabel} · контейнер ${shop.location.number}`
-											: (shop.address ?? '')
-										: master
-											? master.mobile
-												? 'выездной мастер'
-												: master.address
-											: ' '}
-							</Text>
+								{typing ? (
+								'печатает…'
+							) : (
+								<>
+									{presence ? <Text style={{ color: chat?.online ? c.success : c.muted }}>{presence}</Text> : null}
+									{presence && place ? <Text style={{ color: c.muted }}> · </Text> : null}
+									{place}
+								</>
+							)}
+						</Text>
 						</View>
 					</Pressable>
 					{phone ? (

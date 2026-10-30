@@ -34,6 +34,8 @@ export function useChat(id: number) {
 		queryKey: chatKeys.detail(id),
 		queryFn: ({ signal }) => apiFetch<Chat>(`/chats/${id}`, { signal }),
 		enabled: id > 0,
+		// «в сети» / «был(а) 5 мин назад» in the header stays fresh while the chat is open.
+		refetchInterval: 30_000,
 	})
 }
 

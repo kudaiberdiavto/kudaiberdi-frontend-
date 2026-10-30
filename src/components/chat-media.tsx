@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 import {
 	RecordingPresets,
 	requestRecordingPermissionsAsync,
@@ -10,6 +10,7 @@ import {
 import { useVideoPlayer, VideoView } from 'expo-video'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
+import { PlayIcon } from '@/components/voice'
 
 /** The server takes voice messages up to 60 s. */
 export const MAX_VOICE_SECONDS = 60
@@ -130,8 +131,21 @@ export function RecordingBar({ seconds, onCancel }: { seconds: number; onCancel:
 	)
 }
 
-/** VIDEO message: inline player with native controls. */
-export function VideoBubble({ mediaUrl }: { mediaUrl: string }) {
-	const player = useVideoPlayer(resolveUrl(mediaUrl))
-	return <VideoView player={player} nativeControls contentFit="cover" style={{ width: 220, height: 220, borderRadius: 12 }} />
+/** VIDEO message: the first frame with ▶; a tap opens it full screen (`onOpen`). */
+export function VideoBubble({ mediaUrl, onOpen }: { mediaUrl: string; onOpen: () => void }) {
+	const player = useVideoPlayer(resolveUrl(mediaUrl), (p) => {
+		p.muted = true
+	})
+	return (
+		<Pressable onPress={onOpen}>
+			<View pointerEvents="none">
+				<VideoView player={player} nativeControls={false} contentFit="cover" style={{ width: 220, height: 220, borderRadius: 12 }} />
+			</View>
+			<View style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
+				<View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', justifyContent: 'center' }}>
+					<PlayIcon size={22} />
+				</View>
+			</View>
+		</Pressable>
+	)
 }

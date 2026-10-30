@@ -9,9 +9,10 @@ import { CameraV23Icon, MicV23Icon, TickIcon } from '@/components/buyer-v23'
 import { VoicePlayer } from '@/components/voice'
 import { TruckTile } from '@/components/video-v23'
 import { RecordingBar, useVoiceRecorder, VideoBubble } from '@/components/chat-media'
+import { MediaViewer } from '@/components/media-viewer'
 import { fontFamily, raw, useColors } from '@/theme'
 import { newIdempotencyKey, resolveUrl } from '@/lib/api'
-import { formatClock, formatPrice, formatWhenAt } from '@/lib/format'
+import { formatAgo, formatClock, formatPrice, formatWhenAt } from '@/lib/format'
 import { useRealtime, useChatChannel } from '@/lib/realtime'
 import { flattenPages } from '@/api/pagination'
 import { type ChatSide, useChat, useChatMessages, useMarkRead, useQuickReplies, useSendMedia, useSendMessage } from '@/api/chats'
@@ -31,6 +32,12 @@ export const QUICK_TEXT: Record<string, string> = {
 	ROUTE_TO_BOX: 'Как пройти к боксу',
 	CLOSE_REQUEST: 'Купил — закрыть запрос',
 }
+/** The other side in the header: «в сети», «был(а) 5 мин назад»; null — unknown. */
+export function presenceLabel(online: boolean | undefined, lastSeenAt: string | null | undefined) {
+	if (online) return 'в сети'
+	return lastSeenAt ? `был(а) ${formatAgo(lastSeenAt)}` : null
+}
+
 /** Quick replies styled green in the mockups. */
 const POSITIVE = new Set(['CLOSE_REQUEST', 'SOLD'])
 
@@ -158,17 +165,19 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 						message={item}
 						mine={item.side === mySide}
 						shopSide={mySide === 'SHOP'}
+						// Every own message carries ✓ / ✓✓; the newest one also says it in words.
 						status={
-							item.id === lastMine?.id
-								? item.id < 0
-									? sender.isError || media.isError
+							item.side !== mySide
+								? undefined
+								: item.id < 0
+									? item.id === lastMine?.id && (sender.isError || media.isError)
 										? 'failed'
 										: 'sending'
 									: item.id <= otherRead || item.read
 										? 'read'
 										: 'sent'
-								: undefined
 						}
+						last={item.id === lastMine?.id}
 						onRetry={() => sender.retry(item)}
 						about={aboutLabel(item)}
 						// Long press on the other side's message — report it.
@@ -301,7 +310,10 @@ function Message({
 	onComplain,
 	about,
 	shopSide,
+	last,
 }: {
+	/** The newest own message — «Прочитано» / «Доставлено» in words next to the ticks. */
+	last?: boolean
 	message: ChatMessage
 	/** The seller reads the chat — a DELIVERY card opens «Заказ с доставкой», for the buyer «Где посылка». */
 	shopSide?: boolean
@@ -313,6 +325,7 @@ function Message({
 	onComplain?: () => void
 }) {
 	const c = useColors()
+	const [viewing, setViewing] = useState(false)
 
 	// Hidden by the administration: no text and no attachments come — say so instead.
 	if (message.code === 'HIDDEN_BY_ADMIN') {
@@ -400,9 +413,11 @@ function Message({
 					</Text>
 				) : null}
 				{message.type === 'PHOTO' && message.mediaUrl ? (
-					<Image source={{ uri: resolveUrl(message.mediaUrl) }} style={{ width: 220, height: 220, borderRadius: 12 }} />
+					<Pressable onPress={() => setViewing(true)}>
+						<Image source={{ uri: resolveUrl(message.mediaUrl) }} style={{ width: 220, height: 220, borderRadius: 12 }} />
+					</Pressable>
 				) : null}
-				{message.type === 'VIDEO' && message.mediaUrl ? <VideoBubble mediaUrl={message.mediaUrl} /> : null}
+				{message.type === 'VIDEO' && message.mediaUrl ? <VideoBubble mediaUrl={message.mediaUrl} onOpen={() => setViewing(true)} /> : null}
 				{body && message.code === 'RESERVED' ? (
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
 						<TickIcon size={18} color={c.success} strokeWidth={2.8} />
@@ -431,12 +446,41 @@ function Message({
 					color: status === 'failed' ? c.danger : raw.fillInk,
 				}}
 			>
-				{status === 'failed'
-					? 'Не отправлено · повторить'
-					: status === 'sending'
-						? 'отправляется…'
-						: `${formatClock(message.createdAt)}${status === 'read' ? ' · прочитано' : status === 'sent' ? ' · доставлено' : ''}`}
+				{status === 'failed' ? (
+					'Не отправлено · повторить'
+				) : status === 'sending' ? (
+					'отправляется…'
+				) : (
+					<>
+						{formatClock(message.createdAt)}
+						{status ? (
+							<Text style={{ fontFamily: fontFamily(700), color: status === 'read' ? c.brand : raw.fillInk }}>
+								{status === 'read' ? '  ✓✓' : '  ✓'}
+								{last ? (status === 'read' ? ' Прочитано' : ' Доставлено') : ''}
+							</Text>
+						) : null}
+					</>
+				)}
 			</Text>
+			{/* A tap on a photo or a video — full screen. */}
+			<MediaViewer
+				items={
+					viewing && message.mediaUrl
+						? [
+								{
+									id: message.id,
+									kind: message.type === 'VIDEO' ? 'VIDEO' : 'PHOTO',
+									url: resolveUrl(message.mediaUrl),
+									thumbUrl: null,
+									width: null,
+									height: null,
+									durationSec: message.durationSeconds ?? null,
+								},
+							]
+						: null
+				}
+				onClose={() => setViewing(false)}
+			/>
 		</Pressable>
 	)
 }

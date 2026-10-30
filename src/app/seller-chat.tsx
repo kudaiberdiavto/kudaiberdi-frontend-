@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
-import { ChatConversation } from '@/components/chat-conversation'
+import { ChatConversation, presenceLabel } from '@/components/chat-conversation'
 import { ChevronLeftIcon, FlagIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { useChat } from '@/api/chats'
@@ -11,6 +11,7 @@ export default function SellerChatScreen() {
 	const chatId = Number(useLocalSearchParams<{ chatId: string }>().chatId) || 0
 	const chat = useChat(chatId).data
 	const request = chat?.request ?? chat?.serviceRequest
+	const presence = presenceLabel(chat?.online, chat?.lastSeenAt)
 
 	return (
 		<ChatConversation
@@ -37,7 +38,15 @@ export default function SellerChatScreen() {
 							{chat ? (chat.buyer.name ?? 'Покупатель') : ' '}
 						</Text>
 						<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: typing ? c.success : c.muted }}>
-							{typing ? 'печатает…' : request ? `${request.text} · ${request.carLabel}` : ' '}
+							{typing ? (
+								'печатает…'
+							) : (
+								<>
+									{presence ? <Text style={{ color: chat?.online ? c.success : c.muted }}>{presence}</Text> : null}
+									{presence && request ? ' · ' : null}
+									{request ? `${request.text} · ${request.carLabel}` : presence ? null : ' '}
+								</>
+							)}
 						</Text>
 					</View>
 					<Pressable onPress={complain} hitSlop={10} accessibilityLabel="Пожаловаться">
