@@ -177,14 +177,14 @@ export default function SellerProfileForBuyerScreen() {
 						<Pressable
 							onPress={write}
 							disabled={!shop || openChat.isPending}
-							style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: c.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+							style={{ flex: 1, height: 48, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<ChatIcon size={20} color="#FFFFFF" />
 							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
 						</Pressable>
 						<Pressable
 							onPress={route}
-							style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+							style={{ flex: 1, height: 48, paddingHorizontal: 10, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<MapPinIcon size={20} color={c.ink} />
 							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Маршрут</Text>
