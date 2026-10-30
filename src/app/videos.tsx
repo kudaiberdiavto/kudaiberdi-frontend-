@@ -10,7 +10,7 @@ import { BookmarkIcon, SoundOffIcon, SoundOnIcon, TruckIcon, YellowChip, setPlay
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { flattenPages } from '@/api/pagination'
-import { useSignedIn, useToggleVideoFavorite, useVideoFeed } from '@/api/catalog'
+import { useSignedIn, useToggleVideoFavorite, useSharePart, useVideoFeed } from '@/api/catalog'
 import type { VideoFeedItem } from '@/api/types'
 import { useOpenChat } from '@/api/chats'
 import { CommentsSheet } from '@/components/comments-sheet'
@@ -137,6 +137,7 @@ function FeedPage({
 	const c = useColors()
 	const signedIn = useSignedIn()
 	const favorite = useToggleVideoFavorite()
+	const shared = useSharePart()
 	const poster = resolveUrl(item.video.posterUrl)
 	const shop = item.shop
 	const openChat = useOpenChat()
@@ -162,22 +163,24 @@ function FeedPage({
 	const rail = [
 		{
 			key: 'save',
-			label: null,
+			label: item.favoritesCount ? String(item.favoritesCount) : null,
 			icon: <BookmarkIcon size={22} color="#FFFFFF" filled={item.isFavorite} />,
 			onPress: () => (signedIn ? favorite.mutate({ partId: item.partId, favorite: !item.isFavorite }) : router.push('/')),
 		},
 		{
 			key: 'comments',
-			// only the count — no word under the icon
 			label: item.commentsCount ? String(item.commentsCount) : null,
 			icon: <ChatIcon size={22} color="#FFFFFF" strokeWidth={2.1} />,
 			onPress: () => setCommenting(true),
 		},
 		{
 			key: 'share',
-			label: null,
+			label: item.sharesCount ? String(item.sharesCount) : null,
 			icon: <PaperPlaneIcon size={22} color="#FFFFFF" />,
-			onPress: () => Share.share({ message: `${item.title}\nhttps://kudaibergen.kg/p/${item.publicId}` }),
+			onPress: () =>
+				Share.share({ message: `${item.title}\nhttps://kudaibergen.kg/p/${item.publicId}` }).then((result) => {
+					if (result.action === Share.sharedAction) shared.mutate(item.partId)
+				}),
 		},
 		{
 			key: 'sound',

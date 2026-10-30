@@ -693,6 +693,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/parts/{id}/share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Поделились товаром (самолётик в ленте видео) — +1 к счётчику; гостю тоже */
+        post: operations["share"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/parts/{id}/restore": {
         parameters: {
             query?: never;
@@ -8025,7 +8042,11 @@ export interface components {
             shipsToRegions: boolean;
             isFavorite: boolean;
             /** Format: int32 */
+            favoritesCount: number;
+            /** Format: int32 */
             commentsCount: number;
+            /** Format: int32 */
+            sharesCount: number;
             shop: components["schemas"]["VideoShopDto"];
         };
         VideoFeedPageDto: {
@@ -9768,6 +9789,26 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["PartCommentDto"];
                 };
+            };
+        };
+    };
+    share: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

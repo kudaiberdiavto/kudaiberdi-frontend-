@@ -159,13 +159,26 @@ export function useToggleVideoFavorite() {
 							...data,
 							pages: data.pages.map((page) => ({
 								...page,
-								items: page.items.map((item) => (item.partId === partId ? { ...item, isFavorite: favorite } : item)),
+								items: page.items.map((item) =>
+									item.partId === partId
+										? { ...item, isFavorite: favorite, favoritesCount: Math.max(0, item.favoritesCount + (favorite ? 1 : -1)) }
+										: item
+								),
 							})),
 						}
 					: data
 			)
 		},
 		onSettled: () => queryClient.invalidateQueries({ queryKey: meKeys.favoriteParts }),
+	})
+}
+
+/** «Поделиться» in the feed went through: +1 under the paper plane (a guest too). */
+export function useSharePart() {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: (partId: number) => apiFetch<void>(`/parts/${partId}/share`, { method: 'POST' }),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: ['videos', 'feed'] }),
 	})
 }
 
