@@ -13,12 +13,9 @@ import { useRecognizeOem } from '@/api/parts'
 import { useAddShopPhoto } from '@/api/shop'
 import { MAX_PART_PHOTOS, usePartDraft } from '@/store/usePartDraft'
 
-const MODES = ['Деталь', 'Номер детали', 'Бокс'] as const
-const HINTS = ['Деталь целиком, на светлом фоне', 'Наведите на номер на корпусе или бирке', 'Бокс снаружи и полки внутри']
-
 /**
- * 25 — camera. «Деталь»: photos of the part being created [26]; «Номер детали»: OEM number
- * recognition (POST /ocr/oem); «Бокс»: photos of the place, attached to the box right away [22].
+ * 25 — camera, no mode tabs: `mode` 0 (default) — photos of the part being created [26]; 1 — OEM number recognition
+ * (POST /ocr/oem); 2 — photos of the place, attached to the box right away [22].
  * `from=form` — opened from 26, «Готово» returns there; otherwise it opens the form.
  */
 export default function CameraScreen() {
@@ -27,7 +24,7 @@ export default function CameraScreen() {
 	const params = useLocalSearchParams<{ from?: string; mode?: string }>()
 	const cameraRef = useRef<CameraView>(null)
 	const [permission, requestPermission] = useCameraPermissions()
-	const [mode, setMode] = useState(Number(params.mode ?? 0))
+	const mode = Number(params.mode ?? 0)
 	const [torch, setTorch] = useState(false)
 
 	const draft = usePartDraft()
@@ -184,7 +181,7 @@ export default function CameraScreen() {
 						})}
 					</ScrollView>
 				</View>
-			) : (
+			) : mode === 1 && draft.oemNumber ? (
 				<View
 					style={{
 						position: 'absolute',
@@ -199,10 +196,10 @@ export default function CameraScreen() {
 					}}
 				>
 					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: '#FFFFFF' }}>
-						{mode === 1 && draft.oemNumber ? `Номер: ${draft.oemNumber}` : HINTS[mode]}
+						Номер: {draft.oemNumber}
 					</Text>
 				</View>
-			)}
+			) : null}
 
 			{mode === 0 ? (
 				<View style={{ position: 'absolute', left: 16, right: 16, top: 556, flexDirection: 'row', gap: 8 }}>
@@ -240,15 +237,6 @@ export default function CameraScreen() {
 				</View>
 			) : null}
 
-			<View style={{ position: 'absolute', left: 16, right: 16, top: 637, flexDirection: 'row', justifyContent: 'space-between' }}>
-				{MODES.map((label, i) => (
-					<Pressable key={label} onPress={() => setMode(i)}>
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: mode === i ? '#FFD54A' : 'rgba(255,255,255,0.55)' }}>
-							{label}
-						</Text>
-					</Pressable>
-				))}
-			</View>
 
 			<View
 				style={{
