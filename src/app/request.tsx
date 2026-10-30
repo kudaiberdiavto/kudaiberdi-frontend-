@@ -32,7 +32,7 @@ import {
 import type { Reply } from '@/api/types'
 import { openShopRoute } from '@/lib/shop-place'
 
-type Sort = 'CHEAP' | 'NEAR'
+type Sort = 'CHEAP' | 'RATING' | 'FIRST'
 
 /**
  * 05 «Ответы»: timer and «Ещё 30 мин», sorting, «Есть · N» with the price large and the seller's voice,
@@ -73,7 +73,9 @@ export default function RequestScreen() {
 		.sort((a, b) =>
 			sort === 'CHEAP'
 				? (a.price ?? Infinity) - (b.price ?? Infinity)
-				: (a.walkMinutes ?? Infinity) - (b.walkMinutes ?? Infinity)
+				: sort === 'RATING'
+					? (b.shop?.rating ?? 0) - (a.shop?.rating ?? 0)
+					: a.createdAt.localeCompare(b.createdAt)
 		)
 	const askedCount = counts?.delivered ?? detail?.recipientsCount ?? 0
 	const answered = counts ? counts.have + counts.notHave : have.length
@@ -142,8 +144,9 @@ export default function RequestScreen() {
 
 				<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 					<SortChip label="Дешевле" active={sort === 'CHEAP'} onPress={() => setSort('CHEAP')} />
-					<SortChip label="Ближе ко входу" active={sort === 'NEAR'} onPress={() => setSort('NEAR')} />
-					<SortChip label="Только новые" active={onlyNew} onPress={() => setOnlyNew(!onlyNew)} />
+					<SortChip label="Рейтинг выше" active={sort === 'RATING'} onPress={() => setSort('RATING')} />
+					<SortChip label="Первые ответили" active={sort === 'FIRST'} onPress={() => setSort('FIRST')} />
+					<SortChip label="Новые" active={onlyNew} onPress={() => setOnlyNew(!onlyNew)} />
 				</ScrollView>
 
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
