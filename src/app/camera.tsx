@@ -231,9 +231,6 @@ export default function CameraScreen() {
 							) : null}
 						</Pressable>
 					))}
-					{draft.photos.length < MAX_PART_PHOTOS ? (
-						<View style={{ width: 60, height: 60, borderRadius: 10, borderWidth: 2, borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.35)' }} />
-					) : null}
 				</View>
 			) : null}
 
