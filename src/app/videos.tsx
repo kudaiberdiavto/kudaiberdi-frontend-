@@ -5,8 +5,8 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { router, useIsFocused } from 'expo-router'
 import { useEvent } from 'expo'
 import { useVideoPlayer, VideoView } from 'expo-video'
-import { BackIcon, CONDITION_CHIP, PaperPlaneIcon, TickIcon, priceDigits } from '@/components/buyer-v23'
-import { BookmarkIcon, SoundOffIcon, SoundOnIcon, TruckIcon, YellowChip, setPlayerMuted, useFeedCar } from '@/components/video-v23'
+import { BackIcon, CONDITION_CHIP, PaperPlaneIcon, priceDigits } from '@/components/buyer-v23'
+import { BookmarkIcon, SoundOffIcon, SoundOnIcon, TruckIcon, YellowChip, setPlayerMuted } from '@/components/video-v23'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { flattenPages } from '@/api/pagination'
@@ -27,10 +27,9 @@ export default function VideosScreen() {
 }
 
 function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
-	const { car, byCar, params } = useFeedCar()
-	const setByCar = useVideoViewer((s) => s.setByCar)
 	const startPartId = useVideoViewer((s) => s.startPartId)
-	const feed = useVideoFeed(params)
+	// Ads from the market — the same for everyone, not tied to a car.
+	const feed = useVideoFeed()
 	const items = flattenPages(feed.data)
 	const [height, setHeight] = useState(0)
 	const [index, setIndex] = useState(0)
@@ -110,29 +109,12 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 				>
 					<BackIcon color="#FFFFFF" />
 				</Pressable>
-				{car ? (
-					<Pressable
-						onPress={() => setByCar(!byCar)}
-						style={{
-							height: 40,
-							paddingHorizontal: 14,
-							borderRadius: 20,
-							backgroundColor: 'rgba(255,255,255,0.16)',
-							flexDirection: 'row',
-							alignItems: 'center',
-							gap: 6,
-						}}
-					>
-						{byCar ? <TickIcon size={16} color="#FFFFFF" /> : null}
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{car.model.label}</Text>
-					</Pressable>
-				) : null}
 			</View>
 		</View>
 	)
 }
 
-/** One video of the feed: full screen, plays while active, the seller, the part, «Написать» and «Доставка». */
+/** One video of the feed: full screen, plays while active, the seller, the part, «Заказать» and «Доставка». */
 function FeedPage({
 	item,
 	height,
@@ -158,12 +140,18 @@ function FeedPage({
 	const poster = resolveUrl(item.video.posterUrl)
 	const shop = item.shop
 	const openChat = useOpenChat()
-	// «Написать» — the chat with the box about this part (a guest signs in first).
-	const write = () =>
+	// «Заказать» — the chat with the box about this part, «Хочу заказать …» already typed (a guest signs in first).
+	const order = () =>
 		signedIn
 			? openChat.mutate(
 					{ shopId: shop.id, partId: item.partId },
-					{ onSuccess: (chat) => router.push({ pathname: '/chat', params: { chatId: String(chat.id) } }) }
+					{
+						onSuccess: (chat) =>
+							router.push({
+								pathname: '/chat',
+								params: { chatId: String(chat.id), draft: `Здравствуйте! Хочу заказать «${item.title}» за ${priceDigits(item.price)} сом.` },
+							}),
+					}
 				)
 			: router.push('/')
 	const meta = [shop.place, shop.replyMinutes != null ? `отвечает за ${shop.replyMinutes} мин` : null].filter(Boolean).join(' · ')
@@ -255,7 +243,7 @@ function FeedPage({
 				{item.shipsToRegions ? <YellowChip label="Доставка по КР" icon /> : null}
 				<View style={{ flexDirection: 'row', gap: 10, paddingTop: 4 }}>
 					<Pressable
-						onPress={write}
+						onPress={order}
 						disabled={openChat.isPending}
 						style={{
 							flex: 1,
@@ -270,7 +258,7 @@ function FeedPage({
 						}}
 					>
 						<ChatIcon size={20} color="#FFFFFF" strokeWidth={2.2} />
-						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
+						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Заказать</Text>
 					</Pressable>
 					{item.shipsToRegions ? (
 						<Pressable

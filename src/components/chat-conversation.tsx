@@ -43,10 +43,12 @@ interface Props {
 	pinned?: ReactNode
 	/** ACTION quick replies (ROUTE_TO_BOX, CLOSE_REQUEST) — handled by the screen. */
 	onAction: (reply: QuickReply) => void
+	/** Text already in the field — «Заказать» from the video feed: «Хочу заказать …». */
+	draft?: string
 }
 
 /** Shared chat body of 08 and 13: history, quick replies, composer, typing, read receipts. */
-export function ChatConversation({ chatId, mySide, header, pinned, onAction }: Props) {
+export function ChatConversation({ chatId, mySide, header, pinned, onAction, draft }: Props) {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
 	const chat = useChat(chatId)
@@ -58,7 +60,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction }: P
 	const markRead = useMarkRead(chatId)
 	const connected = useRealtime((s) => s.state === 'connected')
 	const { typing, publishTyping } = useChatChannel(chatId, mySide)
-	const [text, setText] = useState('')
+	const [text, setText] = useState(draft ?? '')
 	const [complaint, setComplaint] = useState<ComplaintTarget | null>(null)
 	const lastRead = useRef(0)
 

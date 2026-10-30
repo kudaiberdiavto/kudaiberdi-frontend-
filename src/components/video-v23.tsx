@@ -9,10 +9,7 @@ import { PlayIcon, voiceClock } from '@/components/voice'
 import { priceDigits } from '@/components/buyer-v23'
 import { resolveUrl } from '@/lib/api'
 import { fontFamily } from '@/theme'
-import { useSignedIn } from '@/api/catalog'
-import { useCars } from '@/api/garage'
 import type { DeliveryOrder, Video } from '@/api/types'
-import { useVideoViewer } from '@/store/useVideoViewer'
 
 interface IconProps {
 	size?: number
@@ -185,19 +182,6 @@ export function VideoTile({
 			</View>
 		</Pressable>
 	)
-}
-
-/**
- * The car of «✓ Camry 50» and «для Camry 50»: the main car of the garage. With `byCar` the feed puts the videos
- * fitting it first (the same query on the home screen and in the feed, so they share the loaded pages).
- */
-export function useFeedCar() {
-	const signedIn = useSignedIn()
-	const cars = useCars(signedIn)
-	const byCar = useVideoViewer((s) => s.byCar)
-	const car = signedIn ? (cars.data?.find((item) => item.isPrimary) ?? cars.data?.[0]) : undefined
-	const params = byCar && car ? { brandId: car.brand.id, modelId: car.model.id, year: car.year } : {}
-	return { car, byCar, params }
 }
 
 // ─── Delivery ────────────────────────────────────────────────────────────────

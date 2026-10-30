@@ -6,16 +6,14 @@ import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo
 import * as ImagePicker from 'expo-image-picker'
 import { getThumbnailAsync } from 'expo-video-thumbnails'
 import { BigButton, TickIcon, TopBar, priceDigits } from '@/components/buyer-v23'
-import { BottomSheet, QueryErrorBanner } from '@/components/ui'
-import { BrandLogo } from '@/components/ui/brand'
+import { QueryErrorBanner } from '@/components/ui'
 import { CloseIcon, GalleryIcon } from '@/components/icons'
 import { LoopVideo, TruckTile } from '@/components/video-v23'
 import { voiceClock } from '@/components/voice'
 import { fontFamily, raw, useColors } from '@/theme'
 import { uploadPartVideo } from '@/lib/api'
-import { useBrands, useModels } from '@/api/directory'
 import { usePublishPart, useSavePart } from '@/api/parts'
-import type { Brand, PartVideoUpload } from '@/api/types'
+import type { PartVideoUpload } from '@/api/types'
 
 const MAX_SEC = 30
 
@@ -23,12 +21,6 @@ interface Recorded {
 	uri: string
 	mimeType: string
 	durationSec: number
-}
-
-interface PickedModel {
-	modelId: number
-	brandId: number
-	label: string
 }
 
 /**
@@ -48,19 +40,21 @@ export default function SellerVideoScreen() {
 	const [uploaded, setUploaded] = useState<PartVideoUpload | null>(null)
 	const [uploadError, setUploadError] = useState<string | null>(null)
 	const [title, setTitle] = useState('')
-	const [models, setModels] = useState<PickedModel[]>([])
-	const [selected, setSelected] = useState<number[]>([])
 	const [price, setPrice] = useState('')
 	const [condition, setCondition] = useState<'NEW' | 'USED'>('NEW')
 	const [ships, setShips] = useState(true)
-	const [adding, setAdding] = useState(false)
 
 	const draft = uploaded?.draft
-	const fromVoice = Boolean(draft && (draft.title || draft.price || draft.condition || draft.models.length))
+	const fromVoice = Boolean(draft && (draft.title || draft.price || draft.condition))
 	const priceValue = Number(price.replace(/\D/g, ''))
-	const ready = Boolean(uploaded && title.trim() && priceValue > 0 && selected.length)
+	const ready = Boolean(uploaded && title.trim() && priceValue > 0)
 
 	const upload = async (next: Recorded) => {
+		// The server takes up to 30 s — say so right away instead of uploading a long video for nothing.
+		if (next.durationSec > MAX_SEC + 0.5) {
+			setUploadError(`Видео длиннее ${MAX_SEC} секунд — выберите покороче или обрежьте`)
+			return
+		}
 		setVideo(next)
 		setUploaded(null)
 		setUploadError(null)
@@ -81,10 +75,6 @@ export default function SellerVideoScreen() {
 			if (d.title) setTitle((value) => value || d.title || '')
 			if (d.price) setPrice((value) => value || priceDigits(d.price ?? 0))
 			if (d.condition === 'NEW' || d.condition === 'USED') setCondition(d.condition)
-			if (d.models.length) {
-				setModels((list) => [...list, ...d.models.filter((m) => !list.some((x) => x.modelId === m.modelId))])
-				setSelected((list) => [...new Set([...list, ...d.models.map((m) => m.modelId)])])
-			}
 		} catch (error) {
 			setUploadError((error as Error).message)
 		} finally {
@@ -92,20 +82,10 @@ export default function SellerVideoScreen() {
 		}
 	}
 
-	const toggle = (modelId: number) =>
-		setSelected((list) => (list.includes(modelId) ? list.filter((id) => id !== modelId) : [...list, modelId]))
-
-	const addModel = (model: PickedModel) => {
-		setModels((list) => (list.some((m) => m.modelId === model.modelId) ? list : [...list, model]))
-		setSelected((list) => (list.includes(model.modelId) ? list : [...list, model.modelId]))
-		setAdding(false)
-	}
-
 	// The draft created by the first tap — if publishing fails, the retry updates it instead of creating a second part.
 	const draftId = useRef<number | null>(null)
 	const submit = async () => {
 		if (!uploaded) return
-		const fitments = models.filter((m) => selected.includes(m.modelId)).map((m) => ({ brandId: m.brandId, modelId: m.modelId }))
 		try {
 			const part = await save.mutateAsync({
 				id: draftId.current ?? undefined,
@@ -114,7 +94,6 @@ export default function SellerVideoScreen() {
 					price: priceValue,
 					condition,
 					quantity: 1,
-					fitments,
 					videoMediaId: uploaded.video.id,
 					shipsToRegions: ships,
 				},
@@ -238,35 +217,6 @@ export default function SellerVideoScreen() {
 							color: c.ink,
 						}}
 					/>
-					<Text style={[label, { paddingTop: 4 }]}>На какие машины</Text>
-					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-						{models.map((model) => {
-							const active = selected.includes(model.modelId)
-							return (
-								<Pressable
-									key={model.modelId}
-									onPress={() => toggle(model.modelId)}
-									style={{
-										height: 34,
-										paddingHorizontal: 12,
-										borderRadius: 17,
-										backgroundColor: active ? c.brand : c.card,
-										borderWidth: active ? 0 : 1.5,
-										borderColor: c.border,
-										justifyContent: 'center',
-									}}
-								>
-									<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.ink }}>{model.label}</Text>
-								</Pressable>
-							)
-						})}
-						<Pressable
-							onPress={() => setAdding(true)}
-							style={{ height: 34, paddingHorizontal: 12, borderRadius: 17, borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#B8B4B4', justifyContent: 'center' }}
-						>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>+ ещё</Text>
-						</Pressable>
-					</View>
 					<View style={{ flexDirection: 'row', gap: 10, paddingTop: 4 }}>
 						<View style={{ flex: 1, gap: 6 }}>
 							<Text style={label}>Цена, сом</Text>
@@ -350,7 +300,6 @@ export default function SellerVideoScreen() {
 				/>
 			</Modal>
 
-			{adding ? <ModelPicker onClose={() => setAdding(false)} onPick={addModel} /> : null}
 		</KeyboardAvoidingView>
 	)
 }
@@ -405,7 +354,8 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 	}
 
 	const fromGallery = async () => {
-		const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['videos'], videoMaxDuration: MAX_SEC, quality: 1 })
+		// allowsEditing — iOS shows the trimmer: a longer video is cut to 30 s instead of failing on upload
+		const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['videos'], videoMaxDuration: MAX_SEC, allowsEditing: true, quality: 1 })
 		if (result.canceled) return
 		const asset = result.assets[0]
 		// expo-image-picker: milliseconds on iOS / Android, seconds on web.
@@ -473,64 +423,5 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 				{active ? 'Скажите, что это и сколько стоит' : 'Снимите деталь 10–15 секунд'}
 			</Text>
 		</View>
-	)
-}
-
-/** «+ ещё»: a brand, then its model («Camry 50»). */
-function ModelPicker({ onClose, onPick }: { onClose: () => void; onPick: (model: PickedModel) => void }) {
-	const c = useColors()
-	const [q, setQ] = useState('')
-	const [brand, setBrand] = useState<Brand | null>(null)
-	const brands = useBrands(q.trim() ? { q: q.trim() } : { popular: true })
-	const models = useModels(brand?.id)
-
-	return (
-		<BottomSheet
-			onClose={onClose}
-			header={
-				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-					<Text style={{ flex: 1, fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{brand ? brand.name : 'Какая марка'}</Text>
-					{brand ? (
-						<Text onPress={() => setBrand(null)} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
-							Другая марка
-						</Text>
-					) : null}
-				</View>
-			}
-		>
-			{brand ? (
-				<View style={{ gap: 8 }}>
-					{(models.data ?? []).map((model) => (
-						<Pressable
-							key={model.id}
-							onPress={() => onPick({ modelId: model.id, brandId: brand.id, label: model.label })}
-							style={{ height: 52, borderRadius: 12, borderWidth: 1.5, borderColor: c.hairline, paddingHorizontal: 14, justifyContent: 'center' }}
-						>
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>{model.label}</Text>
-						</Pressable>
-					))}
-				</View>
-			) : (
-				<View style={{ gap: 8 }}>
-					<TextInput
-						value={q}
-						onChangeText={setQ}
-						placeholder="Марка"
-						placeholderTextColor="#8C8888"
-						style={{ height: 48, borderRadius: 12, borderWidth: 1.5, borderColor: c.border, paddingHorizontal: 12, fontSize: 17.5, fontFamily: fontFamily(500), color: c.ink }}
-					/>
-					{(brands.data ?? []).map((item) => (
-						<Pressable
-							key={item.id}
-							onPress={() => setBrand(item)}
-							style={{ height: 52, borderRadius: 12, borderWidth: 1.5, borderColor: c.hairline, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}
-						>
-							<BrandLogo brand={item} size={30} />
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>{item.name}</Text>
-						</Pressable>
-					))}
-				</View>
-			)}
-		</BottomSheet>
 	)
 }

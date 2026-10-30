@@ -1,24 +1,20 @@
 import { useCallback, useState } from 'react'
 import { FlatList, Text, View, type ViewToken } from 'react-native'
 import { router, useIsFocused } from 'expo-router'
-import { VideoTile, useFeedCar } from '@/components/video-v23'
+import { VideoTile } from '@/components/video-v23'
 import { fontFamily, useColors } from '@/theme'
 import { flattenPages } from '@/api/pagination'
 import { useVideoFeed } from '@/api/catalog'
 import type { VideoFeedItem } from '@/api/types'
 import { useVideoViewer } from '@/store/useVideoViewer'
 
-export type VideoFeedCar = Parameters<typeof useVideoFeed>[0]
-
 /**
- * Videos from the market (no section title — the tiles speak for themselves): tiles play by themselves without sound; a tap opens the feed on that video. On the home screen —
- * for the main car; in «Запчасти» — for the car picked there (`car`: filters + «для Camry 50»).
+ * Videos from the market — ads, the same for everyone (not tied to a car): tiles play by themselves without sound,
+ * a tap opens the feed on that video.
  */
-export function MarketVideos({ car: picked }: { car?: { filters: VideoFeedCar; label: string | null } } = {}) {
+export function MarketVideos() {
 	const c = useColors()
-	const main = useFeedCar()
-	const feed = useVideoFeed(picked ? picked.filters : main.params)
-	const carLabel = picked ? picked.label : main.car && main.byCar ? main.car.model.label : null
+	const feed = useVideoFeed()
 	const items = flattenPages(feed.data)
 	const focused = useIsFocused()
 	const [visible, setVisible] = useState<number[]>([0, 1, 2])
@@ -39,14 +35,6 @@ export function MarketVideos({ car: picked }: { car?: { filters: VideoFeedCar; l
 	return (
 		<View style={{ gap: 10, paddingTop: 2 }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-				{/* The car chip gives way when the row is tight — «Смотреть все» always fits. */}
-				{carLabel ? (
-					<View style={{ flexShrink: 1, height: 26, paddingHorizontal: 10, borderRadius: 13, backgroundColor: c.brandTint, justifyContent: 'center' }}>
-						<Text numberOfLines={1} style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>
-							для {carLabel}
-						</Text>
-					</View>
-				) : null}
 				<View style={{ flex: 1 }} />
 				<Text onPress={() => openFeed()} style={{ flexShrink: 0, fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>
 					Смотреть все

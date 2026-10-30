@@ -190,14 +190,9 @@ export function CatalogScreen() {
 
 			<QueryErrorBanner error={search.error} onRetry={() => search.refetch()} offlineText="Нет сети. Покажем запчасти, когда появится" />
 
-			{/* Parts with a video — the same strip as on the home screen, for the car picked here. */}
+			{/* Video ads from the market — the same strip as on the home screen. */}
 			{!f.q.trim() && f.categoryId == null ? (
-				<MarketVideos
-					car={{
-						filters: { carId: partFilters.carId, brandId: partFilters.brandId, modelId: partFilters.modelId },
-						label: appliedCar?.displayName ?? null,
-					}}
-				/>
+				<MarketVideos />
 			) : null}
 
 			<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>

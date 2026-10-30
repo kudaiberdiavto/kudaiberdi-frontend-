@@ -42,10 +42,10 @@ export default function SearchPartScreen() {
 	const isMaster = useSession((s) => s.role) === 'MASTER'
 	const [text, setText] = useState(params.text ?? '')
 	const uploads = usePhotoUploads('REQUEST', 3)
-	// What the buyer said goes into the field if it's still empty — 3–200 characters, as the server takes it.
+	// What the buyer said goes into the field if it's still empty (up to 200 characters, as the server takes it).
 	const voice = useVoiceNote('REQUEST', (result) => {
 		const said = result.voice.transcript?.trim() ?? ''
-		if (said.length >= 3) setText((current) => (current.trim() ? current : said.slice(0, 200)))
+		if (said) setText((current) => (current.trim() ? current : said.slice(0, 200)))
 	})
 	const passport = useReadTechPassport()
 	const addCar = useAddCar()
@@ -66,8 +66,8 @@ export default function SearchPartScreen() {
 	)
 	const typed = text.trim()
 	const voiceId = voice.result?.voice.id
-	// Typed text must be 3+ characters (the server rejects shorter); without text — a photo or a voice note.
-	const hasPart = typed ? typed.length >= 3 : uploads.mediaIds.length > 0 || Boolean(voiceId)
+	// Something to go on: text, a photo or a voice note — no minimum length.
+	const hasPart = typed.length > 0 || uploads.mediaIds.length > 0 || Boolean(voiceId)
 	const busy = uploads.uploading || voice.uploading || voice.recording
 
 	/**

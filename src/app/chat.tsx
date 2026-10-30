@@ -10,7 +10,8 @@ import { openShopRoute } from '@/lib/shop-place'
 /** 07 — buyer's chat with a shop, or with a master (then `shop = null`, `master` and `serviceRequest`); call in one tap. */
 export default function BuyerChatScreen() {
 	const c = useColors()
-	const chatId = Number(useLocalSearchParams<{ chatId: string }>().chatId) || 0
+	const params = useLocalSearchParams<{ chatId: string; draft?: string }>()
+	const chatId = Number(params.chatId) || 0
 	const chat = useChat(chatId).data
 	const shop = chat?.shop
 	const master = chat?.master
@@ -23,6 +24,7 @@ export default function BuyerChatScreen() {
 	return (
 		<ChatConversation
 			chatId={chatId}
+			draft={params.draft}
 			mySide="BUYER"
 			header={(typing) => (
 				<View

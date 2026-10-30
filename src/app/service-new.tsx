@@ -24,7 +24,6 @@ const SERVICES: { code: string; label: string }[] = [
 	{ code: 'BODY_PAINT', label: 'Кузов' },
 	{ code: 'LPG', label: 'ГБО' },
 ]
-const MIN_DESCRIPTION = 10
 const MAX_MEDIA = 5
 const MARKET_LABEL = 'Рядом с рынком Кудайберген'
 
@@ -46,8 +45,7 @@ export default function ServiceNewScreen() {
 	const voice = useVoiceNote('SERVICE', (result) => {
 		// What was said becomes the text if nothing is typed — it is the request's caption anyway.
 		const said = result.voice.transcript?.trim() ?? ''
-		// Shorter than the server's minimum — keep the field empty: the voice note alone is enough.
-		if (said.length >= MIN_DESCRIPTION) setDescription((current) => (current.trim() ? current : said.slice(0, 500)))
+		if (said) setDescription((current) => (current.trim() ? current : said.slice(0, 500)))
 	})
 	const [point, setPoint] = useState<Point>({ ...MARKET_POINT, label: MARKET_LABEL })
 	const [pickPoint, setPickPoint] = useState(false)
@@ -62,17 +60,15 @@ export default function ServiceNewScreen() {
 
 	const recipients = estimate.data?.recipients
 	const text = description.trim()
-	// Typed text must reach the minimum (the server rejects shorter); without text — media or a voice note.
-	const described = text ? text.length >= MIN_DESCRIPTION : media.mediaIds.length > 0 || Boolean(voice.result)
+	// Something to go on: text, photos / videos or a voice note — no minimum length.
+	const described = text.length > 0 || media.mediaIds.length > 0 || Boolean(voice.result)
 	const ready = Boolean(car) && described && !media.uploading && !voice.uploading && !voice.recording && recipients !== 0
 
 	const hint = !car
 		? 'Добавьте машину — мастера смотрят марку'
 		: recipients === 0
 			? 'Рядом нет мастеров, которые берутся за это — попробуйте другую точку'
-			: !described && text.length > 0
-				? `Опишите подробнее: ещё ${MIN_DESCRIPTION - text.length} ${plural(MIN_DESCRIPTION - text.length, ['символ', 'символа', 'символов'])}`
-				: recipients !== undefined
+			: recipients !== undefined
 					? `Спросим ${recipients} ${plural(recipients, ['мастера', 'мастеров', 'мастеров'])} рядом — обычно отвечают за 10 минут`
 					: 'Обычно мастера отвечают за 10 минут'
 
