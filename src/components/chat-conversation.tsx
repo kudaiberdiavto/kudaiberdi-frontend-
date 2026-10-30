@@ -186,8 +186,8 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 					horizontal
 					showsHorizontalScrollIndicator={false}
 					keyboardShouldPersistTaps="handled"
-					style={{ flexGrow: 0 }}
-					contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 10, gap: 8 }}
+					style={{ flexGrow: 0, flexShrink: 0 }}
+					contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 10, gap: 8, alignItems: 'center' }}
 				>
 					{quick.data.map((reply) => {
 						const positive = reply.code ? POSITIVE.has(reply.code) : false
