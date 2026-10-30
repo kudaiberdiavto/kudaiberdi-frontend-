@@ -288,7 +288,7 @@ function FeedPage({
 					) : null}
 				</View>
 			</View>
-			{commenting ? <CommentsSheet partId={item.partId} title={item.title} onClose={() => setCommenting(false)} /> : null}
+			{commenting ? <CommentsSheet partId={item.partId} onClose={() => setCommenting(false)} /> : null}
 		</View>
 	)
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native'
 import { router } from 'expo-router'
+import { PaperPlaneIcon } from '@/components/buyer-v23'
 import { ModalSheet } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
 import { fontFamily, useColors } from '@/theme'
@@ -13,7 +14,7 @@ import type { PartComment } from '@/api/types'
  * Comments under a video part (the reels-like feed): newest first, «Продавец» on the box's own answers, a field to
  * write. Long press — delete (own, or any under your part) or complain.
  */
-export function CommentsSheet({ partId, title, onClose }: { partId: number; title: string; onClose: () => void }) {
+export function CommentsSheet({ partId, onClose }: { partId: number; onClose: () => void }) {
 	const c = useColors()
 	const { height } = useWindowDimensions()
 	const signedIn = useSignedIn()
@@ -50,16 +51,13 @@ export function CommentsSheet({ partId, title, onClose }: { partId: number; titl
 			<Text numberOfLines={1} style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>
 				Комментарии{total ? ` · ${total}` : ''}
 			</Text>
-			<Text numberOfLines={1} style={{ marginTop: -8, fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>
-				{title}
-			</Text>
 
 			<ScrollView style={{ maxHeight: height * 0.45 }} contentContainerStyle={{ gap: 14, paddingVertical: 4 }} keyboardShouldPersistTaps="handled">
 				{comments.isPending ? <ActivityIndicator color={c.muted} /> : null}
 				{items.map((comment) => (
 					<Pressable key={comment.id} onLongPress={() => actions(comment)} delayLongPress={400} style={{ gap: 3 }}>
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>{comment.authorName ?? 'Покупатель'}</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>{comment.mine ? 'Вы' : (comment.authorName ?? 'Покупатель')}</Text>
 							{comment.fromSeller ? (
 								<View style={{ height: 20, paddingHorizontal: 6, borderRadius: 6, backgroundColor: c.brandTint, justifyContent: 'center' }}>
 									<Text style={{ fontSize: 12.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Продавец</Text>
@@ -78,7 +76,7 @@ export function CommentsSheet({ partId, title, onClose }: { partId: number; titl
 			</ScrollView>
 
 			{add.error ? <Text style={{ fontSize: 15, fontFamily: fontFamily(500), color: c.danger }}>{add.error.message}</Text> : null}
-			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+			<View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10 }}>
 				<TextInput
 					value={text}
 					onChangeText={setText}
@@ -90,11 +88,14 @@ export function CommentsSheet({ partId, title, onClose }: { partId: number; titl
 					returnKeyType="send"
 					style={{
 						flex: 1,
-						height: 48,
-						borderRadius: 24,
+						minHeight: 56,
+						maxHeight: 120,
+						borderRadius: 18,
 						backgroundColor: c.surface,
-						paddingHorizontal: 16,
-						fontSize: 16.5,
+						paddingHorizontal: 18,
+						paddingTop: 16,
+						paddingBottom: 16,
+						fontSize: 17.5,
 						fontFamily: fontFamily(400),
 						color: c.ink,
 					}}
@@ -102,16 +103,18 @@ export function CommentsSheet({ partId, title, onClose }: { partId: number; titl
 				<Pressable
 					onPress={send}
 					disabled={signedIn && (!value || add.isPending)}
+					hitSlop={6}
 					style={{
-						height: 48,
-						paddingHorizontal: 16,
-						borderRadius: 24,
+						width: 56,
+						height: 56,
+						borderRadius: 28,
 						backgroundColor: c.success,
+						alignItems: 'center',
 						justifyContent: 'center',
 						opacity: !signedIn || value ? 1 : 0.5,
 					}}
 				>
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{signedIn ? 'Отправить' : 'Войти'}</Text>
+					<PaperPlaneIcon size={24} color="#FFFFFF" />
 				</Pressable>
 			</View>
 			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />
