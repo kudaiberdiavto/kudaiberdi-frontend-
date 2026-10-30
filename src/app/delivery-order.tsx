@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { ActivityIndicator, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Share, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Share, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams } from 'expo-router'
 import { BigButton, BubbleIcon, TickIcon, TopBar, priceDigits } from '@/components/buyer-v23'
 import { QueryErrorBanner } from '@/components/ui'
 import { ClockOutline, routeTitle, toRegion } from '@/components/video-v23'
+import { openCourierWhatsApp } from '@/lib/whatsapp'
+import { WhatsAppIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { formatDay, formatWhenAt } from '@/lib/format'
 import { useMe } from '@/api/me'
@@ -183,10 +185,21 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 					) : null}
 					{courierPhone ? (
 						<Pressable
-							onPress={() => Linking.openURL(`tel:${courierPhone.replace(/[^\d+]/g, '')}`)}
-							style={{ flex: 1, height: 52, paddingHorizontal: 10, borderRadius: 14, borderWidth: 1.5, borderColor: c.border, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}
+							onPress={() => openCourierWhatsApp(courierPhone, order.number)}
+							style={{
+								flex: 1,
+								height: 52,
+								paddingHorizontal: 10,
+								borderRadius: 14,
+								backgroundColor: '#25D366',
+								flexDirection: 'row',
+								alignItems: 'center',
+								justifyContent: 'center',
+								gap: 8,
+							}}
 						>
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Курьер Ылдам</Text>
+							<WhatsAppIcon size={22} color="#FFFFFF" />
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Курьер Ылдам</Text>
 						</Pressable>
 					) : null}
 				</View>

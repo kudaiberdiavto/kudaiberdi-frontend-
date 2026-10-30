@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { Image, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { BigButton, Caps, TopBar, priceDigits } from '@/components/buyer-v23'
 import { QueryErrorBanner } from '@/components/ui'
 import { PlayIcon } from '@/components/voice'
 import { YellowChip, formatKgPhone } from '@/components/video-v23'
+import { openCourierWhatsApp } from '@/lib/whatsapp'
+import { WhatsAppIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { usePart } from '@/api/catalog'
@@ -156,10 +158,11 @@ export default function DeliveryScreen() {
 					</View>
 					{courierPhone ? (
 						<Pressable
-							onPress={() => Linking.openURL(`tel:${courierPhone.replace(/[^\d+]/g, '')}`)}
-							style={{ height: 40, paddingHorizontal: 14, borderRadius: 12, backgroundColor: c.card, justifyContent: 'center' }}
+							onPress={() => openCourierWhatsApp(courierPhone)}
+							style={{ height: 40, paddingHorizontal: 12, borderRadius: 12, backgroundColor: '#25D366', flexDirection: 'row', alignItems: 'center', gap: 6 }}
 						>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>Позвонить</Text>
+							<WhatsAppIcon size={20} color="#FFFFFF" />
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>WhatsApp</Text>
 						</Pressable>
 					) : null}
 				</View>

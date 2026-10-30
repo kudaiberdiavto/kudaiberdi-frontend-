@@ -11,3 +11,12 @@ export function openWhatsApp(phone: string, partTitle?: string | null) {
 		: 'Здравствуйте! Я из приложения Кудайберген.'
 	return Linking.openURL(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`)
 }
+
+/** WhatsApp with the courier service (Ылдам): «Здравствуйте! Я из приложения Кудайберген, по доставке KDB-…». */
+export function openCourierWhatsApp(phone: string, orderNumber?: string | null) {
+	const digits = phone.replace(/\D/g, '')
+	const text = orderNumber
+		? `Здравствуйте! Я из приложения Кудайберген, по доставке ${orderNumber}.`
+		: 'Здравствуйте! Я из приложения Кудайберген, хочу заказать доставку.'
+	return Linking.openURL(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`)
+}
