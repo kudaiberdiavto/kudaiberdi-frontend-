@@ -63,7 +63,7 @@ export function Button({
 			) : (
 				<>
 					{Icon ? <Icon size={20} color={fg} strokeWidth={2.2} /> : null}
-					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize, fontFamily: fontFamily(700), color: fg }}>{label}</Text>
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ flexShrink: 1, fontSize, fontFamily: fontFamily(700), color: fg }}>{label}</Text>
 				</>
 			)}
 		</Pressable>

@@ -257,12 +257,13 @@ export function BigButton({
 					alignItems: 'center',
 					justifyContent: 'center',
 					gap: 8,
+					paddingHorizontal: 14,
 				},
 				style,
 			]}
 		>
 			{loading ? <ActivityIndicator color={color} /> : icon}
-			<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 18.5, fontFamily: fontFamily(700), color }}>{label}</Text>
+			<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ flexShrink: 1, fontSize: 18.5, fontFamily: fontFamily(700), color }}>{label}</Text>
 		</Pressable>
 	)
 }

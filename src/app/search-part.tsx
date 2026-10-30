@@ -291,7 +291,7 @@ export default function SearchPartScreen() {
 							<View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
 								<CameraV23Icon size={26} color={c.brandStrong} />
 							</View>
-							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>Сфотать деталь</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>Сфотать деталь</Text>
 						</DashedTile>
 					)}
 
@@ -322,7 +322,7 @@ export default function SearchPartScreen() {
 							>
 								{voice.uploading ? <ActivityIndicator color="#FFFFFF" /> : <MicV23Icon size={26} color="#FFFFFF" />}
 							</View>
-							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
 								{voice.uploading ? 'Слушаем…' : voice.recording ? `Готово · ${voiceClock(voice.seconds)}` : 'Сказать голосом'}
 							</Text>
 						</DashedTile>
@@ -414,6 +414,7 @@ function DashedTile({
 				alignItems: 'center',
 				justifyContent: 'center',
 				gap: 10,
+				paddingHorizontal: 12,
 			}}
 		>
 			{children}
