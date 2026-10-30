@@ -5,7 +5,7 @@ import { EmptyState, QueryErrorBanner, Screen, ServiceIcon } from '@/components/
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
 import { MediaGallery, MediaStrip } from '@/components/media-strip'
-import { RequestFrom, isPlaceholderText } from '@/components/request-from'
+import { isPlaceholderText } from '@/components/request-text'
 import { CheckMark, MicOutline, UrgentChip, myOfferLine } from '@/components/master-v23'
 import { AccountStatusBanner } from '@/components/account-status-banner'
 import { fontFamily, raw, useColors } from '@/theme'
@@ -159,7 +159,6 @@ export function RequestCard({
 			onPress={() => router.push({ pathname: '/master-request', params: { id: String(item.id) } })}
 			style={{ borderRadius: 20, backgroundColor: c.card, padding: 16, gap: 12 }}
 		>
-			<RequestFrom name={item.buyerName} fallback="Клиент" />
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				<View style={{ width: 46, height: 46, borderRadius: 15, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
 					<ServiceIcon code={item.service.code} size={26} color={c.brandStrong} strokeWidth={2.2} />
@@ -169,7 +168,7 @@ export function RequestCard({
 						{title}
 					</Text>
 					<Text numberOfLines={1} style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
-						{meta}
+						<Text style={{ fontFamily: fontFamily(600), color: c.inkSecondary }}>{item.buyerName?.trim() || 'Клиент'}</Text> · {meta}
 					</Text>
 				</View>
 				{item.urgent ? <UrgentChip /> : null}

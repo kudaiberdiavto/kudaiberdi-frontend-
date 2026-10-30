@@ -4,7 +4,7 @@ import { BrandLogo, EmptyState, QueryErrorBanner, Screen } from '@/components/ui
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
 import { MediaGallery, MediaStrip, photosAsMedia } from '@/components/media-strip'
-import { RequestFrom, isPlaceholderText } from '@/components/request-from'
+import { isPlaceholderText } from '@/components/request-text'
 import { MicIcon, TickIcon } from '@/components/seller-v23'
 import { fontFamily, useColors } from '@/theme'
 import { formatAgo, formatNumber, formatRemaining } from '@/lib/format'
@@ -124,12 +124,15 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 			onPress={() => router.push({ pathname: '/incoming-request', params: { id: String(request.id) } })}
 			style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10 }}
 		>
-			<RequestFrom name={request.buyerName} fallback="Покупатель" />
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<BrandLogo brand={request.car.brand} size={32} />
+				<BrandLogo brand={request.car.brand} size={36} />
 				<View style={{ flex: 1, gap: 1 }}>
-					<Text style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>{request.car.label}</Text>
-					<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>{meta}</Text>
+					<Text numberOfLines={1} style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>
+						{request.car.label}
+					</Text>
+					<Text numberOfLines={1} style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text style={{ fontFamily: fontFamily(600), color: c.inkSecondary }}>{request.buyerName?.trim() || 'Покупатель'}</Text> · {meta}
+					</Text>
 				</View>
 			</View>
 
