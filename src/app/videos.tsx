@@ -161,22 +161,27 @@ function FeedPage({
 
 	const rail = [
 		{
-			label: 'Сохр.',
+			key: 'save',
+			label: null,
 			icon: <BookmarkIcon size={22} color="#FFFFFF" filled={item.isFavorite} />,
 			onPress: () => (signedIn ? favorite.mutate({ partId: item.partId, favorite: !item.isFavorite }) : router.push('/')),
 		},
 		{
-			label: item.commentsCount ? String(item.commentsCount) : 'Комм.',
+			key: 'comments',
+			// only the count — no word under the icon
+			label: item.commentsCount ? String(item.commentsCount) : null,
 			icon: <ChatIcon size={22} color="#FFFFFF" strokeWidth={2.1} />,
 			onPress: () => setCommenting(true),
 		},
 		{
-			label: 'Отправ.',
+			key: 'share',
+			label: null,
 			icon: <PaperPlaneIcon size={22} color="#FFFFFF" />,
 			onPress: () => Share.share({ message: `${item.title}\nhttps://kudaibergen.kg/p/${item.publicId}` }),
 		},
 		{
-			label: 'Звук',
+			key: 'sound',
+			label: null,
 			icon: muted ? <SoundOffIcon size={22} color="#FFFFFF" /> : <SoundOnIcon size={22} color="#FFFFFF" />,
 			onPress: onToggleSound,
 		},
@@ -196,11 +201,11 @@ function FeedPage({
 
 			<View style={{ position: 'absolute', right: 12, bottom: bottom + 250, gap: 14, alignItems: 'center' }}>
 				{rail.map((button) => (
-					<Pressable key={button.label} onPress={button.onPress} style={{ alignItems: 'center', gap: 4 }}>
-						<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.16)', alignItems: 'center', justifyContent: 'center' }}>
+					<Pressable key={button.key} onPress={button.onPress} hitSlop={6} style={{ alignItems: 'center', gap: 4 }}>
+						<View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.16)', alignItems: 'center', justifyContent: 'center' }}>
 							{button.icon}
 						</View>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: '#FFFFFF' }}>{button.label}</Text>
+						{button.label ? <Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{button.label}</Text> : null}
 					</Pressable>
 				))}
 			</View>

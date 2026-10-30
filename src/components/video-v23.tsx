@@ -5,7 +5,6 @@ import { Image, Pressable, Text, View } from 'react-native'
 import Svg, { Circle, Path, Rect } from 'react-native-svg'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useVideoPlayer, VideoView, type VideoPlayer } from 'expo-video'
-import { PlayIcon, voiceClock } from '@/components/voice'
 import { priceDigits } from '@/components/buyer-v23'
 import { resolveUrl } from '@/lib/api'
 import { fontFamily } from '@/theme'
@@ -154,23 +153,6 @@ export function VideoTile({
 				end={{ x: 0.5, y: 1 }}
 				style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
 			/>
-			<View
-				style={{
-					position: 'absolute',
-					top: 10,
-					left: 10,
-					height: 26,
-					paddingHorizontal: 8,
-					borderRadius: 8,
-					backgroundColor: 'rgba(0,0,0,0.55)',
-					flexDirection: 'row',
-					alignItems: 'center',
-					gap: 3,
-				}}
-			>
-				<PlayIcon size={11} />
-				<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{voiceClock(video.durationSec)}</Text>
-			</View>
 			<View style={{ position: 'absolute', left: 10, right: 10, bottom: 10, gap: 3 }}>
 				<Text numberOfLines={2} style={{ fontSize: 18.5, lineHeight: 23, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
 					{title}

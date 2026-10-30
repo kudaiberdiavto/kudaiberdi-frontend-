@@ -4,7 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { LocationCard, ProductCard, QueryErrorBanner } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
-import { ChatIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, PhoneIcon, ShareIcon } from '@/components/icons'
+import { ChatIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, PhoneIcon, ShareIcon, WhatsAppIcon } from '@/components/icons'
+import { openWhatsApp } from '@/lib/whatsapp'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatDay, formatPrice, formatSide, plural } from '@/lib/format'
@@ -188,7 +189,15 @@ export default function SellerProfileForBuyerScreen() {
 							<MapPinIcon size={20} color={c.ink} />
 							<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>Маршрут</Text>
 						</Pressable>
-						{/* The phone is shown only when the shop made it visible (or after a chat). */}
+						{/* WhatsApp and the phone — only when the shop made the number visible (or after a chat). */}
+						{shop?.phone ? (
+							<Pressable
+								onPress={() => shop.phone && openWhatsApp(shop.phone)}
+								style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#25D366', alignItems: 'center', justifyContent: 'center' }}
+							>
+								<WhatsAppIcon size={24} color="#FFFFFF" />
+							</Pressable>
+						) : null}
 						{shop?.phone ? (
 							<Pressable
 								onPress={() => Linking.openURL(`tel:${shop.phone}`)}

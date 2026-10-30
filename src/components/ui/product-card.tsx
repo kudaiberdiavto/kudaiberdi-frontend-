@@ -38,7 +38,7 @@ export function ProductCard({
 	dimmed?: boolean
 	/** ♥ in the corner, filled when the part is in favorites. */
 	favorite?: boolean
-	/** The part has a video: «▶ 0:15» on the picture (the video's poster). */
+	/** The part has a video: ▶ on the picture (the video's poster). */
 	videoSec?: number
 }) {
 	const c = useColors()
@@ -52,27 +52,24 @@ export function ProductCard({
 						<PhotoPlaceholder width={width ?? 200} height={width ?? 200} radius={0} />
 					</View>
 				)}
+				{/* A part with a video — ▶ on the picture (no duration). */}
 				{videoSec != null ? (
 					<View
 						style={{
 							position: 'absolute',
 							left: 8,
 							top: 8,
-							height: 24,
-							paddingHorizontal: 8,
-							borderRadius: 12,
+							width: 30,
+							height: 30,
+							borderRadius: 15,
 							backgroundColor: 'rgba(0,0,0,0.55)',
-							flexDirection: 'row',
 							alignItems: 'center',
-							gap: 4,
+							justifyContent: 'center',
 						}}
 					>
-						<Svg width={10} height={10} viewBox="0 0 24 24" fill="#FFFFFF">
+						<Svg width={12} height={12} viewBox="0 0 24 24" fill="#FFFFFF">
 							<Path d="M8 5.5v13l10-6.5z" />
 						</Svg>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
-							{Math.floor(videoSec / 60)}:{String(Math.round(videoSec % 60)).padStart(2, '0')}
-						</Text>
 					</View>
 				) : null}
 				<View

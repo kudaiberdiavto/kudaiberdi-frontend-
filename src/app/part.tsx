@@ -4,7 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { PhotoPlaceholder, QueryErrorBanner } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
-import { ChatIcon, CheckIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, ShareIcon } from '@/components/icons'
+import { ChatIcon, CheckIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, ShareIcon, WhatsAppIcon } from '@/components/icons'
+import { openWhatsApp } from '@/lib/whatsapp'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatPrice } from '@/lib/format'
@@ -238,6 +239,15 @@ export default function PartScreen() {
 					<MapPinIcon size={20} color={c.ink} />
 					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>Как пройти</Text>
 				</Pressable>
+				{/* WhatsApp — «Я из приложения Кудайберген. Меня интересует «…»» (only when the shop's number is visible). */}
+				{shop?.phone ? (
+					<Pressable
+						onPress={() => shop.phone && openWhatsApp(shop.phone, part?.title)}
+						style={{ width: 54, height: 54, borderRadius: 14, backgroundColor: '#25D366', alignItems: 'center', justifyContent: 'center' }}
+					>
+						<WhatsAppIcon size={26} color="#FFFFFF" />
+					</Pressable>
+				) : null}
 				<Pressable
 					disabled={!shop || openChat.isPending}
 					onPress={write}
