@@ -5,6 +5,7 @@ import { EmptyState, QueryErrorBanner, Screen, ServiceIcon } from '@/components/
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
 import { MediaGallery, MediaStrip } from '@/components/media-strip'
+import { RequestFrom, isPlaceholderText } from '@/components/request-from'
 import { CheckMark, MicOutline, UrgentChip, myOfferLine } from '@/components/master-v23'
 import { AccountStatusBanner } from '@/components/account-status-banner'
 import { fontFamily, raw, useColors } from '@/theme'
@@ -158,6 +159,7 @@ export function RequestCard({
 			onPress={() => router.push({ pathname: '/master-request', params: { id: String(item.id) } })}
 			style={{ borderRadius: 20, backgroundColor: c.card, padding: 16, gap: 12 }}
 		>
+			<RequestFrom name={item.buyerName} fallback="Клиент" />
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				<View style={{ width: 46, height: 46, borderRadius: 15, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
 					<ServiceIcon code={item.service.code} size={26} color={c.brandStrong} strokeWidth={2.2} />
@@ -174,7 +176,9 @@ export function RequestCard({
 			</View>
 
 			<View style={{ gap: 6 }}>
-				<Text style={{ fontSize: 20, lineHeight: 26, fontFamily: fontFamily(600), color: c.ink }}>{item.description}</Text>
+				{isPlaceholderText(item.description) ? null : (
+					<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{item.description}</Text>
+				)}
 				{item.voice ? <VoicePlayer voice={item.voice} /> : null}
 				{full ? <MediaGallery media={item.media} /> : <MediaStrip media={item.media} />}
 			</View>
