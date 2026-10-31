@@ -16,6 +16,7 @@ import { useOpenChat } from '@/api/chats'
 import { CommentsSheet } from '@/components/comments-sheet'
 import { ChatIcon } from '@/components/icons'
 import { useVideoViewer } from '@/store/useVideoViewer'
+import { marketPlace } from '@/lib/shop-place'
 
 /**
  * Videos from the market, full screen (like reels): a video is a part for sale, swiping shows only videos.
@@ -155,7 +156,7 @@ function FeedPage({
 					}
 				)
 			: router.push('/')
-	const meta = [shop.place, shop.replyMinutes != null ? `отвечает за ${shop.replyMinutes} мин` : null].filter(Boolean).join(' · ')
+	const meta = [marketPlace(shop.place), shop.replyMinutes != null ? `отвечает за ${shop.replyMinutes} мин` : null].filter(Boolean).join(' · ')
 	const [commenting, setCommenting] = useState(false)
 	const condition = CONDITION_CHIP[item.condition]
 	const description = [condition, item.fitsLabel].filter(Boolean).join('. ')

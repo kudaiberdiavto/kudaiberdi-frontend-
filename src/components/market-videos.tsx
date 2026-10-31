@@ -7,6 +7,7 @@ import { flattenPages } from '@/api/pagination'
 import { useVideoFeed } from '@/api/catalog'
 import type { VideoFeedItem } from '@/api/types'
 import { useVideoViewer } from '@/store/useVideoViewer'
+import { marketPlace } from '@/lib/shop-place'
 
 /**
  * Videos from the market — ads, the same for everyone (not tied to a car): tiles play by themselves without sound,
@@ -56,7 +57,7 @@ export function MarketVideos() {
 						video={item.video}
 						title={item.title}
 						price={item.price}
-						place={item.shop.place}
+						place={marketPlace(item.shop.place)}
 						playing={focused && visible.includes(index)}
 						onPress={() => openFeed(item.partId)}
 					/>

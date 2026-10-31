@@ -12,9 +12,18 @@ interface ShopPlace {
 	phone?: string | null
 }
 
-/** «Ряд 14 · Бокс 12» on the market, the address off it. */
+/** Market shops say where they are: «Кудайберген · Ряд 14 · Контейнер 12». */
+export const MARKET_PREFIX = 'Кудайберген · '
+
+/** «Кудайберген · Ряд 14 · Контейнер 12» on the market, the address off it. */
 export function shopPlace(shop: ShopPlace) {
-	return shop.location ? formatPlace(shop.location) : (shop.address ?? '')
+	return shop.location ? MARKET_PREFIX + formatPlace(shop.location) : (shop.address ?? '')
+}
+
+/** The server's place line (feed, chats): a market place gets the «Кудайберген · » prefix. */
+export function marketPlace(place: string | null | undefined) {
+	if (!place) return ''
+	return place.startsWith('Ряд') ? MARKET_PREFIX + place : place
 }
 
 /**
@@ -48,5 +57,5 @@ export function open2gis(place: { lat?: number | null; lng?: number | null; addr
 
 /** The same for a card in the grid (ShopBriefDto: row / container, or the address). */
 export function briefPlace(shop: { onMarket: boolean; address?: string | null; rowLabel?: string | null; row?: string | null; container?: number | null }) {
-	return shop.onMarket ? formatPlace(shop) : (shop.address ?? '')
+	return shop.onMarket ? MARKET_PREFIX + formatPlace(shop) : (shop.address ?? '')
 }

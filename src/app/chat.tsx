@@ -23,7 +23,7 @@ export default function BuyerChatScreen() {
 	const presence = presenceLabel(chat?.online, chat?.lastSeenAt)
 	const place = shop
 		? shop.location
-			? `${shop.location.rowLabel} · конт. ${shop.location.number}`
+			? `Кудайберген · ${shop.location.rowLabel} · конт. ${shop.location.number}`
 			: (shop.address ?? '')
 		: master
 			? master.mobile
