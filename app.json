@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "kudaibergen-v2",
+    "name": "Кудайберген",
     "slug": "kudaibergen-v2",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,12 +10,20 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Покажем, где вы на схеме рынка, и построим путь к боксу."
+        "NSLocationWhenInUseUsageDescription": "Найдём мастеров рядом, когда вы отправляете заявку, и покажем дорогу к магазину.",
+        "NSMicrophoneUsageDescription": "Скажите голосом, какая запчасть нужна или что случилось с машиной, и отправляйте голосовые в чате.",
+        "NSPhotoLibraryUsageDescription": "Прикрепите фото или видео запчасти к запросу, товару или сообщению.",
+        "NSCameraUsageDescription": "Сфотографируйте или снимите видео запчасти, чтобы показать продавцу или покупателям."
       },
-      "bundleIdentifier": "com.bekturillo.kudaibergenv2",
+      "bundleIdentifier": "kg.kudaibergen.app",
       "associatedDomains": [
         "applinks:kudaibergen.kg"
-      ]
+      ],
+      "buildNumber": "1",
+      "supportsTablet": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -34,7 +42,7 @@
         "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
         "android.permission.CAMERA"
       ],
-      "package": "com.bekturillo.kudaibergenv2",
+      "package": "kg.kudaibergen.app",
       "intentFilters": [
         {
           "action": "VIEW",
@@ -66,7 +74,8 @@
             "DEFAULT"
           ]
         }
-      ]
+      ],
+      "versionCode": 1
     },
     "web": {
       "output": "static",
@@ -83,14 +92,21 @@
         }
       ],
       "expo-video",
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Скажите голосом, какая запчасть нужна или что случилось с машиной, и отправляйте голосовые в чате."
+        }
+      ],
       "expo-secure-store",
       "expo-asset",
       "@maplibre/maplibre-react-native",
       [
         "expo-camera",
         {
-          "cameraPermission": "Сфотографируйте запчасть, чтобы показать её покупателям."
+          "cameraPermission": "Сфотографируйте или снимите видео запчасти, чтобы показать продавцу или покупателям.",
+          "microphonePermission": "Запишите видео запчасти со звуком.",
+          "recordAudioAndroid": true
         }
       ],
       "./plugins/with-ios-scene-lifecycle",
@@ -103,7 +119,15 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Покажем мастерам, куда ехать — только когда вы отправляете заявку."
+          "locationWhenInUsePermission": "Найдём мастеров рядом, когда вы отправляете заявку, и покажем дорогу к магазину."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Прикрепите фото или видео запчасти к запросу, товару или сообщению.",
+          "cameraPermission": "Сфотографируйте или снимите видео запчасти, чтобы показать продавцу или покупателям.",
+          "microphonePermission": "Запишите видео запчасти со звуком."
         }
       ]
     ],
