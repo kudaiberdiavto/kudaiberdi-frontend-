@@ -89,20 +89,18 @@ export default function PhoneScreen() {
 				</View>
 			}
 			header={
-				// The brand card: the app icon, the name and what it is — the market of Kudaibergen
+				// The brand card in the logo's style: the gear mark, the name, what it is
 				<LinearGradient
-					colors={['#2D63F0', '#1D46BF']}
-					start={{ x: 0.15, y: 0 }}
-					end={{ x: 0.85, y: 1 }}
-					style={{ height: 196, borderRadius: 28, padding: 22, justifyContent: 'space-between', overflow: 'hidden' }}
+					colors={['#2355E8', '#142F8C']}
+					start={{ x: 0.1, y: 0 }}
+					end={{ x: 0.9, y: 1 }}
+					style={{ height: 196, borderRadius: 28, paddingHorizontal: 22, flexDirection: 'row', alignItems: 'center', gap: 16 }}
 				>
-					<View style={{ position: 'absolute', right: -40, top: -40, width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(255,255,255,0.08)' }} />
-					<View style={{ position: 'absolute', right: 40, bottom: -70, width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(255,255,255,0.06)' }} />
-					<Image source={require('../../assets/images/icon.png')} style={{ width: 60, height: 60, borderRadius: 16, borderWidth: 2, borderColor: 'rgba(255,255,255,0.35)' }} />
-					<View style={{ gap: 4 }}>
-						<Text style={{ fontSize: 30, lineHeight: 36, fontFamily: fontFamily(800), letterSpacing: -0.6, color: '#FFFFFF' }}>Кудайберген</Text>
-						<Text style={{ fontSize: 16, lineHeight: 22, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>
-							Рынок автозапчастей · продавцы и мастера рядом
+					<Image source={require('../../assets/images/logo-mark.png')} style={{ width: 92, height: 92 }} />
+					<View style={{ flex: 1, gap: 6 }}>
+						<Text style={{ fontSize: 28, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.5, color: '#FFFFFF' }}>Кудайберген</Text>
+						<Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.85)' }}>
+							Авторынок запчастей в Бишкеке
 						</Text>
 					</View>
 				</LinearGradient>
