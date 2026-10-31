@@ -12,15 +12,15 @@
       "distribution": "internal",
       "android": { "buildType": "apk" },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.kudaibergen.kg",
-        "EXPO_PUBLIC_CENTRIFUGO_URL": "wss://rt.kudaibergen.kg/connection/websocket"
+        "EXPO_PUBLIC_API_URL": "https://kudaibergen-back-production.up.railway.app",
+        "EXPO_PUBLIC_CENTRIFUGO_URL": "wss://discerning-embrace-production-7196.up.railway.app/connection/websocket"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.kudaibergen.kg",
-        "EXPO_PUBLIC_CENTRIFUGO_URL": "wss://rt.kudaibergen.kg/connection/websocket"
+        "EXPO_PUBLIC_API_URL": "https://kudaibergen-back-production.up.railway.app",
+        "EXPO_PUBLIC_CENTRIFUGO_URL": "wss://discerning-embrace-production-7196.up.railway.app/connection/websocket"
       }
     }
   },
