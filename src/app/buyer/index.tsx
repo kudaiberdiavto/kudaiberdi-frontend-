@@ -1,8 +1,9 @@
 import { useState, type ComponentType, type ReactNode } from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Image, Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
+import { resolveUrl } from '@/lib/api'
 import { QueryErrorBanner } from '@/components/ui'
 import {
 	BoxOutlineIcon,
@@ -298,8 +299,10 @@ function RequestCard({
 	)
 }
 
-function Tile({ children }: { children: ReactNode }) {
+/** The tile on the left: the request's photo when there is one (so the rows don't look alike), else the icon. */
+function Tile({ children, photo }: { children: ReactNode; photo?: string | null }) {
 	const c = useColors()
+	if (photo) return <Image source={{ uri: resolveUrl(photo) }} style={{ width: 52, height: 52, borderRadius: 14, backgroundColor: c.brandTint }} />
 	return (
 		<View style={{ width: 52, height: 52, borderRadius: 14, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
 			{children}
@@ -326,7 +329,7 @@ function RequestRow({ request }: { request: RequestSummary }) {
 	return (
 		<RequestCard
 			tile={
-				<Tile>
+				<Tile photo={request.thumbUrl}>
 					<BoxOutlineIcon size={22} color={c.brandStrong} />
 				</Tile>
 			}
@@ -356,7 +359,7 @@ function ServiceRow({ request }: { request: ServiceRequestSummary }) {
 	return (
 		<RequestCard
 			tile={
-				<Tile>
+				<Tile photo={request.thumbUrl}>
 					<WrenchIcon size={22} color={c.brandStrong} />
 				</Tile>
 			}

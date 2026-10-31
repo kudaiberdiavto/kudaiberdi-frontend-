@@ -1660,6 +1660,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/account-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Удалить аккаунт с сайта (страница /delete-account)
+         * @description Код входа из /otp/send; данные стираются через 30 дней, вход до этого срока отменяет удаление
+         */
+        post: operations["deleteAccount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/users/{id}/unblock": {
         parameters: {
             query?: never;
@@ -7437,6 +7457,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             expiresAt: string;
+            thumbUrl: string | null;
         };
         ServiceEstimateDto: {
             /** Format: int32 */
@@ -7511,6 +7532,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             expiresAt: string;
+            thumbUrl: string | null;
         };
         PartHintDto: {
             /** Format: int64 */
@@ -11277,6 +11299,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    deleteAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyOtpRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeletionResponse"];
+                };
             };
         };
     };
