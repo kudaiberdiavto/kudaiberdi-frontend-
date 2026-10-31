@@ -334,15 +334,20 @@ export default function SearchPartScreen() {
 					value={text}
 					onChangeText={setText}
 					maxLength={200}
-					placeholder="Например: стойки передние, пара"
+					// short hint on one line; long text wraps and the field grows instead of scrolling sideways
+					multiline
+					placeholder="Или напишите: фара, стойки…"
 					placeholderTextColor={c.muted}
 					style={{
-						height: 52,
+						minHeight: 52,
+						maxHeight: 120,
 						borderRadius: 14,
 						borderWidth: 2,
 						borderColor: c.border,
 						backgroundColor: c.card,
 						paddingHorizontal: 14,
+						paddingTop: 14,
+						paddingBottom: 14,
 						fontSize: 17.5,
 						fontFamily: fontFamily(400),
 						color: c.ink,

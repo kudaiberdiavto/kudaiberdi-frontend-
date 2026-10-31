@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Keyboard, Linking, Pressable, Text, TextInput, View } from 'react-native'
+import { Image, Keyboard, Linking, Pressable, Text, TextInput, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Button } from '@/components/ui'
 import { AUTH_FIELD_HEIGHT, AuthLayout } from '@/components/auth-layout'
-import { LoupeIcon } from '@/components/buyer-v23'
 import { fontFamily, useColors } from '@/theme'
 import { COUNTRY_CODE, formatLocalPhone, isValidLocalPhone, toE164 } from '@/lib/phone'
 import { ApiError } from '@/lib/api'
@@ -90,33 +89,23 @@ export default function PhoneScreen() {
 				</View>
 			}
 			header={
-				<>
-					<LinearGradient
-						colors={['#2155E6', '#1D46BF']}
-						start={{ x: 0.2, y: 0 }}
-						end={{ x: 0.8, y: 1 }}
-						style={{
-							width: 72,
-							height: 72,
-							borderRadius: 22,
-							alignItems: 'center',
-							justifyContent: 'center',
-							shadowColor: '#2155E6',
-							shadowOpacity: 0.3,
-							shadowOffset: { width: 0, height: 10 },
-							shadowRadius: 12,
-							elevation: 8,
-						}}
-					>
-						<LoupeIcon size={36} color="#FFFFFF" strokeWidth={2.6} />
-					</LinearGradient>
-					<Text style={{ fontSize: 32, lineHeight: 40, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink }}>
-						Кудайберген
-					</Text>
-					<Text numberOfLines={2} style={{ fontSize: 18.5, lineHeight: 26.5, fontFamily: fontFamily(400), color: c.muted }}>
-						Автозапчасти и мастера рынка в одном приложении
-					</Text>
-				</>
+				// The brand card: the app icon, the name and what it is — the market of Kudaibergen
+				<LinearGradient
+					colors={['#2D63F0', '#1D46BF']}
+					start={{ x: 0.15, y: 0 }}
+					end={{ x: 0.85, y: 1 }}
+					style={{ height: 196, borderRadius: 28, padding: 22, justifyContent: 'space-between', overflow: 'hidden' }}
+				>
+					<View style={{ position: 'absolute', right: -40, top: -40, width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(255,255,255,0.08)' }} />
+					<View style={{ position: 'absolute', right: 40, bottom: -70, width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+					<Image source={require('../../assets/images/icon.png')} style={{ width: 60, height: 60, borderRadius: 16, borderWidth: 2, borderColor: 'rgba(255,255,255,0.35)' }} />
+					<View style={{ gap: 4 }}>
+						<Text style={{ fontSize: 30, lineHeight: 36, fontFamily: fontFamily(800), letterSpacing: -0.6, color: '#FFFFFF' }}>Кудайберген</Text>
+						<Text style={{ fontSize: 16, lineHeight: 22, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>
+							Рынок автозапчастей · продавцы и мастера рядом
+						</Text>
+					</View>
+				</LinearGradient>
 			}
 			label="Номер телефона"
 			field={

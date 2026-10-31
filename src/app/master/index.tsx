@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
+import { LinearGradient } from 'expo-linear-gradient'
 import { EmptyState, QueryErrorBanner, Screen, ServiceIcon } from '@/components/ui'
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
@@ -55,16 +56,37 @@ export default function MasterRequestsScreen() {
 			<View style={{ height: 60, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), color: c.ink }}>Заявки</Text>
 			</View>
-			<Pressable
-				onPress={() => router.push('/search-part')}
-				style={{ borderRadius: 16, backgroundColor: c.card, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}
-			>
-				<View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-					<LoupeIcon size={20} color={c.brandStrong} />
-				</View>
-				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>Нужна запчасть?</Text>
-				</View>
+			{/* A part for a client's car — the same big banner as the buyer's «Найти запчасть». */}
+			<Pressable onPress={() => router.push('/search-part')}>
+				<LinearGradient
+					colors={['#2D63F0', '#1D46BF']}
+					start={{ x: 0.25, y: 0 }}
+					end={{ x: 0.75, y: 1 }}
+					style={{
+						height: 108,
+						borderRadius: 24,
+						paddingHorizontal: 18,
+						flexDirection: 'row',
+						alignItems: 'center',
+						gap: 14,
+						overflow: 'hidden',
+						shadowColor: '#1D46BF',
+						shadowOpacity: 0.32,
+						shadowOffset: { width: 0, height: 14 },
+						shadowRadius: 15,
+						elevation: 12,
+					}}
+				>
+					<View style={{ width: 46, height: 46, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' }}>
+						<LoupeIcon size={24} color="#FFFFFF" strokeWidth={2.6} />
+					</View>
+					<View style={{ flex: 1, gap: 3 }}>
+						<Text style={{ fontSize: 23, lineHeight: 29, fontFamily: fontFamily(800), letterSpacing: -0.4, color: '#FFFFFF' }}>Нужна запчасть?</Text>
+						<Text style={{ fontSize: 15, lineHeight: 20, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>
+							Для машины клиента — продавцы ответят с ценой
+						</Text>
+					</View>
+				</LinearGradient>
 			</Pressable>
 			{partRequests.map((request) => (
 				<Pressable
