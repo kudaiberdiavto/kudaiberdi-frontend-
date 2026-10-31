@@ -162,10 +162,15 @@ export default function BuyerHomeScreen() {
 					<ParcelRow key={order.id} order={order} />
 				))}
 
-				<View style={{ height: 2 }} />
-				<Caps link={items.length > PREVIEW ? (all ? 'Свернуть' : 'Все') : undefined} onLink={() => setAll(!all)}>
-					Мои запросы
-				</Caps>
+				{/* No requests yet — no empty heading either. */}
+				{items.length ? (
+					<>
+						<View style={{ height: 2 }} />
+						<Caps link={items.length > PREVIEW ? (all ? 'Свернуть' : 'Все') : undefined} onLink={() => setAll(!all)}>
+							Мои запросы
+						</Caps>
+					</>
+				) : null}
 				<QueryErrorBanner
 					error={requests.error}
 					onRetry={() => requests.refetch()}
