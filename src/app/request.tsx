@@ -305,27 +305,32 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 			{reply.voice ? <VoicePlayer voice={reply.voice} tone="green" /> : null}
 			{reply.message ? <Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(400), color: c.inkSecondary }}>{reply.message}</Text> : null}
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+				{/* The seller hid the number — the main button writes to them instead of a dead «Позвонить». */}
 				<Pressable
-					onPress={() => shop.phone && Linking.openURL(`tel:${shop.phone}`)}
-					disabled={!shop.phone}
+					onPress={() =>
+						shop.phone
+							? Linking.openURL(`tel:${shop.phone}`)
+							: reply.chatId && router.push({ pathname: '/chat', params: { chatId: String(reply.chatId) } })
+					}
 					style={{
 						flex: 1,
 						height: 48,
 						borderRadius: 14,
-						backgroundColor: c.success,
-						opacity: shop.phone ? 1 : 0.45,
+						backgroundColor: shop.phone ? c.success : c.brand,
 						flexDirection: 'row',
 						alignItems: 'center',
 						justifyContent: 'center',
 						gap: 8,
 					}}
 				>
-					<CallIcon size={20} color="#FFFFFF" strokeWidth={2.4} />
-					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Позвонить</Text>
+					{shop.phone ? <CallIcon size={20} color="#FFFFFF" strokeWidth={2.4} /> : <BubbleIcon size={20} color="#FFFFFF" />}
+					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{shop.phone ? 'Позвонить' : 'Написать'}</Text>
 				</Pressable>
-				<SquareButton onPress={() => reply.chatId && router.push({ pathname: '/chat', params: { chatId: String(reply.chatId) } })}>
-					<BubbleIcon size={22} color={c.brandStrong} />
-				</SquareButton>
+				{shop.phone ? (
+					<SquareButton onPress={() => reply.chatId && router.push({ pathname: '/chat', params: { chatId: String(reply.chatId) } })}>
+						<BubbleIcon size={22} color={c.brandStrong} />
+					</SquareButton>
+				) : null}
 				<SquareButton
 					onPress={() =>
 						openShopRoute(shop, { chatId: reply.chatId })
