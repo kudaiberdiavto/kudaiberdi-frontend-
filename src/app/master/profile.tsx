@@ -27,7 +27,7 @@ export default function MasterProfileTab() {
 	const master = profile.data
 	const name = master?.name ?? user?.name ?? ' '
 	const phone = master?.phone ?? user?.phone
-	const edit = () => router.push('/master-profile')
+	const edit = (section?: 'brands' | 'place') => router.push({ pathname: '/master-profile', params: section ? { section } : {} })
 
 	const card = { borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 12 } as const
 	const header = (text: string, action?: () => void) => (
@@ -49,7 +49,7 @@ export default function MasterProfileTab() {
 			<ScrollView contentContainerStyle={{ paddingTop: 4, paddingBottom: 16, gap: 12 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={me.error ?? profile.error ?? save.error} onRetry={() => (me.refetch(), profile.refetch())} />
 
-				<LinearGradient colors={['#2355E8', '#142F8C']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 16, gap: 14 }}>
+				<LinearGradient colors={['#2355E8', '#142F8C']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 16 }}>
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
 						{master?.avatarUrl ? (
 							<Image source={{ uri: resolveUrl(master.avatarUrl) }} style={{ width: 64, height: 64, borderRadius: 32, borderWidth: 2, borderColor: '#FFFFFF' }} />
@@ -76,9 +76,6 @@ export default function MasterProfileTab() {
 							</Text>
 						</View>
 					</View>
-					<Pressable onPress={edit} style={{ height: 44, borderRadius: 14, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#1C44B8' }}>Редактировать</Text>
-					</Pressable>
 				</LinearGradient>
 
 				<View style={{ ...card, flexDirection: 'row', alignItems: 'center' }}>
@@ -95,7 +92,7 @@ export default function MasterProfileTab() {
 				</View>
 
 				<View style={card}>
-					{header('Услуги', edit)}
+					{header('Услуги', () => edit())}
 					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 						{(master?.services ?? []).map((service) => (
 							<View
@@ -110,7 +107,7 @@ export default function MasterProfileTab() {
 				</View>
 
 				<View style={card}>
-					{header('Марки', edit)}
+					{header('Марки', () => edit('brands'))}
 					{master?.allBrands ? (
 						<Text style={{ fontSize: 16, fontFamily: fontFamily(600), color: c.inkSecondary }}>Работаю со всеми марками</Text>
 					) : (
@@ -128,7 +125,8 @@ export default function MasterProfileTab() {
 					)}
 				</View>
 
-				<View style={{ ...card, gap: 0, paddingVertical: 4 }}>
+				<View style={{ ...card, gap: 0, paddingBottom: 4 }}>
+					{header('Где работаю', () => edit('place'))}
 					<Pressable
 						disabled={!master}
 						onPress={() => master && open2gis(master)}

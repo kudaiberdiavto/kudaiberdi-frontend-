@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -43,7 +43,17 @@ export default function MasterProfileScreen() {
 function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error: Error | null }) {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
-	const first = useLocalSearchParams<{ first?: string }>().first === '1' || !initial
+	const params = useLocalSearchParams<{ first?: string; section?: 'brands' | 'place' }>()
+	const first = params.first === '1' || !initial
+	// «Изменить» on a block of «Мой сервис» opens the form at that block
+	const scroll = useRef<ScrollView>(null)
+	const scrolled = useRef(false)
+	const anchor = (section: 'brands' | 'place') => (e: { nativeEvent: { layout: { y: number } } }) => {
+		if (params.section !== section || scrolled.current) return
+		scrolled.current = true
+		const y = e.nativeEvent.layout.y - 8
+		setTimeout(() => scroll.current?.scrollTo({ y, animated: true }), 50)
+	}
 	const types = useServiceTypes().data
 	const brands = useBrands({ popular: true }).data ?? []
 	const me = useMe().data
@@ -104,7 +114,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>Мои услуги</Text>
 			</View>
 
-			<ScrollView contentContainerStyle={{ paddingTop: 8, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+			<ScrollView ref={scroll} contentContainerStyle={{ paddingTop: 8, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={error ?? save.error} />
 
 				{/* Not on the mockup: the name buyers see on offers [37] — asked once, on the first entry. */}
@@ -124,7 +134,9 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 				<SectionLabel>Что делаю</SectionLabel>
 				<ServiceGrid types={types} isSelected={(code) => form.services.includes(code)} onPress={toggleService} tileHeight={84} />
 
-				<SectionLabel>Марки</SectionLabel>
+				<View onLayout={anchor('brands')}>
+					<SectionLabel>Марки</SectionLabel>
+				</View>
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
 					{!form.allBrands
 						? selectedBrands.map((brand) => (
@@ -182,7 +194,9 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 					))}
 				</View>
 
-				<SectionLabel>Где работаю</SectionLabel>
+				<View onLayout={anchor('place')}>
+					<SectionLabel>Где работаю</SectionLabel>
+				</View>
 				{editPlace ? (
 					<View style={{ gap: 8 }}>
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 48, borderRadius: 12, backgroundColor: c.card, borderWidth: 2, borderColor: c.brand, paddingHorizontal: 14 }}>
