@@ -1,13 +1,11 @@
 import { useState } from 'react'
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Image, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { BigButton, Caps, TopBar, priceDigits } from '@/components/buyer-v23'
 import { QueryErrorBanner } from '@/components/ui'
 import { PlayIcon } from '@/components/voice'
 import { YellowChip, formatKgPhone } from '@/components/video-v23'
-import { openCourierWhatsApp } from '@/lib/whatsapp'
-import { WhatsAppIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { usePart } from '@/api/catalog'
@@ -38,7 +36,6 @@ export default function DeliveryScreen() {
 	const region = regions.find((item) => item.code === regionCode)
 	const recipient = name ?? me?.name ?? ''
 	const recipientPhone = phone ?? formatKgPhone(me?.phone)
-	const courierPhone = tariffs.data?.courierPhone
 	const video = part?.video
 	const poster = resolveUrl(video?.posterUrl ?? part?.photos[0]?.thumbUrl ?? null)
 	const ready = Boolean(region && address.trim() && recipient.trim() && recipientPhone.replace(/\D/g, '').length >= 9)
@@ -55,7 +52,13 @@ export default function DeliveryScreen() {
 				recipientName: recipient.trim(),
 				recipientPhone: recipientPhone.replace(/[^\d+]/g, ''),
 			},
-			{ onSuccess: (order) => router.replace({ pathname: '/delivery-order', params: { id: String(order.id) } }) }
+			{
+				onSuccess: (order) => {
+					router.replace({ pathname: '/delivery-order', params: { id: String(order.id) } })
+					// The buyer arranges it with Ылдам: WhatsApp opens with the form filled — from whom, from where, to whom.
+					Linking.openURL(order.courierWhatsappUrl)
+				},
+			}
 		)
 
 	const input = {
@@ -156,15 +159,6 @@ export default function DeliveryScreen() {
 						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>Стоимость — у {tariffs.data?.courierName ?? 'Ылдам Экспресс'}</Text>
 						<Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(400), color: c.inkSecondary }}>Цену доставки обговорите с ними</Text>
 					</View>
-					{courierPhone ? (
-						<Pressable
-							onPress={() => openCourierWhatsApp(courierPhone)}
-							style={{ height: 40, paddingHorizontal: 12, borderRadius: 12, backgroundColor: '#25D366', flexDirection: 'row', alignItems: 'center', gap: 6 }}
-						>
-							<WhatsAppIcon size={20} color="#FFFFFF" />
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>WhatsApp</Text>
-						</Pressable>
-					) : null}
 				</View>
 				<BigButton label="Заказать доставку" tone="green" onPress={submit} loading={create.isPending} disabled={!ready} />
 			</View>

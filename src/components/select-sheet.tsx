@@ -61,7 +61,10 @@ export function SelectSheet<K extends string | number>({
 	onPick,
 	onClose,
 	searchPlaceholder = 'Поиск',
+	onSearch,
 }: {
+	/** The server searches (brands by «мерс», «бэха»): the sheet shows `options` as they come and always has the field. */
+	onSearch?: (q: string) => void
 	title: string
 	options: SelectOption<K>[]
 	selected?: K | null
@@ -73,8 +76,8 @@ export function SelectSheet<K extends string | number>({
 	const insets = useSafeAreaInsets()
 	const [q, setQ] = useState('')
 	const query = q.trim().toLowerCase()
-	const shown = query ? options.filter((o) => o.label.toLowerCase().includes(query)) : options
-	const searchable = options.length > 12
+	const shown = query && !onSearch ? options.filter((o) => o.label.toLowerCase().includes(query)) : options
+	const searchable = Boolean(onSearch) || options.length > 12
 
 	return (
 		<Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>

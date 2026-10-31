@@ -6282,6 +6282,7 @@ export interface components {
             deliveredAt: string | null;
             /** Format: date-time */
             cancelledAt: string | null;
+            courierWhatsappUrl: string;
         };
         DeliveryPartDto: {
             /** Format: int64 */

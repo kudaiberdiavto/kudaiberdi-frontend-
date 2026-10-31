@@ -1,19 +1,17 @@
 import { useState } from 'react'
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Share, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Share, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams } from 'expo-router'
 import { BigButton, BubbleIcon, TickIcon, TopBar, priceDigits } from '@/components/buyer-v23'
 import { QueryErrorBanner } from '@/components/ui'
 import { ClockOutline, routeTitle, toRegion } from '@/components/video-v23'
-import { openCourierWhatsApp } from '@/lib/whatsapp'
 import { WhatsAppIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { formatDay, formatWhenAt } from '@/lib/format'
 import { useMe } from '@/api/me'
 import {
 	useDeliveryOrder,
-	useDeliveryTariffs,
 	usePackDeliveryOrder,
 	usePickedUpDeliveryOrder,
 	useReceiveDeliveryOrder,
@@ -83,7 +81,6 @@ const CAPTION: Record<DeliveryOrder['status'], string> = {
 
 function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 	const c = useColors()
-	const courierPhone = useDeliveryTariffs().data?.courierPhone
 	const receive = useReceiveDeliveryOrder(order.id)
 	const destination = order.districtName ?? order.regionName
 	const steps = [
@@ -183,9 +180,10 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Чат с продавцом</Text>
 						</Pressable>
 					) : null}
-					{courierPhone ? (
+					{order.courierWhatsappUrl ? (
 						<Pressable
-							onPress={() => openCourierWhatsApp(courierPhone, order.number)}
+							// WhatsApp Ылдам with the form filled: the seller, the box / shop address, phones, the parcel.
+							onPress={() => Linking.openURL(order.courierWhatsappUrl)}
 							style={{
 								flex: 1,
 								height: 52,

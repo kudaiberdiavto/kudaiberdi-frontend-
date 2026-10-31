@@ -13,7 +13,7 @@ import { flattenPages } from '@/api/pagination'
 import { usePublicShop, useShop, useShopParts, useShopReviews, useSignedIn, useToggleShopFavorite } from '@/api/catalog'
 import { useOpenChat } from '@/api/chats'
 import { ComplainLink, ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
-import { briefPlace, openShopRoute } from '@/lib/shop-place'
+import { briefPlace, open2gis, openShopRoute } from '@/lib/shop-place'
 
 /** Filled rating stars — gold, the empty ones stay grey. */
 const STAR = '#F5A623'
@@ -136,11 +136,12 @@ export default function SellerProfileForBuyerScreen() {
 								{shop?.location ? `${formatSide(shop.location.side)} сторона`.replace(/^./, (ch) => ch.toUpperCase()) : shop ? 'Магазин' : ' '}
 							</Text>
 							<Pressable
-								onPress={route}
+								// The place in 2GIS — a market box shows the market itself.
+								onPress={() => shop && open2gis({ lat: shop.lat, lng: shop.lng, address: shop.address ?? 'Рынок Кудайберген, Бишкек' })}
 								style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: c.brandTint, flexDirection: 'row', alignItems: 'center', gap: 6 }}
 							>
 								<MapPinIcon size={16} color={c.brandStrong} />
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop && !shop.location ? '2ГИС' : 'На карте'}</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>2ГИС</Text>
 							</Pressable>
 						</View>
 					</View>
