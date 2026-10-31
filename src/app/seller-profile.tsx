@@ -2,18 +2,19 @@ import { useState } from 'react'
 import { Image, Linking, Pressable, ScrollView, Share, Text, View, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { LocationCard, ProductCard, QueryErrorBanner } from '@/components/ui'
+import { LocationCard, QueryErrorBanner } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { ChatIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, PhoneIcon, ShareIcon, WhatsAppIcon } from '@/components/icons'
 import { openWhatsApp } from '@/lib/whatsapp'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
-import { formatDay, formatPrice, formatSide, plural } from '@/lib/format'
+import { formatDay, formatSide, plural } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
 import { usePublicShop, useShop, useShopParts, useShopReviews, useSignedIn, useToggleShopFavorite } from '@/api/catalog'
 import { useOpenChat } from '@/api/chats'
 import { ComplainLink, ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
-import { briefPlace, open2gis, openShopRoute } from '@/lib/shop-place'
+import { open2gis, openShopRoute } from '@/lib/shop-place'
+import { PartTile } from '@/components/catalog-screen'
 
 /** Filled rating stars — gold, the empty ones stay grey. */
 const STAR = '#F5A623'
@@ -36,6 +37,7 @@ export default function SellerProfileForBuyerScreen() {
 
 	const [tab, setTab] = useState<Tab>('parts')
 	const [complaint, setComplaint] = useState<ComplaintTarget | null>(null)
+	const [showAllBrands, setShowAllBrands] = useState(false)
 	const parts = useShopParts(shopId)
 	const reviews = useShopReviews(shopId, tab === 'reviews')
 	const favorite = useToggleShopFavorite(shopId)
@@ -149,28 +151,44 @@ export default function SellerProfileForBuyerScreen() {
 					{brands.length ? (
 						<View style={{ gap: 8 }}>
 							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ПРОДАЁТ ДЛЯ МАРОК</Text>
-							<View style={{ flexDirection: 'row' }}>
-								{brands.slice(0, VISIBLE_BRANDS).map((brand, i) => (
-									<View key={brand.id} style={{ marginLeft: i === 0 ? 0 : -8 }}>
-										<BrandLogo brand={brand} size={36} />
-									</View>
-								))}
-								{brands.length > VISIBLE_BRANDS ? (
-									<View
-										style={{
-											marginLeft: -8,
-											width: 36,
-											height: 36,
-											borderRadius: 18,
-											backgroundColor: c.card,
-											alignItems: 'center',
-											justifyContent: 'center',
-										}}
-									>
-										<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.muted }}>+{brands.length - VISIBLE_BRANDS}</Text>
-									</View>
-								) : null}
-							</View>
+							{showAllBrands ? (
+								// all brands as chips: logo + name
+								<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+									{brands.map((brand) => (
+										<View
+											key={brand.id}
+											style={{ height: 32, paddingLeft: 4, paddingRight: 10, borderRadius: 16, backgroundColor: c.card, flexDirection: 'row', alignItems: 'center', gap: 6 }}
+										>
+											<BrandLogo brand={brand} size={24} />
+											<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.ink }}>{brand.name}</Text>
+										</View>
+									))}
+								</View>
+							) : (
+								// a tap on the logos (or «+N») shows every brand
+								<Pressable onPress={() => setShowAllBrands(true)} disabled={brands.length <= VISIBLE_BRANDS} style={{ flexDirection: 'row' }}>
+									{brands.slice(0, VISIBLE_BRANDS).map((brand, i) => (
+										<View key={brand.id} style={{ marginLeft: i === 0 ? 0 : -8 }}>
+											<BrandLogo brand={brand} size={36} />
+										</View>
+									))}
+									{brands.length > VISIBLE_BRANDS ? (
+										<View
+											style={{
+												marginLeft: -8,
+												height: 36,
+												paddingHorizontal: 10,
+												borderRadius: 18,
+												backgroundColor: c.card,
+												alignItems: 'center',
+												justifyContent: 'center',
+											}}
+										>
+											<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>+{brands.length - VISIBLE_BRANDS}</Text>
+										</View>
+									) : null}
+								</Pressable>
+							)}
 						</View>
 					) : null}
 
@@ -244,19 +262,10 @@ export default function SellerProfileForBuyerScreen() {
 					{tab === 'parts' ? (
 						<View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 10, rowGap: 20, paddingBottom: 24 }}>
 							{partItems.map((part) => (
-								<ProductCard
-									key={part.id}
-									width={(width - 32 - 10) / 2}
-									price={formatPrice(part.price)}
-									title={part.title}
-									fits={part.fits === true}
-									location={briefPlace(part.shop)}
-									photoUrl={resolveUrl(part.mainPhoto?.thumbUrl ?? part.mainPhoto?.url)}
-									shopAvatarUrl={resolveUrl(part.shop.avatarUrl)}
-									dimmed={part.stockStatus === 'OUT_OF_STOCK'}
-									favorite={part.isFavorite}
-									onPress={() => router.push({ pathname: '/part', params: { id: String(part.id) } })}
-								/>
+								// the catalog's tile: a video part shows its poster with ▶ and opens the feed
+								<View key={part.id} style={{ width: (width - 32 - 10) / 2 }}>
+									<PartTile part={part} />
+								</View>
 							))}
 							{parts.hasNextPage ? (
 								<Pressable onPress={() => parts.fetchNextPage()} style={{ width: '100%', paddingVertical: 12, alignItems: 'center' }}>
