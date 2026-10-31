@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { ActivityIndicator, FlatList, Image, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from 'react-native'
+import { ActivityIndicator, FlatList, Image, KeyboardAvoidingView, Linking, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from 'react-native'
 import { router } from 'expo-router'
+import { API_URL } from '@/lib/env'
 import Svg, { Path } from 'react-native-svg'
 import { BottomSheet, Button, EmptyState, LanguageSwitch, PhotoPlaceholder, QueryErrorBanner, Screen, SettingsRow, Toggle } from '@/components/ui'
 import { PlusIcon, TagIcon } from '@/components/icons'
@@ -301,7 +302,8 @@ function MenuSheet({ onClose }: { onClose: () => void }) {
 						})
 					}
 				/>
-				<SettingsRow label="Выйти" labelColor={c.danger} onPress={() => signOut()} />
+				<SettingsRow label="Политика конфиденциальности" value="›" onPress={() => Linking.openURL(`${API_URL}/privacy`)} />
+					<SettingsRow label="Выйти" labelColor={c.danger} onPress={() => signOut()} />
 					<SettingsRow label="Удалить аккаунт" labelColor={c.muted} divider={false} onPress={() => {
 						onClose()
 						router.push('/delete-account')

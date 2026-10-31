@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Alert, Image, Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
+import { API_URL } from '@/lib/env'
 import { BottomSheet, QueryErrorBanner, SettingsRow, Toggle } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { BellIcon, Caps, ChevronIcon, GlobeIcon, HelpIcon, PassportIcon, PlusThinIcon, SwapIcon, TopBar } from '@/components/buyer-v23'
@@ -145,6 +146,11 @@ export default function BuyerProfileScreen() {
 					style={{ marginTop: 14, textAlign: 'center', fontSize: 15, fontFamily: fontFamily(500), color: c.danger }}
 				>
 					Удалить аккаунт
+				</Text>
+				<Text style={{ marginTop: 14, textAlign: 'center', fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text onPress={() => Linking.openURL(`${API_URL}/terms`)}>Правила</Text>
+					{'  ·  '}
+					<Text onPress={() => Linking.openURL(`${API_URL}/privacy`)}>Политика конфиденциальности</Text>
 				</Text>
 			</ScrollView>
 

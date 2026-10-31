@@ -1,5 +1,6 @@
-import { Image, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native'
+import { Image, Linking, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native'
 import { router } from 'expo-router'
+import { API_URL } from '@/lib/env'
 import { Avatar, BrandLogo, QueryErrorBanner, Screen, ServiceIcon, SettingsRow } from '@/components/ui'
 import { MarketSchemeView } from '@/components/market-scheme-view'
 import { MobileTruck, Switch } from '@/components/master-v23'
@@ -192,6 +193,7 @@ export default function MasterProfileTab() {
 							onPress={() => setRole.mutate('SELLER', { onSuccess: () => router.replace('/seller') })}
 						/>
 					) : null}
+					<SettingsRow label="Политика конфиденциальности" value="›" onPress={() => Linking.openURL(`${API_URL}/privacy`)} />
 					<SettingsRow label="Выйти" labelColor={c.danger} onPress={() => signOut()} />
 					<SettingsRow label="Удалить аккаунт" labelColor={c.muted} divider={false} onPress={() => router.push('/delete-account')} />
 				</View>

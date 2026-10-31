@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Keyboard, Pressable, Text, TextInput, View } from 'react-native'
+import { Keyboard, Linking, Pressable, Text, TextInput, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Button } from '@/components/ui'
@@ -8,6 +8,7 @@ import { LoupeIcon } from '@/components/buyer-v23'
 import { fontFamily, useColors } from '@/theme'
 import { COUNTRY_CODE, formatLocalPhone, isValidLocalPhone, toE164 } from '@/lib/phone'
 import { ApiError } from '@/lib/api'
+import { API_URL } from '@/lib/env'
 import { useSendOtp } from '@/api/auth'
 import { homeHref, useSession } from '@/store/useSession'
 
@@ -157,7 +158,22 @@ export default function PhoneScreen() {
 					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>Отправим SMS с кодом</Text>
 				)
 			}
-			footer={<Button label="Получить код" disabled={!isValidLocalPhone(phone)} loading={sendOtp.isPending} onPress={submit} />}
+			footer={
+				<View style={{ gap: 12 }}>
+					<Button label="Получить код" disabled={!isValidLocalPhone(phone)} loading={sendOtp.isPending} onPress={submit} />
+					{/* Entering means accepting the rules (App Store 1.2: user content needs agreed terms). */}
+					<Text style={{ fontSize: 13.5, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
+						Продолжая, вы принимаете{' '}
+						<Text onPress={() => Linking.openURL(`${API_URL}/terms`)} style={{ color: c.brandStrong }}>
+							Правила пользования
+						</Text>{' '}
+						и{' '}
+						<Text onPress={() => Linking.openURL(`${API_URL}/privacy`)} style={{ color: c.brandStrong }}>
+							Политику конфиденциальности
+						</Text>
+					</Text>
+				</View>
+			}
 		/>
 	)
 }
