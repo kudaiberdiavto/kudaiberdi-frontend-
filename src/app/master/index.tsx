@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { FlatList, Pressable, Text, View } from 'react-native'
+import { FlatList, Image, Pressable, Text, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { EmptyState, QueryErrorBanner, Screen, ServiceIcon } from '@/components/ui'
@@ -13,6 +13,7 @@ import { fontFamily, raw, useColors } from '@/theme'
 import { formatAgo, formatDistance, formatPrice, minutesLeft } from '@/lib/format'
 import { markServiceSeen, serviceName, useMasterFeed, useMasterOffer, useMyMaster, useServiceTypes } from '@/api/services'
 import { flattenPages } from '@/api/pagination'
+import { resolveUrl } from '@/lib/api'
 import { useMyRequests } from '@/api/requests'
 import { LoupeIcon } from '@/components/buyer-v23'
 import type { MasterFeedItem } from '@/api/types'
@@ -47,6 +48,8 @@ export default function MasterRequestsScreen() {
 
 	// First master entry: fill the profile before the feed.
 	if (profile.isSuccess && !profile.data) return <Redirect href={{ pathname: '/master-profile', params: { first: '1' } }} />
+
+	const sectionStyle = { fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted } as const
 
 	const answer = (item: MasterFeedItem, record: boolean) =>
 		router.push({ pathname: '/master-answer', params: { id: String(item.id), ...(record ? { record: '1' } : {}) } })
@@ -88,20 +91,32 @@ export default function MasterRequestsScreen() {
 					</View>
 				</LinearGradient>
 			</Pressable>
+			{/* The master's own part requests — a separate, labelled block so they don't mix with clients' requests. */}
+			{partRequests.length ? <Text style={[sectionStyle, { marginTop: 8 }]}>Мои запросы запчастей</Text> : null}
 			{partRequests.map((request) => (
 				<Pressable
 					key={request.id}
 					onPress={() => router.push({ pathname: '/request', params: { id: String(request.id) } })}
-					style={{ borderRadius: 16, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14, gap: 2 }}
+					style={{ borderRadius: 16, backgroundColor: c.card, padding: 10, flexDirection: 'row', alignItems: 'center', gap: 12 }}
 				>
-					<Text numberOfLines={1} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
-						{request.text} · {request.carLabel}
-					</Text>
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: request.haveCount ? c.success : c.muted }}>
-						{request.haveCount
-							? `${request.haveCount} есть${request.minPrice != null ? ` · от ${formatPrice(request.minPrice)}` : ''}`
-							: `Ищем ещё ${minutesLeft(request.expiresAt)} мин`}
-					</Text>
+					{request.thumbUrl ? (
+						<Image source={{ uri: resolveUrl(request.thumbUrl) }} style={{ width: 48, height: 48, borderRadius: 12 }} />
+					) : (
+						<View style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+							<LoupeIcon size={22} color={c.brandStrong} strokeWidth={2.4} />
+						</View>
+					)}
+					<View style={{ flex: 1, gap: 2 }}>
+						<Text numberOfLines={1} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
+							{request.text}
+						</Text>
+						<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(600), color: request.haveCount ? c.success : c.muted }}>
+							{request.haveCount
+								? `${request.haveCount} есть${request.minPrice != null ? ` · от ${formatPrice(request.minPrice)}` : ''}`
+								: `Ищем ещё ${minutesLeft(request.expiresAt)} мин`}
+							<Text style={{ color: c.muted, fontFamily: fontFamily(400) }}> · {request.carLabel}</Text>
+						</Text>
+					</View>
 				</Pressable>
 			))}
 			{/* Requests reach only ACTIVE masters — say why the feed is empty. */}
@@ -112,6 +127,7 @@ export default function MasterRequestsScreen() {
 				action={{ label: 'Изменить профиль', onPress: () => router.push('/master-profile') }}
 			/>
 			<QueryErrorBanner error={fresh.error ?? answered.error ?? offer.error} onRetry={() => (fresh.refetch(), answered.refetch())} />
+			<Text style={[sectionStyle, { marginTop: 8 }]}>Заявки от клиентов</Text>
 		</View>
 	)
 
@@ -124,7 +140,7 @@ export default function MasterRequestsScreen() {
 				contentContainerStyle={{ flexGrow: 1, gap: 10, paddingBottom: 16 }}
 				ListEmptyComponent={
 					fresh.isSuccess && answered.isSuccess ? (
-						<EmptyState title="Новых заявок нет" icon={RequestsIcon} />
+						<EmptyState title="Пока заявок нет" icon={RequestsIcon} />
 					) : null
 				}
 				showsVerticalScrollIndicator={false}
