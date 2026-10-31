@@ -6,7 +6,7 @@ import * as Location from 'expo-location'
 import { BottomSheet, BrandLogo, Button, QueryErrorBanner } from '@/components/ui'
 import { BackIcon, BrandTile, Label, PlusIcon, TickIcon } from '@/components/seller-v23'
 import { LocateIcon, SearchIcon } from '@/components/icons'
-import { currentCoords } from '@/lib/locate'
+import { addressAt, currentCoords } from '@/lib/locate'
 import { fontFamily, raw, useColors } from '@/theme'
 import { useRowContainers, useRows } from '@/api/market'
 import { useBrands } from '@/api/directory'
@@ -63,8 +63,8 @@ export default function BoxSelectScreen() {
 			const coords = await currentCoords()
 			setPoint({ lat: coords.latitude, lng: coords.longitude })
 			if (!address.trim()) {
-				const [place] = await Location.reverseGeocodeAsync(coords).catch(() => [])
-				if (place) setAddress([place.street, place.streetNumber].filter(Boolean).join(' ') || place.name || '')
+				const address = await addressAt(coords)
+				if (address) setAddress(address)
 			}
 		} catch {
 			setLocateError('Не удалось определить место — попробуйте ещё раз')

@@ -24,3 +24,18 @@ export async function currentCoords(): Promise<Location.LocationObjectCoords> {
 	if (fresh) return fresh.coords
 	return (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Lowest })).coords
 }
+
+/**
+ * The address of a point for a person: «ул. Ахунбаева 98, Бишкек». In Kyrgyzstan the geocoder often leaves
+ * streetNumber empty and puts the house into `name` — take whichever has the number, then add the city.
+ */
+export async function addressAt(coords: { latitude: number; longitude: number }): Promise<string | null> {
+	const [place] = await Location.reverseGeocodeAsync(coords).catch(() => [] as Location.LocationGeocodedAddress[])
+	if (!place) return null
+	const withNumber = place.streetNumber ? [place.street, place.streetNumber].filter(Boolean).join(' ') : null
+	const named = place.name && /\d/.test(place.name) ? place.name : null
+	const line = withNumber ?? named ?? place.street ?? place.name ?? place.district ?? null
+	const city = place.city ?? place.subregion ?? null
+	if (!line) return city
+	return city && !line.includes(city) ? `${line}, ${city}` : line
+}

@@ -3,7 +3,7 @@ import { Image, Pressable, ScrollView, Text, TextInput, View } from 'react-nativ
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Location from 'expo-location'
-import { currentCoords } from '@/lib/locate'
+import { addressAt, currentCoords } from '@/lib/locate'
 import { BrandLogo, ServiceIcon } from '@/components/ui'
 import { VoicePlayer, useVoiceNote, voiceClock } from '@/components/voice'
 import { CameraOutline, CloseX, MicOutline, ModalSheet, PinOutline, SendPlane } from '@/components/master-v23'
@@ -81,7 +81,8 @@ export default function ServiceNewScreen() {
 				return
 			}
 			const coords = await currentCoords()
-			setPoint({ lat: coords.latitude, lng: coords.longitude, label: 'Где я сейчас' })
+			const address = await addressAt(coords)
+			setPoint({ lat: coords.latitude, lng: coords.longitude, label: address ?? 'Где я сейчас', address: address ?? undefined })
 			setPickPoint(false)
 		} catch {
 			setLocateError('Не удалось определить место — попробуйте ещё раз')
