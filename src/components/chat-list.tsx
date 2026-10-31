@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { FlatList, Image, Pressable, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { Avatar, EmptyState, QueryErrorBanner, Screen } from '@/components/ui'
@@ -13,45 +12,27 @@ import { QUICK_TEXT, SYSTEM_TEXT } from './chat-conversation'
 
 /**
  * 16 «Чаты» — the buyer's chats or the box's chats. Rows are kept live by the CHAT event.
- * `sides` — a switch between sides (a master: clients and the sellers they asked for parts).
+ * `also` — one more side in the same list, newest first (a master: clients and the sellers they asked for parts).
  */
-export function ChatList({ as: initial, sides }: { as: ChatListAs; sides?: { as: ChatListAs; label: string }[] }) {
+export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 	const c = useColors()
-	const [as, setAs] = useState<ChatListAs>(initial)
 	const chats = useChats(as)
-	const items = flattenPages(chats.data)
+	const extra = useChats(also ?? as, Boolean(also))
+	const items = also
+		? [...flattenPages(chats.data), ...flattenPages(extra.data)].sort((x, y) =>
+				(y.lastMessage?.at ?? y.updatedAt).localeCompare(x.lastMessage?.at ?? x.updatedAt)
+			)
+		: flattenPages(chats.data)
 
 	return (
 		<Screen padding={0}>
 			<View style={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 12 }}>
 				<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.52, color: c.ink }}>Чаты</Text>
-				{sides ? (
-					<View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
-						{sides.map((side) => {
-							const active = side.as === as
-							return (
-								<Pressable
-									key={side.as}
-									onPress={() => setAs(side.as)}
-									style={{
-										height: 36,
-										paddingHorizontal: 14,
-										borderRadius: 18,
-										backgroundColor: active ? c.brand : c.card,
-										justifyContent: 'center',
-									}}
-								>
-									<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.ink }}>{side.label}</Text>
-								</Pressable>
-							)
-						})}
-					</View>
-				) : null}
 			</View>
 
 			<QueryErrorBanner
-				error={chats.error}
-				onRetry={() => chats.refetch()}
+				error={chats.error ?? (also ? extra.error : null)}
+				onRetry={() => (chats.refetch(), also && extra.refetch())}
 				offlineText="Нет сети. Покажем чаты, когда появится"
 				style={{ marginHorizontal: 16, marginBottom: 12 }}
 			/>
@@ -59,8 +40,11 @@ export function ChatList({ as: initial, sides }: { as: ChatListAs; sides?: { as:
 			<FlatList
 				data={items}
 				keyExtractor={(item) => String(item.id)}
-				onEndReached={() => chats.hasNextPage && !chats.isFetchingNextPage && chats.fetchNextPage()}
-				onRefresh={() => chats.refetch()}
+				onEndReached={() => {
+					if (chats.hasNextPage && !chats.isFetchingNextPage) chats.fetchNextPage()
+					if (also && extra.hasNextPage && !extra.isFetchingNextPage) extra.fetchNextPage()
+				}}
+				onRefresh={() => (chats.refetch(), also && extra.refetch())}
 				refreshing={false}
 				renderItem={({ item, index }) => <ChatRow chat={item} highlight={index === 0} />}
 				contentContainerStyle={{ flexGrow: 1 }}

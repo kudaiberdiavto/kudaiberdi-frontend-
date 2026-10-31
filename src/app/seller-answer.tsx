@@ -4,14 +4,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { BrandLogo } from '@/components/ui'
 import { VoicePlayer, useVoiceNote, voiceClock } from '@/components/voice'
-import { Label, MicIcon, PlaneIcon, SparkleIcon, TickIcon } from '@/components/seller-v23'
+import { Label, MicIcon, PlaneIcon, TickIcon } from '@/components/seller-v23'
+import { MediaStrip, photosAsMedia } from '@/components/media-strip'
+import { isPlaceholderText } from '@/components/request-text'
 import { fontFamily, raw, useColors } from '@/theme'
 import { formatNumber } from '@/lib/format'
 import { useIncomingRequest, useMarkSeen, useReplyToRequest } from '@/api/incoming'
-import type { PartCondition, ReplyDraft } from '@/api/types'
+import type { PartCondition } from '@/api/types'
 
-const VIOLET = '#5B3FD1'
-const VIOLET_TINT = '#F1ECFF'
 
 /**
  * 14 «Проверьте и отправьте» — the answer «Есть» with a price. `voice=1` (from «Ответить голосом» [13]) starts the
@@ -30,16 +30,8 @@ export default function SellerAnswerScreen() {
 	const [price, setPrice] = useState('')
 	const [condition, setCondition] = useState<PartCondition | null>(null)
 	const [original, setOriginal] = useState<boolean | null>(null)
-	// What the voice filled: such fields carry ✧ until the seller changes them.
-	const [heard, setHeard] = useState<ReplyDraft | null>(null)
-
-	const note = useVoiceNote('REPLY', (result) => {
-		const draft = result.reply
-		setHeard(draft)
-		if (draft?.price) setPrice(String(draft.price))
-		if (draft?.condition) setCondition(draft.condition)
-		if (draft?.original !== null && draft?.original !== undefined) setOriginal(draft.original)
-	})
+	// The voice goes to the buyer as is; the price and the condition the seller sets by hand.
+	const note = useVoiceNote('REPLY')
 
 	useEffect(() => {
 		markSeen.mutate(id)
@@ -50,11 +42,9 @@ export default function SellerAnswerScreen() {
 	const data = request.data
 	const voice = note.result?.voice
 	const amount = Number(price)
-	const priceFromVoice = Boolean(heard?.price && heard.price === amount)
 
 	const rerecord = () => {
 		note.reset()
-		setHeard(null)
 		note.start()
 	}
 
@@ -66,8 +56,6 @@ export default function SellerAnswerScreen() {
 				condition: condition ?? undefined,
 				original: original ?? undefined,
 				voiceMediaId: voice?.id,
-				manufacturer: heard?.manufacturer ?? undefined,
-				tags: heard?.tags.length ? heard.tags : undefined,
 			},
 			{ onSuccess: () => router.back() }
 		)
@@ -113,10 +101,21 @@ export default function SellerAnswerScreen() {
 						<View style={{ flex: 1, gap: 1 }}>
 							<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), color: c.ink }}>Проверьте и отправьте</Text>
 							<Text numberOfLines={1} style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
-								{data ? `${data.text} · ${data.car.modelLabel}` : ' '}
+								{data ? [data.buyerName, data.car.label].filter(Boolean).join(' · ') : ' '}
 							</Text>
 						</View>
 					</View>
+
+					{/* The request itself stays in sight while answering: the words, the buyer's voice, the photos. */}
+					{data && (!isPlaceholderText(data.text) || data.voice || data.photos.length) ? (
+						<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 12, gap: 8 }}>
+							{isPlaceholderText(data.text) ? null : (
+								<Text style={{ fontSize: 17, lineHeight: 22, fontFamily: fontFamily(600), color: c.ink }}>{data.text}</Text>
+							)}
+							{data.voice ? <VoicePlayer voice={data.voice} background={c.card} /> : null}
+							<MediaStrip media={photosAsMedia(data.photos)} />
+						</View>
+					) : null}
 
 					{note.recording || note.uploading ? (
 						<Recording seconds={note.seconds} uploading={note.uploading} onDone={note.stop} onCancel={note.cancel} />
@@ -125,7 +124,7 @@ export default function SellerAnswerScreen() {
 							<VoicePlayer voice={voice} background={c.card} />
 							<View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start', paddingHorizontal: 4 }}>
 								<Text style={{ flex: 1, fontSize: 16.5, lineHeight: 22.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.inkSecondary }}>
-									{voice.transcript ? `«${voice.transcript}»` : 'Не разобрали слова — заполните цену сами'}
+									{voice.transcript ? `«${voice.transcript}»` : 'Ваше голосовое'}
 								</Text>
 								<Text onPress={rerecord} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 									Перезаписать
@@ -151,13 +150,7 @@ export default function SellerAnswerScreen() {
 					)}
 					{note.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{note.error}</Text> : null}
 
-					<Label
-						right={
-							heard ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>можно поправить</Text> : undefined
-						}
-					>
-						{heard ? 'Заполнили из голоса' : 'Ваш ответ'}
-					</Label>
+					<Label>Ваш ответ</Label>
 
 					<View
 						style={{
@@ -180,17 +173,15 @@ export default function SellerAnswerScreen() {
 							style={{ minWidth: 40, fontSize: 32, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink, padding: 0 }}
 						/>
 						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>сом</Text>
-						<View style={{ flex: 1 }} />
-						{priceFromVoice ? <FromVoice /> : null}
 					</View>
 
 					<View style={{ flexDirection: 'row', gap: 8 }}>
-						<Choice label="Новая" active={condition === 'NEW'} fromVoice={heard?.condition === 'NEW'} onPress={() => setCondition('NEW')} />
-						<Choice label="Б/у" active={condition === 'USED'} fromVoice={heard?.condition === 'USED'} onPress={() => setCondition('USED')} />
+						<Choice label="Новая" active={condition === 'NEW'} onPress={() => setCondition('NEW')} />
+						<Choice label="Б/у" active={condition === 'USED'} onPress={() => setCondition('USED')} />
 					</View>
 					<View style={{ flexDirection: 'row', gap: 8 }}>
-						<Choice label="Оригинал" active={original === true} fromVoice={heard?.original === true} onPress={() => setOriginal(true)} />
-						<Choice label="Копия" active={original === false} fromVoice={heard?.original === false} onPress={() => setOriginal(false)} />
+						<Choice label="Оригинал" active={original === true} onPress={() => setOriginal(true)} />
+						<Choice label="Копия" active={original === false} onPress={() => setOriginal(false)} />
 					</View>
 
 					{reply.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text> : null}
@@ -218,17 +209,7 @@ export default function SellerAnswerScreen() {
 	)
 }
 
-/** ✧ «из голоса». */
-function FromVoice() {
-	return (
-		<View style={{ height: 24, paddingHorizontal: 8, borderRadius: 12, backgroundColor: VIOLET_TINT, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-			<SparkleIcon size={13} color={VIOLET} />
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: VIOLET }}>из голоса</Text>
-		</View>
-	)
-}
-
-function Choice({ label, active, fromVoice, onPress }: { label: string; active: boolean; fromVoice: boolean; onPress: () => void }) {
+function Choice({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
 	const c = useColors()
 	return (
 		<Pressable
@@ -247,7 +228,6 @@ function Choice({ label, active, fromVoice, onPress }: { label: string; active: 
 			}}
 		>
 			<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{label}</Text>
-			{active && fromVoice ? <SparkleIcon size={14} color={VIOLET} /> : null}
 		</Pressable>
 	)
 }

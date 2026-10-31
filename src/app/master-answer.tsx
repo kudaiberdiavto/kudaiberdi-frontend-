@@ -3,11 +3,11 @@ import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Stack, router, useLocalSearchParams } from 'expo-router'
 import { VoicePlayer, useVoiceNote, voiceClock } from '@/components/voice'
-import { CheckMark, FromVoiceBadge, MicOutline, SendPlane, Sparkle } from '@/components/master-v23'
+import { CheckMark, MicOutline, SendPlane } from '@/components/master-v23'
+import { MediaStrip } from '@/components/media-strip'
 import { fontFamily, useColors } from '@/theme'
 import { formatClock, formatNumber } from '@/lib/format'
 import { useMasterOffer, useMasterRequest } from '@/api/services'
-import type { OfferDraft } from '@/api/types'
 
 type When = 'NOW' | 'TODAY' | 'TOMORROW'
 
@@ -40,23 +40,9 @@ export default function MasterAnswerScreen() {
 	const [price, setPrice] = useState('')
 	// Late in the evening «today + 2 hours» is already tomorrow — offer the morning instead.
 	const [when, setWhen] = useState<When>(() => (openedAt.getHours() >= 21 ? 'TOMORROW' : 'TODAY'))
-	const [times, setTimes] = useState<Record<When, Date>>(() => ({ NOW: openedAt, TODAY: laterToday(openedAt), TOMORROW: tomorrowMorning(openedAt) }))
-	const [fromVoice, setFromVoice] = useState<{ price: number | null; when: When | null }>({ price: null, when: null })
-
-	const apply = (draft: OfferDraft | null) => {
-		if (!draft) return
-		if (draft.priceFrom) setPrice(String(draft.priceFrom))
-		const spoken = draft.when === 'AT_TIME' ? null : draft.when
-		if (spoken) {
-			setWhen(spoken)
-			if (draft.availableAt) {
-				const at = new Date(draft.availableAt)
-				setTimes((current) => ({ ...current, [spoken]: at }))
-			}
-		}
-		setFromVoice({ price: draft.priceFrom, when: spoken })
-	}
-	const voice = useVoiceNote('OFFER', (result) => apply(result.offer))
+	const [times] = useState<Record<When, Date>>(() => ({ NOW: openedAt, TODAY: laterToday(openedAt), TOMORROW: tomorrowMorning(openedAt) }))
+	// The voice goes to the client as is; the price and the time the master sets by hand.
+	const voice = useVoiceNote('OFFER')
 
 	// «Ответить голосом» [18] — start recording right away, once on open.
 	useEffect(() => {
@@ -73,7 +59,7 @@ export default function MasterAnswerScreen() {
 
 	const send = () => {
 		if (busy) return
-		const at = when === 'NOW' ? (fromVoice.when === 'NOW' ? times.NOW : new Date()) : times[when]
+		const at = when === 'NOW' ? new Date() : times[when]
 		offer.mutate(
 			{
 				id,
@@ -89,12 +75,9 @@ export default function MasterAnswerScreen() {
 	}
 
 	const timeLabel = (value: When) => {
-		if (value === 'NOW') {
-			const minutes = Math.round((times.NOW.getTime() - openedAt.getTime()) / 60_000)
-			return fromVoice.when === 'NOW' && minutes > 5 ? `Через ${minutes} мин` : 'Сейчас'
-		}
+		if (value === 'NOW') return 'Сейчас'
 		if (value === 'TODAY') return `Сегодня ${formatClock(times.TODAY)}`
-		return fromVoice.when === 'TOMORROW' ? `Завтра ${formatClock(times.TOMORROW)}` : 'Завтра'
+		return 'Завтра'
 	}
 
 	const subtitle = request ? [request.description, request.car.modelLabel ?? request.car.label].filter(Boolean).join(' · ') : ' '
@@ -129,11 +112,11 @@ export default function MasterAnswerScreen() {
 						</View>
 					</View>
 
-					{/* The client's voice note — to listen again before answering (not while recording). */}
-					{request?.voice && !voice.recording ? (
-						<View style={{ gap: 6 }}>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Голос клиента</Text>
-							<VoicePlayer voice={request.voice} background={c.surface} />
+					{/* The client's request stays in sight: the voice note to listen again, the photos and videos. */}
+					{request && (request.voice || request.media.length) && !voice.recording ? (
+						<View style={{ gap: 8 }}>
+							{request.voice ? <VoicePlayer voice={request.voice} background={c.surface} /> : null}
+							<MediaStrip media={request.media} />
 						</View>
 					) : null}
 
@@ -143,7 +126,7 @@ export default function MasterAnswerScreen() {
 								<MicOutline size={22} color="#FFFFFF" />
 							</View>
 							<Text style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(600), color: c.ink }}>
-								{voice.recording ? `Говорите… ${voiceClock(voice.seconds)}` : 'Распознаём…'}
+								{voice.recording ? `Говорите… ${voiceClock(voice.seconds)}` : 'Загружаем…'}
 							</Text>
 							{voice.recording ? (
 								<Pressable onPress={voice.stop} style={{ height: 40, paddingHorizontal: 16, borderRadius: 12, backgroundColor: c.brand, justifyContent: 'center' }}>
@@ -156,7 +139,7 @@ export default function MasterAnswerScreen() {
 							<VoicePlayer voice={voice.result.voice} background={c.card} />
 							<View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start', paddingHorizontal: 4 }}>
 								<Text style={{ flex: 1, fontSize: 16.5, lineHeight: 22.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.inkSecondary }}>
-									{voice.result.voice.transcript ? `«${voice.result.voice.transcript}»` : 'Не удалось разобрать — заполните цену и время сами'}
+									{voice.result.voice.transcript ? `«${voice.result.voice.transcript}»` : 'Ваше голосовое'}
 								</Text>
 								<Text onPress={voice.start} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
 									Перезаписать
@@ -204,8 +187,6 @@ export default function MasterAnswerScreen() {
 							style={{ minWidth: 40, fontSize: 32, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink, padding: 0 }}
 						/>
 						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>сом</Text>
-						<View style={{ flex: 1 }} />
-						{fromVoice.price && fromVoice.price === priceValue ? <FromVoiceBadge /> : null}
 					</View>
 
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -231,7 +212,6 @@ export default function MasterAnswerScreen() {
 									<Text numberOfLines={1} style={{ fontSize: 16.5, fontFamily: fontFamily(selected ? 700 : 600), color: selected ? c.brandStrong : c.ink }}>
 										{timeLabel(value)}
 									</Text>
-									{fromVoice.when === value ? <Sparkle size={14} /> : null}
 								</Pressable>
 							)
 						})}

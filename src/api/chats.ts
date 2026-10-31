@@ -12,11 +12,12 @@ export type ChatSide = 'BUYER' | 'SHOP'
 export type ChatListAs = ChatSide | 'MASTER'
 
 /** Chats list [16] — buyer's, the box's or the master's chats. */
-export function useChats(as: ChatListAs) {
+export function useChats(as: ChatListAs, enabled = true) {
 	return useInfiniteQuery({
 		queryKey: [...chatKeys.list, as],
 		queryFn: ({ pageParam, signal }) => apiFetch<ChatListPage>('/chats', { query: { as, cursor: pageParam }, signal }),
 		...cursorPaging,
+		enabled,
 	})
 }
 
