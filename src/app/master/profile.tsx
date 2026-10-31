@@ -7,7 +7,7 @@ import { MobileTruck, Switch } from '@/components/master-v23'
 import { fontFamily, useColors } from '@/theme'
 import { formatE164 } from '@/lib/phone'
 import { resolveUrl } from '@/lib/api'
-import { useMe, useSetRole } from '@/api/me'
+import { useMe } from '@/api/me'
 import { serviceName, useMyMaster, useSaveMaster, useServiceTypes } from '@/api/services'
 import { useSession } from '@/store/useSession'
 
@@ -22,7 +22,6 @@ export default function MasterProfileTab() {
 	const types = useServiceTypes().data
 	const profile = useMyMaster()
 	const save = useSaveMaster(true)
-	const setRole = useSetRole()
 	const signOut = useSession((s) => s.signOut)
 	const user = me.data
 	const master = profile.data
@@ -55,7 +54,7 @@ export default function MasterProfileTab() {
 				<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>Мой сервис</Text>
 			</View>
 			<ScrollView contentContainerStyle={{ paddingTop: 4, paddingBottom: 16, gap: 10 }} showsVerticalScrollIndicator={false}>
-				<QueryErrorBanner error={me.error ?? profile.error ?? save.error ?? setRole.error} onRetry={() => (me.refetch(), profile.refetch())} />
+				<QueryErrorBanner error={me.error ?? profile.error ?? save.error} onRetry={() => (me.refetch(), profile.refetch())} />
 
 				<Pressable onPress={() => router.push('/master-profile')} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 					{master?.avatarUrl ? (
@@ -175,24 +174,8 @@ export default function MasterProfileTab() {
 					<Switch value={master?.mobile ?? false} disabled={!master || save.isPending} onChange={(mobile) => save.mutate({ mobile })} />
 				</View>
 
-				{/* Not on the mockup: switching mode and signing out live under the fold. */}
+				{/* Not on the mockup: policy, sign out and account deletion live under the fold. */}
 				<View style={{ borderRadius: 16, backgroundColor: c.card, overflow: 'hidden', marginTop: 6 }}>
-					<SettingsRow
-						label="Перейти в режим покупателя"
-						value="›"
-						valueColor={c.brandStrong}
-						valueWeight={700}
-						onPress={() => setRole.mutate('BUYER', { onSuccess: () => router.replace('/buyer') })}
-					/>
-					{user?.hasShop ? (
-						<SettingsRow
-							label="Перейти в режим продавца"
-							value="›"
-							valueColor={c.brandStrong}
-							valueWeight={700}
-							onPress={() => setRole.mutate('SELLER', { onSuccess: () => router.replace('/seller') })}
-						/>
-					) : null}
 					<SettingsRow label="Политика конфиденциальности" value="›" onPress={() => Linking.openURL(`${API_URL}/privacy`)} />
 					<SettingsRow label="Выйти" labelColor={c.danger} onPress={() => signOut()} />
 					<SettingsRow label="Удалить аккаунт" labelColor={c.muted} divider={false} onPress={() => router.push('/delete-account')} />

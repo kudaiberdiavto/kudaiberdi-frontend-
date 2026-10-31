@@ -450,7 +450,7 @@ function ClaimSheet({
 						<>
 							<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>Заявка на спор отправлена</Text>
 							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-								Администрация рынка проверит, чей это бокс, и пришлёт пуш с решением.
+								Администрация рынка проверит, чей это контейнер, и пришлёт пуш с решением.
 							</Text>
 							<Button label="Понятно" onPress={close} />
 						</>
@@ -458,7 +458,7 @@ function ClaimSheet({
 						<>
 							<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>{box?.place ?? ' '} занят</Text>
 							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-								Если это ваш бокс, а в приложении его занял другой продавец, — откройте спор. Администрация рынка разберётся.
+								Если это ваш контейнер, а в приложении его занял другой продавец, — откройте спор. Администрация рынка разберётся.
 							</Text>
 							<TextInput
 								value={text}
@@ -472,7 +472,7 @@ function ClaimSheet({
 								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{claim.error.message}</Text>
 							) : null}
 							{code === 'CONTAINER_FREE' && box ? (
-								<Button label="Занять этот бокс" variant="secondary" onPress={() => onFree({ id: box.id, number: box.number })} />
+								<Button label="Занять этот контейнер" variant="secondary" onPress={() => onFree({ id: box.id, number: box.number })} />
 							) : (
 								<Button
 									label="Это мой контейнер"

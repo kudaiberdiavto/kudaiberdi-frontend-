@@ -155,7 +155,7 @@ export function formatPlace(place: {
 }) {
 	const box = place.container ?? place.number
 	const row = formatRow(place)
-	return box === null || box === undefined ? row : `${row} · Бокс ${box}`
+	return box === null || box === undefined ? row : `${row} · Контейнер ${box}`
 }
 
 // ─── Cars ────────────────────────────────────────────────────────────────────

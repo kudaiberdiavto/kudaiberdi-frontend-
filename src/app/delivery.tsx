@@ -90,7 +90,7 @@ export default function DeliveryScreen() {
 								{part.title}
 							</Text>
 							<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
-								{part.shop.name} · {shopPlace(part.shop).replace('Бокс', 'конт.')}
+								{part.shop.name} · {shopPlace(part.shop).replace('Контейнер', 'конт.')}
 							</Text>
 						</View>
 						{part.price != null ? (

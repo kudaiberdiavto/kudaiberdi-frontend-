@@ -21,15 +21,15 @@ import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-she
 
 /** Labels for codes the server sends without text. */
 export const SYSTEM_TEXT: Record<string, string> = {
-	PAY_AT_BOX: 'Оплата в боксе при осмотре',
-	REQUEST_CLOSED: 'Запрос закрыт: купили в этом боксе',
+	PAY_AT_BOX: 'Оплата в контейнере при осмотре',
+	REQUEST_CLOSED: 'Запрос закрыт: купили в этом контейнере',
 }
 export const QUICK_TEXT: Record<string, string> = {
 	ARRIVED: 'Я на месте',
 	RESERVED: 'Отложил для вас',
 	ROUTE: 'Как пройти',
 	SOLD: 'Продано',
-	ROUTE_TO_BOX: 'Как пройти к боксу',
+	ROUTE_TO_BOX: 'Как пройти к контейнеру',
 	CLOSE_REQUEST: 'Купил — закрыть запрос',
 }
 /** The other side in the header: «в сети», «был(а) 5 мин назад»; null — unknown. */

@@ -12,7 +12,7 @@ import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatDay } from '@/lib/format'
 import { COUNTRY_CODE, formatE164, formatLocalPhone, isValidLocalPhone, toE164 } from '@/lib/phone'
-import { useSetRole, useSettings, useUpdateMe, useUpdateSettings } from '@/api/me'
+import { useSettings, useUpdateMe, useUpdateSettings } from '@/api/me'
 import { useMyShop, useSetShopAvatar, useUpdateShop } from '@/api/shop'
 import { usePhotoUploads } from '@/api/media'
 import { useMyParts, useMyPartsSummary } from '@/api/parts'
@@ -136,7 +136,7 @@ export default function SellerBoxScreen() {
 		<Screen padding={0}>
 			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				<Text numberOfLines={1} style={{ flex: 1, fontSize: 22, fontFamily: fontFamily(700), letterSpacing: -0.22, color: c.ink }}>
-					{data?.name ?? 'Мой бокс'}
+					{data?.name ?? 'Мой контейнер'}
 				</Text>
 				<Pressable onPress={() => setMenu(true)} hitSlop={10} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
 					<Svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke={c.ink} strokeWidth={2.2} strokeLinecap="round">
@@ -242,7 +242,6 @@ function MenuSheet({ onClose }: { onClose: () => void }) {
 	const settings = useSettings()
 	const updateSettings = useUpdateSettings()
 	const updateMe = useUpdateMe()
-	const setRole = useSetRole()
 	const lang = useSession((st) => st.lang)
 	const signOut = useSession((st) => st.signOut)
 	const s = stats.data
@@ -261,7 +260,7 @@ function MenuSheet({ onClose }: { onClose: () => void }) {
 
 	return (
 		<BottomSheet onClose={onClose} maxHeight={0.85} header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>Настройки</Text>}>
-			<QueryErrorBanner error={stats.error ?? setRole.error} />
+			<QueryErrorBanner error={stats.error} />
 			<Label>За 30 дней</Label>
 			<View style={{ flexDirection: 'row', gap: 8 }}>
 				<Stat value={s?.answeredPercent !== null && s?.answeredPercent !== undefined ? `${s.answeredPercent}%` : '—'} label="ответили" color={c.success} />
@@ -283,24 +282,6 @@ function MenuSheet({ onClose }: { onClose: () => void }) {
 				<SettingsRow
 					label="Звук нового запроса"
 					right={<Toggle value={settings.data?.newRequestSound ?? true} onChange={(value) => updateSettings.mutate({ newRequestSound: value })} />}
-				/>
-				<SettingsRow
-					label="Перейти в режим покупателя"
-					value="›"
-					valueColor={c.brandStrong}
-					valueWeight={700}
-					onPress={() => setRole.mutate('BUYER', { onSuccess: () => router.replace('/buyer') })}
-				/>
-				<SettingsRow
-					label="Я мастер / СТО"
-					value="›"
-					valueColor={c.brandStrong}
-					valueWeight={700}
-					onPress={() =>
-						setRole.mutate('MASTER', {
-							onSuccess: (me) => router.replace(me.hasMaster ? '/master' : { pathname: '/master-profile', params: { first: '1' } }),
-						})
-					}
 				/>
 				<SettingsRow label="Политика конфиденциальности" value="›" onPress={() => Linking.openURL(`${API_URL}/privacy`)} />
 					<SettingsRow label="Выйти" labelColor={c.danger} onPress={() => signOut()} />
@@ -354,7 +335,7 @@ function EditSheet({ shop, onClose }: { shop: MyShop; onClose: () => void }) {
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
 			<BottomSheet
 				onClose={onClose}
-				header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>Мой бокс</Text>}
+				header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>Мой контейнер</Text>}
 				footer={<Button label="Сохранить" disabled={name.trim().length < 2 || !phoneOk} loading={update.isPending} onPress={save} />}
 			>
 				<Label>Название</Label>

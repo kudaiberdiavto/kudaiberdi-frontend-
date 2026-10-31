@@ -27,7 +27,7 @@ export default function SellerLayout() {
 					<TabButton icon={ChatIcon} label="Чаты" badge={unread || undefined} />
 				</TabTrigger>
 				<TabTrigger name="box" asChild>
-					<TabButton icon={BoxIcon} label="Мой бокс" />
+					<TabButton icon={BoxIcon} label="Профиль" />
 				</TabTrigger>
 			</TabBarContainer>
 

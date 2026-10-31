@@ -5,18 +5,18 @@ import { router } from 'expo-router'
 import { API_URL } from '@/lib/env'
 import { BottomSheet, QueryErrorBanner, SettingsRow, Toggle } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
-import { BellIcon, Caps, ChevronIcon, GlobeIcon, HelpIcon, PassportIcon, PlusThinIcon, SwapIcon, TopBar } from '@/components/buyer-v23'
+import { BellIcon, Caps, ChevronIcon, GlobeIcon, HelpIcon, PassportIcon, PlusThinIcon, TopBar } from '@/components/buyer-v23'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatE164 } from '@/lib/phone'
-import { useMe, useSetRole, useSettings, useUpdateMe, useUpdateSettings } from '@/api/me'
+import { useMe, useSettings, useUpdateMe, useUpdateSettings } from '@/api/me'
 import { useCars, useDeleteCar } from '@/api/garage'
 import { toLang, useSession } from '@/store/useSession'
 
 /** «Помощь в WhatsApp» — the support number from the build config (digits, e.g. 996555000000). */
 const SUPPORT_WHATSAPP = process.env.EXPO_PUBLIC_SUPPORT_WHATSAPP
 
-/** 10 «Профиль»: name and phone, cars (tech passport mark), language, notifications, help, «Я продаю на рынке». */
+/** 10 «Профиль»: name and phone, cars (tech passport mark), language, notifications, help. */
 export default function BuyerProfileScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
@@ -29,7 +29,6 @@ export default function BuyerProfileScreen() {
 			{ text: 'Удалить', style: 'destructive', onPress: () => deleteCar.mutate(id) },
 		])
 	const updateMe = useUpdateMe()
-	const setRole = useSetRole()
 	const lang = useSession((s) => s.lang)
 	const [notifications, setNotifications] = useState(false)
 
@@ -42,14 +41,12 @@ export default function BuyerProfileScreen() {
 	}
 
 	// Switch to the seller mode: role on the server, then the box (or its registration [11]).
-	const becomeSeller = () =>
-		setRole.mutate('SELLER', { onSuccess: (next) => router.replace(next.hasShop ? '/seller' : '/box-select') })
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<TopBar title="Профиль" big onBack={false} />
 			<ScrollView contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} showsVerticalScrollIndicator={false}>
-				<QueryErrorBanner error={me.error ?? setRole.error ?? deleteCar.error} onRetry={() => me.refetch()} />
+				<QueryErrorBanner error={me.error ?? deleteCar.error} onRetry={() => me.refetch()} />
 
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingTop: 4, paddingBottom: 8 }}>
 					{user?.avatarUrl ? (
@@ -132,7 +129,6 @@ export default function BuyerProfileScreen() {
 						label="Помощь в WhatsApp"
 						onPress={() => SUPPORT_WHATSAPP && Linking.openURL(`https://wa.me/${SUPPORT_WHATSAPP}`)}
 					/>
-					<MenuRow icon={<SwapIcon size={22} color={c.ink} />} label="Я продаю на рынке" onPress={becomeSeller} />
 				</View>
 				{/* Not in the mockup, but without it there is no way out of the account. */}
 				<Text

@@ -190,7 +190,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 							<TextInput
 								value={form.address}
 								onChangeText={(address) => patch({ address })}
-								placeholder="Адрес: улица, дом, бокс"
+								placeholder="Адрес: улица, дом, контейнер"
 								placeholderTextColor={raw.fillInk}
 								style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}
 							/>
