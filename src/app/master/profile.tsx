@@ -16,7 +16,7 @@ import { useSession } from '@/store/useSession'
 
 const STAR = '#F5A623'
 
-/** 20 «Мой сервис» — the master's card as clients see it, services, brands, address, «Выезжаю к клиенту». */
+/** 20 «Мой сервис» — the master's card, services, brands, address, «Выезжаю к клиенту». */
 export default function MasterProfileTab() {
 	const c = useColors()
 	const me = useMe()
@@ -76,18 +76,9 @@ export default function MasterProfileTab() {
 							</Text>
 						</View>
 					</View>
-					<View style={{ flexDirection: 'row', gap: 10 }}>
-						<Pressable
-							disabled={!master}
-							onPress={() => master && router.push({ pathname: '/master-card', params: { id: String(master.id) } })}
-							style={{ flex: 1, height: 44, borderRadius: 14, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}
-						>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#1C44B8' }}>Как видят клиенты</Text>
-						</Pressable>
-						<Pressable onPress={edit} style={{ flex: 1, height: 44, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Редактировать</Text>
-						</Pressable>
-					</View>
+					<Pressable onPress={edit} style={{ height: 44, borderRadius: 14, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#1C44B8' }}>Редактировать</Text>
+					</Pressable>
 				</LinearGradient>
 
 				<View style={{ ...card, flexDirection: 'row', alignItems: 'center' }}>
