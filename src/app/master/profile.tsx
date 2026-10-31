@@ -192,7 +192,8 @@ export default function MasterProfileTab() {
 							onPress={() => setRole.mutate('SELLER', { onSuccess: () => router.replace('/seller') })}
 						/>
 					) : null}
-					<SettingsRow label="Выйти" labelColor={c.danger} divider={false} onPress={() => signOut()} />
+					<SettingsRow label="Выйти" labelColor={c.danger} onPress={() => signOut()} />
+					<SettingsRow label="Удалить аккаунт" labelColor={c.muted} divider={false} onPress={() => router.push('/delete-account')} />
 				</View>
 			</ScrollView>
 		</Screen>

@@ -301,7 +301,12 @@ function MenuSheet({ onClose }: { onClose: () => void }) {
 						})
 					}
 				/>
-				<SettingsRow label="Выйти" labelColor={c.danger} divider={false} onPress={() => signOut()} />
+				<SettingsRow label="Выйти" labelColor={c.danger} onPress={() => signOut()} />
+					<SettingsRow label="Удалить аккаунт" labelColor={c.muted} divider={false} onPress={() => {
+						onClose()
+						router.push('/delete-account')
+					}}
+				/>
 			</View>
 		</BottomSheet>
 	)

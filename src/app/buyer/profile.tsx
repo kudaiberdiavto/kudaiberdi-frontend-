@@ -140,6 +140,12 @@ export default function BuyerProfileScreen() {
 				>
 					Выйти
 				</Text>
+				<Text
+					onPress={() => router.push('/delete-account')}
+					style={{ marginTop: 14, textAlign: 'center', fontSize: 15, fontFamily: fontFamily(500), color: c.danger }}
+				>
+					Удалить аккаунт
+				</Text>
 			</ScrollView>
 
 			{notifications ? <NotificationsSheet onClose={() => setNotifications(false)} /> : null}
