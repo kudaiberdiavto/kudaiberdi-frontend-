@@ -15,20 +15,20 @@ interface Layer {
 }
 
 const LAYERS: Layer[] = [
-	{ source: require('../../assets/images/layer-plate.png'), spin: 0, edge: '#161B24' },
-	{ source: require('../../assets/images/layer-gears.png'), spin: -1, edge: '#7A5A1C' },
-	{ source: require('../../assets/images/layer-gear.png'), spin: 1, edge: '#4E5666' },
-	{ source: require('../../assets/images/layer-medal.png'), spin: 0, edge: '#0E2266' },
-	{ source: require('../../assets/images/layer-k.png'), side: require('../../assets/images/layer-k-flat.png'), spin: 0, edge: '#8C99B3', thick: 2 },
+	{ source: require('../../assets/images/layer-plate.png'), spin: 0, edge: '#3E4656' },
+	{ source: require('../../assets/images/layer-gears.png'), spin: -1, edge: '#B48C3C' },
+	{ source: require('../../assets/images/layer-gear.png'), spin: 1, edge: '#9AA2B1' },
+	{ source: require('../../assets/images/layer-medal.png'), spin: 0, edge: '#2A50C8' },
+	{ source: require('../../assets/images/layer-k.png'), side: require('../../assets/images/layer-k-flat.png'), spin: 0, edge: '#C9D2E3', thick: 1 },
 	{ source: require('../../assets/images/layer-glass.png'), spin: 0, edge: null },
 ]
 
 /** Copies behind each face that make up its side. */
-const THICKNESS = 7
+const THICKNESS = 3
 
 /**
- * The logo taking itself apart like a watch in an exploded view: it turns sideways, the thick layers slide apart
- * horizontally while the gears keep turning, then it closes back up — and rests assembled for a while.
+ * The logo taking itself apart like a watch in an exploded view: it turns a third toward the viewer, the layers slide
+ * apart horizontally — the crystal and «К» come forward, the plate stays at the back — while the gears keep turning, then it closes back up — and rests assembled for a while.
  */
 export function ExplodedLogo({ size }: { size: number }) {
 	const [tilt] = useState(() => new Animated.Value(0))
@@ -56,11 +56,11 @@ export function ExplodedLogo({ size }: { size: number }) {
 		return () => (show.stop(), spin.stop())
 	}, [tilt, spread, turn])
 
-	const gap = size * 0.34
-	const depth = size * 0.016
+	const gap = size * 0.30
+	const depth = size * 0.01
 	const middle = (LAYERS.length - 1) / 2
-	const rotateY = tilt.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-62deg'] })
-	const rotateX = tilt.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '12deg'] })
+	const rotateY = tilt.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '38deg'] })
+	const rotateX = tilt.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '16deg'] })
 	const forward = turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] })
 	const backward = turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-540deg'] })
 
@@ -69,8 +69,8 @@ export function ExplodedLogo({ size }: { size: number }) {
 			{LAYERS.flatMap((layer, i) => {
 				const x = (k: number) =>
 					Animated.add(
-						spread.interpolate({ inputRange: [0, 1], outputRange: [0, (i - middle) * gap] }),
-						tilt.interpolate({ inputRange: [0, 1], outputRange: [0, -k * depth] })
+						spread.interpolate({ inputRange: [0, 1], outputRange: [0, -(i - middle) * gap] }),
+						tilt.interpolate({ inputRange: [0, 1], outputRange: [0, k * depth] })
 					)
 				const rotate = layer.spin > 0 ? forward : layer.spin < 0 ? backward : '0deg'
 				// the side first (farthest copy first), then the face on top
