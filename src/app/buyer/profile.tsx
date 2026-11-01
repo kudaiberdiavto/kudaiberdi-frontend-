@@ -12,9 +12,9 @@ import { formatE164 } from '@/lib/phone'
 import { useMe, useSettings, useUpdateMe, useUpdateSettings } from '@/api/me'
 import { useCars, useDeleteCar } from '@/api/garage'
 import { toLang, useSession } from '@/store/useSession'
+import { openSupport } from '@/lib/support'
 
 /** «Помощь в WhatsApp» — the support number from the build config (digits, e.g. 996555000000). */
-const SUPPORT_WHATSAPP = process.env.EXPO_PUBLIC_SUPPORT_WHATSAPP
 
 /** 10 «Профиль»: name and phone, cars (tech passport mark), language, notifications, help. */
 export default function BuyerProfileScreen() {
@@ -127,7 +127,7 @@ export default function BuyerProfileScreen() {
 					<MenuRow
 						icon={<HelpIcon size={22} color={c.ink} />}
 						label="Помощь в WhatsApp"
-						onPress={() => SUPPORT_WHATSAPP && Linking.openURL(`https://wa.me/${SUPPORT_WHATSAPP}`)}
+						onPress={openSupport}
 					/>
 				</View>
 				{/* Not in the mockup, but without it there is no way out of the account. */}

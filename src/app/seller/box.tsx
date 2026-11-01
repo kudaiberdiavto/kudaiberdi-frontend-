@@ -21,6 +21,7 @@ import { usePartDraft } from '@/store/usePartDraft'
 import { useShopStats } from '@/api/stats'
 import { toLang, useSession } from '@/store/useSession'
 import type { MyPartItem, MyShop } from '@/api/types'
+import { openSupport } from '@/lib/support'
 
 /**
  * 15 «Мой бокс» — a profile like on social apps: avatar (tap — change), counters, name and place, my brands,
@@ -283,6 +284,7 @@ function MenuSheet({ onClose }: { onClose: () => void }) {
 					label="Звук нового запроса"
 					right={<Toggle value={settings.data?.newRequestSound ?? true} onChange={(value) => updateSettings.mutate({ newRequestSound: value })} />}
 				/>
+				<SettingsRow label="Помощь в WhatsApp" value="›" onPress={openSupport} />
 				<SettingsRow label="Политика конфиденциальности" value="›" onPress={() => Linking.openURL(`${API_URL}/privacy`)} />
 					<SettingsRow label="Выйти" labelColor={c.danger} onPress={() => signOut()} />
 					<SettingsRow label="Удалить аккаунт" labelColor={c.muted} divider={false} onPress={() => {

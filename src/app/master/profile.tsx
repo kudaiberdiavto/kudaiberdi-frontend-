@@ -13,6 +13,7 @@ import { resolveUrl } from '@/lib/api'
 import { useMe } from '@/api/me'
 import { useMyMaster, useSaveMaster } from '@/api/services'
 import { useSession } from '@/store/useSession'
+import { openSupport } from '@/lib/support'
 
 const STAR = '#F5A623'
 
@@ -148,7 +149,7 @@ export default function MasterProfileTab() {
 				</View>
 
 				<View style={{ borderRadius: 18, backgroundColor: c.card, overflow: 'hidden', marginTop: 4 }}>
-					<SettingsRow label="Поддержка" value="›" onPress={() => Linking.openURL(`${API_URL}/support`)} />
+					<SettingsRow label="Помощь в WhatsApp" value="›" onPress={openSupport} />
 					<SettingsRow label="Политика конфиденциальности" value="›" onPress={() => Linking.openURL(`${API_URL}/privacy`)} />
 					<SettingsRow label="Выйти" labelColor={c.danger} onPress={() => signOut()} />
 					<SettingsRow label="Удалить аккаунт" labelColor={c.muted} divider={false} onPress={() => router.push('/delete-account')} />
