@@ -61,6 +61,11 @@ function isSalam(text?: string | null) {
 	return /(ас+ал[ао]му?|салам|as+alam|salam)/i.test(text) && !/(алейкум|aleikum|alaikum)[\s,]+(ва|уа|wa)?\s*(ас+алам|салам|as+alam|salam)/i.test(text)
 }
 
+/** «Ассаламу алейкум» or its answer «Алейкум ассалам». */
+function isGreeting(text?: string | null) {
+	return isSalam(text) || /(алейкум|aleikum|alaikum)[\s,]+(ва|уа|wa)?\s*(ас+алам|салам|as+alam|salam)/i.test(text ?? '')
+}
+
 /** Shared chat body of 08 and 13: history, quick replies, composer, typing, read receipts. */
 export function ChatConversation({ chatId, mySide, header, pinned, onAction, draft }: Props) {
 	const c = useColors()
@@ -135,10 +140,13 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 	}
 
 	// The other side greeted last — «Алейкум ассалам!» goes first, in place of our own «Ассаламу алейкум!».
-	const greeted = messages[0] != null && messages[0].side !== mySide && isSalam(messages[0].text)
+	// We already greeted (or answered the greeting) in this chat — the greeting chips are gone for good.
+	const weGreeted = messages.some((m) => m.side === mySide && isGreeting(m.text))
+	const greeted = !weGreeted && messages[0] != null && messages[0].side !== mySide && isSalam(messages[0].text)
+	const templates = (quick.data ?? []).filter((r) => !(weGreeted || greeted) || !isGreeting(r.text))
 	const replies: QuickReply[] = greeted
-		? [{ kind: 'MESSAGE', code: null, templateId: null, text: t('Алейкум ассалам!') } as QuickReply, ...(quick.data ?? []).filter((r) => !isSalam(r.text))]
-		: (quick.data ?? [])
+		? [{ kind: 'MESSAGE', code: null, templateId: null, text: t('Алейкум ассалам!') } as QuickReply, ...templates]
+		: templates
 
 	const pressQuick = (reply: QuickReply) => {
 		if (reply.kind === 'ACTION') return onAction(reply)
@@ -214,7 +222,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 					{replies.map((reply) => {
 						const positive = reply.code ? POSITIVE.has(reply.code) : false
 						// Greetings stand out — a filled blue chip, the first thing to tap.
-						const greeting = !reply.code && (isSalam(reply.text) || reply.text === t('Алейкум ассалам!'))
+						const greeting = !reply.code && isGreeting(reply.text)
 						return (
 							<Pressable
 								key={`${reply.code ?? reply.templateId}-${reply.text}`}
