@@ -9,6 +9,7 @@ import { fontFamily, useColors } from '@/theme'
 import { plural } from '@/lib/format'
 import { useBrands } from '@/api/directory'
 import { useMyShop, useSetShopBrands } from '@/api/shop'
+import { t } from '@/i18n'
 
 /** 23 «Марки, которые продаю» — requests come only for these brands. */
 export default function SellerBrandsScreen() {
@@ -42,9 +43,7 @@ export default function SellerBrandsScreen() {
 				<Pressable onPress={() => router.back()}>
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
-				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					Марки, которые продаю
-				</Text>
+				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>{t('Марки, которые продаю')}</Text>
 			</View>
 
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 12, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
@@ -65,7 +64,7 @@ export default function SellerBrandsScreen() {
 					<TextInput
 						value={q}
 						onChangeText={setQ}
-						placeholder="Найти марку"
+						placeholder={t('Найти марку')}
 						placeholderTextColor="#7D7979"
 						style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 					/>
@@ -76,7 +75,7 @@ export default function SellerBrandsScreen() {
 
 				<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
 					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-						{searching ? 'НАЙДЕНО' : 'ПОПУЛЯРНЫЕ'}
+						{searching ? t('НАЙДЕНО') : t('ПОПУЛЯРНЫЕ')}
 					</Text>
 					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Выбрано {selected.length}</Text>
 				</View>
@@ -132,9 +131,7 @@ export default function SellerBrandsScreen() {
 				</View>
 
 				{!searching ? (
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-						ВСЕ МАРКИ А–Я
-					</Text>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ВСЕ МАРКИ А–Я')}</Text>
 				) : null}
 
 				<View style={{ borderRadius: 16, backgroundColor: c.card, overflow: 'hidden' }}>
@@ -202,7 +199,7 @@ export default function SellerBrandsScreen() {
 						<ActivityIndicator color="#FFFFFF" />
 					) : (
 						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
-							Сохранить · {selected.length} {plural(selected.length, ['марка', 'марки', 'марок'])}
+							Сохранить · {selected.length} {plural(selected.length, [t('марка'), t('марки'), t('марок')])}
 						</Text>
 					)}
 				</Pressable>

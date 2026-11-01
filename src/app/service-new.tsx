@@ -14,18 +14,19 @@ import { useServiceMedia } from '@/api/media'
 import { useCreateServiceRequest, useServiceEstimate } from '@/api/services'
 import { MARKET_POINT } from '@/data/service-types'
 import { useServiceDraft } from '@/store/useServiceDraft'
+import { t } from '@/i18n'
 
 /** The six tiles of the mockup, in its order. */
 const SERVICES: { code: string; label: string }[] = [
-	{ code: 'CAR_REPAIR', label: 'Ремонт' },
-	{ code: 'TIRE_SERVICE', label: 'Шиномонтаж' },
-	{ code: 'TOW_TRUCK', label: 'Эвакуатор' },
-	{ code: 'AUTO_ELECTRIC', label: 'Автоэлектрик' },
-	{ code: 'BODY_PAINT', label: 'Кузов' },
-	{ code: 'LPG', label: 'ГБО' },
+	{ code: 'CAR_REPAIR', label: t('Ремонт') },
+	{ code: 'TIRE_SERVICE', label: t('Шиномонтаж') },
+	{ code: 'TOW_TRUCK', label: t('Эвакуатор') },
+	{ code: 'AUTO_ELECTRIC', label: t('Автоэлектрик') },
+	{ code: 'BODY_PAINT', label: t('Кузов') },
+	{ code: 'LPG', label: t('ГБО') },
 ]
 const MAX_MEDIA = 5
-const MARKET_LABEL = 'Рядом с рынком Кудайберген'
+const MARKET_LABEL = t('Рядом с рынком Кудайберген')
 
 type Point = { lat: number; lng: number; label: string; address?: string }
 
@@ -65,11 +66,11 @@ export default function ServiceNewScreen() {
 	const ready = Boolean(car) && described && !media.uploading && !voice.uploading && !voice.recording && recipients !== 0
 
 	const hint = !car
-		? 'Добавьте машину — мастера смотрят марку'
+		? t('Добавьте машину — мастера смотрят марку')
 		: recipients === 0
-			? 'Рядом нет мастеров, которые берутся за это — попробуйте другую точку'
+			? t('Рядом нет мастеров, которые берутся за это — попробуйте другую точку')
 			: recipients !== undefined
-					? `Спросим ${recipients} ${plural(recipients, ['мастера', 'мастеров', 'мастеров'])} рядом`
+					? t('Спросим {0} {1} рядом', recipients, plural(recipients, [t('мастера'), t('мастеров'), t('мастеров')]))
 					: ''
 
 	const locate = async () => {
@@ -77,15 +78,15 @@ export default function ServiceNewScreen() {
 		setLocateError(null)
 		try {
 			if (!(await Location.requestForegroundPermissionsAsync()).granted) {
-				setLocateError('Разрешите доступ к геолокации в настройках')
+				setLocateError(t('Разрешите доступ к геолокации в настройках'))
 				return
 			}
 			const coords = await currentCoords()
 			const address = await addressAt(coords)
-			setPoint({ lat: coords.latitude, lng: coords.longitude, label: address ?? 'Где я сейчас', address: address ?? undefined })
+			setPoint({ lat: coords.latitude, lng: coords.longitude, label: address ?? t('Где я сейчас'), address: address ?? undefined })
 			setPickPoint(false)
 		} catch {
-			setLocateError('Не удалось определить место — попробуйте ещё раз')
+			setLocateError(t('Не удалось определить место — попробуйте ещё раз'))
 		} finally {
 			setLocating(false)
 		}
@@ -115,7 +116,7 @@ export default function ServiceNewScreen() {
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>Нужен мастер</Text>
+				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>{t('Нужен мастер')}</Text>
 				<Pressable onPress={() => router.back()} hitSlop={10}>
 					<CloseX size={24} color={c.ink} />
 				</Pressable>
@@ -126,7 +127,7 @@ export default function ServiceNewScreen() {
 				keyboardShouldPersistTaps="handled"
 				showsVerticalScrollIndicator={false}
 			>
-				{label('Какая услуга')}
+				{label(t('Какая услуга'))}
 				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 					{SERVICES.map((item) => {
 						const selected = item.code === service
@@ -171,7 +172,7 @@ export default function ServiceNewScreen() {
 					})}
 				</View>
 
-				{label('Машина')}
+				{label(t('Машина'))}
 				<View style={{ flexDirection: 'row' }}>
 					{car ? (
 						<Pressable
@@ -197,14 +198,14 @@ export default function ServiceNewScreen() {
 							onPress={() => router.push('/garage-add')}
 							style={{ height: 40, paddingHorizontal: 14, borderRadius: 20, borderWidth: 2, borderStyle: 'dashed', borderColor: raw.mapRowBorder, justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>+ Добавить машину</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('+ Добавить машину')}</Text>
 						</Pressable>
 					) : (
 						<View style={{ height: 40 }} />
 					)}
 				</View>
 
-				{label('Что случилось')}
+				{label(t('Что случилось'))}
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 					<Pressable
 						onPress={media.pick}
@@ -224,18 +225,16 @@ export default function ServiceNewScreen() {
 					>
 						<CameraOutline size={26} color={c.brandStrong} />
 						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>
-							{media.items.length ? `Фото / видео · ${media.items.length}` : 'Фото / видео'}
+							{media.items.length ? t('Фото / видео · {0}', media.items.length) : t('Фото / видео')}
 						</Text>
 					</Pressable>
 					<View style={{ flex: 1, height: 92, borderRadius: 16, backgroundColor: c.card, justifyContent: 'center', gap: 6, paddingHorizontal: 10 }}>
 						<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: voice.recording ? c.danger : c.success }}>
-								{voice.recording ? 'Говорите…' : 'Голосом'}
+								{voice.recording ? t('Говорите…') : t('Голосом')}
 							</Text>
 							{voice.result && !voice.recording ? (
-								<Text onPress={voice.start} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
-									Заново
-								</Text>
+								<Text onPress={voice.start} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Заново')}</Text>
 							) : null}
 						</View>
 						{voice.result && !voice.recording ? (
@@ -272,7 +271,7 @@ export default function ServiceNewScreen() {
 									)}
 								</View>
 								<Text style={{ flex: 1, fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>
-									{voice.uploading ? 'Загружаем…' : voice.recording ? `${voiceClock(voice.seconds)} · стоп` : 'Записать'}
+									{voice.uploading ? t('Загружаем…') : voice.recording ? t('{0} · стоп', voiceClock(voice.seconds)) : t('Записать')}
 								</Text>
 							</Pressable>
 						)}
@@ -308,7 +307,7 @@ export default function ServiceNewScreen() {
 				<TextInput
 					value={description}
 					onChangeText={(value) => setDescription(value.slice(0, 500))}
-					placeholder="Например: стучит спереди справа на кочках"
+					placeholder={t('Например: стучит спереди справа на кочках')}
 					placeholderTextColor={raw.fillInk}
 					multiline
 					style={{
@@ -331,9 +330,7 @@ export default function ServiceNewScreen() {
 					<Text numberOfLines={1} style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}>
 						{point.label}
 					</Text>
-					<Text onPress={() => setPickPoint(true)} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
-						Изменить
-					</Text>
+					<Text onPress={() => setPickPoint(true)} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Изменить')}</Text>
 				</View>
 			</ScrollView>
 
@@ -368,13 +365,13 @@ export default function ServiceNewScreen() {
 					}}
 				>
 					<SendPlane size={20} color="#FFFFFF" />
-					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{create.isPending ? 'Отправляем…' : 'Найти мастера'}</Text>
+					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{create.isPending ? t('Отправляем…') : t('Найти мастера')}</Text>
 				</Pressable>
 			</View>
 
 			{pickCar ? (
 				<ModalSheet onClose={() => setPickCar(false)}>
-					<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>Какая машина</Text>
+					<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{t('Какая машина')}</Text>
 					{(cars.data ?? []).map((item) => (
 						<Pressable
 							key={item.id}
@@ -403,18 +400,16 @@ export default function ServiceNewScreen() {
 							router.push('/garage-add')
 						}}
 						style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong, textAlign: 'center', paddingVertical: 8 }}
-					>
-						+ Добавить машину
-					</Text>
+					>{t('+ Добавить машину')}</Text>
 				</ModalSheet>
 			) : null}
 
 			{pickPoint ? (
 				<ModalSheet onClose={() => setPickPoint(false)}>
-					<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>Где искать мастера</Text>
+					<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{t('Где искать мастера')}</Text>
 					{[
 						{ key: 'market', title: MARKET_LABEL, onPress: () => (setPoint({ ...MARKET_POINT, label: MARKET_LABEL }), setPickPoint(false)) },
-						{ key: 'gps', title: locating ? 'Определяем…' : 'Где я сейчас', onPress: locate },
+						{ key: 'gps', title: locating ? t('Определяем…') : t('Где я сейчас'), onPress: locate },
 					].map((option) => (
 						<Pressable
 							key={option.key}

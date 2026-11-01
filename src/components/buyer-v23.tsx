@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, Text, View, type StyleProp, type ViewStyl
 import Svg, { Circle, Path, Rect } from 'react-native-svg'
 import { router } from 'expo-router'
 import { fontFamily, useColors } from '@/theme'
+import { t } from '@/i18n'
 
 // ─── Icons (24×24 strokes from the mockup) ──────────────────────────────────
 
@@ -316,7 +317,7 @@ export function priceDigits(value: number) {
 }
 
 /** «Новые», «Б/у», «Под заказ» — chips under the price [05]. */
-export const CONDITION_CHIP = { NEW: 'Новые', USED: 'Б/у', ON_ORDER: 'Под заказ' } as const
+export const CONDITION_CHIP = { NEW: t('Новые'), USED: t('Б/у'), ON_ORDER: t('Под заказ') } as const
 
 /** Chips of a «Есть» answer: condition, «Оригинал KYB» / «Копия», then the rest of the tags [05]. */
 export function replyChips(reply: {
@@ -328,8 +329,8 @@ export function replyChips(reply: {
 	const chips: string[] = []
 	if (reply.condition) chips.push(CONDITION_CHIP[reply.condition])
 	const maker = reply.manufacturer ? ` ${reply.manufacturer}` : ''
-	if (reply.original === true) chips.push(`Оригинал${maker}`)
-	else if (reply.original === false) chips.push(`Копия${maker}`)
+	if (reply.original === true) chips.push(t('Оригинал{0}', maker))
+	else if (reply.original === false) chips.push(t('Копия{0}', maker))
 	else if (reply.manufacturer) chips.push(reply.manufacturer)
 	return [...chips, ...reply.tags]
 }

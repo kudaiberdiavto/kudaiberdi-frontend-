@@ -3,6 +3,7 @@ import { Redirect, router, useLocalSearchParams } from 'expo-router'
 import { Button, QueryErrorBanner } from '@/components/ui'
 import { fontFamily, useColors } from '@/theme'
 import { useQrResolve } from '@/api/market'
+import { t } from '@/i18n'
 
 /**
  * QR sticker of a row or a container (https://kudaibergen.kg/qr/{token}) scanned with the phone camera:
@@ -23,9 +24,9 @@ export default function QrLink() {
 		<View style={{ flex: 1, backgroundColor: c.surface, padding: 24, justifyContent: 'center', gap: 14 }}>
 			<QueryErrorBanner error={qr.error} onRetry={() => qr.refetch()} />
 			<Text style={{ fontSize: 17.5, fontFamily: fontFamily(600), color: c.muted, textAlign: 'center' }}>
-				{qr.error ? 'QR-код не относится к рынку' : 'Открываем место на рынке…'}
+				{qr.error ? t('QR-код не относится к рынку') : t('Открываем место на рынке…')}
 			</Text>
-			{qr.error ? <Button label="На главную" onPress={() => router.replace('/buyer')} /> : null}
+			{qr.error ? <Button label={t('На главную')} onPress={() => router.replace('/buyer')} /> : null}
 		</View>
 	)
 }

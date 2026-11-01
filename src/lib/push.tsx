@@ -13,6 +13,7 @@ import { queryClient } from '@/lib/query-client'
 import { useSession } from '@/store/useSession'
 import { chatKeys, incomingKeys, masterKeys, shopKeys } from '@/api/keys'
 import type { Chat, Me } from '@/api/types'
+import { t } from '@/i18n'
 
 const TOKEN_KEY = 'push.token'
 
@@ -47,16 +48,16 @@ if (Platform.OS !== 'web') {
 	Notifications.setNotificationCategoryAsync('NEW_REQUEST', [
 		{
 			identifier: 'HAVE',
-			buttonTitle: 'Есть',
-			textInput: { submitButtonTitle: 'Отправить', placeholder: 'Цена, сом' },
+			buttonTitle: t('Есть'),
+			textInput: { submitButtonTitle: t('Отправить'), placeholder: t('Цена, сом') },
 			options: { opensAppToForeground: false },
 		},
-		{ identifier: 'NOT_HAVE', buttonTitle: 'Нет', options: { opensAppToForeground: false } },
+		{ identifier: 'NOT_HAVE', buttonTitle: t('Нет'), options: { opensAppToForeground: false } },
 	]).catch(() => {})
 	// «Могу помочь / Не моё» on a new service request [39]: «Не моё» answers in the background.
 	Notifications.setNotificationCategoryAsync('NEW_SERVICE_REQUEST', [
-		{ identifier: 'CAN_HELP', buttonTitle: 'Могу помочь', options: { opensAppToForeground: true } },
-		{ identifier: 'NOT_MINE', buttonTitle: 'Не моё', options: { opensAppToForeground: false } },
+		{ identifier: 'CAN_HELP', buttonTitle: t('Могу помочь'), options: { opensAppToForeground: true } },
+		{ identifier: 'NOT_MINE', buttonTitle: t('Не моё'), options: { opensAppToForeground: false } },
 	]).catch(() => {})
 }
 
@@ -157,8 +158,8 @@ async function handleResponse(response: Notifications.NotificationResponse) {
 			// The action runs in the background — a tap on this reminder finishes the answer in the app [14].
 			await Notifications.scheduleNotificationAsync({
 				content: {
-					title: 'Ответ не отправлен',
-					body: price === null ? '«Есть» — только с ценой. Нажмите, чтобы ответить' : 'Нажмите, чтобы ответить в приложении',
+					title: t('Ответ не отправлен'),
+					body: price === null ? t('«Есть» — только с ценой. Нажмите, чтобы ответить') : t('Нажмите, чтобы ответить в приложении'),
 					data: { type: 'NEW_REQUEST', requestId: data.requestId },
 				},
 				trigger: null,

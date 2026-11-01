@@ -8,11 +8,12 @@ import { BoxOutlineIcon, LoupeIcon, TickIcon, WrenchIcon } from '@/components/bu
 import { fontFamily, useColors } from '@/theme'
 import { useSetRole } from '@/api/me'
 import type { UserRole } from '@/api/types'
+import { t } from '@/i18n'
 
 const ROLES = [
-	{ value: 'BUYER' as const, who: 'покупатель', title: 'Ищу запчасти', description: 'Для своей машины — продавцы рынка ответят с ценой, найду и мастера', icon: LoupeIcon },
-	{ value: 'SELLER' as const, who: 'продавец', title: 'Продаю запчасти', description: 'Контейнер на Кудайбергене или магазин в городе — получаю запросы покупателей', icon: BoxOutlineIcon },
-	{ value: 'MASTER' as const, who: 'мастер', title: 'Я мастер или СТО', description: 'Ремонт, шиномонтаж, эвакуатор — получаю заявки от водителей рядом', icon: WrenchIcon },
+	{ value: 'BUYER' as const, who: t('покупатель'), title: t('Ищу запчасти'), description: t('Для своей машины — продавцы рынка ответят с ценой, найду и мастера'), icon: LoupeIcon },
+	{ value: 'SELLER' as const, who: t('продавец'), title: t('Продаю запчасти'), description: t('Контейнер на Кудайбергене или магазин в городе — получаю запросы покупателей'), icon: BoxOutlineIcon },
+	{ value: 'MASTER' as const, who: t('мастер'), title: t('Я мастер или СТО'), description: t('Ремонт, шиномонтаж, эвакуатор — получаю заявки от водителей рядом'), icon: WrenchIcon },
 ]
 
 /** 02 «Кто вы?» — buyer, seller or master; chosen once, the app is built around it. */
@@ -32,10 +33,8 @@ export default function RoleScreen() {
 				style={{ paddingTop: insets.top + 20, paddingBottom: 26, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, gap: 6 }}
 			>
 				<Image source={require('../../assets/images/logo-mark.png')} style={{ width: 56, height: 56, marginBottom: 8 }} />
-				<Text style={{ fontSize: 28, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.3, color: '#FFFFFF' }}>Кто вы?</Text>
-				<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>
-					Приложение подстроится под вас
-				</Text>
+				<Text style={{ fontSize: 28, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.3, color: '#FFFFFF' }}>{t('Кто вы?')}</Text>
+				<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>{t('Приложение подстроится под вас')}</Text>
 			</LinearGradient>
 
 			<ScrollView contentContainerStyle={{ padding: 20, gap: 12 }} showsVerticalScrollIndicator={false}>
@@ -92,7 +91,7 @@ export default function RoleScreen() {
 
 			<View style={{ paddingTop: 12, paddingHorizontal: 20, paddingBottom: Math.max(insets.bottom, 34) }}>
 				<Button
-					label={`Продолжить как ${chosen.who}`}
+					label={t('Продолжить как {0}', chosen.who)}
 					loading={saveRole.isPending}
 					onPress={() =>
 						saveRole.mutate(role, {

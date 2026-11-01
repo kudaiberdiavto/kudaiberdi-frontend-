@@ -20,8 +20,9 @@ import { toPartFilters, useCatalogFilters } from '@/store/useCatalogFilters'
 import { useCars } from '@/api/garage'
 import { ComplainLink, ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
 import { openShopRoute, shopPlace } from '@/lib/shop-place'
+import { t } from '@/i18n'
 
-const CONDITION: Record<PartCondition, string> = { NEW: 'Новое', USED: 'Б/У', ON_ORDER: 'Под заказ' }
+const CONDITION: Record<PartCondition, string> = { NEW: t('Новое'), USED: t('Б/У'), ON_ORDER: t('Под заказ') }
 
 /** 29 — part card. `id` from the catalog, or `publicId` from a share link /p/{publicId}. */
 export default function PartScreen() {
@@ -165,14 +166,14 @@ export default function PartScreen() {
 							<View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: c.border }} />
 						)}
 						<Text style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(400), color: part.fit.fits ? '#14532D' : c.danger }}>
-							<Text style={{ fontFamily: fontFamily(700) }}>{part.fit.fits ? 'Подходит' : 'Не подходит'}</Text> к вашей{' '}
+							<Text style={{ fontFamily: fontFamily(700) }}>{part.fit.fits ? t('Подходит') : t('Не подходит')}</Text>{' '}{t('к вашей')}{' '}
 							{part.fit.carLabel}
 						</Text>
 						{part.fit.fits ? <CheckIcon size={18} color={c.success} strokeWidth={3} /> : null}
 					</View>
 				) : part?.fitments.length ? (
 					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
-						Подходит: {part.fitments.map((f) => f.label).join(', ')}
+						{t('Подходит: {0}', part.fitments.map((f) => f.label).join(', '))}
 					</Text>
 				) : null}
 
@@ -186,7 +187,7 @@ export default function PartScreen() {
 						{/* Only when it ran out — in stock is the norm, not worth a line. */}
 						{part.stockStatus !== 'IN_STOCK' ? (
 							<View style={{ height: 30, paddingHorizontal: 12, borderRadius: 15, backgroundColor: '#FDECEC', justifyContent: 'center' }}>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.danger }}>Нет в наличии</Text>
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.danger }}>{t('Нет в наличии')}</Text>
 							</View>
 						) : null}
 					</View>
@@ -246,7 +247,7 @@ export default function PartScreen() {
 					style={{ flex: 1, height: 54, paddingHorizontal: 10, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 				>
 					<MapPinIcon size={20} color={c.ink} />
-					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? '2ГИС' : 'Как пройти'}</Text>
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? t('2ГИС') : t('Как пройти')}</Text>
 				</Pressable>
 				<Pressable
 					disabled={!shop || openChat.isPending}
@@ -265,7 +266,7 @@ export default function PartScreen() {
 					}}
 				>
 					<ChatIcon size={20} color="#FFFFFF" />
-					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Написать')}</Text>
 				</Pressable>
 				{/* WhatsApp at the right edge — «Я из приложения Кудайберген. Меня интересует «…»» (only when the shop's number is visible). */}
 				{shop?.phone ? (
@@ -291,7 +292,7 @@ function Similar({ partId, categoryId, car }: { partId: number; categoryId?: num
 	if (!items.length) return null
 	return (
 		<View style={{ gap: 12, paddingTop: 8 }}>
-			<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>Похожие запчасти</Text>
+			<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>{t('Похожие запчасти')}</Text>
 			<View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 12, rowGap: 18 }}>
 				{items.map((item) => (
 					<View key={item.id} style={{ width: '47.8%' }}>

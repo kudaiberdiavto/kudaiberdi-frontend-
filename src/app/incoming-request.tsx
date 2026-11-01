@@ -6,6 +6,7 @@ import { TopBar } from '@/components/buyer-v23'
 import { useColors } from '@/theme'
 import { useIncomingRequest, useMarkSeen } from '@/api/incoming'
 import { RequestCard } from './seller/index'
+import { t } from '@/i18n'
 
 /** A buyer's request opened from «Запросы»: the same card, photos large, the answer buttons below. */
 export default function IncomingRequestScreen() {
@@ -21,7 +22,7 @@ export default function IncomingRequestScreen() {
 
 	return (
 		<Screen padding={0}>
-			<TopBar title="Запрос" />
+			<TopBar title={t('Запрос')} />
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 4, gap: 12 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={request.error} onRetry={() => request.refetch()} />
 				{request.data ? <RequestCard request={request.data} full /> : request.isPending ? <ActivityIndicator color={c.muted} style={{ paddingTop: 40 }} /> : null}

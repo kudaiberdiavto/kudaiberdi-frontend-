@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 // Display formatting for server data. Strings follow the mockups exactly:
 // «3 200 сом», «12 мин назад», «9:38», «вчера», «Ряд 14 · Бокс 12», «Camry 50 · 2012».
 // Server dates are UTC ISO-8601; everything here renders in the device's local time.
@@ -14,7 +15,7 @@ export function formatNumber(value: number) {
 /** 3200 → «3 200 сом». Prices are whole soms (`currency: "KGS"`). */
 export function formatPrice(value: number | null | undefined) {
 	if (value === null || value === undefined) return ''
-	return `${formatNumber(value)}${NBSP}сом`
+	return t('{0}{1}сом', formatNumber(value), NBSP)
 }
 
 /** Russian plural: plural(24, ['запчасть', 'запчасти', 'запчастей']) → «запчасти». */
@@ -35,8 +36,8 @@ export function countLabel(n: number, forms: readonly [string, string, string]) 
 
 const MINUTE = 60_000
 const HOUR = 60 * MINUTE
-const MONTHS = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
-const WEEKDAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб']
+const months = () => [t('янв'), t('фев'), t('мар'), t('апр'), t('мая'), t('июн'), t('июл'), t('авг'), t('сен'), t('окт'), t('ноя'), t('дек')]
+const WEEKDAYS = [t('вс'), t('пн'), t('вт'), t('ср'), t('чт'), t('пт'), t('сб')]
 
 const toDate = (value: string | Date) => (value instanceof Date ? value : new Date(value))
 
@@ -59,20 +60,20 @@ export function formatClock(value: string | Date) {
 export function formatWhenAt(value: string | Date, now = new Date()) {
 	const date = toDate(value)
 	const days = Math.round((new Date(date).setHours(0, 0, 0, 0) - new Date(now).setHours(0, 0, 0, 0)) / 86_400_000)
-	const day = days === 0 ? 'сегодня' : days === 1 ? 'завтра' : formatDay(date)
+	const day = days === 0 ? t('сегодня') : days === 1 ? t('завтра') : formatDay(date)
 	return `${day} ${formatClock(date)}`
 }
 
 /** «рядом», «850 м», «2,1 км». */
 export function formatDistance(meters: number) {
-	if (meters < 100) return 'рядом'
-	return meters < 1000 ? `${Math.round(meters / 10) * 10} м` : `${(meters / 1000).toFixed(1).replace('.', ',')} км`
+	if (meters < 100) return t('рядом')
+	return meters < 1000 ? t('{0} м', Math.round(meters / 10) * 10) : t('{0} км', (meters / 1000).toFixed(1).replace('.', ','))
 }
 
 /** «12 сен» — for anything older than yesterday. */
 export function formatDay(value: string | Date) {
 	const date = toDate(value)
-	return `${date.getDate()} ${MONTHS[date.getMonth()]}`
+	return `${date.getDate()} ${months()[date.getMonth()]}`
 }
 
 /**
@@ -82,13 +83,13 @@ export function formatDay(value: string | Date) {
 export function formatAgo(value: string | Date, { short = false, now = new Date() } = {}) {
 	const date = toDate(value)
 	const diff = now.getTime() - date.getTime()
-	const suffix = short ? '' : ' назад'
+	const suffix = short ? '' : t(' назад')
 
-	if (diff < MINUTE) return short ? '1 мин' : 'только что'
-	if (diff < HOUR) return `${Math.floor(diff / MINUTE)} мин${suffix}`
+	if (diff < MINUTE) return short ? t('1 мин') : t('только что')
+	if (diff < HOUR) return t('{0} мин{1}', Math.floor(diff / MINUTE), suffix)
 	const days = daysAgo(date, now)
-	if (days === 0) return `${Math.floor(diff / HOUR)} ч${suffix}`
-	if (days === 1) return 'вчера'
+	if (days === 0) return t('{0} ч{1}', Math.floor(diff / HOUR), suffix)
+	if (days === 1) return t('вчера')
 	return formatDay(date)
 }
 
@@ -97,7 +98,7 @@ export function formatChatTime(value: string | Date, now = new Date()) {
 	const date = toDate(value)
 	const days = daysAgo(date, now)
 	if (days <= 0) return formatClock(date)
-	if (days === 1) return 'вчера'
+	if (days === 1) return t('вчера')
 	if (days < 7) return WEEKDAYS[date.getDay()]
 	return formatDay(date)
 }
@@ -109,16 +110,16 @@ export function minutesLeft(expiresAt: string | Date, now = new Date()) {
 
 /** «18 мин», «1 ч 20 мин», «3 ч». */
 export function formatDuration(minutes: number) {
-	if (minutes < 60) return `${minutes} мин`
+	if (minutes < 60) return t('{0} мин', minutes)
 	const h = Math.floor(minutes / 60)
 	const m = minutes % 60
-	return m ? `${h} ч ${m} мин` : `${h} ч`
+	return m ? t('{0} ч {1} мин', h, m) : t('{0} ч', h)
 }
 
 /** Timer label from `expiresAt`: «осталось 12 мин» / «время вышло». */
 export function formatRemaining(expiresAt: string | Date, now = new Date()) {
 	const left = minutesLeft(expiresAt, now)
-	return left > 0 ? `осталось ${formatDuration(left)}` : 'время вышло'
+	return left > 0 ? t('осталось {0}', formatDuration(left)) : t('время вышло')
 }
 
 // ─── Market place ────────────────────────────────────────────────────────────
@@ -126,10 +127,10 @@ export function formatRemaining(expiresAt: string | Date, now = new Date()) {
 type Side = 'NORTH' | 'SOUTH' | 'EAST' | 'WEST'
 
 const SIDES: Record<Side, string> = {
-	NORTH: 'северная',
-	SOUTH: 'южная',
-	EAST: 'восточная',
-	WEST: 'западная',
+	NORTH: t('северная'),
+	SOUTH: t('южная'),
+	EAST: t('восточная'),
+	WEST: t('западная'),
 }
 
 /** «северная» (сторона ряда). */
@@ -139,7 +140,7 @@ export function formatSide(side: Side | null | undefined) {
 
 /** «Ряд 14» — prefers the server's `rowLabel`, falls back to the row code. */
 export function formatRow(row: { rowLabel?: string | null; row?: string | null; rowCode?: string | null }) {
-	return row.rowLabel ?? `Ряд ${row.row ?? row.rowCode ?? ''}`
+	return row.rowLabel ?? t('Ряд {0}', row.row ?? row.rowCode ?? '')
 }
 
 /**
@@ -155,7 +156,7 @@ export function formatPlace(place: {
 }) {
 	const box = place.container ?? place.number
 	const row = formatRow(place)
-	return box === null || box === undefined ? row : `${row} · Контейнер ${box}`
+	return box === null || box === undefined ? row : t('{0} · Контейнер {1}', row, box)
 }
 
 // ─── Cars ────────────────────────────────────────────────────────────────────

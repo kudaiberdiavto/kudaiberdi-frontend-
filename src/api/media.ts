@@ -6,6 +6,7 @@ import { Platform } from 'react-native'
 import { getThumbnailAsync } from 'expo-video-thumbnails'
 import { uploadPhoto, uploadVideo } from '@/lib/api'
 import type { MediaItem, MediaPurpose, Photo } from './types'
+import { t } from '@/i18n'
 
 export interface PendingPhoto {
 	key: string
@@ -166,7 +167,7 @@ export function useServiceMedia(max = 5) {
 			item.source.posterUri = video ? item.previewUri : null
 			// Checked here too, so a long video fails at once instead of after the upload (400 VIDEO_TOO_LONG).
 			if (durationSec && durationSec > MAX_VIDEO_SEC + 0.5) {
-				added.push({ ...item, status: 'error', error: 'Видео длиннее 30 секунд' })
+				added.push({ ...item, status: 'error', error: t('Видео длиннее 30 секунд') })
 				continue
 			}
 			added.push(item)
@@ -177,7 +178,7 @@ export function useServiceMedia(max = 5) {
 
 	const retry = (key: string) => {
 		const item = items.find((i) => i.key === key)
-		if (item && item.error !== 'Видео длиннее 30 секунд') start(item)
+		if (item && item.error !== t('Видео длиннее 30 секунд')) start(item)
 	}
 	const remove = (key: string) => setItems((list) => list.filter((i) => i.key !== key))
 

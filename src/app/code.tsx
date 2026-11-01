@@ -8,6 +8,7 @@ import { ApiError } from '@/lib/api'
 import { formatE164 } from '@/lib/phone'
 import { useSendOtp, useVerifyOtp } from '@/api/auth'
 import { homeHref } from '@/store/useSession'
+import { t } from '@/i18n'
 
 const CODE_LENGTH = 4
 
@@ -62,7 +63,7 @@ export default function CodeScreen() {
 
 	const errorText =
 		error instanceof ApiError && error.code === 'OTP_INVALID' && typeof error.extra.attemptsLeft === 'number'
-			? `${error.message}. Осталось попыток: ${error.extra.attemptsLeft}`
+			? t('{0}. Осталось попыток: {1}', error.message, error.extra.attemptsLeft)
 			: error?.message
 
 	return (
@@ -83,11 +84,9 @@ export default function CodeScreen() {
 				</Pressable>
 			}
 			header={
-				<Text style={{ fontSize: 32, lineHeight: 40, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink }}>
-					Код из SMS
-				</Text>
+				<Text style={{ fontSize: 32, lineHeight: 40, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink }}>{t('Код из SMS')}</Text>
 			}
-			label={`Отправили на ${formatE164(phone)}`}
+			label={t('Отправили на {0}', formatE164(phone))}
 			field={
 				<>
 					<Pressable onPress={() => inputRef.current?.focus()} style={{ flexDirection: 'row', gap: 12 }}>
@@ -137,13 +136,11 @@ export default function CodeScreen() {
 					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
 						{secondsLeft > 0 ? (
 							<>
-								Отправить снова через{' '}
+								{t('Отправить снова через')}{' '}
 								<Text style={{ fontFamily: fontFamily(700), color: c.ink }}>{formatCountdown(secondsLeft)}</Text>
 							</>
 						) : (
-							<Text onPress={resend.isPending ? undefined : sendAgain} style={{ fontFamily: fontFamily(700), color: c.brandStrong }}>
-								Отправить код снова
-							</Text>
+							<Text onPress={resend.isPending ? undefined : sendAgain} style={{ fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Отправить код снова')}</Text>
 						)}
 					</Text>
 				</>

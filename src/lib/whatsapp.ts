@@ -1,4 +1,5 @@
 import { Linking } from 'react-native'
+import { t } from '@/i18n'
 
 /**
  * WhatsApp with the shop: «Здравствуйте! Я из приложения Кудайберген. Меня интересует «…»» already typed.
@@ -7,8 +8,8 @@ import { Linking } from 'react-native'
 export function openWhatsApp(phone: string, partTitle?: string | null) {
 	const digits = phone.replace(/\D/g, '')
 	const text = partTitle
-		? `Здравствуйте! Я из приложения Кудайберген. Меня интересует «${partTitle}».`
-		: 'Здравствуйте! Я из приложения Кудайберген.'
+		? t('Здравствуйте! Я из приложения Кудайберген. Меня интересует «{0}».', partTitle)
+		: t('Здравствуйте! Я из приложения Кудайберген.')
 	return Linking.openURL(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`)
 }
 

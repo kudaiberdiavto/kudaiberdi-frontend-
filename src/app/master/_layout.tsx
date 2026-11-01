@@ -4,6 +4,7 @@ import { useUnread } from '@/api/chats'
 import { useMasterFeed } from '@/api/services'
 import { flattenPages } from '@/api/pagination'
 import { ChatIcon, ProfileIcon, RequestsIcon, SearchIcon } from '@/components/icons'
+import { t } from '@/i18n'
 
 /** Master tabs: Заявки · Запчасти · Чаты · Профиль (мастер тоже покупает запчасти — для машины клиента). */
 export default function MasterLayout() {
@@ -19,16 +20,16 @@ export default function MasterLayout() {
 
 			<TabBarContainer>
 				<TabTrigger name="requests" asChild>
-					<TabButton icon={RequestsIcon} label="Заявки" badge={fresh || undefined} />
+					<TabButton icon={RequestsIcon} label={t('Заявки')} badge={fresh || undefined} />
 				</TabTrigger>
 				<TabTrigger name="parts" asChild>
-					<TabButton icon={SearchIcon} label="Запчасти" />
+					<TabButton icon={SearchIcon} label={t('Запчасти')} />
 				</TabTrigger>
 				<TabTrigger name="chats" asChild>
-					<TabButton icon={ChatIcon} label="Чаты" badge={unread || undefined} />
+					<TabButton icon={ChatIcon} label={t('Чаты')} badge={unread || undefined} />
 				</TabTrigger>
 				<TabTrigger name="profile" asChild>
-					<TabButton icon={ProfileIcon} label="Профиль" />
+					<TabButton icon={ProfileIcon} label={t('Профиль')} />
 				</TabTrigger>
 			</TabBarContainer>
 

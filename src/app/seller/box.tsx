@@ -22,6 +22,7 @@ import { useShopStats } from '@/api/stats'
 import { toLang, useSession } from '@/store/useSession'
 import type { MyPartItem, MyShop } from '@/api/types'
 import { openSupport } from '@/lib/support'
+import { t } from '@/i18n'
 
 /**
  * 15 «Мой бокс» — a profile like on social apps: avatar (tap — change), counters, name and place, my brands,
@@ -42,7 +43,7 @@ export default function SellerBoxScreen() {
 
 	const data = shop.data
 	const tile = (width - 4) / 3
-	const place = data ? (data.location ? `Ряд ${data.location.rowCode} · Контейнер ${data.location.number}` : (data.address ?? '')) : ''
+	const place = data ? (data.location ? t('Ряд {0} · Контейнер {1}', data.location.rowCode, data.location.number) : (data.address ?? '')) : ''
 	const avatarBusy = avatarUpload.photos.length > 0 || setAvatar.isPending
 
 	const newPart = () => {
@@ -57,7 +58,7 @@ export default function SellerBoxScreen() {
 				status={data?.status}
 				reason={data?.blockReason}
 				kind="shop"
-				action={{ label: 'Выбрать другой контейнер', onPress: () => router.push('/box-select') }}
+				action={{ label: t('Выбрать другой контейнер'), onPress: () => router.push('/box-select') }}
 			/>
 
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
@@ -97,9 +98,9 @@ export default function SellerBoxScreen() {
 					</View>
 </Pressable>
 				<View style={{ flex: 1, flexDirection: 'row' }}>
-					<Counter value={summary.data ? String(summary.data.all) : '—'} label="товаров" />
-					<Counter value={data?.reviewsCount ? data.rating.toFixed(1) : '—'} label="рейтинг" star={Boolean(data?.reviewsCount)} />
-					<Counter value={data ? String(data.reviewsCount) : '—'} label="отзывов" />
+					<Counter value={summary.data ? String(summary.data.all) : '—'} label={t('товаров')} />
+					<Counter value={data?.reviewsCount ? data.rating.toFixed(1) : '—'} label={t('рейтинг')} star={Boolean(data?.reviewsCount)} />
+					<Counter value={data ? String(data.reviewsCount) : '—'} label={t('отзывов')} />
 				</View>
 			</View>
 
@@ -127,8 +128,8 @@ export default function SellerBoxScreen() {
 			) : null}
 
 			<View style={{ flexDirection: 'row', gap: 8 }}>
-				<Button label="Изменить" variant="secondary" height={40} radius={10} fontSize={15.5} style={{ flex: 1 }} onPress={() => data && setEditing(true)} />
-				<Button label="Выложить" variant="secondary" height={40} radius={10} fontSize={15.5} icon={PlusIcon} style={{ flex: 1 }} onPress={newPart} />
+				<Button label={t('Изменить')} variant="secondary" height={40} radius={10} fontSize={15.5} style={{ flex: 1 }} onPress={() => data && setEditing(true)} />
+				<Button label={t('Выложить')} variant="secondary" height={40} radius={10} fontSize={15.5} icon={PlusIcon} style={{ flex: 1 }} onPress={newPart} />
 			</View>
 		</View>
 	)
@@ -137,7 +138,7 @@ export default function SellerBoxScreen() {
 		<Screen padding={0}>
 			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				<Text numberOfLines={1} style={{ flex: 1, fontSize: 22, fontFamily: fontFamily(700), letterSpacing: -0.22, color: c.ink }}>
-					{data?.name ?? 'Мой контейнер'}
+					{data?.name ?? t('Мой контейнер')}
 				</Text>
 				<Pressable onPress={() => setMenu(true)} hitSlop={10} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
 					<Svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke={c.ink} strokeWidth={2.2} strokeLinecap="round">
@@ -166,7 +167,7 @@ export default function SellerBoxScreen() {
 						<ActivityIndicator color={c.muted} style={{ paddingTop: 40 }} />
 					) : (
 						<View style={{ paddingTop: 40 }}>
-							<EmptyState title="Публикаций нет" icon={TagIcon} />
+							<EmptyState title={t('Публикаций нет')} icon={TagIcon} />
 						</View>
 					)
 				}
@@ -229,7 +230,7 @@ function PostTile({ part, size }: { part: MyPartItem; size: number }) {
 						justifyContent: 'center',
 					}}
 				>
-					<Text style={{ fontSize: 12.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Черновик</Text>
+					<Text style={{ fontSize: 12.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Черновик')}</Text>
 				</View>
 			) : null}
 		</Pressable>
@@ -260,34 +261,34 @@ function MenuSheet({ onClose }: { onClose: () => void }) {
 	}
 
 	return (
-		<BottomSheet onClose={onClose} maxHeight={0.85} header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>Настройки</Text>}>
+		<BottomSheet onClose={onClose} maxHeight={0.85} header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{t('Настройки')}</Text>}>
 			<QueryErrorBanner error={stats.error} />
-			<Label>За 30 дней</Label>
+			<Label>{t('За 30 дней')}</Label>
 			<View style={{ flexDirection: 'row', gap: 8 }}>
-				<Stat value={s?.answeredPercent !== null && s?.answeredPercent !== undefined ? `${s.answeredPercent}%` : '—'} label="ответили" color={c.success} />
-				<Stat value={s?.avgReplyMinutes ? `${s.avgReplyMinutes} мин` : '—'} label="ср. ответ" />
-				<Stat value={s ? String(s.falseHave) : '—'} label="«не было»" color={s && s.falseHave > 0 ? c.danger : undefined} />
+				<Stat value={s?.answeredPercent !== null && s?.answeredPercent !== undefined ? `${s.answeredPercent}%` : '—'} label={t('ответили')} color={c.success} />
+				<Stat value={s?.avgReplyMinutes ? t('{0} мин', s.avgReplyMinutes) : '—'} label={t('ср. ответ')} />
+				<Stat value={s ? String(s.falseHave) : '—'} label={t('«не было»')} color={s && s.falseHave > 0 ? c.danger : undefined} />
 			</View>
 			{/* Only while paused — the rule itself is not explained up front. */}
 			{pausedUntil ? (
 				<View style={{ borderRadius: 14, backgroundColor: '#FFF7E6', paddingVertical: 10, paddingHorizontal: 14 }}>
 					<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: '#7A4B00' }}>
-						Запросы не приходят до {formatDay(pausedUntil)}: 3 покупателя отметили «сказали есть, а не было».
+						{t('Запросы не приходят до {0}: 3 покупателя отметили «сказали есть, а не было».', formatDay(pausedUntil))}
 					</Text>
 				</View>
 			) : null}
 
 			<View style={{ borderRadius: 16, backgroundColor: c.surface, overflow: 'hidden', marginTop: 6 }}>
-				<SettingsRow label="Мои марки" value="›" valueColor={c.brandStrong} valueWeight={700} onPress={openBrands} />
-				<SettingsRow label="Язык" height={60} right={<LanguageSwitch value={lang === 'ky' ? 'kg' : 'ru'} onChange={changeLang} />} />
+				<SettingsRow label={t('Мои марки')} value="›" valueColor={c.brandStrong} valueWeight={700} onPress={openBrands} />
+				<SettingsRow label={t('Язык')} height={60} right={<LanguageSwitch value={lang === 'ky' ? 'kg' : 'ru'} onChange={changeLang} />} />
 				<SettingsRow
-					label="Звук нового запроса"
+					label={t('Звук нового запроса')}
 					right={<Toggle value={settings.data?.newRequestSound ?? true} onChange={(value) => updateSettings.mutate({ newRequestSound: value })} />}
 				/>
-				<SettingsRow label="Помощь в WhatsApp" value="›" onPress={openSupport} />
-				<SettingsRow label="Политика конфиденциальности" value="›" onPress={() => Linking.openURL(`${API_URL}/privacy`)} />
-					<SettingsRow label="Выйти" labelColor={c.danger} onPress={() => signOut()} />
-					<SettingsRow label="Удалить аккаунт" labelColor={c.muted} divider={false} onPress={() => {
+				<SettingsRow label={t('Помощь в WhatsApp')} value="›" onPress={openSupport} />
+				<SettingsRow label={t('Политика конфиденциальности')} value="›" onPress={() => Linking.openURL(`${API_URL}/privacy`)} />
+					<SettingsRow label={t('Выйти')} labelColor={c.danger} onPress={() => signOut()} />
+					<SettingsRow label={t('Удалить аккаунт')} labelColor={c.muted} divider={false} onPress={() => {
 						onClose()
 						router.push('/delete-account')
 					}}
@@ -337,12 +338,12 @@ function EditSheet({ shop, onClose }: { shop: MyShop; onClose: () => void }) {
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
 			<BottomSheet
 				onClose={onClose}
-				header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>Мой контейнер</Text>}
-				footer={<Button label="Сохранить" disabled={name.trim().length < 2 || !phoneOk} loading={update.isPending} onPress={save} />}
+				header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{t('Мой контейнер')}</Text>}
+				footer={<Button label={t('Сохранить')} disabled={name.trim().length < 2 || !phoneOk} loading={update.isPending} onPress={save} />}
 			>
-				<Label>Название</Label>
-				<TextInput value={name} onChangeText={setName} maxLength={60} placeholder="Автодеталь Азамат" placeholderTextColor={raw.fillInk} style={field} />
-				<Label>Телефон для покупателей</Label>
+				<Label>{t('Название')}</Label>
+				<TextInput value={name} onChangeText={setName} maxLength={60} placeholder={t('Автодеталь Азамат')} placeholderTextColor={raw.fillInk} style={field} />
+				<Label>{t('Телефон для покупателей')}</Label>
 				<View style={{ ...field, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.muted }}>{COUNTRY_CODE}</Text>
 					<TextInput

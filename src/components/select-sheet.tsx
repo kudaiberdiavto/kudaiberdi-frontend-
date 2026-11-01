@@ -3,6 +3,7 @@ import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CheckIcon, CloseIcon, SearchIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
+import { t } from '@/i18n'
 
 export interface SelectOption<K extends string | number> {
 	key: K
@@ -60,7 +61,7 @@ export function SelectSheet<K extends string | number>({
 	selected,
 	onPick,
 	onClose,
-	searchPlaceholder = 'Поиск',
+	searchPlaceholder = t('Поиск'),
 	onSearch,
 }: {
 	/** The server searches (brands by «мерс», «бэха»): the sheet shows `options` as they come and always has the field. */
@@ -139,7 +140,7 @@ export function SelectSheet<K extends string | number>({
 						)
 					}}
 					ListEmptyComponent={
-						<Text style={{ paddingTop: 24, fontSize: 17, fontFamily: fontFamily(500), color: c.muted, textAlign: 'center' }}>Ничего не нашли</Text>
+						<Text style={{ paddingTop: 24, fontSize: 17, fontFamily: fontFamily(500), color: c.muted, textAlign: 'center' }}>{t('Ничего не нашли')}</Text>
 					}
 				/>
 			</View>

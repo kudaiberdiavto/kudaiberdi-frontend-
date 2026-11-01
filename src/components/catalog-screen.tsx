@@ -17,11 +17,12 @@ import type { PartCard } from '@/api/types'
 import { type CatalogSort, toPartFilters, useCatalogFilters } from '@/store/useCatalogFilters'
 import { useSession } from '@/store/useSession'
 import { briefPlace } from '@/lib/shop-place'
+import { t } from '@/i18n'
 
 const SORTS: { value: CatalogSort; label: string }[] = [
-	{ value: 'PRICE_ASC', label: 'Дешевле' },
-	{ value: 'PRICE_DESC', label: 'Дороже' },
-	{ value: 'NEWEST', label: 'Новые' },
+	{ value: 'PRICE_ASC', label: t('Дешевле') },
+	{ value: 'PRICE_DESC', label: t('Дороже') },
+	{ value: 'NEWEST', label: t('Новые') },
 ]
 
 /**
@@ -77,9 +78,9 @@ export function CatalogScreen() {
 	const header = (
 		<View style={{ gap: 14, paddingBottom: 14 }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>Поиск запчастей</Text>
+				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>{t('Поиск запчастей')}</Text>
 				<Pressable onPress={() => router.push('/shops')} hitSlop={8}>
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Магазины ›</Text>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Магазины ›')}</Text>
 				</Pressable>
 			</View>
 
@@ -100,14 +101,14 @@ export function CatalogScreen() {
 				<TextInput
 					value={text}
 					onChangeText={setText}
-					placeholder="Стойки, колодки, номер детали…"
+					placeholder={t('Стойки, колодки, номер детали…')}
 					placeholderTextColor="#7D7979"
 					returnKeyType="search"
 					style={{ flex: 1, minWidth: 0, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 				/>
 			</View>
 
-			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ИЩУ ДЛЯ МАШИНЫ</Text>
+			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ИЩУ ДЛЯ МАШИНЫ')}</Text>
 
 			<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 				{carList.map((car) => {
@@ -159,13 +160,13 @@ export function CatalogScreen() {
 							color: carId === null && f.brand ? c.brandStrong : c.ink,
 						}}
 					>
-						{carId === null && f.brand ? `${f.modelLabel ?? f.brand.shortName} ›` : isMaster ? 'Выберите марку ›' : 'Любая марка ›'}
+						{carId === null && f.brand ? `${f.modelLabel ?? f.brand.shortName} ›` : isMaster ? t('Выберите марку ›') : t('Любая марка ›')}
 					</Text>
 				</Pressable>
 			</ScrollView>
 
 			<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-				{[{ id: null, name: 'Все' }, ...(categories.data ?? [])].map((category) => {
+				{[{ id: null, name: t('Все') }, ...(categories.data ?? [])].map((category) => {
 					const active = f.categoryId === category.id
 					return (
 						<Pressable
@@ -188,7 +189,7 @@ export function CatalogScreen() {
 				})}
 			</ScrollView>
 
-			<QueryErrorBanner error={search.error} onRetry={() => search.refetch()} offlineText="Нет сети. Покажем запчасти, когда появится" />
+			<QueryErrorBanner error={search.error} onRetry={() => search.refetch()} offlineText={t('Нет сети. Покажем запчасти, когда появится')} />
 
 			{/* Video ads from the market — the same strip as on the home screen. */}
 			{!f.q.trim() && f.categoryId == null ? (
@@ -204,13 +205,13 @@ export function CatalogScreen() {
 							{appliedCar && fitsTotal != null ? (
 								<>
 									<Text style={{ fontFamily: fontFamily(700), color: c.ink }}>
-										{fitsTotal} {plural(fitsTotal, ['подходит', 'подходят', 'подходят'])}
+										{fitsTotal} {plural(fitsTotal, [t('подходит'), t('подходят'), t('подходят')])}
 									</Text>
-									{` к ${appliedCar.displayName}`}
+									{t(' к {0}', appliedCar.displayName)}
 								</>
 							) : (
 								<Text style={{ fontFamily: fontFamily(700), color: c.ink }}>
-									{countLabel(total, ['запчасть', 'запчасти', 'запчастей'])}
+									{countLabel(total, [t('запчасть'), t('запчасти'), t('запчастей')])}
 								</Text>
 							)}
 						</>
@@ -234,9 +235,7 @@ export function CatalogScreen() {
 				onEndReached={() => search.hasNextPage && !search.isFetchingNextPage && search.fetchNextPage()}
 				renderItem={({ item: row }) =>
 					row.kind === 'others' ? (
-						<Text style={{ paddingTop: 8, fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-							ОСТАЛЬНЫЕ ЗАПЧАСТИ
-						</Text>
+						<Text style={{ paddingTop: 8, fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ОСТАЛЬНЫЕ ЗАПЧАСТИ')}</Text>
 					) : (
 						<View style={{ flexDirection: 'row', gap: 12 }}>
 							{row.parts.map((part) => (
@@ -250,7 +249,7 @@ export function CatalogScreen() {
 				}
 				ListEmptyComponent={
 					search.isSuccess ? (
-						<EmptyState title="Ничего не нашли" icon={SearchIcon} />
+						<EmptyState title={t('Ничего не нашли')} icon={SearchIcon} />
 					) : null
 				}
 			/>
@@ -281,10 +280,8 @@ export function CatalogScreen() {
 					elevation: 8,
 				}}
 			>
-				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(400), color: '#FFFFFF' }}>
-					Не нашли? Спросите продавцов
-				</Text>
-				<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#8FB0FF' }}>Спросить →</Text>
+				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(400), color: '#FFFFFF' }}>{t('Не нашли? Спросите продавцов')}</Text>
+				<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#8FB0FF' }}>{t('Спросить →')}</Text>
 			</Pressable>
 		</View>
 	)

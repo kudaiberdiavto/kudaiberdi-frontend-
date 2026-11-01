@@ -17,6 +17,7 @@ import { CommentsSheet } from '@/components/comments-sheet'
 import { ChatIcon } from '@/components/icons'
 import { useVideoViewer } from '@/store/useVideoViewer'
 import { marketPlace } from '@/lib/shop-place'
+import { t } from '@/i18n'
 
 /**
  * Videos from the market, full screen (like reels): a video is a part for sale, swiping shows only videos.
@@ -92,7 +93,7 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 								<ActivityIndicator color="#FFFFFF" />
 							) : (
 								<Text style={{ fontSize: 17.5, lineHeight: 24, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
-									{feed.error ? 'Не удалось загрузить видео' : 'Видео нет'}
+									{feed.error ? t('Не удалось загрузить видео') : t('Видео нет')}
 								</Text>
 							)}
 						</View>
@@ -151,12 +152,12 @@ function FeedPage({
 						onSuccess: (chat) =>
 							router.push({
 								pathname: '/chat',
-								params: { chatId: String(chat.id), draft: `Здравствуйте! Хочу заказать «${item.title}» за ${priceDigits(item.price)} сом.` },
+								params: { chatId: String(chat.id), draft: t('Здравствуйте! Хочу заказать «{0}» за {1} сом.', item.title, priceDigits(item.price)) },
 							}),
 					}
 				)
 			: router.push('/')
-	const meta = [marketPlace(shop.place), shop.replyMinutes != null ? `отвечает за ${shop.replyMinutes} мин` : null].filter(Boolean).join(' · ')
+	const meta = [marketPlace(shop.place), shop.replyMinutes != null ? t('отвечает за {0} мин', shop.replyMinutes) : null].filter(Boolean).join(' · ')
 	const [commenting, setCommenting] = useState(false)
 	const condition = CONDITION_CHIP[item.condition]
 	const description = [condition, item.fitsLabel].filter(Boolean).join('. ')
@@ -242,14 +243,14 @@ function FeedPage({
 					</Text>
 				) : null}
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-					<Text style={{ fontSize: 30, fontFamily: fontFamily(800), letterSpacing: -0.6, color: '#FFFFFF' }}>{priceDigits(item.price)} сом</Text>
+					<Text style={{ fontSize: 30, fontFamily: fontFamily(800), letterSpacing: -0.6, color: '#FFFFFF' }}>{t('{0} сом', priceDigits(item.price))}</Text>
 					{condition ? (
 						<View style={{ height: 24, paddingHorizontal: 8, borderRadius: 7, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center' }}>
 							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{condition}</Text>
 						</View>
 					) : null}
 				</View>
-				{item.shipsToRegions ? <YellowChip label="Доставка по КР" icon /> : null}
+				{item.shipsToRegions ? <YellowChip label={t('Доставка по КР')} icon /> : null}
 				<View style={{ flexDirection: 'row', gap: 10, paddingTop: 4 }}>
 					<Pressable
 						onPress={order}
@@ -267,7 +268,7 @@ function FeedPage({
 						}}
 					>
 						<ChatIcon size={20} color="#FFFFFF" strokeWidth={2.2} />
-						<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Заказать</Text>
+						<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Заказать')}</Text>
 					</Pressable>
 					{item.shipsToRegions ? (
 						<Pressable
@@ -284,7 +285,7 @@ function FeedPage({
 							}}
 						>
 							<TruckIcon size={20} color={c.ink} />
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Доставка</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{t('Доставка')}</Text>
 						</Pressable>
 					) : null}
 				</View>

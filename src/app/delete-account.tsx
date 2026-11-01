@@ -9,6 +9,7 @@ import { apiFetch } from '@/lib/api'
 import { formatDay } from '@/lib/format'
 import { useSession } from '@/store/useSession'
 import type { components } from '@/api/schema'
+import { t } from '@/i18n'
 
 type SendOtp = components['schemas']['SendOtpResponse']
 type Deletion = components['schemas']['DeletionResponse']
@@ -31,13 +32,13 @@ export default function DeleteAccountScreen() {
 		return (
 			<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 				<View style={{ flex: 1, padding: 24, justifyContent: 'center', gap: 14 }}>
-					<Text style={{ fontSize: 24, fontFamily: fontFamily(800), color: c.ink }}>Аккаунт удалён</Text>
+					<Text style={{ fontSize: 24, fontFamily: fontFamily(800), color: c.ink }}>{t('Аккаунт удалён')}</Text>
 					<Text style={{ fontSize: 17, lineHeight: 24, fontFamily: fontFamily(400), color: c.inkSecondary }}>
-						Данные сотрём {formatDay(confirm.data.purgeAt)}. Если передумаете — просто войдите по номеру до этой даты.
+						{t('Данные сотрём {0}. Если передумаете — просто войдите по номеру до этой даты.', formatDay(confirm.data.purgeAt))}
 					</Text>
 				</View>
 				<View style={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 12 }}>
-					<Button label="Готово" onPress={() => useSession.getState().signOut()} />
+					<Button label={t('Готово')} onPress={() => useSession.getState().signOut()} />
 				</View>
 			</View>
 		)
@@ -45,19 +46,16 @@ export default function DeleteAccountScreen() {
 
 	return (
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar title="Удалить аккаунт" />
+			<TopBar title={t('Удалить аккаунт')} />
 			<ScrollView contentContainerStyle={{ padding: 16, gap: 14 }} keyboardShouldPersistTaps="handled">
 				<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 16, gap: 8 }}>
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Что удалится</Text>
-					<Text style={{ fontSize: 16, lineHeight: 23, fontFamily: fontFamily(400), color: c.inkSecondary }}>
-						Профиль, номер телефона, машины, избранное, запросы и заявки. Магазин и профиль мастера пропадут из поиска, сообщения в
-						чатах будут скрыты. Через 30 дней данные сотрутся навсегда.
-					</Text>
+					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{t('Что удалится')}</Text>
+					<Text style={{ fontSize: 16, lineHeight: 23, fontFamily: fontFamily(400), color: c.inkSecondary }}>{t('Профиль, номер телефона, машины, избранное, запросы и заявки. Магазин и профиль мастера пропадут из поиска, сообщения в чатах будут скрыты. Через 30 дней данные сотрутся навсегда.')}</Text>
 				</View>
 
 				{send.data ? (
 					<>
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.muted }}>Код из SMS</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Код из SMS')}</Text>
 						<TextInput
 							value={code}
 							onChangeText={(value) => setCode(value.replace(/\D/g, '').slice(0, 4))}
@@ -86,9 +84,9 @@ export default function DeleteAccountScreen() {
 
 			<View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: insets.bottom + 12 }}>
 				{send.data ? (
-					<Button label="Удалить аккаунт" disabled={code.length < 4} loading={confirm.isPending} onPress={() => confirm.mutate()} style={{ backgroundColor: c.danger }} />
+					<Button label={t('Удалить аккаунт')} disabled={code.length < 4} loading={confirm.isPending} onPress={() => confirm.mutate()} style={{ backgroundColor: c.danger }} />
 				) : (
-					<Button label="Получить код" variant="secondary" loading={send.isPending} onPress={() => send.mutate()} />
+					<Button label={t('Получить код')} variant="secondary" loading={send.isPending} onPress={() => send.mutate()} />
 				)}
 			</View>
 		</KeyboardAvoidingView>

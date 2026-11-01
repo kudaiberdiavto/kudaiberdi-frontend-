@@ -11,6 +11,7 @@ import { useVideoPlayer, VideoView } from 'expo-video'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { PlayIcon } from '@/components/voice'
+import { t } from '@/i18n'
 
 /** The server takes voice messages up to 60 s. */
 export const MAX_VOICE_SECONDS = 60
@@ -63,7 +64,7 @@ export function useVoiceRecorder(onRecorded: (voice: RecordedVoice) => void) {
 		setError(null)
 		const permission = await requestRecordingPermissionsAsync()
 		if (!permission.granted) {
-			setError('Разрешите доступ к микрофону в настройках')
+			setError(t('Разрешите доступ к микрофону в настройках'))
 			return
 		}
 		await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true })
@@ -122,11 +123,9 @@ export function RecordingBar({ seconds, onCancel }: { seconds: number; onCancel:
 		>
 			<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: c.danger }} />
 			<Text style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(600), color: c.ink }}>
-				Запись {clock(seconds)} / {clock(MAX_VOICE_SECONDS)}
+				{t('Запись {0} / {1}', clock(seconds), clock(MAX_VOICE_SECONDS))}
 			</Text>
-			<Text onPress={onCancel} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.danger }}>
-				Отмена
-			</Text>
+			<Text onPress={onCancel} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.danger }}>{t('Отмена')}</Text>
 		</View>
 	)
 }

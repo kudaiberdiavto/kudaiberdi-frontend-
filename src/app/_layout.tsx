@@ -36,6 +36,8 @@ export default function RootLayout() {
 	})
 
 	const booting = useSession((s) => s.status === 'booting')
+	// A language change remounts the screens — every text is read again in the new language.
+	const lang = useSession((s) => s.lang)
 
 	useEffect(() => {
 		useSession.getState().boot()
@@ -60,6 +62,7 @@ export default function RootLayout() {
 						<SafeAreaProvider>
 							<StatusBar style="dark" />
 							<Stack
+								key={lang}
 								screenOptions={{
 									headerShown: false,
 									contentStyle: { backgroundColor: lightColors.surface },

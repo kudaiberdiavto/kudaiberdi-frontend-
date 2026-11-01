@@ -1,6 +1,7 @@
 import type { Feature, FeatureCollection, LineString, Point, Polygon } from 'geojson'
 import { schemaToGeo } from '@/lib/geo'
 import bundled from '@/data/market-map.json'
+import { t } from '@/i18n'
 
 // The market scheme (GET /market/map, or the bundled copy offline) → GeoJSON for MapLibre.
 // Coordinates are scheme pixels (Y down) and go through the GPS calibration in lib/geo.
@@ -35,8 +36,8 @@ export function bundledScheme(): MarketScheme {
 			blocks.push({ kind: b.kind, rect })
 		}
 	})
-	rows.push({ id: -1001, code: 'З', label: 'З', type: 'VROW', geometry: { polygon: bundled.zone_Z_polygon } })
-	rows.push({ id: -1002, code: 'А', label: 'А', type: 'VROW', geometry: { polygon: bundled.row_A_polygon } })
+	rows.push({ id: -1001, code: t('З'), label: t('З'), type: 'VROW', geometry: { polygon: bundled.zone_Z_polygon } })
+	rows.push({ id: -1002, code: t('А'), label: t('А'), type: 'VROW', geometry: { polygon: bundled.row_A_polygon } })
 	return { version: 0, boundary: bundled.boundary, blocks, rows, passages: bundled.passages, entrances: bundled.entrances }
 }
 

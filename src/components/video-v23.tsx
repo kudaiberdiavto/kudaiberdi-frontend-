@@ -9,6 +9,7 @@ import { priceDigits } from '@/components/buyer-v23'
 import { resolveUrl } from '@/lib/api'
 import { fontFamily } from '@/theme'
 import type { DeliveryOrder, Video } from '@/api/types'
+import { t } from '@/i18n'
 
 interface IconProps {
 	size?: number
@@ -157,7 +158,7 @@ export function VideoTile({
 				<Text numberOfLines={2} style={{ fontSize: 18.5, lineHeight: 23, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
 					{title}
 				</Text>
-				<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{priceDigits(price)} с</Text>
+				<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{t('{0} с', priceDigits(price))}</Text>
 				<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.75)' }}>
 					{place}
 				</Text>
@@ -181,29 +182,29 @@ export function beforeCutoff(cutoff: string, now = new Date()) {
 
 /** «в Ош», «в Чуйскую обл.» — where the parcel goes (accusative of the region's name). */
 export function toRegion(name: string) {
-	return name.replace(/ая обл\.$/, 'ую обл.')
+	return name.replace(/ая обл\.$/, t('ую обл.'))
 }
 
 /** «Бишкек → Ош», «По Бишкеку». */
 export function routeTitle(order: Pick<DeliveryOrder, 'region' | 'regionName' | 'districtName'>) {
-	return order.region === 'BISHKEK' ? 'По Бишкеку' : `Бишкек → ${order.districtName ?? order.regionName}`
+	return order.region === 'BISHKEK' ? t('По Бишкеку') : t('Бишкек → {0}', order.districtName ?? order.regionName)
 }
 
 /** The buyer's line of a parcel: «Упакована — ждёт курьера», «В пути в Ош». */
 export function deliveryStatusText(order: DeliveryOrder) {
 	switch (order.status) {
 		case 'NEW':
-			return 'Оформлена — продавец упакует'
+			return t('Оформлена — продавец упакует')
 		case 'PACKED':
-			return 'Упакована — ждёт курьера'
+			return t('Упакована — ждёт курьера')
 		case 'COURIER_ORDERED':
-			return 'Курьер едет за посылкой'
+			return t('Курьер едет за посылкой')
 		case 'PICKED_UP':
-			return order.region === 'BISHKEK' ? 'Едет к вам' : `В пути в ${toRegion(order.districtName ?? order.regionName)}`
+			return order.region === 'BISHKEK' ? t('Едет к вам') : t('В пути в {0}', toRegion(order.districtName ?? order.regionName))
 		case 'DELIVERED':
-			return 'Доставлена'
+			return t('Доставлена')
 		case 'CANCELLED':
-			return 'Отменена'
+			return t('Отменена')
 	}
 }
 

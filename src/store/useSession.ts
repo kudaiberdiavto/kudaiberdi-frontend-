@@ -5,6 +5,7 @@ import { getItem, setItem } from '@/lib/secure-storage'
 import { queryClient } from '@/lib/query-client'
 import type { Lang, Me, TokenResponse, UserRole } from '@/api/types'
 import { meKeys } from '@/api/keys'
+import { setAppLang } from '@/i18n'
 
 // Client-side session state only: whether we are signed in, who, and the UI
 // language. The profile itself lives in TanStack Query (`meKeys.me`).
@@ -74,7 +75,10 @@ export const useSession = create<SessionState>((set, get) => ({
 
 	boot: async () => {
 		const savedLang = await getItem(LANG_KEY)
-		if (savedLang === 'ru' || savedLang === 'ky') set({ lang: savedLang })
+		if (savedLang === 'ru' || savedLang === 'ky') {
+			setAppLang(savedLang)
+			set({ lang: savedLang })
+		}
 
 		if (!(await loadTokens())) {
 			set({ status: 'guest' })
@@ -104,14 +108,19 @@ export const useSession = create<SessionState>((set, get) => ({
 	},
 
 	setLang: (lang) => {
+		setAppLang(lang)
 		set({ lang })
 		setItem(LANG_KEY, lang)
 	},
 
 	signIn: async (response) => {
 		await saveTokens(response)
-		queryClient.setQueryData(meKeys.me, response.user)
-		get().setUser(response.user)
+		// The language picked on the sign-in screen wins over the one saved in the profile — and is saved there.
+		const lang = toLang(get().lang)
+		const user = response.user.lang === lang ? response.user : { ...response.user, lang }
+		if (user !== response.user) apiFetch('/me', { method: 'PATCH', body: { lang } }).catch(() => {})
+		queryClient.setQueryData(meKeys.me, user)
+		get().setUser(user)
 		set({ status: 'authed' })
 	},
 

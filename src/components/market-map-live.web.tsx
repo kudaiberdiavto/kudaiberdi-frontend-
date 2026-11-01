@@ -10,6 +10,7 @@ import { marketMapStyle } from '@/data/map-style'
 import { type MarketGeo, routeToGeoJSON } from '@/lib/market-geojson'
 import { useMarketGeo } from '@/api/market'
 import { raw, useColors } from '@/theme'
+import { t } from '@/i18n'
 
 const MARKET_ZOOM = 16.2
 
@@ -111,7 +112,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 
 		map.on('error', (event) => {
 			setStatus('error')
-			setErrorText(event.error?.message ?? 'Неизвестная ошибка карты')
+			setErrorText(event.error?.message ?? t('Неизвестная ошибка карты'))
 			console.error('[market-map] ', event.error ?? event)
 		})
 
@@ -290,7 +291,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 					]}
 				>
 					<Text style={{ fontSize: 16.5, color: c.ink, textAlign: 'center' }}>
-						{status === 'loading' ? 'Загружаю карту…' : 'Карта не загрузилась'}
+						{status === 'loading' ? t('Загружаю карту…') : t('Карта не загрузилась')}
 					</Text>
 					{status === 'error' ? (
 						<Text selectable style={{ fontSize: 14.5, color: c.danger, textAlign: 'center' }}>

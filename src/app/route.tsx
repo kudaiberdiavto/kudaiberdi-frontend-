@@ -10,6 +10,7 @@ import { schemaToGeo } from '@/lib/geo'
 import { fontFamily, raw, useColors } from '@/theme'
 import { formatPlace } from '@/lib/format'
 import { useRoute } from '@/api/market'
+import { t } from '@/i18n'
 
 export default function RouteScreen() {
 	const c = useColors()
@@ -43,7 +44,7 @@ export default function RouteScreen() {
 				style={{ position: 'absolute', left: 0, right: 0, top: 0, height: insets.top + 60 }}
 			/>
 			<View style={{ position: 'absolute', left: 0, right: 0, top: insets.top }}>
-				<TopBar title="Как пройти" />
+				<TopBar title={t('Как пройти')} />
 			</View>
 
 			<View
@@ -68,18 +69,18 @@ export default function RouteScreen() {
 			>
 				<View style={{ width: 40, height: 5, borderRadius: 3, backgroundColor: c.border, alignSelf: 'center' }} />
 
-				<QueryErrorBanner error={route.error} onRetry={() => route.refetch()} offlineText="Нет сети. Маршрут построим, когда появится" />
+				<QueryErrorBanner error={route.error} onRetry={() => route.refetch()} offlineText={t('Нет сети. Маршрут построим, когда появится')} />
 
 				{data ? (
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-						<PlaceBox label="РЯД" value={data.target.rowCode} />
-						<PlaceBox label="КОНТ." value={String(data.target.number)} />
+						<PlaceBox label={t('РЯД')} value={data.target.rowCode} />
+						<PlaceBox label={t('КОНТ.')} value={String(data.target.number)} />
 						<View style={{ flex: 1, gap: 2 }}>
 							<Text numberOfLines={1} style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>
 								{params.shopName ?? formatPlace(data.target)}
 							</Text>
 							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
-								≈ {minutes} мин пешком{data.fromSource === 'ENTRANCE' ? ' от входа' : ''}
+								{t('≈ {0} мин пешком', minutes)}{data.fromSource === 'ENTRANCE' ? t(' от входа') : ''}
 							</Text>
 						</View>
 					</View>
@@ -96,7 +97,7 @@ export default function RouteScreen() {
 
 				<View style={{ flexDirection: 'row', gap: 10 }}>
 					<BigButton
-						label="Позвонить"
+						label={t('Позвонить')}
 						tone="green"
 						height={52}
 						icon={<CallIcon size={20} color="#FFFFFF" strokeWidth={2.4} />}
@@ -105,7 +106,7 @@ export default function RouteScreen() {
 						style={{ flex: 1 }}
 					/>
 					<BigButton
-						label="Написать"
+						label={t('Написать')}
 						tone="green"
 						height={52}
 						icon={<BubbleIcon size={20} color="#FFFFFF" strokeWidth={2.4} />}

@@ -31,6 +31,7 @@ import {
 } from '@/api/requests'
 import type { Reply } from '@/api/types'
 import { openShopRoute } from '@/lib/shop-place'
+import { t } from '@/i18n'
 
 type Sort = 'CHEAP' | 'RATING' | 'FIRST'
 
@@ -107,13 +108,13 @@ export default function RequestScreen() {
 						<View style={{ flex: 1, gap: 2 }}>
 							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
 								{closed
-									? 'Запрос закрыт'
+									? t('Запрос закрыт')
 									: active
-										? `Ищем ещё ${left} ${plural(left, ['минуту', 'минуты', 'минут'])}`
-										: 'Время вышло'}
+										? t('Ищем ещё {0} {1}', left, plural(left, [t('минуту'), t('минуты'), t('минут')]))
+										: t('Время вышло')}
 							</Text>
 							<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>
-								Спросили {askedCount} {plural(askedCount, ['продавца', 'продавцов', 'продавцов'])} · ответили {answered}
+								{t('Спросили {0} {1} · ответили {2}', askedCount, plural(askedCount, [t('продавца'), t('продавцов'), t('продавцов')]), answered)}
 							</Text>
 						</View>
 						{!closed && detail.canExtend ? (
@@ -125,7 +126,7 @@ export default function RequestScreen() {
 								{extend.isPending ? (
 									<ActivityIndicator size="small" color={c.brandStrong} />
 								) : (
-									<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Ещё 30 мин</Text>
+									<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Ещё 30 мин')}</Text>
 								)}
 							</Pressable>
 						) : null}
@@ -136,17 +137,17 @@ export default function RequestScreen() {
 				{/* What the buyer attached — voice and photos — not in the mockup, but they should see what they asked. */}
 				{detail?.voice || detail?.photos.length ? (
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 8 }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Ваш запрос</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Ваш запрос')}</Text>
 						{detail.voice ? <VoicePlayer voice={detail.voice} /> : null}
 						<MediaStrip media={photosAsMedia(detail.photos)} />
 					</View>
 				) : null}
 
 				<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-					<SortChip label="Дешевле" active={sort === 'CHEAP'} onPress={() => setSort('CHEAP')} />
-					<SortChip label="Рейтинг выше" active={sort === 'RATING'} onPress={() => setSort('RATING')} />
-					<SortChip label="Первые ответили" active={sort === 'FIRST'} onPress={() => setSort('FIRST')} />
-					<SortChip label="Новые" active={onlyNew} onPress={() => setOnlyNew(!onlyNew)} />
+					<SortChip label={t('Дешевле')} active={sort === 'CHEAP'} onPress={() => setSort('CHEAP')} />
+					<SortChip label={t('Рейтинг выше')} active={sort === 'RATING'} onPress={() => setSort('RATING')} />
+					<SortChip label={t('Первые ответили')} active={sort === 'FIRST'} onPress={() => setSort('FIRST')} />
+					<SortChip label={t('Новые')} active={onlyNew} onPress={() => setOnlyNew(!onlyNew)} />
 				</ScrollView>
 
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -159,7 +160,7 @@ export default function RequestScreen() {
 							color: c.muted,
 						}}
 					>
-						{tab === 'HAVE' ? `ЕСТЬ · ${have.length}` : `Есть · ${have.length}`}
+						{tab === 'HAVE' ? t('ЕСТЬ · {0}', have.length) : t('Есть · {0}', have.length)}
 					</Text>
 					<View style={{ flex: 1 }} />
 					<Text
@@ -171,7 +172,7 @@ export default function RequestScreen() {
 							color: c.muted,
 						}}
 					>
-						{tab === 'NOT_HAVE' ? `НЕТ · ${counts?.notHave ?? 0}` : `Нет · ${counts?.notHave ?? 0}`}
+						{tab === 'NOT_HAVE' ? t('НЕТ · {0}', counts?.notHave ?? 0) : t('Нет · {0}', counts?.notHave ?? 0)}
 					</Text>
 				</View>
 
@@ -179,7 +180,7 @@ export default function RequestScreen() {
 					<>
 						{replies.isSuccess && have.length === 0 ? (
 							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-								{active ? 'Ждём ответов' : 'Никто не ответил «Есть»'}
+								{active ? t('Ждём ответов') : t('Никто не ответил «Есть»')}
 							</Text>
 						) : null}
 						{shown.map((reply, index) => (
@@ -187,7 +188,7 @@ export default function RequestScreen() {
 						))}
 						{have.length > 0 && !closed ? (
 							<Pressable onPress={() => setSheet(true)} style={{ alignItems: 'center', paddingVertical: 10 }}>
-								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Нашли запчасть?</Text>
+								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Нашли запчасть?')}</Text>
 							</Pressable>
 						) : null}
 					</>
@@ -204,12 +205,12 @@ export default function RequestScreen() {
 								}}
 							>
 								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(600), color: c.ink }}>
-									{place.row ? `Ряд ${place.row}` : 'Ряд —'} · конт. {place.container ?? '—'}
+									{place.row ? t('Ряд {0}', place.row) : t('Ряд —')}{t(' · конт. {0}', place.container ?? '—')}
 								</Text>
 							</View>
 						))}
 						{(stats.data?.notHave ?? []).length === 0 ? (
-							<Text style={{ paddingVertical: 14, fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>Никто не ответил «Нет»</Text>
+							<Text style={{ paddingVertical: 14, fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Никто не ответил «Нет»')}</Text>
 						) : null}
 					</View>
 				)}
@@ -268,7 +269,7 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 	const shop = reply.shop
 	if (!shop) return null
 	const place = shop.location
-		? `Ряд ${shop.location.rowCode} · конт. ${shop.location.number}${reply.walkMinutes != null ? ` · ${reply.walkMinutes} мин` : ''}`
+		? t('Ряд {0} · конт. {1}', shop.location.rowCode, shop.location.number) + (reply.walkMinutes != null ? t(' · {0} мин', reply.walkMinutes) : '')
 		: (shop.address ?? '')
 	const chips = replyChips(reply)
 	return (
@@ -286,7 +287,7 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 						<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), letterSpacing: -0.22, color: c.ink }}>
 							{priceDigits(reply.price)}
 						</Text>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>сом</Text>
+						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>{t('сом')}</Text>
 					</View>
 				) : null}
 			</View>
@@ -324,7 +325,7 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 					}}
 				>
 					{shop.phone ? <CallIcon size={20} color="#FFFFFF" strokeWidth={2.4} /> : <BubbleIcon size={20} color="#FFFFFF" />}
-					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{shop.phone ? 'Позвонить' : 'Написать'}</Text>
+					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{shop.phone ? t('Позвонить') : t('Написать')}</Text>
 				</Pressable>
 				{shop.phone ? (
 					<SquareButton onPress={() => reply.chatId && router.push({ pathname: '/chat', params: { chatId: String(reply.chatId) } })}>
@@ -386,7 +387,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 				{shop.name}
 			</Text>
 			<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
-				{done ? 'отмечен' : shop.location ? `${shop.location.rowCode} · ${shop.location.number}` : 'магазин'}
+				{done ? t('отмечен') : shop.location ? `${shop.location.rowCode} · ${shop.location.number}` : t('магазин')}
 			</Text>
 		</Pressable>
 	)
@@ -397,7 +398,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 			maxHeight={0.8}
 			header={
 				<Text style={{ fontSize: 24, lineHeight: 31.2, fontFamily: fontFamily(800), letterSpacing: -0.24, color: c.ink }}>
-					{step === 'MAIN' ? 'Нашли запчасть?' : 'Кто сказал «есть»?'}
+					{step === 'MAIN' ? t('Нашли запчасть?') : t('Кто сказал «есть»?')}
 				</Text>
 			}
 		>
@@ -409,7 +410,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 								<View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}>
 									<TickIcon size={22} color="#FFFFFF" strokeWidth={2.2} />
 								</View>
-								<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>Да, купил — у кого?</Text>
+								<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>{t('Да, купил — у кого?')}</Text>
 							</View>
 							<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 								{shops.map((shop) =>
@@ -427,20 +428,20 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 						<SheetRow
 							tone="red"
 							icon={<CrossIcon size={22} color={c.danger} strokeWidth={2.2} />}
-							title="Сказали «есть», а не было"
-							subtitle="Продавец получит отметку"
+							title={t('Сказали «есть», а не было')}
+							subtitle={t('Продавец получит отметку')}
 							onPress={() => setStep('FALSE')}
 						/>
 						<SheetRow
 							icon={<LoupeIcon size={22} color={c.brandStrong} />}
-							title="Ещё ищу"
-							subtitle="Продлим запрос на 30 минут"
+							title={t('Ещё ищу')}
+							subtitle={t('Продлим запрос на 30 минут')}
 							onPress={() => extend.mutate(30, { onSuccess: onClose })}
 						/>
 					</>
 				) : (
 					<>
-						<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>Выберите продавца</Text>
+						<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>{t('Выберите продавца')}</Text>
 						<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 							{shops.map((shop) =>
 								shopCard(
@@ -451,7 +452,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 								)
 							)}
 						</ScrollView>
-						<SheetRow icon={<LoupeIcon size={22} color={c.brandStrong} />} title="Готово" subtitle="Вернуться к ответам" onPress={onClose} />
+						<SheetRow icon={<LoupeIcon size={22} color={c.brandStrong} />} title={t('Готово')} subtitle={t('Вернуться к ответам')} onPress={onClose} />
 					</>
 				)}
 				{error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}

@@ -2,7 +2,7 @@ import { Image, Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { API_URL } from '@/lib/env'
-import { BrandLogo, QueryErrorBanner, Screen, ServiceIcon, SettingsRow } from '@/components/ui'
+import { BrandLogo, LanguageSwitch, QueryErrorBanner, Screen, ServiceIcon, SettingsRow } from '@/components/ui'
 import { MapPinIcon, PhoneIcon } from '@/components/icons'
 import { MobileTruck, Switch } from '@/components/master-v23'
 import { fontFamily, useColors } from '@/theme'
@@ -10,10 +10,11 @@ import { formatE164 } from '@/lib/phone'
 import { plural } from '@/lib/format'
 import { open2gis } from '@/lib/shop-place'
 import { resolveUrl } from '@/lib/api'
-import { useMe } from '@/api/me'
+import { useMe, useUpdateMe } from '@/api/me'
 import { useMyMaster, useSaveMaster } from '@/api/services'
-import { useSession } from '@/store/useSession'
+import { toLang, useSession } from '@/store/useSession'
 import { openSupport } from '@/lib/support'
+import { t } from '@/i18n'
 
 const STAR = '#F5A623'
 
@@ -24,6 +25,13 @@ export default function MasterProfileTab() {
 	const profile = useMyMaster()
 	const save = useSaveMaster(true)
 	const signOut = useSession((s) => s.signOut)
+	const lang = useSession((s) => s.lang)
+	const updateMe = useUpdateMe()
+	const changeLang = (next: 'ru' | 'kg') => {
+		const apiLang = next === 'kg' ? 'ky' : 'ru'
+		useSession.getState().setLang(apiLang)
+		updateMe.mutate({ lang: toLang(apiLang) })
+	}
 	const user = me.data
 	const master = profile.data
 	const name = master?.name ?? user?.name ?? ' '
@@ -35,9 +43,7 @@ export default function MasterProfileTab() {
 		<View style={{ flexDirection: 'row', alignItems: 'center' }}>
 			<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>{text}</Text>
 			{action ? (
-				<Text onPress={action} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
-					Изменить
-				</Text>
+				<Text onPress={action} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Изменить')}</Text>
 			) : null}
 		</View>
 	)
@@ -45,7 +51,7 @@ export default function MasterProfileTab() {
 	return (
 		<Screen>
 			<View style={{ height: 52, justifyContent: 'center' }}>
-				<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>Мой сервис</Text>
+				<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>{t('Мой сервис')}</Text>
 			</View>
 			<ScrollView contentContainerStyle={{ paddingTop: 4, paddingBottom: 16, gap: 12 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={me.error ?? profile.error ?? save.error} onRetry={() => (me.refetch(), profile.refetch())} />
@@ -69,10 +75,10 @@ export default function MasterProfileTab() {
 								{master?.reviewsCount ? (
 									<>
 										<Text style={{ color: STAR }}>★ </Text>
-										{master.rating.toFixed(1)} · {master.reviewsCount} {plural(master.reviewsCount, ['отзыв', 'отзыва', 'отзывов'])}
+										{master.rating.toFixed(1)} · {master.reviewsCount} {plural(master.reviewsCount, [t('отзыв'), t('отзыва'), t('отзывов')])}
 									</>
 								) : (
-									'Пока без отзывов'
+									t('Пока без отзывов')
 								)}
 							</Text>
 						</View>
@@ -84,16 +90,16 @@ export default function MasterProfileTab() {
 						<MobileTruck size={24} color={c.brandStrong} />
 					</View>
 					<View style={{ flex: 1, gap: 1 }}>
-						<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(700), color: c.ink }}>Выезжаю к клиенту</Text>
+						<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(700), color: c.ink }}>{t('Выезжаю к клиенту')}</Text>
 						<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
-							{master?.mobile ? `в радиусе ${master.radiusKm} км` : 'клиенты приезжают ко мне'}
+							{master?.mobile ? t('в радиусе {0} км', master.radiusKm) : t('клиенты приезжают ко мне')}
 						</Text>
 					</View>
 					<Switch value={master?.mobile ?? false} disabled={!master || save.isPending} onChange={(mobile) => save.mutate({ mobile })} />
 				</View>
 
 				<View style={card}>
-					{header('Услуги', () => edit())}
+					{header(t('Услуги'), () => edit())}
 					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 						{(master?.services ?? []).map((service) => (
 							<View
@@ -108,9 +114,9 @@ export default function MasterProfileTab() {
 				</View>
 
 				<View style={card}>
-					{header('Марки', () => edit('brands'))}
+					{header(t('Марки'), () => edit('brands'))}
 					{master?.allBrands ? (
-						<Text style={{ fontSize: 16, fontFamily: fontFamily(600), color: c.inkSecondary }}>Работаю со всеми марками</Text>
+						<Text style={{ fontSize: 16, fontFamily: fontFamily(600), color: c.inkSecondary }}>{t('Работаю со всеми марками')}</Text>
 					) : (
 						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 							{(master?.brands ?? []).map((brand) => (
@@ -127,15 +133,15 @@ export default function MasterProfileTab() {
 				</View>
 
 				<View style={{ ...card, gap: 0, paddingBottom: 4 }}>
-					{header('Где работаю', () => edit('place'))}
+					{header(t('Где работаю'), () => edit('place'))}
 					<Pressable
 						disabled={!master}
 						onPress={() => master && open2gis(master)}
 						style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 }}
 					>
 						<MapPinIcon size={22} color={c.brandStrong} />
-						<Text style={{ flex: 1, fontSize: 16, lineHeight: 21, fontFamily: fontFamily(600), color: c.ink }}>{master?.address || 'Адрес не указан'}</Text>
-						<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>2ГИС</Text>
+						<Text style={{ flex: 1, fontSize: 16, lineHeight: 21, fontFamily: fontFamily(600), color: c.ink }}>{master?.address || t('Адрес не указан')}</Text>
+						<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('2ГИС')}</Text>
 					</Pressable>
 					{phone ? (
 						<>
@@ -149,10 +155,11 @@ export default function MasterProfileTab() {
 				</View>
 
 				<View style={{ borderRadius: 18, backgroundColor: c.card, overflow: 'hidden', marginTop: 4 }}>
-					<SettingsRow label="Помощь в WhatsApp" value="›" onPress={openSupport} />
-					<SettingsRow label="Политика конфиденциальности" value="›" onPress={() => Linking.openURL(`${API_URL}/privacy`)} />
-					<SettingsRow label="Выйти" labelColor={c.danger} onPress={() => signOut()} />
-					<SettingsRow label="Удалить аккаунт" labelColor={c.muted} divider={false} onPress={() => router.push('/delete-account')} />
+					<SettingsRow label={t('Язык')} height={60} right={<LanguageSwitch value={lang === 'ky' ? 'kg' : 'ru'} onChange={changeLang} />} />
+					<SettingsRow label={t('Помощь в WhatsApp')} value="›" onPress={openSupport} />
+					<SettingsRow label={t('Политика конфиденциальности')} value="›" onPress={() => Linking.openURL(`${API_URL}/privacy`)} />
+					<SettingsRow label={t('Выйти')} labelColor={c.danger} onPress={() => signOut()} />
+					<SettingsRow label={t('Удалить аккаунт')} labelColor={c.muted} divider={false} onPress={() => router.push('/delete-account')} />
 				</View>
 			</ScrollView>
 		</Screen>

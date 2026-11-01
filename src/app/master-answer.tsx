@@ -8,6 +8,7 @@ import { MediaStrip } from '@/components/media-strip'
 import { fontFamily, useColors } from '@/theme'
 import { formatClock, formatNumber } from '@/lib/format'
 import { useMasterOffer, useMasterRequest } from '@/api/services'
+import { t } from '@/i18n'
 
 type When = 'NOW' | 'TODAY' | 'TOMORROW'
 
@@ -75,9 +76,9 @@ export default function MasterAnswerScreen() {
 	}
 
 	const timeLabel = (value: When) => {
-		if (value === 'NOW') return 'Сейчас'
-		if (value === 'TODAY') return `Сегодня ${formatClock(times.TODAY)}`
-		return 'Завтра'
+		if (value === 'NOW') return t('Сейчас')
+		if (value === 'TODAY') return t('Сегодня {0}', formatClock(times.TODAY))
+		return t('Завтра')
 	}
 
 	const subtitle = request ? [request.description, request.car.modelLabel ?? request.car.label].filter(Boolean).join(' · ') : ' '
@@ -105,7 +106,7 @@ export default function MasterAnswerScreen() {
 							<CheckMark size={22} color="#FFFFFF" strokeWidth={2.2} />
 						</View>
 						<View style={{ flex: 1, gap: 1 }}>
-							<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), color: c.ink }}>Проверьте и отправьте</Text>
+							<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), color: c.ink }}>{t('Проверьте и отправьте')}</Text>
 							<Text numberOfLines={1} style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
 								{subtitle}
 							</Text>
@@ -130,17 +131,17 @@ export default function MasterAnswerScreen() {
 							style={{ height: 48, borderRadius: 14, backgroundColor: c.brandTint, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<MicOutline size={20} color={c.brandStrong} />
-							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Сказать голосом</Text>
+							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Сказать голосом')}</Text>
 						</Pressable>
 					)}
 					{voice.error ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.danger }}>{voice.error}</Text> : null}
 
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}>
-							{voice.result ? 'Заполнили из голоса' : 'Цена и время'}
+							{voice.result ? t('Заполнили из голоса') : t('Цена и время')}
 						</Text>
 						<View style={{ flex: 1 }} />
-						{voice.result ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>можно поправить</Text> : null}
+						{voice.result ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>{t('можно поправить')}</Text> : null}
 					</View>
 
 					<View
@@ -155,7 +156,7 @@ export default function MasterAnswerScreen() {
 							gap: 8,
 						}}
 					>
-						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>от</Text>
+						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>{t('от')}</Text>
 						<TextInput
 							value={priceValue ? formatNumber(priceValue) : ''}
 							onChangeText={(value) => setPrice(value.replace(/\D/g, '').slice(0, 7))}
@@ -164,7 +165,7 @@ export default function MasterAnswerScreen() {
 							placeholderTextColor={c.border}
 							style={{ minWidth: 40, fontSize: 32, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink, padding: 0 }}
 						/>
-						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>сом</Text>
+						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>{t('сом')}</Text>
 					</View>
 
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -212,7 +213,7 @@ export default function MasterAnswerScreen() {
 						}}
 					>
 						<SendPlane size={20} color="#FFFFFF" />
-						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{offer.isPending ? 'Отправляем…' : 'Отправить клиенту'}</Text>
+						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{offer.isPending ? t('Отправляем…') : t('Отправить клиенту')}</Text>
 					</Pressable>
 				</View>
 			</KeyboardAvoidingView>

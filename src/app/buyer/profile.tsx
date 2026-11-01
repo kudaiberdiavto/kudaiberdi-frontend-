@@ -13,6 +13,7 @@ import { useMe, useSettings, useUpdateMe, useUpdateSettings } from '@/api/me'
 import { useCars, useDeleteCar } from '@/api/garage'
 import { toLang, useSession } from '@/store/useSession'
 import { openSupport } from '@/lib/support'
+import { t } from '@/i18n'
 
 /** «Помощь в WhatsApp» — the support number from the build config (digits, e.g. 996555000000). */
 
@@ -25,8 +26,8 @@ export default function BuyerProfileScreen() {
 	const deleteCar = useDeleteCar()
 	const askDelete = (id: number, title: string) =>
 		Alert.alert('Удалить машину?', title, [
-			{ text: 'Отмена', style: 'cancel' },
-			{ text: 'Удалить', style: 'destructive', onPress: () => deleteCar.mutate(id) },
+			{ text: t('Отмена'), style: 'cancel' },
+			{ text: t('Удалить'), style: 'destructive', onPress: () => deleteCar.mutate(id) },
 		])
 	const updateMe = useUpdateMe()
 	const lang = useSession((s) => s.lang)
@@ -44,7 +45,7 @@ export default function BuyerProfileScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar title="Профиль" big onBack={false} />
+			<TopBar title={t('Профиль')} big onBack={false} />
 			<ScrollView contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={me.error ?? deleteCar.error} onRetry={() => me.refetch()} />
 
@@ -57,12 +58,12 @@ export default function BuyerProfileScreen() {
 						</View>
 					)}
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{user ? (user.name ?? 'Без имени') : ' '}</Text>
+						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{user ? (user.name ?? t('Без имени')) : ' '}</Text>
 						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>{user ? formatE164(user.phone) : ' '}</Text>
 					</View>
 				</View>
 
-				<Caps>Мои машины</Caps>
+				<Caps>{t('Мои машины')}</Caps>
 				{(cars.data ?? []).map((car) => (
 					<Pressable
 						key={car.id}
@@ -96,12 +97,12 @@ export default function BuyerProfileScreen() {
 					}}
 				>
 					<PlusThinIcon size={18} color={c.brandStrong} strokeWidth={2.6} />
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Добавить машину</Text>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Добавить машину')}</Text>
 				</Pressable>
 
 				<View style={{ height: 4 }} />
 				<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 6 }}>
-					<MenuRow icon={<GlobeIcon size={22} color={c.ink} />} label="Язык">
+					<MenuRow icon={<GlobeIcon size={22} color={c.ink} />} label={t('Язык')}>
 						<View style={{ height: 34, borderRadius: 17, backgroundColor: c.card, borderWidth: 1.5, borderColor: c.border, flexDirection: 'row', padding: 2 }}>
 							{(['ru', 'ky'] as const).map((value) => {
 								const active = lang === value
@@ -117,10 +118,10 @@ export default function BuyerProfileScreen() {
 							})}
 						</View>
 					</MenuRow>
-					<MenuRow icon={<BellIcon size={22} color={c.ink} />} label="Уведомления" onPress={() => setNotifications(true)} />
+					<MenuRow icon={<BellIcon size={22} color={c.ink} />} label={t('Уведомления')} onPress={() => setNotifications(true)} />
 					<MenuRow
 						icon={<HelpIcon size={22} color={c.ink} />}
-						label="Помощь в WhatsApp"
+						label={t('Помощь в WhatsApp')}
 						onPress={openSupport}
 					/>
 				</View>
@@ -128,19 +129,15 @@ export default function BuyerProfileScreen() {
 				<Text
 					onPress={() => useSession.getState().signOut()}
 					style={{ marginTop: 20, textAlign: 'center', fontSize: 16.5, fontFamily: fontFamily(600), color: c.muted }}
-				>
-					Выйти
-				</Text>
+				>{t('Выйти')}</Text>
 				<Text
 					onPress={() => router.push('/delete-account')}
 					style={{ marginTop: 14, textAlign: 'center', fontSize: 15, fontFamily: fontFamily(500), color: c.danger }}
-				>
-					Удалить аккаунт
-				</Text>
+				>{t('Удалить аккаунт')}</Text>
 				<Text style={{ marginTop: 14, textAlign: 'center', fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
-					<Text onPress={() => Linking.openURL(`${API_URL}/terms`)}>Правила</Text>
+					<Text onPress={() => Linking.openURL(`${API_URL}/terms`)}>{t('Правила')}</Text>
 					{'  ·  '}
-					<Text onPress={() => Linking.openURL(`${API_URL}/privacy`)}>Политика конфиденциальности</Text>
+					<Text onPress={() => Linking.openURL(`${API_URL}/privacy`)}>{t('Политика конфиденциальности')}</Text>
 				</Text>
 			</ScrollView>
 
@@ -166,14 +163,14 @@ function NotificationsSheet({ onClose }: { onClose: () => void }) {
 	const settings = useSettings()
 	const update = useUpdateSettings()
 	return (
-		<BottomSheet onClose={onClose} header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>Уведомления</Text>}>
+		<BottomSheet onClose={onClose} header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{t('Уведомления')}</Text>}>
 			<View style={{ borderRadius: 16, backgroundColor: c.card, overflow: 'hidden' }}>
 				<SettingsRow
-					label="Ответы продавцов и мастеров"
+					label={t('Ответы продавцов и мастеров')}
 					right={<Toggle value={settings.data?.notifyReplies ?? true} onChange={(value) => update.mutate({ notifyReplies: value })} />}
 				/>
 				<SettingsRow
-					label="Сообщения в чатах"
+					label={t('Сообщения в чатах')}
 					divider={false}
 					right={<Toggle value={settings.data?.notifyChat ?? true} onChange={(value) => update.mutate({ notifyChat: value })} />}
 				/>

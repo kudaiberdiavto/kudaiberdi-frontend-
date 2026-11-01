@@ -9,6 +9,7 @@ import { formatAgo } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
 import { useAddPartComment, useDeletePartComment, usePartComments, useSignedIn } from '@/api/catalog'
 import type { PartComment } from '@/api/types'
+import { t } from '@/i18n'
 
 /**
  * Comments under a video part (the reels-like feed): newest first, «Продавец» on the box's own answers, a field to
@@ -40,16 +41,16 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 	const actions = (comment: PartComment) =>
 		Alert.alert('Комментарий', comment.text, [
 			...(comment.canDelete
-				? [{ text: 'Удалить', style: 'destructive' as const, onPress: () => remove.mutate(comment.id) }]
+				? [{ text: t('Удалить'), style: 'destructive' as const, onPress: () => remove.mutate(comment.id) }]
 				: []),
-			...(!comment.mine && signedIn ? [{ text: 'Пожаловаться', onPress: () => setComplaint({ type: 'PART_COMMENT', targetId: comment.id }) }] : []),
-			{ text: 'Отмена', style: 'cancel' as const },
+			...(!comment.mine && signedIn ? [{ text: t('Пожаловаться'), onPress: () => setComplaint({ type: 'PART_COMMENT', targetId: comment.id }) }] : []),
+			{ text: t('Отмена'), style: 'cancel' as const },
 		])
 
 	return (
 		<ModalSheet onClose={onClose}>
 			<Text numberOfLines={1} style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>
-				Комментарии{total ? ` · ${total}` : ''}
+				{t('Комментарии')}{total ? ` · ${total}` : ''}
 			</Text>
 
 			<ScrollView style={{ maxHeight: height * 0.45 }} contentContainerStyle={{ gap: 14, paddingVertical: 4 }} keyboardShouldPersistTaps="handled">
@@ -57,10 +58,10 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 				{items.map((comment) => (
 					<Pressable key={comment.id} onLongPress={() => actions(comment)} delayLongPress={400} style={{ gap: 3 }}>
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>{comment.mine ? 'Вы' : (comment.authorName ?? 'Покупатель')}</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>{comment.mine ? t('Вы') : (comment.authorName ?? t('Покупатель'))}</Text>
 							{comment.fromSeller ? (
 								<View style={{ height: 20, paddingHorizontal: 6, borderRadius: 6, backgroundColor: c.brandTint, justifyContent: 'center' }}>
-									<Text style={{ fontSize: 12.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Продавец</Text>
+									<Text style={{ fontSize: 12.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Продавец')}</Text>
 								</View>
 							) : null}
 							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{formatAgo(comment.createdAt, { short: true })}</Text>
@@ -69,9 +70,7 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 					</Pressable>
 				))}
 				{comments.hasNextPage ? (
-					<Text onPress={() => comments.fetchNextPage()} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong, textAlign: 'center' }}>
-						Показать ещё
-					</Text>
+					<Text onPress={() => comments.fetchNextPage()} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong, textAlign: 'center' }}>{t('Показать ещё')}</Text>
 				) : null}
 			</ScrollView>
 
@@ -80,7 +79,7 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 				<TextInput
 					value={text}
 					onChangeText={setText}
-					placeholder={signedIn ? 'Написать комментарий' : 'Войдите, чтобы написать'}
+					placeholder={signedIn ? t('Написать комментарий') : t('Войдите, чтобы написать')}
 					placeholderTextColor={c.muted}
 					maxLength={500}
 					editable={signedIn}

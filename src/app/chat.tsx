@@ -6,6 +6,7 @@ import { resolveUrl } from '@/lib/api'
 import { fontFamily, useColors } from '@/theme'
 import { useChat } from '@/api/chats'
 import { openShopRoute } from '@/lib/shop-place'
+import { t } from '@/i18n'
 
 /** 07 — buyer's chat with a shop, or with a master (then `shop = null`, `master` and `serviceRequest`); call in one tap. */
 export default function BuyerChatScreen() {
@@ -23,11 +24,11 @@ export default function BuyerChatScreen() {
 	const presence = presenceLabel(chat?.online, chat?.lastSeenAt)
 	const place = shop
 		? shop.location
-			? `Кудайберген · ${shop.location.rowLabel} · конт. ${shop.location.number}`
+			? t('Кудайберген · {0} · конт. {1}', shop.location.rowLabel, shop.location.number)
 			: (shop.address ?? '')
 		: master
 			? master.mobile
-				? 'выездной мастер'
+				? t('выездной мастер')
 				: master.address
 			: ''
 
@@ -76,7 +77,7 @@ export default function BuyerChatScreen() {
 							</Text>
 							<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: typing ? c.success : c.brandStrong }}>
 								{typing ? (
-								'печатает…'
+								t('печатает…')
 							) : (
 								<>
 									{presence ? <Text style={{ color: chat?.online ? c.success : c.muted }}>{presence}</Text> : null}
@@ -90,7 +91,7 @@ export default function BuyerChatScreen() {
 					{phone ? (
 						<Pressable
 							onPress={() => Linking.openURL(`tel:${phone}`)}
-							accessibilityLabel="Позвонить"
+							accessibilityLabel={t('Позвонить')}
 							style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}
 						>
 							<CallIcon size={22} color="#FFFFFF" />
@@ -119,7 +120,7 @@ export default function BuyerChatScreen() {
 							{chat?.serviceRequest ? <WrenchIcon size={20} color={c.brandStrong} /> : <BoxOutlineIcon size={20} color={c.brandStrong} />}
 						</View>
 						<View style={{ flexShrink: 1, gap: 1 }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>{chat?.serviceRequest ? 'Ваша заявка' : 'Ваш запрос'}</Text>
+							<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>{chat?.serviceRequest ? t('Ваша заявка') : t('Ваш запрос')}</Text>
 							<Text numberOfLines={1} style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>
 								{request.text} · {request.carLabel}
 							</Text>

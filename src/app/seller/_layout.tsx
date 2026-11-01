@@ -4,6 +4,7 @@ import { useUnread } from '@/api/chats'
 import { useIncomingRequests } from '@/api/incoming'
 import { flattenPages } from '@/api/pagination'
 import { BoxIcon, ChatIcon, RequestsIcon, TagIcon } from '@/components/icons'
+import { t } from '@/i18n'
 
 /** Seller tabs: Запросы · Товары · Чаты · Мой бокс (продажа запчастей осталась, как была). */
 export default function SellerLayout() {
@@ -18,16 +19,16 @@ export default function SellerLayout() {
 
 			<TabBarContainer>
 				<TabTrigger name="requests" asChild>
-					<TabButton icon={RequestsIcon} label="Запросы" badge={fresh || undefined} />
+					<TabButton icon={RequestsIcon} label={t('Запросы')} badge={fresh || undefined} />
 				</TabTrigger>
 				<TabTrigger name="products" asChild>
-					<TabButton icon={TagIcon} label="Товары" />
+					<TabButton icon={TagIcon} label={t('Товары')} />
 				</TabTrigger>
 				<TabTrigger name="chats" asChild>
-					<TabButton icon={ChatIcon} label="Чаты" badge={unread || undefined} />
+					<TabButton icon={ChatIcon} label={t('Чаты')} badge={unread || undefined} />
 				</TabTrigger>
 				<TabTrigger name="box" asChild>
-					<TabButton icon={BoxIcon} label="Профиль" />
+					<TabButton icon={BoxIcon} label={t('Профиль')} />
 				</TabTrigger>
 			</TabBarContainer>
 

@@ -11,6 +11,7 @@ import { useOpenChat } from '@/api/chats'
 import { useMasterByLink, useMasterPublic, useMasterReviews, useServiceTypes } from '@/api/services'
 import { ORIGINS } from '@/store/useServiceDraft'
 import { ComplainLink, ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
+import { t } from '@/i18n'
 
 /** Filled rating stars — gold, the empty ones stay grey. */
 const STAR = '#F5A623'
@@ -37,7 +38,7 @@ export default function MasterCardScreen() {
 	const cover = master?.photos[0]
 	const origins = master?.origins.length
 		? master.origins.map((o) => ORIGINS.find((x) => x.value === o)?.label ?? o).join(', ')
-		: 'любые машины'
+		: t('любые машины')
 
 	const write = () =>
 		master &&
@@ -83,7 +84,7 @@ export default function MasterCardScreen() {
 						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
 							{master
 								? master.reviewsCount
-									? <><Text style={{ color: STAR }}>★</Text>{` ${master.rating.toFixed(1)} · ${master.reviewsCount} ${plural(master.reviewsCount, ['оценка', 'оценки', 'оценок'])}`}</>
+									? <><Text style={{ color: STAR }}>★</Text>{` ${master.rating.toFixed(1)} · ${master.reviewsCount} ${plural(master.reviewsCount, [t('оценка'), t('оценки'), t('оценок')])}`}</>
 									: null
 								: ' '}
 						</Text>
@@ -92,7 +93,7 @@ export default function MasterCardScreen() {
 					{master ? (
 						<View style={{ flexDirection: 'row', gap: 8 }}>
 							<Button
-								label="Позвонить"
+								label={t('Позвонить')}
 								variant="success"
 								icon={PhoneIcon}
 								height={48}
@@ -100,7 +101,7 @@ export default function MasterCardScreen() {
 								disabled={!master.phone}
 								onPress={() => master.phone && Linking.openURL(`tel:${master.phone}`)}
 							/>
-							<Button label="Написать" variant="success" icon={ChatIcon} height={48} style={{ flex: 1.4 }} loading={openChat.isPending} onPress={write} />
+							<Button label={t('Написать')} variant="success" icon={ChatIcon} height={48} style={{ flex: 1.4 }} loading={openChat.isPending} onPress={write} />
 						</View>
 					) : null}
 
@@ -110,7 +111,7 @@ export default function MasterCardScreen() {
 							<View style={{ flex: 1, gap: 2 }}>
 								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>{master.address}</Text>
 								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
-									{master.mobile ? `Выезжает к клиенту · до ${master.radiusKm} км` : `Принимает в радиусе ${master.radiusKm} км`}
+									{master.mobile ? t('Выезжает к клиенту · до {0} км', master.radiusKm) : t('Принимает в радиусе {0} км', master.radiusKm)}
 								</Text>
 							</View>
 						</View>
@@ -118,7 +119,7 @@ export default function MasterCardScreen() {
 
 					{master?.services.length ? (
 						<>
-							<SectionLabel>Услуги</SectionLabel>
+							<SectionLabel>{t('Услуги')}</SectionLabel>
 							<View style={{ gap: 8 }}>
 								{master.services.map((service) => (
 									<View key={service.code} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -134,17 +135,17 @@ export default function MasterCardScreen() {
 
 					{master ? (
 						<>
-							<SectionLabel>Марки и машины</SectionLabel>
+							<SectionLabel>{t('Марки и машины')}</SectionLabel>
 							<View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
-								{master.allBrands ? <Chip label="Все марки" height={34} radius={17} color={c.ink} /> : master.brands.map((brand) => <BrandLogo key={brand.id} brand={brand} size={34} />)}
+								{master.allBrands ? <Chip label={t('Все марки')} height={34} radius={17} color={c.ink} /> : master.brands.map((brand) => <BrandLogo key={brand.id} brand={brand} size={34} />)}
 							</View>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>Откуда машины: {origins}</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Откуда машины: {0}', origins)}</Text>
 						</>
 					) : null}
 
 					{master && master.photos.length > 1 ? (
 						<>
-							<SectionLabel>Фото работ</SectionLabel>
+							<SectionLabel>{t('Фото работ')}</SectionLabel>
 							<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 								{master.photos.map((photo) => (
 									<Image key={photo.id} source={{ uri: resolveUrl(photo.thumbUrl) }} style={{ width: 120, height: 120, borderRadius: 12, backgroundColor: raw.fill }} />
@@ -153,7 +154,7 @@ export default function MasterCardScreen() {
 						</>
 					) : null}
 
-					{master && commented.length ? <SectionLabel>{`Отзывы · ${commented.length}`}</SectionLabel> : null}
+					{master && commented.length ? <SectionLabel>{t('Отзывы · {0}', commented.length)}</SectionLabel> : null}
 					{commented.map((review) => (
 						<Pressable
 							key={review.id}
@@ -168,12 +169,12 @@ export default function MasterCardScreen() {
 								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>{formatDay(review.createdAt)}</Text>
 							</View>
 							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>
-								{review.buyerName ?? 'Клиент'}
+								{review.buyerName ?? t('Клиент')}
 								{review.tags.length ? ` · ${review.tags.map((t) => t.label).join(', ')}` : ''}
 							</Text>
 						</Pressable>
 					))}
-					{master ? <ComplainLink onPress={() => setComplaint({ type: 'MASTER', targetId: master.id })} label="Пожаловаться на мастера" /> : null}
+					{master ? <ComplainLink onPress={() => setComplaint({ type: 'MASTER', targetId: master.id })} label={t('Пожаловаться на мастера')} /> : null}
 				</View>
 			</ScrollView>
 			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />

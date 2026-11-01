@@ -3,6 +3,7 @@ import { Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-nat
 import type { IconProps } from '@/components/icons'
 import { isNetworkError } from '@/lib/api'
 import { fontFamily, useColors } from '@/theme'
+import { t } from '@/i18n'
 
 /** Red banner from screen 20 («Нет сети. Покажем ответы, когда появится»). */
 export function NoticeBanner({
@@ -41,7 +42,7 @@ export function NoticeBanner({
 export function QueryErrorBanner({
 	error,
 	onRetry,
-	offlineText = 'Нет сети. Обновим, когда появится',
+	offlineText = t('Нет сети. Обновим, когда появится'),
 	style,
 }: {
 	error: unknown
@@ -50,7 +51,7 @@ export function QueryErrorBanner({
 	style?: StyleProp<ViewStyle>
 }) {
 	if (!error) return null
-	const text = isNetworkError(error) ? offlineText : ((error as Error).message ?? 'Не удалось загрузить')
+	const text = isNetworkError(error) ? offlineText : ((error as Error).message ?? t('Не удалось загрузить'))
 	return <NoticeBanner text={text} onPress={onRetry} style={style} />
 }
 

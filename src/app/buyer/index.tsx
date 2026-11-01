@@ -30,14 +30,15 @@ import { serviceName, useMyServiceRequests, useServiceTypes } from '@/api/servic
 import { useSignedIn } from '@/api/catalog'
 import { useDeliveryOrders } from '@/api/delivery'
 import type { DeliveryOrder, RequestSummary, ServiceRequestSummary } from '@/api/types'
+import { t } from '@/i18n'
 
 type Row = { kind: 'part'; request: RequestSummary } | { kind: 'service'; request: ServiceRequestSummary }
 
 /** «Нужен мастер?» [03]: three services → the one-screen request [16], «Все услуги» → choose there. */
 const HOME_SERVICES: { code: string; label: string; icon: ComponentType<{ size?: number; color: string; strokeWidth?: number }> }[] = [
-	{ code: 'CAR_REPAIR', label: 'Ремонт', icon: WrenchIcon },
-	{ code: 'TIRE_SERVICE', label: 'Шиномонтаж', icon: WheelIcon },
-	{ code: 'TOW_TRUCK', label: 'Эвакуатор', icon: TowIcon },
+	{ code: 'CAR_REPAIR', label: t('Ремонт'), icon: WrenchIcon },
+	{ code: 'TIRE_SERVICE', label: t('Шиномонтаж'), icon: WheelIcon },
+	{ code: 'TOW_TRUCK', label: t('Эвакуатор'), icon: TowIcon },
 ]
 
 /** Rows shown before «Все». */
@@ -65,9 +66,9 @@ export default function BuyerHomeScreen() {
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<View style={{ height: 60, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.muted }}>{name ? `Салам, ${name}` : 'Салам'}</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.muted }}>{name ? t('Салам, {0}', name) : t('Салам')}</Text>
 					<Text numberOfLines={1} style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>
-						{car ? `${car.title} · ${car.year}` : 'Машина не выбрана'}
+						{car ? `${car.title} · ${car.year}` : t('Машина не выбрана')}
 					</Text>
 				</View>
 				{/* No car yet — «Добавить»; switching cars is not on the home screen. */}
@@ -87,7 +88,7 @@ export default function BuyerHomeScreen() {
 						}}
 					>
 						<PlusThinIcon size={16} color={c.ink} />
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>Добавить</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>{t('Добавить')}</Text>
 					</Pressable>
 				)}
 			</View>
@@ -129,17 +130,13 @@ export default function BuyerHomeScreen() {
 							<LoupeIcon size={24} color="#FFFFFF" strokeWidth={2.6} />
 						</View>
 						<View style={{ flex: 1, gap: 3 }}>
-							<Text style={{ fontSize: 23, lineHeight: 29, fontFamily: fontFamily(800), letterSpacing: -0.4, color: '#FFFFFF' }}>
-								Найти запчасть
-							</Text>
-							<Text style={{ fontSize: 15, lineHeight: 20, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>
-								Фото или голосом — продавцы ответят с ценой
-							</Text>
+							<Text style={{ fontSize: 23, lineHeight: 29, fontFamily: fontFamily(800), letterSpacing: -0.4, color: '#FFFFFF' }}>{t('Найти запчасть')}</Text>
+							<Text style={{ fontSize: 15, lineHeight: 20, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>{t('Фото или голосом — продавцы ответят с ценой')}</Text>
 						</View>
 					</LinearGradient>
 				</Pressable>
 
-				<Caps>Нужен мастер?</Caps>
+				<Caps>{t('Нужен мастер?')}</Caps>
 				<View style={{ flexDirection: 'row', gap: 8 }}>
 					{HOME_SERVICES.map(({ code, label, icon: Icon }) => (
 						<ServiceTile
@@ -150,7 +147,7 @@ export default function BuyerHomeScreen() {
 						/>
 					))}
 					<ServiceTile
-						label="Все услуги"
+						label={t('Все услуги')}
 						muted
 						icon={<PlusThinIcon size={22} color={c.ink} />}
 						onPress={() => router.push('/service-new')}
@@ -167,15 +164,13 @@ export default function BuyerHomeScreen() {
 				{items.length ? (
 					<>
 						<View style={{ height: 2 }} />
-						<Caps link={items.length > PREVIEW ? (all ? 'Свернуть' : 'Все') : undefined} onLink={() => setAll(!all)}>
-							Мои запросы
-						</Caps>
+						<Caps link={items.length > PREVIEW ? (all ? t('Свернуть') : t('Все')) : undefined} onLink={() => setAll(!all)}>{t('Мои запросы')}</Caps>
 					</>
 				) : null}
 				<QueryErrorBanner
 					error={requests.error}
 					onRetry={() => requests.refetch()}
-					offlineText="Нет сети. Покажем запросы, когда появится"
+					offlineText={t('Нет сети. Покажем запросы, когда появится')}
 				/>
 				{(all ? items : items.slice(0, PREVIEW)).map((item) =>
 					item.kind === 'part' ? (
@@ -191,9 +186,7 @@ export default function BuyerHomeScreen() {
 							if (services.hasNextPage) services.fetchNextPage()
 						}}
 						style={{ textAlign: 'center', paddingVertical: 8, fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}
-					>
-						Показать ещё
-					</Text>
+					>{t('Показать ещё')}</Text>
 				) : null}
 
 
@@ -316,15 +309,15 @@ function RequestRow({ request }: { request: RequestSummary }) {
 	const left = minutesLeft(request.expiresAt)
 	const status =
 		request.state === 'CLOSED'
-			? 'Закрыт'
+			? t('Закрыт')
 			: request.status === 'ACTIVE' && left > 0
-				? `Ищем ещё ${left} мин`
+				? t('Ищем ещё {0} мин', left)
 				: request.haveCount > 0
-					? 'Время вышло'
-					: 'Пока никто не ответил'
+					? t('Время вышло')
+					: t('Пока никто не ответил')
 	const chip =
 		request.haveCount > 0
-			? `${request.haveCount} есть${request.minPrice != null ? ` · от ${priceDigits(request.minPrice)} с` : ''}`
+			? t('{0} есть', request.haveCount) + (request.minPrice != null ? t(' · от {0} с', priceDigits(request.minPrice)) : '')
 			: undefined
 	return (
 		<RequestCard
@@ -350,12 +343,12 @@ function ServiceRow({ request }: { request: ServiceRequestSummary }) {
 	const service = serviceName(types, request.service.code, true)
 	const status =
 		request.state === 'CLOSED'
-			? `${service} · договорились`
+			? t('{0} · договорились', service)
 			: offers > 0
-				? `${service} · ${offers} ${plural(offers, ['мастер ответил', 'мастера ответили', 'мастеров ответили'])}`
+				? `${service} · ${offers} ${plural(offers, [t('мастер ответил'), t('мастера ответили'), t('мастеров ответили')])}`
 				: request.status === 'ACTIVE'
-					? `${service} · ждём мастеров`
-					: `${service} · никто не ответил`
+					? t('{0} · ждём мастеров', service)
+					: t('{0} · никто не ответил', service)
 	return (
 		<RequestCard
 			tile={

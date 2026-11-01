@@ -10,6 +10,7 @@ import { ApiError } from '@/lib/api'
 import { API_URL } from '@/lib/env'
 import { useSendOtp } from '@/api/auth'
 import { homeHref, useSession } from '@/store/useSession'
+import { t } from '@/i18n'
 
 const LANGS = [
 	{ value: 'ru', label: 'RU' },
@@ -98,14 +99,12 @@ export default function PhoneScreen() {
 				>
 					<Image source={require('../../assets/images/logo-mark.png')} style={{ width: 92, height: 92 }} />
 					<View style={{ flex: 1, gap: 6 }}>
-						<Text style={{ fontSize: 28, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.5, color: '#FFFFFF' }}>Кудайберген</Text>
-						<Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.85)' }}>
-							Авторынок запчастей в Бишкеке
-						</Text>
+						<Text style={{ fontSize: 28, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.5, color: '#FFFFFF' }}>{t('Кудайберген')}</Text>
+						<Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.85)' }}>{t('Авторынок запчастей в Бишкеке')}</Text>
 					</View>
 				</LinearGradient>
 			}
-			label="Номер телефона"
+			label={t('Номер телефона')}
 			field={
 				<View
 					style={{
@@ -142,22 +141,18 @@ export default function PhoneScreen() {
 				error ? (
 					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text>
 				) : (
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>Отправим SMS с кодом</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Отправим SMS с кодом')}</Text>
 				)
 			}
 			footer={
 				<View style={{ gap: 12 }}>
-					<Button label="Получить код" disabled={!isValidLocalPhone(phone)} loading={sendOtp.isPending} onPress={submit} />
+					<Button label={t('Получить код')} disabled={!isValidLocalPhone(phone)} loading={sendOtp.isPending} onPress={submit} />
 					{/* Entering means accepting the rules (App Store 1.2: user content needs agreed terms). */}
 					<Text style={{ fontSize: 13.5, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
-						Продолжая, вы принимаете{' '}
-						<Text onPress={() => Linking.openURL(`${API_URL}/terms`)} style={{ color: c.brandStrong }}>
-							Правила пользования
-						</Text>{' '}
-						и{' '}
-						<Text onPress={() => Linking.openURL(`${API_URL}/privacy`)} style={{ color: c.brandStrong }}>
-							Политику конфиденциальности
-						</Text>
+						{t('Продолжая, вы принимаете')}{' '}
+						<Text onPress={() => Linking.openURL(`${API_URL}/terms`)} style={{ color: c.brandStrong }}>{t('Правила пользования')}</Text>{' '}
+						{t('и')}{' '}
+						<Text onPress={() => Linking.openURL(`${API_URL}/privacy`)} style={{ color: c.brandStrong }}>{t('Политику конфиденциальности')}</Text>
 					</Text>
 				</View>
 			}

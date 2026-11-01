@@ -15,6 +15,7 @@ import { resolveUrl } from '@/lib/api'
 import type { CarOrigin, MyMaster } from '@/api/types'
 import { MARKET_POINT } from '@/data/service-types'
 import { ORIGINS } from '@/store/useServiceDraft'
+import { t } from '@/i18n'
 
 interface Form {
 	name: string
@@ -48,7 +49,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 	// «Изменить» on a block of «Мой сервис» opens the form at that block
 	const scroll = useRef<ScrollView>(null)
 	const scrolled = useRef(false)
-	const anchor = (section: 'brands' | 'place') => (e: { nativeEvent: { layout: { y: number } } }) => {
+	const anchor = (section: 'brands' | 'place', e: { nativeEvent: { layout: { y: number } } }) => {
 		if (params.section !== section || scrolled.current) return
 		scrolled.current = true
 		const y = e.nativeEvent.layout.y - 8
@@ -111,7 +112,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 						<ChevronLeftIcon size={24} color={c.ink} />
 					</Pressable>
 				) : null}
-				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>Мои услуги</Text>
+				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>{t('Мои услуги')}</Text>
 			</View>
 
 			<ScrollView ref={scroll} contentContainerStyle={{ paddingTop: 8, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
@@ -120,22 +121,22 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 				{/* Not on the mockup: the name buyers see on offers [37] — asked once, on the first entry. */}
 				{!initial ? (
 					<>
-						<SectionLabel>Название</SectionLabel>
+						<SectionLabel>{t('Название')}</SectionLabel>
 						<TextInput
 							value={form.name}
 							onChangeText={(name) => patch({ name: name.slice(0, 60) })}
-							placeholder="СТО «Ходовик» или Мастер Эрлан"
+							placeholder={t('СТО «Ходовик» или Мастер Эрлан')}
 							placeholderTextColor={raw.fillInk}
 							style={{ height: 48, borderRadius: 12, backgroundColor: c.card, borderWidth: 2, borderColor: c.border, paddingHorizontal: 14, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}
 						/>
 					</>
 				) : null}
 
-				<SectionLabel>Что делаю</SectionLabel>
+				<SectionLabel>{t('Что делаю')}</SectionLabel>
 				<ServiceGrid types={types} isSelected={(code) => form.services.includes(code)} onPress={toggleService} tileHeight={84} />
 
-				<View onLayout={anchor('brands')}>
-					<SectionLabel>Марки</SectionLabel>
+				<View onLayout={(e) => anchor('brands', e)}>
+					<SectionLabel>{t('Марки')}</SectionLabel>
 				</View>
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
 					{!form.allBrands
@@ -157,11 +158,11 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 							justifyContent: 'center',
 						}}
 					>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Все марки</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Все марки')}</Text>
 					</Pressable>
 					{!pickBrands ? (
 						<Pressable onPress={() => setPickBrands(true)} style={{ height: 34, paddingHorizontal: 12, borderRadius: 17, backgroundColor: c.card, justifyContent: 'center' }}>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Выбрать…</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Выбрать…')}</Text>
 						</Pressable>
 					) : null}
 				</View>
@@ -180,7 +181,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 					</View>
 				) : null}
 
-				<SectionLabel>Откуда машины</SectionLabel>
+				<SectionLabel>{t('Откуда машины')}</SectionLabel>
 				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 					{ORIGINS.filter((o) => o.value !== 'UNKNOWN').map((origin) => (
 						<Chip
@@ -194,8 +195,8 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 					))}
 				</View>
 
-				<View onLayout={anchor('place')}>
-					<SectionLabel>Где работаю</SectionLabel>
+				<View onLayout={(e) => anchor('place', e)}>
+					<SectionLabel>{t('Где работаю')}</SectionLabel>
 				</View>
 				{editPlace ? (
 					<View style={{ gap: 8 }}>
@@ -204,7 +205,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 							<TextInput
 								value={form.address}
 								onChangeText={(address) => patch({ address })}
-								placeholder="Адрес: улица, дом, контейнер"
+								placeholder={t('Адрес: улица, дом, контейнер')}
 								placeholderTextColor={raw.fillInk}
 								style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}
 							/>
@@ -212,12 +213,12 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 						<Pressable onPress={locate} disabled={locating} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 36 }}>
 							{locating ? <ActivityIndicator color={c.brandStrong} /> : <LocateIcon size={18} color={c.brandStrong} />}
 							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
-								{form.lat !== null ? 'Точка определена · обновить' : 'Определить по геолокации'}
+								{form.lat !== null ? t('Точка определена · обновить') : t('Определить по геолокации')}
 							</Text>
 						</Pressable>
 						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 							{RADII.map((km) => (
-								<Chip key={km} label={`${km} км`} height={36} radius={12} color={c.ink} selected={km === form.radiusKm} onPress={() => patch({ radiusKm: km })} />
+								<Chip key={km} label={t('{0} км', km)} height={36} radius={12} color={c.ink} selected={km === form.radiusKm} onPress={() => patch({ radiusKm: km })} />
 							))}
 						</View>
 					</View>
@@ -229,17 +230,17 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 						<MapPinIcon size={20} color={c.brandStrong} />
 						<View style={{ flex: 1, gap: 2 }}>
 							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>{form.address}</Text>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>Принимаю заявки в радиусе {form.radiusKm} км</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Принимаю заявки в радиусе {0} км', form.radiusKm)}</Text>
 						</View>
 					</Pressable>
 				)}
 
 				<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 12, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14 }}>
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}>Выезжаю к клиенту</Text>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}>{t('Выезжаю к клиенту')}</Text>
 					<Toggle value={form.mobile} onChange={(mobile) => patch({ mobile })} />
 				</View>
 
-				<SectionLabel>Телефон для клиентов</SectionLabel>
+				<SectionLabel>{t('Телефон для клиентов')}</SectionLabel>
 				<TextInput
 					value={form.phone}
 					onChangeText={(phone) => patch({ phone: phone.replace(/[^\d+]/g, '').slice(0, 13) })}
@@ -254,7 +255,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 
 			<View style={{ paddingTop: 12, paddingHorizontal: 16, paddingBottom: 28 + insets.bottom, backgroundColor: c.card, borderTopWidth: 1, borderTopColor: c.hairline }}>
 				<Button
-					label="Сохранить"
+					label={t('Сохранить')}
 					height={56}
 					disabled={!ready}
 					loading={save.isPending}
@@ -292,7 +293,7 @@ function MasterMedia({ master: initial }: { master: MyMaster }) {
 
 	return (
 		<>
-			<SectionLabel>Фото</SectionLabel>
+			<SectionLabel>{t('Фото')}</SectionLabel>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				<Pressable onPress={() => avatar.pick('library')}>
 					{avatar.photos[0] || master.avatarUrl ? (
@@ -319,11 +320,11 @@ function MasterMedia({ master: initial }: { master: MyMaster }) {
 						style={{ width: 76, height: 76, borderRadius: 12, borderWidth: 2, borderStyle: 'dashed', borderColor: raw.mapRowBorder, alignItems: 'center', justifyContent: 'center', gap: 4 }}
 					>
 						<PhotoIcon size={20} color={c.brandStrong} />
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>Фото</Text>
+						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Фото')}</Text>
 					</Pressable>
 				) : null}
 			</View>
-			{master.photos.length ? <Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>Удержите фото, чтобы удалить</Text> : null}
+			{master.photos.length ? <Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>{t('Удержите фото, чтобы удалить')}</Text> : null}
 			{error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
 		</>
 	)

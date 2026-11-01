@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { localJsonStorage } from '@/lib/local-json'
 import type { Brand, CarOrigin, FuelType, ServiceWhen, ServiceWhere } from '@/api/types'
+import { t } from '@/i18n'
 
 type ServiceCode = string
 
@@ -79,19 +80,19 @@ export const useServiceDraft = create<ServiceDraft>()(
 )
 
 export const ORIGINS: { value: CarOrigin; label: string; hint: string | null; short: string }[] = [
-	{ value: 'JAPAN', label: 'Япония', hint: '«японец»', short: 'Япония' },
-	{ value: 'USA', label: 'США', hint: '«американец»', short: 'США' },
-	{ value: 'EUROPE', label: 'Европа', hint: '«европеец»', short: 'Европа' },
-	{ value: 'KOREA', label: 'Корея', hint: '«кореец»', short: 'Корея' },
-	{ value: 'UAE', label: 'ОАЭ', hint: '«эмиратец»', short: 'ОАЭ' },
-	{ value: 'UNKNOWN', label: 'Не знаю', hint: null, short: '' },
+	{ value: 'JAPAN', label: t('Япония'), hint: t('«японец»'), short: t('Япония') },
+	{ value: 'USA', label: t('США'), hint: t('«американец»'), short: t('США') },
+	{ value: 'EUROPE', label: t('Европа'), hint: t('«европеец»'), short: t('Европа') },
+	{ value: 'KOREA', label: t('Корея'), hint: t('«кореец»'), short: t('Корея') },
+	{ value: 'UAE', label: t('ОАЭ'), hint: t('«эмиратец»'), short: t('ОАЭ') },
+	{ value: 'UNKNOWN', label: t('Не знаю'), hint: null, short: '' },
 ]
 
 export const FUELS: { value: FuelType; label: string }[] = [
-	{ value: 'PETROL', label: 'Бензин' },
-	{ value: 'DIESEL', label: 'Дизель' },
-	{ value: 'LPG_PETROL', label: 'Газ/бензин' },
-	{ value: 'HYBRID', label: 'Гибрид' },
+	{ value: 'PETROL', label: t('Бензин') },
+	{ value: 'DIESEL', label: t('Дизель') },
+	{ value: 'LPG_PETROL', label: t('Газ/бензин') },
+	{ value: 'HYBRID', label: t('Гибрид') },
 ]
 
 /** «Camry 50 · 2012 · 2.5 · США» — only the parts that are known. */
@@ -101,7 +102,7 @@ export function serviceCarLabel(car: Pick<ServiceDraftCar, 'modelLabel' | 'year'
 }
 
 export const WHERE_OPTIONS: { value: ServiceWhere; label: string; hint: string }[] = [
-	{ value: 'I_COME', label: 'Поеду сам', hint: 'Покажем мастеров рядом с вами' },
-	{ value: 'MASTER_COMES', label: 'Мастер выезжает', hint: 'Нужна точка, куда ехать' },
-	{ value: 'PICKUP_POINT', label: 'Эвакуатор забирает', hint: 'Нужна точка, откуда забрать' },
+	{ value: 'I_COME', label: t('Поеду сам'), hint: t('Покажем мастеров рядом с вами') },
+	{ value: 'MASTER_COMES', label: t('Мастер выезжает'), hint: t('Нужна точка, куда ехать') },
+	{ value: 'PICKUP_POINT', label: t('Эвакуатор забирает'), hint: t('Нужна точка, откуда забрать') },
 ]

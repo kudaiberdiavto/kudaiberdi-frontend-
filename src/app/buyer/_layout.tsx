@@ -2,6 +2,7 @@ import { TabList, TabSlot, TabTrigger, Tabs } from 'expo-router/ui'
 import { TabBarContainer, TabButton } from '@/components/tab-bar'
 import { useUnread } from '@/api/chats'
 import { ChatIcon, HomeIcon, ProfileIcon, SearchIcon } from '@/components/icons'
+import { t } from '@/i18n'
 
 /** Buyer tabs: Главная · Запчасти · Чаты · Профиль (карта рынка пока убрана). «Мои запросы» — на главной [03]. */
 export default function BuyerLayout() {
@@ -14,16 +15,16 @@ export default function BuyerLayout() {
 
 			<TabBarContainer>
 				<TabTrigger name="home" asChild>
-					<TabButton icon={HomeIcon} label="Главная" />
+					<TabButton icon={HomeIcon} label={t('Главная')} />
 				</TabTrigger>
 				<TabTrigger name="parts" asChild>
-					<TabButton icon={SearchIcon} label="Запчасти" />
+					<TabButton icon={SearchIcon} label={t('Запчасти')} />
 				</TabTrigger>
 				<TabTrigger name="chats" asChild>
-					<TabButton icon={ChatIcon} label="Чаты" badge={unread || undefined} />
+					<TabButton icon={ChatIcon} label={t('Чаты')} badge={unread || undefined} />
 				</TabTrigger>
 				<TabTrigger name="profile" asChild>
-					<TabButton icon={ProfileIcon} label="Профиль" />
+					<TabButton icon={ProfileIcon} label={t('Профиль')} />
 				</TabTrigger>
 			</TabBarContainer>
 

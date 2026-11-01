@@ -9,6 +9,7 @@ import { MicIcon } from '@/components/icons'
 import { resolveUrl, uploadVoice, type VoicePurpose } from '@/lib/api'
 import { fontFamily, useColors } from '@/theme'
 import type { Voice, VoiceUpload } from '@/api/types'
+import { t } from '@/i18n'
 
 const BAR_WIDTH = 4
 const BAR_GAP = 2
@@ -183,7 +184,7 @@ export function VoiceRecordingPanel({ seconds, uploading, onDone, onCancel }: { 
 					<MicIcon size={22} color="#FFFFFF" />
 				</View>
 				<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
-					{uploading ? 'Слушаем…' : `Говорите · ${voiceClock(seconds)}`}
+					{uploading ? t('Слушаем…') : t('Говорите · {0}', voiceClock(seconds))}
 				</Text>
 			</View>
 			{uploading ? null : (
@@ -192,10 +193,10 @@ export function VoiceRecordingPanel({ seconds, uploading, onDone, onCancel }: { 
 						onPress={onCancel}
 						style={{ flex: 1, height: 48, borderRadius: 14, borderWidth: 2, borderColor: c.border, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}
 					>
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Отмена</Text>
+						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{t('Отмена')}</Text>
 					</Pressable>
 					<Pressable onPress={onDone} style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}>
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Готово</Text>
+						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Готово')}</Text>
 					</Pressable>
 				</View>
 			)}
@@ -219,7 +220,7 @@ export function VoiceResultPanel({ voice, onRerecord }: { voice: Pick<Voice, 'ur
 				style={{ height: 44, borderRadius: 12, borderWidth: 2, borderColor: c.border, backgroundColor: c.card, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 			>
 				<MicIcon size={18} color={c.brandStrong} />
-				<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>Перезаписать</Text>
+				<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Перезаписать')}</Text>
 			</Pressable>
 		</View>
 	)

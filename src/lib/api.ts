@@ -8,6 +8,7 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import { API_URL } from '@/lib/env'
 import { getItem, setItem } from '@/lib/secure-storage'
 import type { MediaItem, MediaPurpose, PartVideoUpload, Photo, VoiceUpload } from '@/api/types'
+import { t } from '@/i18n'
 
 export { API_URL }
 const API_BASE = `${API_URL}/api/v1`
@@ -57,7 +58,7 @@ export function isNetworkError(error: unknown) {
 }
 
 const networkError = () =>
-	new ApiError({ status: 0, code: 'NETWORK', message: 'Нет сети. Проверьте интернет и попробуйте ещё раз' })
+	new ApiError({ status: 0, code: 'NETWORK', message: t('Нет сети. Проверьте интернет и попробуйте ещё раз') })
 
 // The backend answers with RFC 7807 problem+json: {code, detail, errors[{field, message}], retryAfter?, …}.
 // The contract describes {code, message, fields}; both shapes are accepted (see BACKEND_QUESTIONS.md).
@@ -80,7 +81,7 @@ function parseError(status: number, text: string, retryAfterHeader: string | nul
 	return new ApiError({
 		status,
 		code: typeof code === 'string' ? code : status === 401 ? 'UNAUTHORIZED' : status >= 500 ? 'INTERNAL_ERROR' : 'BAD_REQUEST',
-		message: detail ?? message ?? title ?? (status >= 500 ? 'Сервер недоступен, попробуйте позже' : 'Что-то пошло не так'),
+		message: detail ?? message ?? title ?? (status >= 500 ? t('Сервер недоступен, попробуйте позже') : t('Что-то пошло не так')),
 		fields,
 		retryAfter: Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : undefined,
 		extra,

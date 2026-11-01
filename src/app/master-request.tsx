@@ -7,6 +7,7 @@ import { useColors } from '@/theme'
 import { minutesLeft } from '@/lib/format'
 import { markServiceSeen, serviceName, useMasterOffer, useMasterRequest, useServiceTypes } from '@/api/services'
 import { RequestCard } from './master/index'
+import { t } from '@/i18n'
 
 /** A client's request opened from «Заявки»: the same card, photos and videos large, the answer buttons below. */
 export default function MasterRequestScreen() {
@@ -26,7 +27,7 @@ export default function MasterRequestScreen() {
 
 	return (
 		<Screen padding={0}>
-			<TopBar title="Заявка" />
+			<TopBar title={t('Заявка')} />
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 4, gap: 12 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={request.error ?? offer.error} onRetry={() => request.refetch()} />
 				{item ? (

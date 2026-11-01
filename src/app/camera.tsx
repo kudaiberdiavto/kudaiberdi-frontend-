@@ -12,6 +12,7 @@ import { usePhotoUploads } from '@/api/media'
 import { useRecognizeOem } from '@/api/parts'
 import { useAddShopPhoto } from '@/api/shop'
 import { MAX_PART_PHOTOS, usePartDraft } from '@/store/usePartDraft'
+import { t } from '@/i18n'
 
 /**
  * 25 — camera, no mode tabs: `mode` 0 (default) — photos of the part being created [26]; 1 — OEM number recognition
@@ -37,8 +38,8 @@ export default function CameraScreen() {
 	if (!permission.granted) {
 		return (
 			<View style={{ flex: 1, backgroundColor: '#0B0B0C', alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 }}>
-				<Text style={{ fontSize: 17.5, color: '#FFFFFF', textAlign: 'center' }}>Нужен доступ к камере, чтобы сфотографировать запчасть</Text>
-				<Button label="Разрешить камеру" onPress={requestPermission} />
+				<Text style={{ fontSize: 17.5, color: '#FFFFFF', textAlign: 'center' }}>{t('Нужен доступ к камере, чтобы сфотографировать запчасть')}</Text>
+				<Button label={t('Разрешить камеру')} onPress={requestPermission} />
 			</View>
 		)
 	}
@@ -79,10 +80,10 @@ export default function CameraScreen() {
 
 	const title =
 		mode === 0
-			? `Фото запчасти · ${draft.photos.length} из ${MAX_PART_PHOTOS}`
+			? t('Фото запчасти · {0} из {1}', draft.photos.length, MAX_PART_PHOTOS)
 			: mode === 1
-				? 'Номер детали'
-				: `Фото места${boxUploads.photos.length ? ` · ${boxUploads.photos.length}` : ''}`
+				? t('Номер детали')
+				: t('Фото места') + (boxUploads.photos.length ? ` · ${boxUploads.photos.length}` : '')
 	const candidates = recognize.data?.candidates ?? []
 	const recentShots = draft.photos.slice(-2)
 
@@ -147,12 +148,12 @@ export default function CameraScreen() {
 					<View style={{ alignSelf: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.55)' }}>
 						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: '#FFFFFF' }}>
 							{recognize.isPending
-								? 'Распознаём номер…'
+								? t('Распознаём номер…')
 								: recognize.error
 									? recognize.error.message
 									: candidates.length
-										? 'Нажмите на верный номер'
-										: 'Номер не нашли — попробуйте ближе и ровнее'}
+										? t('Нажмите на верный номер')
+										: t('Номер не нашли — попробуйте ближе и ровнее')}
 						</Text>
 					</View>
 					<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
@@ -173,8 +174,8 @@ export default function CameraScreen() {
 									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: '#201F1D' }}>{candidate.oem}</Text>
 									<Text style={{ fontSize: 12, fontFamily: fontFamily(600), color: '#605D5D' }}>
 										{candidate.partsFound
-											? `есть у ${candidate.partsFound} ${plural(candidate.partsFound, ['продавца', 'продавцов', 'продавцов'])}`
-											: 'новый номер'}
+											? t('есть у {0} {1}', candidate.partsFound, plural(candidate.partsFound, [t('продавца'), t('продавцов'), t('продавцов')]))
+											: t('новый номер')}
 									</Text>
 								</Pressable>
 							)
@@ -196,7 +197,7 @@ export default function CameraScreen() {
 					}}
 				>
 					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: '#FFFFFF' }}>
-						Номер: {draft.oemNumber}
+						{t('Номер: {0}', draft.oemNumber)}
 					</Text>
 				</View>
 			) : null}
@@ -281,7 +282,7 @@ export default function CameraScreen() {
 						justifyContent: 'center',
 					}}
 				>
-					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Готово</Text>
+					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Готово')}</Text>
 				</Pressable>
 			</View>
 		</View>

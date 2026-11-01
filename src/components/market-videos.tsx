@@ -8,6 +8,7 @@ import { useVideoFeed } from '@/api/catalog'
 import type { VideoFeedItem } from '@/api/types'
 import { useVideoViewer } from '@/store/useVideoViewer'
 import { marketPlace } from '@/lib/shop-place'
+import { t } from '@/i18n'
 
 /**
  * Videos from the market — ads, the same for everyone (not tied to a car): tiles play by themselves without sound,
@@ -37,9 +38,7 @@ export function MarketVideos() {
 		<View style={{ gap: 10, paddingTop: 2 }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
 				<View style={{ flex: 1 }} />
-				<Text onPress={() => openFeed()} style={{ flexShrink: 0, fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>
-					Смотреть все
-				</Text>
+				<Text onPress={() => openFeed()} style={{ flexShrink: 0, fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Смотреть все')}</Text>
 			</View>
 			<FlatList
 				horizontal

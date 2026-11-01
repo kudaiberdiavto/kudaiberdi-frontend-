@@ -15,6 +15,7 @@ import { useOpenChat } from '@/api/chats'
 import { ComplainLink, ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
 import { open2gis, openShopRoute } from '@/lib/shop-place'
 import { PartTile } from '@/components/catalog-screen'
+import { t } from '@/i18n'
 
 /** Filled rating stars — gold, the empty ones stay grey. */
 const STAR = '#F5A623'
@@ -120,7 +121,7 @@ export default function SellerProfileForBuyerScreen() {
 						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
 							{shop
 								? shop.reviewsCount
-									? <><Text style={{ color: STAR }}>★</Text>{` ${shop.rating.toFixed(1)} · ${shop.reviewsCount} ${plural(shop.reviewsCount, ['оценка', 'оценки', 'оценок'])}`}</>
+									? <><Text style={{ color: STAR }}>★</Text>{` ${shop.rating.toFixed(1)} · ${shop.reviewsCount} ${plural(shop.reviewsCount, [t('оценка'), t('оценки'), t('оценок')])}`}</>
 									: null
 								: ' '}
 						</Text>
@@ -135,22 +136,22 @@ export default function SellerProfileForBuyerScreen() {
 						)}
 						<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
 							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>
-								{shop?.location ? `${formatSide(shop.location.side)} сторона`.replace(/^./, (ch) => ch.toUpperCase()) : shop ? 'Магазин' : ' '}
+								{shop?.location ? t('{0} сторона', formatSide(shop.location.side)).replace(/^./, (ch) => ch.toUpperCase()) : shop ? t('Магазин') : ' '}
 							</Text>
 							<Pressable
 								// The place in 2GIS — a market box shows the market itself.
-								onPress={() => shop && open2gis({ lat: shop.lat, lng: shop.lng, address: shop.address ?? 'Рынок Кудайберген, Бишкек' })}
+								onPress={() => shop && open2gis({ lat: shop.lat, lng: shop.lng, address: shop.address ?? t('Рынок Кудайберген, Бишкек') })}
 								style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: c.brandTint, flexDirection: 'row', alignItems: 'center', gap: 6 }}
 							>
 								<MapPinIcon size={16} color={c.brandStrong} />
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>2ГИС</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('2ГИС')}</Text>
 							</Pressable>
 						</View>
 					</View>
 
 					{brands.length ? (
 						<View style={{ gap: 8 }}>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ПРОДАЁТ ДЛЯ МАРОК</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ПРОДАЁТ ДЛЯ МАРОК')}</Text>
 							{showAllBrands ? (
 								// all brands as chips: logo + name
 								<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
@@ -199,14 +200,14 @@ export default function SellerProfileForBuyerScreen() {
 							style={{ flex: 1, height: 48, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<ChatIcon size={20} color="#FFFFFF" />
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Написать</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Написать')}</Text>
 						</Pressable>
 						<Pressable
 							onPress={route}
 							style={{ flex: 1, height: 48, paddingHorizontal: 10, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<MapPinIcon size={20} color={c.ink} />
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? '2ГИС' : 'Маршрут'}</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? t('2ГИС') : t('Маршрут')}</Text>
 						</Pressable>
 						{/* The phone, then WhatsApp at the edge — only when the shop made the number visible (or after a chat). */}
 						{shop?.phone ? (
@@ -233,8 +234,8 @@ export default function SellerProfileForBuyerScreen() {
 					<View style={{ flexDirection: 'row', gap: 20 }}>
 						{(
 							[
-								{ value: 'parts', label: `Запчасти ${counts?.parts ?? ''}` },
-								{ value: 'reviews', label: 'Отзывы' },
+								{ value: 'parts', label: t('Запчасти {0}', counts?.parts ?? '') },
+								{ value: 'reviews', label: t('Отзывы') },
 							] as const
 						).map((item) => (
 							<Pressable
@@ -269,11 +270,11 @@ export default function SellerProfileForBuyerScreen() {
 							))}
 							{parts.hasNextPage ? (
 								<Pressable onPress={() => parts.fetchNextPage()} style={{ width: '100%', paddingVertical: 12, alignItems: 'center' }}>
-									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Показать ещё</Text>
+									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Показать ещё')}</Text>
 								</Pressable>
 							) : null}
 							{parts.isSuccess && partItems.length === 0 ? (
-								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>Запчасти ещё не выложены</Text>
+								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Запчасти ещё не выложены')}</Text>
 							) : null}
 						</View>
 					) : null}
@@ -294,23 +295,23 @@ export default function SellerProfileForBuyerScreen() {
 										<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>{formatDay(review.createdAt)}</Text>
 									</View>
 									<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>
-										{review.buyerName ?? 'Покупатель'}
+										{review.buyerName ?? t('Покупатель')}
 										{review.tags.length ? ` · ${review.tags.map((t) => t.label).join(', ')}` : ''}
 									</Text>
 									{review.reply ? (
-										<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>Ответ продавца: {review.reply}</Text>
+										<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Ответ продавца: {0}', review.reply)}</Text>
 									) : null}
 								</Pressable>
 							))}
 							{reviews.hasNextPage ? (
 								<Pressable onPress={() => reviews.fetchNextPage()} style={{ paddingVertical: 12, alignItems: 'center' }}>
-									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Показать ещё</Text>
+									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Показать ещё')}</Text>
 								</Pressable>
 							) : null}
 						</View>
 					) : null}
 				</View>
-				{shop ? <ComplainLink onPress={() => setComplaint({ type: 'SHOP', targetId: shop.id })} label="Пожаловаться на магазин" /> : null}
+				{shop ? <ComplainLink onPress={() => setComplaint({ type: 'SHOP', targetId: shop.id })} label={t('Пожаловаться на магазин')} /> : null}
 			</ScrollView>
 			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />
 		</View>

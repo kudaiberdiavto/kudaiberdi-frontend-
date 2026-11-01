@@ -9,6 +9,7 @@ import { flattenPages } from '@/api/pagination'
 import { type ChatListAs, useChats } from '@/api/chats'
 import type { ChatListItem } from '@/api/types'
 import { QUICK_TEXT, SYSTEM_TEXT } from './chat-conversation'
+import { t } from '@/i18n'
 
 /**
  * 16 «Чаты» — the buyer's chats or the box's chats. Rows are kept live by the CHAT event.
@@ -27,13 +28,13 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 	return (
 		<Screen padding={0}>
 			<View style={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 12 }}>
-				<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.52, color: c.ink }}>Чаты</Text>
+				<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.52, color: c.ink }}>{t('Чаты')}</Text>
 			</View>
 
 			<QueryErrorBanner
 				error={chats.error ?? (also ? extra.error : null)}
 				onRetry={() => (chats.refetch(), also && extra.refetch())}
-				offlineText="Нет сети. Покажем чаты, когда появится"
+				offlineText={t('Нет сети. Покажем чаты, когда появится')}
 				style={{ marginHorizontal: 16, marginBottom: 12 }}
 			/>
 
@@ -48,7 +49,7 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 				refreshing={false}
 				renderItem={({ item, index }) => <ChatRow chat={item} highlight={index === 0} />}
 				contentContainerStyle={{ flexGrow: 1 }}
-				ListEmptyComponent={chats.isSuccess ? <EmptyState title="Чатов нет" icon={ChatIcon} /> : null}
+				ListEmptyComponent={chats.isSuccess ? <EmptyState title={t('Чатов нет')} icon={ChatIcon} /> : null}
 			/>
 		</Screen>
 	)
@@ -57,7 +58,7 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 function ChatRow({ chat, highlight }: { chat: ChatListItem; highlight: boolean }) {
 	const c = useColors()
 	const last = chat.lastMessage
-	const lastText = last ? (last.text ?? QUICK_TEXT[last.code ?? ''] ?? SYSTEM_TEXT[last.code ?? ''] ?? (last.type === 'PHOTO' ? 'Фото' : last.type === 'VOICE' ? 'Голосовое' : '')) : ''
+	const lastText = last ? (last.text ?? QUICK_TEXT[last.code ?? ''] ?? SYSTEM_TEXT[last.code ?? ''] ?? (last.type === 'PHOTO' ? t('Фото') : last.type === 'VOICE' ? t('Голосовое') : '')) : ''
 
 	return (
 		<Pressable
@@ -103,7 +104,7 @@ function ChatRow({ chat, highlight }: { chat: ChatListItem; highlight: boolean }
 						numberOfLines={1}
 						style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: chat.unread ? c.ink : c.muted }}
 					>
-						{last?.fromMe ? `Вы: ${lastText}` : lastText}
+						{last?.fromMe ? t('Вы: {0}', lastText) : lastText}
 					</Text>
 					{chat.unread ? (
 						<View

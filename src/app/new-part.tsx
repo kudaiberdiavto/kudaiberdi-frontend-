@@ -12,21 +12,22 @@ import { useCategories } from '@/api/directory'
 import { useMyPart, usePublishPart, useSavePart } from '@/api/parts'
 import type { PartCondition } from '@/api/types'
 import { MAX_PART_PHOTOS, partBody, usePartDraft } from '@/store/usePartDraft'
+import { t } from '@/i18n'
 
 const CONDITIONS: { value: PartCondition; label: string }[] = [
-	{ value: 'NEW', label: 'Новое' },
-	{ value: 'USED', label: 'Б/У' },
-	{ value: 'ON_ORDER', label: 'Под заказ' },
+	{ value: 'NEW', label: t('Новое') },
+	{ value: 'USED', label: t('Б/У') },
+	{ value: 'ON_ORDER', label: t('Под заказ') },
 ]
 
 /** `missing[]` of PART_INCOMPLETE → words for the hint. */
 const MISSING: Record<string, string> = {
-	title: 'название',
-	categoryId: 'категорию',
-	condition: 'состояние',
-	price: 'цену',
-	mediaIds: 'фото',
-	fitments: 'машины',
+	title: t('название'),
+	categoryId: t('категорию'),
+	condition: t('состояние'),
+	price: t('цену'),
+	mediaIds: t('фото'),
+	fitments: t('машины'),
 }
 
 /** 26 «Новая запчасть» — create (after 24 / 25) or edit (`id`). Draft → publish. */
@@ -60,7 +61,7 @@ export default function NewPartScreen() {
 	const error = save.error ?? publish.error
 	const missing = error instanceof ApiError && Array.isArray(error.extra.missing) ? (error.extra.missing as string[]) : null
 	const errorText = missing
-		? `Заполните: ${missing.map((m) => MISSING[m] ?? m).join(', ')}`
+		? t('Заполните: {0}', missing.map((m) => MISSING[m] ?? m).join(', '))
 		: error?.message
 
 	const saveDraft = async () => {
@@ -129,7 +130,7 @@ export default function NewPartScreen() {
 							justifyContent: 'center',
 						}}
 					>
-						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Главное</Text>
+						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Главное')}</Text>
 					</View>
 				) : null}
 			</Pressable>
@@ -151,11 +152,11 @@ export default function NewPartScreen() {
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					{id ? 'Запчасть' : 'Новая запчасть'}
+					{id ? t('Запчасть') : t('Новая запчасть')}
 				</Text>
 				{!published ? (
 					<Pressable disabled={save.isPending || uploading} onPress={onDraft}>
-						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(600), color: c.muted }}>Черновик</Text>
+						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Черновик')}</Text>
 					</Pressable>
 				) : null}
 			</View>
@@ -185,19 +186,19 @@ export default function NewPartScreen() {
 						>
 							<CameraIcon size={24} color={c.brandStrong} />
 							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>
-								{draft.photos.length ? 'Ещё фото' : 'Фото'}
+								{draft.photos.length ? t('Ещё фото') : t('Фото')}
 							</Text>
 						</Pressable>
 					) : null}
 				</View>
 				{draft.photos.length > 3 ? (
 					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>
-						Ещё {draft.photos.length - 3} фото · всего {draft.photos.length} из {MAX_PART_PHOTOS}
+						{t('Ещё {0} фото · всего {1} из {2}', draft.photos.length - 3, draft.photos.length, MAX_PART_PHOTOS)}
 					</Text>
 				) : null}
 
 				<View style={{ gap: 6 }}>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Название</Text>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Название')}</Text>
 					<View
 						style={{
 							height: 52,
@@ -213,18 +214,18 @@ export default function NewPartScreen() {
 							value={draft.title}
 							onChangeText={(title) => draft.set({ title })}
 							maxLength={120}
-							placeholder="Например: Стойка передняя KYB, левая"
+							placeholder={t('Например: Стойка передняя KYB, левая')}
 							placeholderTextColor={raw.fillInk}
 							style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 						/>
 					</View>
 					{draft.oemNumber ? (
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>Номер детали: {draft.oemNumber}</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>{t('Номер детали: {0}', draft.oemNumber)}</Text>
 					) : null}
 				</View>
 
 				<View style={{ gap: 8 }}>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Подходит к машинам</Text>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Подходит к машинам')}</Text>
 					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 						{draft.fitments.map((fitment, index) => (
 							<View
@@ -267,13 +268,13 @@ export default function NewPartScreen() {
 							}}
 						>
 							<PlusIcon size={16} color={c.brandStrong} />
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Машина</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Машина')}</Text>
 						</Pressable>
 					</View>
 				</View>
 
 				<View style={{ gap: 6 }}>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Категория</Text>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Категория')}</Text>
 					<Pressable
 						onPress={() => setPickCategory((v) => !v)}
 						style={{
@@ -289,7 +290,7 @@ export default function NewPartScreen() {
 						}}
 					>
 						<Text style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: category ? c.ink : raw.fillInk }}>
-							{category?.name ?? 'Выберите категорию'}
+							{category?.name ?? t('Выберите категорию')}
 						</Text>
 						<Text style={{ fontSize: 17.5, color: c.muted }}>{pickCategory ? '⌃' : '›'}</Text>
 					</Pressable>
@@ -326,7 +327,7 @@ export default function NewPartScreen() {
 				</View>
 
 				<View style={{ gap: 6 }}>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Состояние</Text>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Состояние')}</Text>
 					<Segmented
 						items={CONDITIONS.map((item) => item.label)}
 						value={CONDITIONS.findIndex((item) => item.value === draft.condition)}
@@ -339,7 +340,7 @@ export default function NewPartScreen() {
 
 				<View style={{ flexDirection: 'row', gap: 16 }}>
 					<View style={{ flex: 1, gap: 6 }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Цена</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Цена')}</Text>
 						<View
 							style={{
 								height: 52,
@@ -361,7 +362,7 @@ export default function NewPartScreen() {
 								placeholderTextColor={raw.fillInk}
 								style={{ flex: 1, minWidth: 0, fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink, padding: 0 }}
 							/>
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: c.muted }}>сом</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: c.muted }}>{t('сом')}</Text>
 						</View>
 					</View>
 				</View>
@@ -378,7 +379,7 @@ export default function NewPartScreen() {
 						justifyContent: 'space-between',
 					}}
 				>
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(600), color: c.ink }}>Есть в наличии</Text>
+					<Text style={{ fontSize: 17, fontFamily: fontFamily(600), color: c.ink }}>{t('Есть в наличии')}</Text>
 					<Toggle value={draft.quantity > 0} onChange={(on) => draft.set({ quantity: on ? 1 : 0 })} />
 				</View>
 			</ScrollView>
@@ -410,7 +411,7 @@ export default function NewPartScreen() {
 					}}
 				>
 					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
-						{uploading ? 'Загружаем фото…' : published ? 'Сохранить' : 'Опубликовать'}
+						{uploading ? t('Загружаем фото…') : published ? t('Сохранить') : t('Опубликовать')}
 					</Text>
 				</Pressable>
 			</View>

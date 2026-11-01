@@ -9,6 +9,7 @@ import { fontFamily, useColors } from '@/theme'
 import { useBrands, useModels } from '@/api/directory'
 import type { CarModel } from '@/api/types'
 import { usePartDraft } from '@/store/usePartDraft'
+import { t } from '@/i18n'
 
 const ALL_MODELS = -1
 
@@ -43,7 +44,7 @@ export default function FitmentAddScreen() {
 		setPicked((list) => (id === ALL_MODELS ? [ALL_MODELS] : list.includes(id) ? list : [...list.filter((x) => x !== ALL_MODELS), id]))
 
 	const pickedLabel = (id: number) => {
-		if (id === ALL_MODELS) return 'Все модели'
+		if (id === ALL_MODELS) return t('Все модели')
 		const model = modelList.find((m) => m.id === id)
 		return model ? fitmentLabel(model) : ''
 	}
@@ -51,7 +52,7 @@ export default function FitmentAddScreen() {
 	const add = () => {
 		if (!brand) return
 		if (picked.includes(ALL_MODELS)) {
-			addFitment({ brandId: brand.id, brand, label: `${brand.shortName} · все модели` })
+			addFitment({ brandId: brand.id, brand, label: t('{0} · все модели', brand.shortName) })
 		} else {
 			for (const model of modelList) {
 				if (!picked.includes(model.id)) continue
@@ -74,16 +75,16 @@ export default function FitmentAddScreen() {
 				<Pressable onPress={() => router.back()} hitSlop={10}>
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
-				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>Подходит к машинам</Text>
+				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>{t('Подходит к машинам')}</Text>
 			</View>
 
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 16 }} keyboardShouldPersistTaps="handled">
 				<QueryErrorBanner error={brands.error ?? models.error} onRetry={() => (brands.refetch(), models.refetch())} />
-				<SelectField label="Марка" value={brand?.name} placeholder="Выберите марку" onPress={() => setPicking('brand')} />
+				<SelectField label={t('Марка')} value={brand?.name} placeholder={t('Выберите марку')} onPress={() => setPicking('brand')} />
 				<SelectField
-					label="Модели"
+					label={t('Модели')}
 					value={null}
-					placeholder={picked.length ? 'Добавить ещё модель' : 'Выберите модель'}
+					placeholder={picked.length ? t('Добавить ещё модель') : t('Выберите модель')}
 					disabled={!brand}
 					onPress={() => setPicking('model')}
 				/>
@@ -114,13 +115,13 @@ export default function FitmentAddScreen() {
 			</ScrollView>
 
 			<View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: insets.bottom + 12 }}>
-				<Button label={picked.length > 1 ? `Добавить · ${picked.length}` : 'Добавить'} disabled={!brand || picked.length === 0} onPress={add} />
+				<Button label={picked.length > 1 ? t('Добавить · {0}', picked.length) : t('Добавить')} disabled={!brand || picked.length === 0} onPress={add} />
 			</View>
 
 			{picking === 'brand' ? (
 				<SelectSheet
-					title="Марка"
-					searchPlaceholder="Toyota, мерс, бэха…"
+					title={t('Марка')}
+					searchPlaceholder={t('Toyota, мерс, бэха…')}
 					options={(brands.data ?? []).map((b) => ({ key: b.id, label: b.name }))}
 					selected={brandId}
 					onSearch={setBrandQuery}
@@ -137,13 +138,13 @@ export default function FitmentAddScreen() {
 			{picking === 'model' && brand ? (
 				<SelectSheet
 					title={brand.name}
-					searchPlaceholder="Модель"
+					searchPlaceholder={t('Модель')}
 					options={[
-						{ key: ALL_MODELS, label: 'Все модели' },
+						{ key: ALL_MODELS, label: t('Все модели') },
 						...modelList.map((m) => ({
 							key: m.id,
 							label: m.label,
-							sub: m.yearFrom ? `${m.yearFrom}–${m.yearTo ?? 'н.в.'}` : null,
+							sub: m.yearFrom ? `${m.yearFrom}–${m.yearTo ?? t('н.в.')}` : null,
 						})),
 					]}
 					selected={picked[picked.length - 1] ?? null}

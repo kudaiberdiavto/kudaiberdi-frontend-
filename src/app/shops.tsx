@@ -11,6 +11,7 @@ import { shopPlace } from '@/lib/shop-place'
 import { flattenPages } from '@/api/pagination'
 import { useShopList } from '@/api/catalog'
 import type { ShopCard } from '@/api/types'
+import { t } from '@/i18n'
 
 /** «Все магазины»: боксы рынка и центры вне рынка — логотип, название, рейтинг, место; поиск по названию. */
 export default function ShopsScreen() {
@@ -33,7 +34,7 @@ export default function ShopsScreen() {
 				<Pressable onPress={() => router.back()} hitSlop={10}>
 					<BackIcon color={c.ink} />
 				</Pressable>
-				<Text style={{ flex: 1, fontSize: 24, fontFamily: fontFamily(700), color: c.ink }}>Магазины</Text>
+				<Text style={{ flex: 1, fontSize: 24, fontFamily: fontFamily(700), color: c.ink }}>{t('Магазины')}</Text>
 			</View>
 
 			<FlatList
@@ -62,7 +63,7 @@ export default function ShopsScreen() {
 							<TextInput
 								value={text}
 								onChangeText={setText}
-								placeholder="Название магазина"
+								placeholder={t('Название магазина')}
 								placeholderTextColor={raw.fillInk}
 								style={{ flex: 1, fontSize: 17, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 							/>

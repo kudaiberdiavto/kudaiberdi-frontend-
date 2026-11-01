@@ -1,6 +1,7 @@
 import { Linking } from 'react-native'
 import { router } from 'expo-router'
 import { formatPlace } from '@/lib/format'
+import { t } from '@/i18n'
 
 /** A shop's place: a box on the Кудайберген market, or a shop / centre with its own address. */
 interface ShopPlace {
@@ -13,7 +14,7 @@ interface ShopPlace {
 }
 
 /** Market shops say where they are: «Кудайберген · Ряд 14 · Контейнер 12». */
-export const MARKET_PREFIX = 'Кудайберген · '
+export const MARKET_PREFIX = t('Кудайберген · ')
 
 /** «Кудайберген · Ряд 14 · Контейнер 12» on the market, the address off it. */
 export function shopPlace(shop: ShopPlace) {

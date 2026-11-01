@@ -13,6 +13,7 @@ import { useMe } from '@/api/me'
 import { useCreateDeliveryOrder, useDeliveryTariffs } from '@/api/delivery'
 import type { DeliveryRegion, DeliveryRegionCode } from '@/api/types'
 import { shopPlace } from '@/lib/shop-place'
+import { t } from '@/i18n'
 
 /**
  * «Доставка» — where to (8 regions), the courier brings it home: address, recipient, phone. No delivery prices in
@@ -76,7 +77,7 @@ export default function DeliveryScreen() {
 
 	return (
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar title="Доставка" right={<YellowChip label={tariffs.data?.courierName ?? 'Ылдам Экспресс'} height={28} />} />
+			<TopBar title={t('Доставка')} right={<YellowChip label={tariffs.data?.courierName ?? t('Ылдам Экспресс')} height={28} />} />
 
 			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 				{part ? (
@@ -90,18 +91,18 @@ export default function DeliveryScreen() {
 								{part.title}
 							</Text>
 							<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
-								{part.shop.name} · {shopPlace(part.shop).replace('Контейнер', 'конт.')}
+								{part.shop.name} · {shopPlace(part.shop).replace(t('Контейнер'), t('конт.'))}
 							</Text>
 						</View>
 						{part.price != null ? (
-							<Text style={{ fontSize: 18.5, fontFamily: fontFamily(800), color: c.ink }}>{priceDigits(part.price)} с</Text>
+							<Text style={{ fontSize: 18.5, fontFamily: fontFamily(800), color: c.ink }}>{t('{0} с', priceDigits(part.price))}</Text>
 						) : null}
 					</View>
 				) : null}
 
 				<QueryErrorBanner error={tariffs.error ?? create.error} onRetry={() => tariffs.refetch()} />
 
-				<Caps>Куда везти</Caps>
+				<Caps>{t('Куда везти')}</Caps>
 				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 					{regions.map((item) => {
 						const active = item.code === region?.code
@@ -128,18 +129,18 @@ export default function DeliveryScreen() {
 					})}
 				</View>
 				<View style={{ height: 2 }} />
-				<Caps>Курьер привезёт домой</Caps>
+				<Caps>{t('Курьер привезёт домой')}</Caps>
 				<View style={{ gap: 6 }}>
-					<Text style={label}>{region ? `Адрес в ${region.inName}` : 'Адрес'}</Text>
-					<TextInput value={address} onChangeText={setAddress} placeholder="ул. Ленина 45, кв. 12" placeholderTextColor="#8C8888" style={input} />
+					<Text style={label}>{region ? t('Адрес в {0}', region.inName) : t('Адрес')}</Text>
+					<TextInput value={address} onChangeText={setAddress} placeholder={t('ул. Ленина 45, кв. 12')} placeholderTextColor="#8C8888" style={input} />
 				</View>
 				<View style={{ flexDirection: 'row', gap: 10 }}>
 					<View style={{ flex: 1, gap: 6 }}>
-						<Text style={label}>Получатель</Text>
-						<TextInput value={recipient} onChangeText={setName} placeholder="Имя" placeholderTextColor="#8C8888" style={input} />
+						<Text style={label}>{t('Получатель')}</Text>
+						<TextInput value={recipient} onChangeText={setName} placeholder={t('Имя')} placeholderTextColor="#8C8888" style={input} />
 					</View>
 					<View style={{ flex: 1.2, gap: 6 }}>
-						<Text style={label}>Телефон</Text>
+						<Text style={label}>{t('Телефон')}</Text>
 						<TextInput
 							value={recipientPhone}
 							onChangeText={setPhone}
@@ -156,11 +157,11 @@ export default function DeliveryScreen() {
 				{/* Prices and days are agreed with the courier service itself. */}
 				<View style={{ borderRadius: 14, backgroundColor: '#FFF4D6', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>Стоимость — у {tariffs.data?.courierName ?? 'Ылдам Экспресс'}</Text>
-						<Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(400), color: c.inkSecondary }}>Цену доставки обговорите с ними</Text>
+						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>{t('Стоимость — у {0}', tariffs.data?.courierName ?? t('Ылдам Экспресс'))}</Text>
+						<Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(400), color: c.inkSecondary }}>{t('Цену доставки обговорите с ними')}</Text>
 					</View>
 				</View>
-				<BigButton label="Заказать доставку" tone="green" onPress={submit} loading={create.isPending} disabled={!ready} />
+				<BigButton label={t('Заказать доставку')} tone="green" onPress={submit} loading={create.isPending} disabled={!ready} />
 			</View>
 		</KeyboardAvoidingView>
 	)

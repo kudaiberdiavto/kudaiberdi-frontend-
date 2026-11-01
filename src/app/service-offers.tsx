@@ -13,12 +13,13 @@ import { formatDistance, formatNumber, minutesLeft, plural } from '@/lib/format'
 import { open2gis } from '@/lib/shop-place'
 import { useExtendServiceRequest, useServiceOffers, useServiceRequest, useServiceStats, useWidenServiceRequest } from '@/api/services'
 import type { ServiceOffer } from '@/api/types'
+import { t } from '@/i18n'
 
 type Sort = 'NEAR' | 'CHEAP' | 'TODAY'
 const SORTS: { value: Sort; label: string }[] = [
-	{ value: 'NEAR', label: 'Ближе' },
-	{ value: 'CHEAP', label: 'Дешевле' },
-	{ value: 'TODAY', label: 'Сегодня' },
+	{ value: 'NEAR', label: t('Ближе') },
+	{ value: 'CHEAP', label: t('Дешевле') },
+	{ value: 'TODAY', label: t('Сегодня') },
 ]
 
 const isToday = (offer: ServiceOffer, now: Date) =>
@@ -26,7 +27,7 @@ const isToday = (offer: ServiceOffer, now: Date) =>
 
 /** «ул. Лущихина · 600 м» / «выездной · 2 км». */
 function offerPlace(offer: ServiceOffer) {
-	const where = offer.master?.mobile ? 'выездной' : offer.master?.address.split(',')[0]
+	const where = offer.master?.mobile ? t('выездной') : offer.master?.address.split(',')[0]
 	return [where, formatDistance(offer.distanceM)].filter(Boolean).join(' · ')
 }
 
@@ -105,13 +106,13 @@ export default function ServiceOffersScreen() {
 						<View style={{ flex: 1, gap: 2 }}>
 							<Text style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>
 								{active
-									? `Ищем ещё ${left} ${plural(left, ['минуту', 'минуты', 'минут'])}`
+									? t('Ищем ещё {0} {1}', left, plural(left, [t('минуту'), t('минуты'), t('минут')]))
 									: data.status === 'CLOSED'
-										? 'Заявка закрыта'
-										: 'Время вышло'}
+										? t('Заявка закрыта')
+										: t('Время вышло')}
 							</Text>
 							<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
-								Спросили {asked} {plural(asked, ['мастера', 'мастеров', 'мастеров'])} · ответили {answered}
+								{t('Спросили {0} {1} · ответили {2}', asked, plural(asked, [t('мастера'), t('мастеров'), t('мастеров')]), answered)}
 							</Text>
 						</View>
 						{/* Time is up: wait longer, or (nobody answered) look further away. */}
@@ -122,7 +123,7 @@ export default function ServiceOffersScreen() {
 								style={{ height: 36, paddingHorizontal: 12, borderRadius: 12, backgroundColor: c.brandTint, justifyContent: 'center' }}
 							>
 								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
-									{answered || !detail?.canWiden ? 'Ещё 30 мин' : `+5 км`}
+									{answered || !detail?.canWiden ? t('Ещё 30 мин') : t('+5 км')}
 								</Text>
 							</Pressable>
 						) : null}
@@ -133,7 +134,7 @@ export default function ServiceOffersScreen() {
 				{/* What the buyer attached — voice, photos, videos — not in the mockup, but they should see what they sent. */}
 				{detail?.voice || detail?.media.length ? (
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 8 }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>Ваша заявка</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Ваша заявка')}</Text>
 						{detail.voice ? <VoicePlayer voice={detail.voice} /> : null}
 						<MediaStrip media={detail.media} />
 					</View>
@@ -173,7 +174,7 @@ export default function ServiceOffersScreen() {
 
 				{offers.isSuccess && list.length === 0 ? (
 					<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center', paddingVertical: 24 }}>
-						{all.length ? 'На сегодня никто не свободен' : active ? 'Ждём ответы мастеров' : 'Никто не ответил'}
+						{all.length ? t('На сегодня никто не свободен') : active ? t('Ждём ответы мастеров') : t('Никто не ответил')}
 					</Text>
 				) : null}
 			</ScrollView>
@@ -187,7 +188,7 @@ export default function ServiceOffersScreen() {
 function OfferCard({ offer, best, onComplain }: { offer: ServiceOffer; best: boolean; onComplain: () => void }) {
 	const c = useColors()
 	const master = offer.master
-	const name = master?.name ?? 'Мастер'
+	const name = master?.name ?? t('Мастер')
 	const when = offerWhen(offer.availableAt, new Date(offer.createdAt))
 	return (
 		<Pressable
@@ -217,10 +218,10 @@ function OfferCard({ offer, best, onComplain }: { offer: ServiceOffer; best: boo
 				{offer.priceFrom ? (
 					<View style={{ alignItems: 'flex-end' }}>
 						<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), letterSpacing: -0.22, color: c.ink }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted, letterSpacing: 0 }}>от </Text>
+							<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted, letterSpacing: 0 }}>{t('от')}{' '}</Text>
 							{formatNumber(offer.priceFrom)}
 						</Text>
-						<Text style={{ fontSize: 13, lineHeight: 17, fontFamily: fontFamily(600), color: c.muted }}>сом</Text>
+						<Text style={{ fontSize: 13, lineHeight: 17, fontFamily: fontFamily(600), color: c.muted }}>{t('сом')}</Text>
 					</View>
 				) : null}
 			</Pressable>

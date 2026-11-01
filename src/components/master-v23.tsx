@@ -7,6 +7,7 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg'
 import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated'
 import { fontFamily, useColors } from '@/theme'
 import { formatClock, formatNumber } from '@/lib/format'
+import { t } from '@/i18n'
 
 type IconProps = { size?: number; color: string; strokeWidth?: number }
 
@@ -93,7 +94,7 @@ export function FromVoiceBadge() {
 	return (
 		<View style={{ height: 24, paddingHorizontal: 8, borderRadius: 12, backgroundColor: '#F1ECFF', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
 			<Sparkle />
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#5B3FD1' }}>из голоса</Text>
+			<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#5B3FD1' }}>{t('из голоса')}</Text>
 		</View>
 	)
 }
@@ -146,7 +147,7 @@ export function CallRow({ onCall, onChat, onRoute }: { onCall?: () => void; onCh
 				}}
 			>
 				<PhoneOutline size={20} color="#FFFFFF" />
-				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Позвонить</Text>
+				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Позвонить')}</Text>
 			</Pressable>
 			{/* «Написать» — green like «Позвонить» */}
 			{square(<ChatBubble size={22} color={c.success} />, onChat, '#E7F6EC')}
@@ -172,7 +173,7 @@ export function SmallChip({ label, tone }: { label: string; tone: 'green' | 'gre
  * «Срочно» — SOS: solid red with a white dot, blinking (fades to 35 % and back, ~1 s) so an urgent request
  * stands out in the feed at a glance.
  */
-export function UrgentChip({ label = 'Срочно' }: { label?: string }) {
+export function UrgentChip({ label = t('Срочно') }: { label?: string }) {
 	const c = useColors()
 	const opacity = useSharedValue(1)
 	useEffect(() => {
@@ -232,18 +233,18 @@ export function offerWhen(availableAt: string | null | undefined, from = new Dat
 	if (!availableAt) return null
 	const at = new Date(availableAt)
 	const minutes = Math.round((at.getTime() - from.getTime()) / 60_000)
-	if (minutes <= 5) return 'Сейчас'
-	if (minutes <= 90) return minutes >= 55 && minutes <= 65 ? 'Через 1 час' : `Через ${minutes} мин`
-	if (sameDay(at, from)) return `Сегодня в ${formatClock(at)}`
+	if (minutes <= 5) return t('Сейчас')
+	if (minutes <= 90) return minutes >= 55 && minutes <= 65 ? t('Через 1 час') : t('Через {0} мин', minutes)
+	if (sameDay(at, from)) return t('Сегодня в {0}', formatClock(at))
 	const tomorrow = new Date(from.getTime() + 86_400_000)
-	if (sameDay(at, tomorrow)) return `Завтра ${formatClock(at)}`
+	if (sameDay(at, tomorrow)) return t('Завтра {0}', formatClock(at))
 	return `${at.getDate()}.${String(at.getMonth() + 1).padStart(2, '0')} ${formatClock(at)}`
 }
 
 /** «от 1 500 с · через 20 мин» — the master's own answer in the feed [18]. */
 export function myOfferLine(priceFrom: number | null | undefined, availableAt: string | null | undefined, createdAt: string) {
 	const when = offerWhen(availableAt, new Date(createdAt))
-	return ['Вы ответили', priceFrom ? `от ${formatNumber(priceFrom)} с` : null, when ? when.charAt(0).toLowerCase() + when.slice(1) : null]
+	return [t('Вы ответили'), priceFrom ? t('от {0} с', formatNumber(priceFrom)) : null, when ? when.charAt(0).toLowerCase() + when.slice(1) : null]
 		.filter(Boolean)
 		.join(' · ')
 }

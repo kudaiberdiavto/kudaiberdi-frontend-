@@ -11,6 +11,7 @@ import { fontFamily, raw, useColors } from '@/theme'
 import { formatNumber } from '@/lib/format'
 import { useIncomingRequest, useMarkSeen, useReplyToRequest } from '@/api/incoming'
 import type { PartCondition } from '@/api/types'
+import { t } from '@/i18n'
 
 
 /**
@@ -99,7 +100,7 @@ export default function SellerAnswerScreen() {
 							<TickIcon size={22} color="#FFFFFF" strokeWidth={2.2} />
 						</View>
 						<View style={{ flex: 1, gap: 1 }}>
-							<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), color: c.ink }}>Проверьте и отправьте</Text>
+							<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), color: c.ink }}>{t('Проверьте и отправьте')}</Text>
 							<Text numberOfLines={1} style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
 								{data ? [data.buyerName, data.car.label].filter(Boolean).join(' · ') : ' '}
 							</Text>
@@ -135,12 +136,12 @@ export default function SellerAnswerScreen() {
 							}}
 						>
 							<MicIcon size={20} color={c.brandStrong} />
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Сказать голосом</Text>
+							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Сказать голосом')}</Text>
 						</Pressable>
 					)}
 					{note.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{note.error}</Text> : null}
 
-					<Label>Ваш ответ</Label>
+					<Label>{t('Ваш ответ')}</Label>
 
 					<View
 						style={{
@@ -158,20 +159,20 @@ export default function SellerAnswerScreen() {
 							value={amount > 0 ? formatNumber(amount) : price}
 							onChangeText={(text) => setPrice(text.replace(/\D/g, '').slice(0, 7))}
 							keyboardType="number-pad"
-							placeholder="Цена"
+							placeholder={t('Цена')}
 							placeholderTextColor={raw.fillInk}
 							style={{ minWidth: 40, fontSize: 32, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink, padding: 0 }}
 						/>
-						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>сом</Text>
+						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>{t('сом')}</Text>
 					</View>
 
 					<View style={{ flexDirection: 'row', gap: 8 }}>
-						<Choice label="Новая" active={condition === 'NEW'} onPress={() => setCondition('NEW')} />
-						<Choice label="Б/у" active={condition === 'USED'} onPress={() => setCondition('USED')} />
+						<Choice label={t('Новая')} active={condition === 'NEW'} onPress={() => setCondition('NEW')} />
+						<Choice label={t('Б/у')} active={condition === 'USED'} onPress={() => setCondition('USED')} />
 					</View>
 					<View style={{ flexDirection: 'row', gap: 8 }}>
-						<Choice label="Оригинал" active={original === true} onPress={() => setOriginal(true)} />
-						<Choice label="Копия" active={original === false} onPress={() => setOriginal(false)} />
+						<Choice label={t('Оригинал')} active={original === true} onPress={() => setOriginal(true)} />
+						<Choice label={t('Копия')} active={original === false} onPress={() => setOriginal(false)} />
 					</View>
 
 					{reply.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text> : null}
@@ -191,7 +192,7 @@ export default function SellerAnswerScreen() {
 						}}
 					>
 						<PlaneIcon size={20} color="#FFFFFF" />
-						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Отправить покупателю</Text>
+						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Отправить покупателю')}</Text>
 					</Pressable>
 				</View>
 			</KeyboardAvoidingView>

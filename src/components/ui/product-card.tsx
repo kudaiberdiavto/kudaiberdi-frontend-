@@ -3,6 +3,7 @@ import { CheckIcon, HeartIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import Svg, { Path } from 'react-native-svg'
 import { PhotoPlaceholder } from './photo'
+import { t } from '@/i18n'
 
 /**
  * Карточка товара в сетке — как на маркетплейсах: квадратное фото со скруглением без подложки (♥, «✓ Подходит»,
@@ -103,7 +104,7 @@ export function ProductCard({
 						}}
 					>
 						<CheckIcon size={14} color="#FFFFFF" strokeWidth={3} />
-						<Text style={{ fontSize: 13.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Подходит</Text>
+						<Text style={{ fontSize: 13.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Подходит')}</Text>
 					</View>
 				) : null}
 			</View>

@@ -4,6 +4,7 @@ import { ChatConversation, presenceLabel } from '@/components/chat-conversation'
 import { ChevronLeftIcon, FlagIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { useChat } from '@/api/chats'
+import { t } from '@/i18n'
 
 /** 13 — seller's (or master's) chat with a buyer. */
 export default function SellerChatScreen() {
@@ -35,11 +36,11 @@ export default function SellerChatScreen() {
 					</Pressable>
 					<View style={{ flex: 1, gap: 2 }}>
 						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>
-							{chat ? (chat.buyer.name ?? 'Покупатель') : ' '}
+							{chat ? (chat.buyer.name ?? t('Покупатель')) : ' '}
 						</Text>
 						<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: typing ? c.success : c.muted }}>
 							{typing ? (
-								'печатает…'
+								t('печатает…')
 							) : (
 								<>
 									{presence ? <Text style={{ color: chat?.online ? c.success : c.muted }}>{presence}</Text> : null}
@@ -49,7 +50,7 @@ export default function SellerChatScreen() {
 							)}
 						</Text>
 					</View>
-					<Pressable onPress={complain} hitSlop={10} accessibilityLabel="Пожаловаться">
+					<Pressable onPress={complain} hitSlop={10} accessibilityLabel={t('Пожаловаться')}>
 						<FlagIcon size={20} color={c.muted} />
 					</Pressable>
 				</View>

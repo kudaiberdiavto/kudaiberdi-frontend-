@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { fontFamily, raw, useColors } from '@/theme'
+import { t } from '@/i18n'
 
 export { Button } from './button'
 export { Chip } from './chip'
@@ -257,7 +258,7 @@ export function LanguageSwitch({ value, onChange }: { value: 'ru' | 'kg'; onChan
 						}}
 					>
 						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.muted }}>
-							{code === 'ru' ? 'Русский' : 'Кыргызча'}
+							{code === 'ru' ? t('Русский') : t('Кыргызча')}
 						</Text>
 					</Pressable>
 				)
@@ -285,8 +286,8 @@ export function LocationCard({
 	)
 	return (
 		<View style={[{ flexDirection: 'row', gap: 12 }, style]}>
-			{cell('РЯД', rowLabel)}
-			{cell('КОНТЕЙНЕР', boxLabel)}
+			{cell(t('РЯД'), rowLabel)}
+			{cell(t('КОНТЕЙНЕР'), boxLabel)}
 		</View>
 	)
 }

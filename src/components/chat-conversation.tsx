@@ -18,24 +18,25 @@ import { flattenPages } from '@/api/pagination'
 import { type ChatSide, useChat, useChatMessages, useMarkRead, useQuickReplies, useSendMedia, useSendMessage } from '@/api/chats'
 import type { ChatMessage, QuickReply } from '@/api/types'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
+import { t } from '@/i18n'
 
 /** Labels for codes the server sends without text. */
 export const SYSTEM_TEXT: Record<string, string> = {
-	PAY_AT_BOX: 'Оплата в контейнере при осмотре',
-	REQUEST_CLOSED: 'Запрос закрыт: купили в этом контейнере',
+	PAY_AT_BOX: t('Оплата в контейнере при осмотре'),
+	REQUEST_CLOSED: t('Запрос закрыт: купили в этом контейнере'),
 }
 export const QUICK_TEXT: Record<string, string> = {
-	ARRIVED: 'Я на месте',
-	RESERVED: 'Отложил для вас',
-	ROUTE: 'Как пройти',
-	SOLD: 'Продано',
-	ROUTE_TO_BOX: 'Как пройти к контейнеру',
-	CLOSE_REQUEST: 'Купил — закрыть запрос',
+	ARRIVED: t('Я на месте'),
+	RESERVED: t('Отложил для вас'),
+	ROUTE: t('Как пройти'),
+	SOLD: t('Продано'),
+	ROUTE_TO_BOX: t('Как пройти к контейнеру'),
+	CLOSE_REQUEST: t('Купил — закрыть запрос'),
 }
 /** The other side in the header: «в сети», «был(а) 5 мин назад»; null — unknown. */
 export function presenceLabel(online: boolean | undefined, lastSeenAt: string | null | undefined) {
-	if (online) return 'в сети'
-	return lastSeenAt ? `был(а) ${formatAgo(lastSeenAt)}` : null
+	if (online) return t('в сети')
+	return lastSeenAt ? t('был(а) {0}', formatAgo(lastSeenAt)) : null
 }
 
 /** Quick replies styled green in the mockups. */
@@ -85,10 +86,10 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 		const payload = (message.payload ?? {}) as { requestId?: number; serviceRequestId?: number }
 		const pinned = chat.data
 		if (payload.serviceRequestId) {
-			return payload.serviceRequestId === pinned?.serviceRequest?.id ? `по заявке «${pinned.serviceRequest.text}»` : 'по другой заявке'
+			return payload.serviceRequestId === pinned?.serviceRequest?.id ? t('по заявке «{0}»', pinned.serviceRequest.text) : t('по другой заявке')
 		}
 		if (payload.requestId) {
-			return payload.requestId === pinned?.request?.id ? `по запросу «${pinned.request.text}»` : 'по другому запросу'
+			return payload.requestId === pinned?.request?.id ? t('по запросу «{0}»', pinned.request.text) : t('по другому запросу')
 		}
 		return null
 	}
@@ -136,7 +137,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 	// The other side greeted last — «Алейкум ассалам!» goes first, in place of our own «Ассаламу алейкум!».
 	const greeted = messages[0] != null && messages[0].side !== mySide && isSalam(messages[0].text)
 	const replies: QuickReply[] = greeted
-		? [{ kind: 'MESSAGE', code: null, templateId: null, text: 'Алейкум ассалам!' } as QuickReply, ...(quick.data ?? []).filter((r) => !isSalam(r.text))]
+		? [{ kind: 'MESSAGE', code: null, templateId: null, text: t('Алейкум ассалам!') } as QuickReply, ...(quick.data ?? []).filter((r) => !isSalam(r.text))]
 		: (quick.data ?? [])
 
 	const pressQuick = (reply: QuickReply) => {
@@ -162,7 +163,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 			<QueryErrorBanner
 				error={history.error ?? chat.error}
 				onRetry={() => history.refetch()}
-				offlineText="Нет сети. Сообщения отправятся, когда появится"
+				offlineText={t('Нет сети. Сообщения отправятся, когда появится')}
 				style={{ marginHorizontal: 16, marginTop: 12 }}
 			/>
 
@@ -213,7 +214,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 					{replies.map((reply) => {
 						const positive = reply.code ? POSITIVE.has(reply.code) : false
 						// Greetings stand out — a filled blue chip, the first thing to tap.
-						const greeting = !reply.code && (isSalam(reply.text) || reply.text === 'Алейкум ассалам!')
+						const greeting = !reply.code && (isSalam(reply.text) || reply.text === t('Алейкум ассалам!'))
 						return (
 							<Pressable
 								key={`${reply.code ?? reply.templateId}-${reply.text}`}
@@ -270,7 +271,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 							if (connected) publishTyping()
 						}}
 						onSubmitEditing={send}
-						placeholder={canWrite ? 'Сообщение' : chat.data?.blockedByOther ? 'Собеседник ограничил чат' : 'Чат недоступен'}
+						placeholder={canWrite ? t('Сообщение') : chat.data?.blockedByOther ? t('Собеседник ограничил чат') : t('Чат недоступен')}
 						placeholderTextColor="#8C8888"
 						maxLength={2000}
 						style={{
@@ -345,7 +346,7 @@ function Message({
 	if (message.code === 'HIDDEN_BY_ADMIN') {
 		return (
 			<View style={{ alignSelf: mine ? 'flex-end' : 'flex-start', borderRadius: 16, borderWidth: 1.5, borderColor: c.border, borderStyle: 'dashed', paddingVertical: 10, paddingHorizontal: 14 }}>
-				<Text style={{ fontSize: 15.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.muted }}>Сообщение скрыто администрацией</Text>
+				<Text style={{ fontSize: 15.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.muted }}>{t('Сообщение скрыто администрацией')}</Text>
 			</View>
 		)
 	}
@@ -363,9 +364,9 @@ function Message({
 			>
 				<TruckTile size={40} />
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: c.ink }}>Заказ с доставкой</Text>
+					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: c.ink }}>{t('Заказ с доставкой')}</Text>
 					{message.text ? <Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(500), color: c.inkSecondary }}>{message.text}</Text> : null}
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{shopSide ? 'Открыть заказ ›' : 'Где посылка ›'}</Text>
+					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{shopSide ? t('Открыть заказ ›') : t('Где посылка ›')}</Text>
 				</View>
 			</Pressable>
 		)
@@ -384,7 +385,7 @@ function Message({
 	const payload = (message.payload ?? {}) as Record<string, unknown>
 	const price = typeof payload.price === 'number' ? formatPrice(payload.price) : null
 	// A master's «Могу помочь» [37]: `{offerId, priceFrom, availableAt}`.
-	const offerPrice = typeof payload.priceFrom === 'number' ? `от ${formatPrice(payload.priceFrom)}` : null
+	const offerPrice = typeof payload.priceFrom === 'number' ? t('от {0}', formatPrice(payload.priceFrom)) : null
 	const offerAt = typeof payload.availableAt === 'string' ? formatWhenAt(payload.availableAt) : null
 	const partReply = message.type === 'REPLY' && typeof payload.requestId === 'number'
 	const body = partReply
@@ -461,16 +462,16 @@ function Message({
 				}}
 			>
 				{status === 'failed' ? (
-					'Не отправлено · повторить'
+					t('Не отправлено · повторить')
 				) : status === 'sending' ? (
-					'отправляется…'
+					t('отправляется…')
 				) : (
 					<>
 						{formatClock(message.createdAt)}
 						{status ? (
 							<Text style={{ fontFamily: fontFamily(700), color: status === 'read' ? c.brand : raw.fillInk }}>
 								{status === 'read' ? '  ✓✓' : '  ✓'}
-								{last ? (status === 'read' ? ' Прочитано' : ' Доставлено') : ''}
+								{last ? (status === 'read' ? t(' Прочитано') : t(' Доставлено')) : ''}
 							</Text>
 						) : null}
 					</>
@@ -499,7 +500,7 @@ function Message({
 	)
 }
 
-const CONDITION_WORD: Record<string, string> = { NEW: 'новые', USED: 'б/у', ON_ORDER: 'под заказ' }
+const CONDITION_WORD: Record<string, string> = { NEW: t('новые'), USED: t('б/у'), ON_ORDER: t('под заказ') }
 
 /** «Есть KYB оригинал, новые. Пара — 3 200 сом» from the REPLY card payload [07]; the seller's own text follows. */
 function replyText(payload: Record<string, unknown>, text: string | null | undefined) {
@@ -507,7 +508,7 @@ function replyText(payload: Record<string, unknown>, text: string | null | undef
 	const original = typeof payload.original === 'boolean' ? payload.original : null
 	const manufacturer = typeof payload.manufacturer === 'string' ? payload.manufacturer : null
 	const tags = Array.isArray(payload.tags) ? payload.tags.filter((tag): tag is string => typeof tag === 'string') : []
-	const head = ['Есть', manufacturer, original === true ? 'оригинал' : original === false ? 'копия' : null].filter(Boolean).join(' ')
+	const head = [t('Есть'), manufacturer, original === true ? t('оригинал') : original === false ? t('копия') : null].filter(Boolean).join(' ')
 	let line = condition ? `${head}, ${CONDITION_WORD[condition] ?? ''}` : head
 	if (tags.length) line += `. ${tags.join(', ')}`
 	if (typeof payload.price === 'number') line += ` — ${formatPrice(payload.price)}`

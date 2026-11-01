@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import Constants, { ExecutionEnvironment } from 'expo-constants'
 import { fontFamily, raw } from '@/theme'
 import type { MarketMapLiveHandle } from './market-map-maplibre'
+import { t } from '@/i18n'
 
 export type { MarketMapLiveHandle } from './market-map-maplibre'
 
@@ -19,9 +20,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(props: Props, ref
 	if (Real) return <Real {...props} ref={ref} />
 	return (
 		<View style={[StyleSheet.absoluteFill, { backgroundColor: raw.mapSurface, alignItems: 'center', justifyContent: 'center' }]}>
-			<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: raw.mapLabel, textAlign: 'center', paddingHorizontal: 32 }}>
-				Карта работает в сборке приложения, в Expo Go её нет
-			</Text>
+			<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: raw.mapLabel, textAlign: 'center', paddingHorizontal: 32 }}>{t('Карта работает в сборке приложения, в Expo Go её нет')}</Text>
 		</View>
 	)
 })

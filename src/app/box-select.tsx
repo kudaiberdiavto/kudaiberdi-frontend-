@@ -15,9 +15,10 @@ import { useSession } from '@/store/useSession'
 import { useClaimContainer } from '@/api/complaints'
 import { ApiError } from '@/lib/api'
 import type { Brand } from '@/api/types'
+import { t } from '@/i18n'
 
 /** Rows in the order of the mockup grid [11]; rows the mockup doesn't know go after them. */
-const ROW_ORDER = ['18', '16', '14', '12', '10', '8', '6', '4', '1', 'Ц', 'Л', 'Н', 'Я', 'С', 'Ж', 'Д', 'В', 'Ю', 'Х', 'У']
+const ROW_ORDER = ['18', '16', '14', '12', '10', '8', '6', '4', '1', t('Ц'), t('Л'), t('Н'), t('Я'), t('С'), t('Ж'), t('Д'), t('В'), t('Ю'), t('Х'), t('У')]
 /** Brand tiles before «Другие» — as in the mockup. */
 const TILES = 5
 
@@ -57,7 +58,7 @@ export default function BoxSelectScreen() {
 		setLocateError(null)
 		try {
 			if (!(await Location.requestForegroundPermissionsAsync()).granted) {
-				setLocateError('Разрешите доступ к геолокации в настройках')
+				setLocateError(t('Разрешите доступ к геолокации в настройках'))
 				return
 			}
 			const coords = await currentCoords()
@@ -67,7 +68,7 @@ export default function BoxSelectScreen() {
 				if (address) setAddress(address)
 			}
 		} catch {
-			setLocateError('Не удалось определить место — попробуйте ещё раз')
+			setLocateError(t('Не удалось определить место — попробуйте ещё раз'))
 		} finally {
 			setLocating(false)
 		}
@@ -91,9 +92,9 @@ export default function BoxSelectScreen() {
 		!row || !number || !detail.isSuccess
 			? null
 			: !slot
-				? `В ряду ${row.code} нет контейнера ${number}`
+				? t('В ряду {0} нет контейнера {1}', row.code, number)
 				: taken
-					? `Контейнер ${number} уже занят другим продавцом`
+					? t('Контейнер {0} уже занят другим продавцом', number)
 					: null
 
 	const all = brands.data ?? []
@@ -141,7 +142,7 @@ export default function BoxSelectScreen() {
 					</Pressable>
 				) : null}
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					{hasShop ? 'Ваш контейнер' : 'Где вы продаёте'}
+					{hasShop ? t('Ваш контейнер') : t('Где вы продаёте')}
 				</Text>
 			</View>
 
@@ -155,8 +156,8 @@ export default function BoxSelectScreen() {
 				{hasShop ? null : (
 					<View style={{ flexDirection: 'row', padding: 4, borderRadius: 14, backgroundColor: raw.fill, gap: 4 }}>
 						{[
-							{ value: true, label: 'На рынке Кудайберген' },
-							{ value: false, label: 'Магазин или центр' },
+							{ value: true, label: t('На рынке Кудайберген') },
+							{ value: false, label: t('Магазин или центр') },
 						].map((option) => {
 							const active = onMarket === option.value
 							return (
@@ -174,19 +175,19 @@ export default function BoxSelectScreen() {
 
 				{store ? (
 					<>
-						<Label>Название</Label>
+						<Label>{t('Название')}</Label>
 						<TextInput
 							value={name}
 							onChangeText={(text) => setName(text.slice(0, 60))}
-							placeholder="Например, Kia Центр Бишкек"
+							placeholder={t('Например, Kia Центр Бишкек')}
 							placeholderTextColor={raw.fillInk}
 							style={field}
 						/>
-						<Label>Адрес</Label>
+						<Label>{t('Адрес')}</Label>
 						<TextInput
 							value={address}
 							onChangeText={(text) => setAddress(text.slice(0, 160))}
-							placeholder="ул. Ленина 45"
+							placeholder={t('ул. Ленина 45')}
 							placeholderTextColor={raw.fillInk}
 							style={field}
 						/>
@@ -197,7 +198,7 @@ export default function BoxSelectScreen() {
 						>
 							<LocateIcon size={20} color={point ? c.success : c.brandStrong} />
 							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: point ? c.success : c.brandStrong }}>
-								{locating ? 'Определяем…' : point ? 'Точка определена — обновить' : 'Отметить по геолокации'}
+								{locating ? t('Определяем…') : point ? t('Точка определена — обновить') : t('Отметить по геолокации')}
 							</Text>
 						</Pressable>
 						{locateError ? (
@@ -206,7 +207,7 @@ export default function BoxSelectScreen() {
 					</>
 				) : (
 					<>
-						<Label>Ряд</Label>
+						<Label>{t('Ряд')}</Label>
 						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
 							{sortedRows.map((item) => {
 								const active = item.id === activeRowId
@@ -235,7 +236,7 @@ export default function BoxSelectScreen() {
 							})}
 						</View>
 
-						<Label>Номер контейнера</Label>
+						<Label>{t('Номер контейнера')}</Label>
 						<View
 							style={{
 								height: 56,
@@ -251,7 +252,7 @@ export default function BoxSelectScreen() {
 								value={number}
 								onChangeText={(text) => setNumber(text.replace(/\D/g, '').slice(0, 4))}
 								keyboardType="number-pad"
-								placeholder={row ? `Например, 12` : 'Сначала выберите ряд'}
+								placeholder={row ? t('Например, 12') : t('Сначала выберите ряд')}
 								placeholderTextColor={raw.fillInk}
 								style={{ fontSize: 24, fontFamily: fontFamily(800), color: c.ink, padding: 0 }}
 							/>
@@ -263,9 +264,7 @@ export default function BoxSelectScreen() {
 									<Text
 										onPress={() => setClaim({ id: slot.id, number: slot.number })}
 										style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}
-									>
-										Это мой контейнер
-									</Text>
+									>{t('Это мой контейнер')}</Text>
 								) : null}
 							</View>
 						) : null}
@@ -275,7 +274,7 @@ export default function BoxSelectScreen() {
 
 				{hasShop ? null : (
 					<>
-						<Label>Какие марки продаёте</Label>
+						<Label>{t('Какие марки продаёте')}</Label>
 						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 							{tiles.map((brand) => (
 								<BrandTile key={brand.id} brand={brand} active={picked.includes(brand.id)} onPress={() => toggle(brand.id)} />
@@ -296,7 +295,7 @@ export default function BoxSelectScreen() {
 								}}
 							>
 								<PlusIcon size={20} color={c.brandStrong} />
-								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Другие</Text>
+								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Другие')}</Text>
 							</Pressable>
 						</View>
 					</>
@@ -319,7 +318,7 @@ export default function BoxSelectScreen() {
 					}}
 				>
 					<Button
-						label={hasShop ? 'Переехать сюда' : 'Начать получать запросы'}
+						label={hasShop ? t('Переехать сюда') : t('Начать получать запросы')}
 						disabled={!ready}
 						loading={register.isPending || relocate.isPending}
 						onPress={submit}
@@ -328,7 +327,7 @@ export default function BoxSelectScreen() {
 			)}
 
 			<ClaimSheet
-				box={claim && row ? { ...claim, place: `${row.label} · конт. ${claim.number}` } : null}
+				box={claim && row ? { ...claim, place: t('{0} · конт. {1}', row.label, claim.number) } : null}
 				onClose={() => setClaim(null)}
 				onFree={(free) => {
 					setClaim(null)
@@ -364,7 +363,7 @@ function OtherBrands({
 			maxHeight={0.8}
 			header={
 				<View style={{ gap: 12 }}>
-					<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>Все марки</Text>
+					<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{t('Все марки')}</Text>
 					<View
 						style={{
 							height: 48,
@@ -380,14 +379,14 @@ function OtherBrands({
 						<TextInput
 							value={q}
 							onChangeText={setQ}
-							placeholder="Найти марку"
+							placeholder={t('Найти марку')}
 							placeholderTextColor={raw.fillInk}
 							style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 						/>
 					</View>
 				</View>
 			}
-			footer={<Button label={picked.length ? `Готово · ${picked.length}` : 'Готово'} onPress={onClose} />}
+			footer={<Button label={picked.length ? t('Готово · {0}', picked.length) : t('Готово')} onPress={onClose} />}
 		>
 			{list.map((brand) => {
 				const active = picked.includes(brand.id)
@@ -448,22 +447,18 @@ function ClaimSheet({
 				<View style={{ backgroundColor: c.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 28 + insets.bottom, gap: 14 }}>
 					{claim.isSuccess ? (
 						<>
-							<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>Заявка на спор отправлена</Text>
-							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-								Администрация рынка проверит, чей это контейнер, и пришлёт пуш с решением.
-							</Text>
-							<Button label="Понятно" onPress={close} />
+							<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>{t('Заявка на спор отправлена')}</Text>
+							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>{t('Администрация рынка проверит, чей это контейнер, и пришлёт пуш с решением.')}</Text>
+							<Button label={t('Понятно')} onPress={close} />
 						</>
 					) : (
 						<>
-							<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>{box?.place ?? ' '} занят</Text>
-							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-								Если это ваш контейнер, а в приложении его занял другой продавец, — откройте спор. Администрация рынка разберётся.
-							</Text>
+							<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>{t('{0} занят', box?.place ?? ' ')}</Text>
+							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>{t('Если это ваш контейнер, а в приложении его занял другой продавец, — откройте спор. Администрация рынка разберётся.')}</Text>
 							<TextInput
 								value={text}
 								onChangeText={(v) => setText(v.slice(0, 500))}
-								placeholder="Комментарий — необязательно: с какого года аренда, договор…"
+								placeholder={t('Комментарий — необязательно: с какого года аренда, договор…')}
 								placeholderTextColor={raw.fillInk}
 								multiline
 								style={{ minHeight: 72, borderRadius: 12, borderWidth: 2, borderColor: c.border, paddingVertical: 10, paddingHorizontal: 14, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink, textAlignVertical: 'top' }}
@@ -472,10 +467,10 @@ function ClaimSheet({
 								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{claim.error.message}</Text>
 							) : null}
 							{code === 'CONTAINER_FREE' && box ? (
-								<Button label="Занять этот контейнер" variant="secondary" onPress={() => onFree({ id: box.id, number: box.number })} />
+								<Button label={t('Занять этот контейнер')} variant="secondary" onPress={() => onFree({ id: box.id, number: box.number })} />
 							) : (
 								<Button
-									label="Это мой контейнер"
+									label={t('Это мой контейнер')}
 									loading={claim.isPending}
 									disabled={code === 'OWN_CONTAINER'}
 									onPress={() => box && claim.mutate({ containerId: box.id, text: text.trim() || undefined })}

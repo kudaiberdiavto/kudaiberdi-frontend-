@@ -11,6 +11,7 @@ import type { Brand, CarModel, CarOrigin, FuelType } from '@/api/types'
 import { useClientCar } from '@/store/useClientCar'
 import { SelectField, SelectSheet } from '@/components/select-sheet'
 import { FUELS, ORIGINS } from '@/store/useServiceDraft'
+import { t } from '@/i18n'
 
 const VOLUMES = [1.3, 1.5, 1.8, 2.0, 2.4, 2.5, 3.0, 3.5, 4.0]
 
@@ -104,7 +105,7 @@ export default function GarageAddScreen() {
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					{once ? 'Другая машина' : 'Добавить машину'}
+					{once ? t('Другая машина') : t('Добавить машину')}
 				</Text>
 			</View>
 
@@ -126,7 +127,7 @@ export default function GarageAddScreen() {
 					<TextInput
 						value={q}
 						onChangeText={setQ}
-						placeholder="Марка: Toyota, мерс, бэха…"
+						placeholder={t('Марка: Toyota, мерс, бэха…')}
 						placeholderTextColor="#7D7979"
 						style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 					/>
@@ -136,9 +137,7 @@ export default function GarageAddScreen() {
 
 				{popular.length ? (
 					<>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-							ПОПУЛЯРНЫЕ
-						</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ПОПУЛЯРНЫЕ')}</Text>
 						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 							{popular.map((b) => {
 								const active = brand?.id === b.id
@@ -171,7 +170,7 @@ export default function GarageAddScreen() {
 
 				{rest.length ? (
 					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-						{q.trim() ? 'НАЙДЕНО' : 'ВСЕ МАРКИ А–Я'}
+						{q.trim() ? t('НАЙДЕНО') : t('ВСЕ МАРКИ А–Я')}
 					</Text>
 				) : null}
 				{rest.map((b) => (
@@ -209,7 +208,7 @@ export default function GarageAddScreen() {
 								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{addCar.error.message}</Text>
 							) : null}
 							<Button
-								label={once ? 'Выбрать' : 'Добавить в гараж'}
+								label={once ? t('Выбрать') : t('Добавить в гараж')}
 								height={52}
 								disabled={!modelId || !year}
 								loading={addCar.isPending}
@@ -244,26 +243,26 @@ export default function GarageAddScreen() {
 					}
 				>
 					{/* Dropdowns with search — a brand has dozens of models. */}
-					<SelectField label="Модель" value={model?.label} placeholder="Выберите модель" onPress={() => setPicking('model')} />
+					<SelectField label={t('Модель')} value={model?.label} placeholder={t('Выберите модель')} onPress={() => setPicking('model')} />
 					<SelectField
-						label="Год"
+						label={t('Год')}
 						value={year ? String(year) : null}
-						placeholder="Выберите год"
+						placeholder={t('Выберите год')}
 						disabled={!model}
 						onPress={() => setPicking('year')}
 					/>
 
 					{year && !once ? (
 						<>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ОБЪЁМ, Л · НЕОБЯЗАТЕЛЬНО</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ОБЪЁМ, Л · НЕОБЯЗАТЕЛЬНО')}</Text>
 							<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 								{VOLUMES.map((v) => chip(v.toFixed(1), v === engineVolume, () => setEngineVolume(v === engineVolume ? null : v), v))}
 							</ScrollView>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ТОПЛИВО</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ТОПЛИВО')}</Text>
 							<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 								{FUELS.map((f) => chip(f.label, f.value === fuel, () => setFuel(f.value === fuel ? null : f.value), f.value))}
 							</View>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ОТКУДА МАШИНА</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ОТКУДА МАШИНА')}</Text>
 							<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 								{ORIGINS.filter((o) => o.value !== 'UNKNOWN').map((o) => chip(o.label, o.value === origin, () => setOrigin(o.value === origin ? null : o.value), o.value))}
 							</View>
@@ -274,12 +273,12 @@ export default function GarageAddScreen() {
 
 			{picking === 'model' ? (
 				<SelectSheet
-					title="Модель"
-					searchPlaceholder={`Модель ${brand?.name ?? ''}`.trim()}
+					title={t('Модель')}
+					searchPlaceholder={t('Модель {0}', brand?.name ?? '').trim()}
 					options={(models.data ?? []).map((m) => ({
 						key: m.id,
 						label: m.label,
-						sub: m.yearFrom ? `${m.yearFrom}–${m.yearTo ?? 'н. в.'}` : null,
+						sub: m.yearFrom ? `${m.yearFrom}–${m.yearTo ?? t('н. в.')}` : null,
 					}))}
 					selected={modelId}
 					onPick={(id) => {
@@ -291,7 +290,7 @@ export default function GarageAddScreen() {
 			) : null}
 			{picking === 'year' && model ? (
 				<SelectSheet
-					title="Год"
+					title={t('Год')}
 					options={yearsOf(model).map((y) => ({ key: y, label: String(y) }))}
 					selected={year}
 					onPick={setYear}

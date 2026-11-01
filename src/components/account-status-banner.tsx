@@ -1,5 +1,6 @@
 import { Pressable, Text, View } from 'react-native'
 import { fontFamily, useColors } from '@/theme'
+import { t } from '@/i18n'
 
 type Status = 'PENDING_VERIFICATION' | 'ACTIVE' | 'BLOCKED' | 'REJECTED'
 
@@ -21,32 +22,32 @@ export function AccountStatusBanner({
 	const c = useColors()
 	if (!status || status === 'ACTIVE') return null
 	const bad = status === 'BLOCKED' || status === 'REJECTED'
-	const what = kind === 'shop' ? 'Магазин' : 'Профиль'
+	const what = kind === 'shop' ? t('Магазин') : t('Профиль')
 	const title =
 		status === 'BLOCKED'
-			? `${what} заблокирован`
+			? t('{0} заблокирован', what)
 			: status === 'REJECTED'
 				? kind === 'shop'
-					? 'Место не подтверждено'
-					: 'Профиль отклонён'
-				: `${what} на проверке`
+					? t('Место не подтверждено')
+					: t('Профиль отклонён')
+				: t('{0} на проверке', what)
 	const text =
 		reason ??
 		(status === 'BLOCKED'
-			? 'Запросы не приходят. Напишите в поддержку.'
+			? t('Запросы не приходят. Напишите в поддержку.')
 			: status === 'REJECTED'
 				? kind === 'shop'
-					? 'Администрация не подтвердила контейнер. Магазин скрыт — выберите контейнер заново.'
-					: 'Администрация не подтвердила профиль. Исправьте данные и сохраните.'
+					? t('Администрация не подтвердила контейнер. Магазин скрыт — выберите контейнер заново.')
+					: t('Администрация не подтвердила профиль. Исправьте данные и сохраните.')
 				: kind === 'shop'
-					? 'Запросы начнут приходить, как только администрация подтвердит место.'
-					: 'Заявки начнут приходить, как только администратор подтвердит профиль.')
+					? t('Запросы начнут приходить, как только администрация подтвердит место.')
+					: t('Заявки начнут приходить, как только администратор подтвердит профиль.'))
 
 	return (
 		<View style={{ borderRadius: 12, backgroundColor: bad ? c.dangerTint : c.brandTint, padding: 12, gap: 4 }}>
 			<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: bad ? c.danger : c.brandStrong }}>{title}</Text>
 			<Text style={{ fontSize: 14.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.inkSecondary }}>
-				{reason && status === 'REJECTED' ? `Причина: ${reason}` : text}
+				{reason && status === 'REJECTED' ? t('Причина: {0}', reason) : text}
 			</Text>
 			{action && status === 'REJECTED' ? (
 				<Pressable onPress={action.onPress} hitSlop={8} style={{ paddingTop: 4 }}>

@@ -14,6 +14,7 @@ import { fontFamily, raw, useColors } from '@/theme'
 import { uploadPartVideo } from '@/lib/api'
 import { usePublishPart, useSavePart } from '@/api/parts'
 import type { PartVideoUpload } from '@/api/types'
+import { t } from '@/i18n'
 
 const MAX_SEC = 30
 
@@ -52,7 +53,7 @@ export default function SellerVideoScreen() {
 	const upload = async (next: Recorded) => {
 		// The server takes up to 30 s — say so right away instead of uploading a long video for nothing.
 		if (next.durationSec > MAX_SEC + 0.5) {
-			setUploadError(`Видео длиннее ${MAX_SEC} секунд — выберите покороче или обрежьте`)
+			setUploadError(t('Видео длиннее {0} секунд — выберите покороче или обрежьте', MAX_SEC))
 			return
 		}
 		setVideo(next)
@@ -110,7 +111,7 @@ export default function SellerVideoScreen() {
 
 	return (
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar title="Выложить видео" />
+			<TopBar title={t('Выложить видео')} />
 
 			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 12 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 				<View style={{ flexDirection: 'row', gap: 12 }}>
@@ -125,7 +126,7 @@ export default function SellerVideoScreen() {
 								<View style={{ width: 44, height: 44, borderRadius: 22, borderWidth: 3, borderColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
 									<View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: '#E5484D' }} />
 								</View>
-								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Снять</Text>
+								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Снять')}</Text>
 							</View>
 						)}
 						{video ? (
@@ -162,17 +163,15 @@ export default function SellerVideoScreen() {
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Переснять</Text>
+								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Переснять')}</Text>
 							</Pressable>
 						) : null}
 					</Pressable>
 
 					<View style={{ flex: 1, gap: 8 }}>
-						<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(700), color: c.ink }}>
-							Снимите деталь 10–15 секунд и скажите вслух, что это и сколько стоит
-						</Text>
+						<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(700), color: c.ink }}>{t('Снимите деталь 10–15 секунд и скажите вслух, что это и сколько стоит')}</Text>
 						{progress !== null ? (
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.brandStrong }}>Загружаем… {Math.round(progress * 100)}%</Text>
+							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.brandStrong }}>{t('Загружаем… {0}%', Math.round(progress * 100))}</Text>
 						) : fromVoice ? (
 							<View
 								style={{
@@ -187,23 +186,21 @@ export default function SellerVideoScreen() {
 								}}
 							>
 								<TickIcon size={13} color={c.brandStrong} />
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>Заполнили из голоса</Text>
+								<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Заполнили из голоса')}</Text>
 							</View>
 						) : null}
 						{uploadError && video ? (
-							<Text onPress={() => upload(video)} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.danger }}>
-								Не загрузилось · повторить
-							</Text>
+							<Text onPress={() => upload(video)} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.danger }}>{t('Не загрузилось · повторить')}</Text>
 						) : null}
 					</View>
 				</View>
 
 				<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 8 }}>
-					<Text style={label}>Что это</Text>
+					<Text style={label}>{t('Что это')}</Text>
 					<TextInput
 						value={title}
 						onChangeText={setTitle}
-						placeholder="Стойки передние KYB, пара"
+						placeholder={t('Стойки передние KYB, пара')}
 						placeholderTextColor="#8C8888"
 						maxLength={120}
 						style={{
@@ -219,7 +216,7 @@ export default function SellerVideoScreen() {
 					/>
 					<View style={{ flexDirection: 'row', gap: 10, paddingTop: 4 }}>
 						<View style={{ flex: 1, gap: 6 }}>
-							<Text style={label}>Цена, сом</Text>
+							<Text style={label}>{t('Цена, сом')}</Text>
 							<TextInput
 								value={price}
 								onChangeText={(text) => {
@@ -242,7 +239,7 @@ export default function SellerVideoScreen() {
 							/>
 						</View>
 						<View style={{ flex: 1, gap: 6 }}>
-							<Text style={label}>Состояние</Text>
+							<Text style={label}>{t('Состояние')}</Text>
 							<View style={{ height: 48, borderRadius: 12, backgroundColor: raw.fill, padding: 4, flexDirection: 'row' }}>
 								{(['NEW', 'USED'] as const).map((value) => (
 									<Pressable
@@ -251,7 +248,7 @@ export default function SellerVideoScreen() {
 										style={{ flex: 1, borderRadius: 9, backgroundColor: condition === value ? c.card : 'transparent', alignItems: 'center', justifyContent: 'center' }}
 									>
 										<Text style={{ fontSize: 16, fontFamily: fontFamily(condition === value ? 700 : 600), color: condition === value ? c.ink : c.muted }}>
-											{value === 'NEW' ? 'Новая' : 'Б/у'}
+											{value === 'NEW' ? t('Новая') : t('Б/у')}
 										</Text>
 									</Pressable>
 								))}
@@ -263,8 +260,8 @@ export default function SellerVideoScreen() {
 				<Pressable onPress={() => setShips(!ships)} style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 					<TruckTile />
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>Отправлю в регионы</Text>
-						<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>Курьер Ылдам Экспресс заберёт из контейнера</Text>
+						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>{t('Отправлю в регионы')}</Text>
+						<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Курьер Ылдам Экспресс заберёт из контейнера')}</Text>
 					</View>
 					<View
 						style={{
@@ -287,7 +284,7 @@ export default function SellerVideoScreen() {
 			</ScrollView>
 
 			<View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: insets.bottom + 12 }}>
-				<BigButton label="Выложить в ленту" tone="green" onPress={submit} disabled={!ready} loading={save.isPending || publish.isPending} />
+				<BigButton label={t('Выложить в ленту')} tone="green" onPress={submit} disabled={!ready} loading={save.isPending || publish.isPending} />
 			</View>
 
 			<Modal visible={recording} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setRecording(false)}>
@@ -370,11 +367,9 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 				<CameraView ref={camera} style={{ flex: 1 }} mode="video" facing="back" />
 			) : (
 				<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 }}>
-					<Text style={{ fontSize: 17.5, lineHeight: 24, fontFamily: fontFamily(500), color: '#FFFFFF', textAlign: 'center' }}>
-						Разрешите камеру и микрофон — снимите деталь и скажите, что это и сколько стоит
-					</Text>
+					<Text style={{ fontSize: 17.5, lineHeight: 24, fontFamily: fontFamily(500), color: '#FFFFFF', textAlign: 'center' }}>{t('Разрешите камеру и микрофон — снимите деталь и скажите, что это и сколько стоит')}</Text>
 					<BigButton
-						label="Разрешить"
+						label={t('Разрешить')}
 						onPress={async () => {
 							await requestCamera()
 							await requestMic()
@@ -420,7 +415,7 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 				</Pressable>
 			</View>
 			<Text style={{ position: 'absolute', left: 24, right: 24, bottom: insets.bottom + 112, fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: '#FFFFFF', textAlign: 'center' }}>
-				{active ? 'Скажите, что это и сколько стоит' : 'Снимите деталь 10–15 секунд'}
+				{active ? t('Скажите, что это и сколько стоит') : t('Снимите деталь 10–15 секунд')}
 			</Text>
 		</View>
 	)

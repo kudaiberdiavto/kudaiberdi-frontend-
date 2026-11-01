@@ -22,6 +22,7 @@ import { usePhotoUploads } from '@/api/media'
 import { useCreateRequest, useRecipientsEstimate } from '@/api/requests'
 import { useClientCar } from '@/store/useClientCar'
 import { useSession } from '@/store/useSession'
+import { t } from '@/i18n'
 
 /**
  * 04 «Найти запчасть»: car, photo + voice + text, the request goes to sellers of the car's brand.
@@ -82,12 +83,12 @@ export default function SearchPartScreen() {
 		estimate.data?.brand ?? (useClient && clientCar ? clientCar.brand.name : carList.find((car) => car.id === carId)?.brand.name)
 	const error = create.error
 	// No car yet — the chip says «Выбрать машину»; otherwise it adds one more (a master — the client's car).
-	const addCarLabel = isMaster ? 'Машина клиента' : carList.length || clientCar ? 'Добавить машину' : 'Выбрать машину'
+	const addCarLabel = isMaster ? t('Машина клиента') : carList.length || clientCar ? t('Добавить машину') : t('Выбрать машину')
 	const pickCar = () => router.push({ pathname: '/garage-add', params: isMaster ? { once: '1' } : { select: '1' } })
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar title="Найти запчасть" big onClose={() => router.back()} />
+			<TopBar title={t('Найти запчасть')} big onClose={() => router.back()} />
 
 			<ScrollView
 				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
@@ -96,7 +97,7 @@ export default function SearchPartScreen() {
 			>
 				<QueryErrorBanner error={cars.error} onRetry={() => cars.refetch()} />
 
-				<Caps>Для какой машины</Caps>
+				<Caps>{t('Для какой машины')}</Caps>
 				<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 					{carList.map((car) => {
 						const active = !useClient && car.id === carId
@@ -165,7 +166,7 @@ export default function SearchPartScreen() {
 				</ScrollView>
 
 				<View style={{ height: 2 }} />
-				<Caps>Что нужно</Caps>
+				<Caps>{t('Что нужно')}</Caps>
 				<View style={{ flexDirection: 'row', gap: 10 }}>
 					{photo ? (
 						<View style={{ flex: 1, height: 132, borderRadius: 18, overflow: 'hidden', backgroundColor: '#E1E6ED' }}>
@@ -194,7 +195,7 @@ export default function SearchPartScreen() {
 							</Pressable>
 							{uploads.photos.length > 1 ? (
 								<View style={{ position: 'absolute', top: 8, left: 8, height: 24, paddingHorizontal: 8, borderRadius: 12, backgroundColor: 'rgba(32,31,29,0.6)', justifyContent: 'center' }}>
-									<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{uploads.photos.length} фото</Text>
+									<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('{0} фото', uploads.photos.length)}</Text>
 								</View>
 							) : null}
 							{uploads.canAdd ? (
@@ -214,7 +215,7 @@ export default function SearchPartScreen() {
 									}}
 								>
 									<PlusThinIcon size={12} color={c.ink} strokeWidth={2.8} />
-									<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.ink }}>Ещё фото</Text>
+									<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.ink }}>{t('Ещё фото')}</Text>
 								</Pressable>
 							) : null}
 						</View>
@@ -223,17 +224,15 @@ export default function SearchPartScreen() {
 							<View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
 								<CameraV23Icon size={26} color={c.brandStrong} />
 							</View>
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>Сфотать деталь</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>{t('Сфотать деталь')}</Text>
 						</DashedTile>
 					)}
 
 					{voice.result ? (
 						<View style={{ flex: 1, height: 132, borderRadius: 18, backgroundColor: c.card, padding: 12, justifyContent: 'space-between' }}>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Голосом</Text>
+							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Голосом')}</Text>
 							<VoicePlayer voice={voice.result.voice} height={40} />
-							<Text onPress={voice.reset} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.muted }}>
-								Перезаписать
-							</Text>
+							<Text onPress={voice.reset} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.muted }}>{t('Перезаписать')}</Text>
 						</View>
 					) : (
 						<DashedTile onPress={voice.recording ? voice.stop : voice.start} disabled={voice.uploading}>
@@ -255,7 +254,7 @@ export default function SearchPartScreen() {
 								{voice.uploading ? <ActivityIndicator color="#FFFFFF" /> : <MicV23Icon size={26} color="#FFFFFF" />}
 							</View>
 							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
-								{voice.uploading ? 'Слушаем…' : voice.recording ? `Готово · ${voiceClock(voice.seconds)}` : 'Сказать голосом'}
+								{voice.uploading ? t('Слушаем…') : voice.recording ? t('Готово · {0}', voiceClock(voice.seconds)) : t('Сказать голосом')}
 							</Text>
 						</DashedTile>
 					)}
@@ -268,7 +267,7 @@ export default function SearchPartScreen() {
 					maxLength={200}
 					// short hint on one line; long text wraps and the field grows instead of scrolling sideways
 					multiline
-					placeholder="Или напишите: фара, стойки…"
+					placeholder={t('Или напишите: фара, стойки…')}
 					placeholderTextColor={c.muted}
 					style={{
 						minHeight: 52,
@@ -289,10 +288,8 @@ export default function SearchPartScreen() {
 				{brand ? (
 					<View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start', borderRadius: 14, backgroundColor: c.brandTint, paddingVertical: 12, paddingHorizontal: 14 }}>
 						<PaperPlaneIcon size={18} color={c.brandStrong} strokeWidth={2.2} />
-						<Text style={{ flex: 1, fontSize: 15.5, lineHeight: 21.5, fontFamily: fontFamily(400), color: '#1D2B53' }}>
-							Спросим <Text style={{ fontFamily: fontFamily(700) }}>всех продавцов {brand}</Text>
-							{recipients != null ? ` — ${recipients} ${plural(recipients, ['магазин', 'магазина', 'магазинов'])}` : ''}. Обычно
-							отвечают за 5–10 минут.
+						<Text style={{ flex: 1, fontSize: 15.5, lineHeight: 21.5, fontFamily: fontFamily(400), color: '#1D2B53' }}>{t('Спросим')}{' '}<Text style={{ fontFamily: fontFamily(700) }}>{t('всех продавцов {0}', brand)}</Text>
+							{recipients != null ? ` — ${recipients} ${plural(recipients, [t('магазин'), t('магазина'), t('магазинов')])}` : ''}{t('. Обычно отвечают за 5–10 минут.')}
 						</Text>
 					</View>
 				) : null}
@@ -311,7 +308,7 @@ export default function SearchPartScreen() {
 				}}
 			>
 				<BigButton
-					label={!hasCar ? 'Сначала выберите машину' : !hasPart ? 'Опишите, что нужно' : 'Отправить запрос'}
+					label={!hasCar ? t('Сначала выберите машину') : !hasPart ? t('Опишите, что нужно') : t('Отправить запрос')}
 					height={58}
 					icon={hasCar && hasPart ? <PaperPlaneIcon size={20} color="#FFFFFF" /> : undefined}
 					disabled={hasCar && (!hasPart || busy)}

@@ -17,6 +17,7 @@ import {
 	useReceiveDeliveryOrder,
 } from '@/api/delivery'
 import type { DeliveryOrder } from '@/api/types'
+import { t } from '@/i18n'
 
 /**
  * One delivery order. The buyer sees «Где посылка» (status card, timeline, track number); the shop — «Заказ с
@@ -35,7 +36,7 @@ export default function DeliveryOrderScreen() {
 
 	return (
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar title={asShop ? 'Заказ с доставкой' : 'Где посылка'} />
+			<TopBar title={asShop ? t('Заказ с доставкой') : t('Где посылка')} />
 			<QueryErrorBanner error={order.error} onRetry={() => order.refetch()} />
 			{!data ? (
 				<ActivityIndicator style={{ marginTop: 40 }} color={c.brand} />
@@ -55,26 +56,26 @@ function dayTime(value: string) {
 }
 
 /** «Ряд 14 · конт. 12» → «Ряд 14, конт. 12». */
-const placeComma = (place: string | null) => (place ?? 'контейнер').replace(' · ', ', ')
+const placeComma = (place: string | null) => (place ?? t('контейнер')).replace(' · ', ', ')
 
 /** When the courier brings the parcel: picked up (or the pick-up day) + the region's days. */
 function arrivalText(order: DeliveryOrder, now = new Date()) {
-	if (order.status === 'DELIVERED') return `Доставлено ${order.deliveredAt ? formatWhenAt(order.deliveredAt) : ''}`.trim()
-	if (order.status === 'CANCELLED') return 'Заказ отменён'
+	if (order.status === 'DELIVERED') return t('Доставлено {0}', order.deliveredAt ? formatWhenAt(order.deliveredAt) : '').trim()
+	if (order.status === 'CANCELLED') return t('Заказ отменён')
 	const base = order.pickedUpAt ? new Date(order.pickedUpAt) : new Date(now.getTime() + (order.pickupToday ? 0 : 86_400_000))
 	const arrival = new Date(base.getTime() + order.days * 86_400_000)
 	const days = Math.round((new Date(arrival).setHours(0, 0, 0, 0) - new Date(now).setHours(0, 0, 0, 0)) / 86_400_000)
-	const day = days <= 0 ? 'сегодня' : days === 1 ? 'завтра' : days === 2 ? 'послезавтра' : formatDay(arrival)
-	return `Курьер привезёт домой ${day}`
+	const day = days <= 0 ? t('сегодня') : days === 1 ? t('завтра') : days === 2 ? t('послезавтра') : formatDay(arrival)
+	return t('Курьер привезёт домой {0}', day)
 }
 
 const CAPTION: Record<DeliveryOrder['status'], string> = {
-	NEW: 'Оформлен',
-	PACKED: 'Упакован',
-	COURIER_ORDERED: 'Ждёт курьера',
-	PICKED_UP: 'В пути',
-	DELIVERED: 'Доставлен',
-	CANCELLED: 'Отменён',
+	NEW: t('Оформлен'),
+	PACKED: t('Упакован'),
+	COURIER_ORDERED: t('Ждёт курьера'),
+	PICKED_UP: t('В пути'),
+	DELIVERED: t('Доставлен'),
+	CANCELLED: t('Отменён'),
 }
 
 // ─── Buyer: «Где посылка» ────────────────────────────────────────────────────
@@ -84,12 +85,12 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 	const receive = useReceiveDeliveryOrder(order.id)
 	const destination = order.districtName ?? order.regionName
 	const steps = [
-		{ title: 'Заказ оформлен', at: order.createdAt, note: 'оплату обсудили в чате' },
-		{ title: 'Продавец упаковал', at: order.packedAt },
-		{ title: 'Заказали курьера Ылдам', at: order.courierOrderedAt },
-		{ title: 'Курьер забрал с рынка', at: order.pickedUpAt, note: placeComma(order.shop.place) },
-		{ title: order.region === 'BISHKEK' ? 'Едет к вам' : `Едет в ${toRegion(destination)}`, at: order.status === 'DELIVERED' ? order.deliveredAt : null },
-		{ title: 'Курьер привезёт домой', at: order.deliveredAt, note: `${order.address} · позвонит заранее` },
+		{ title: t('Заказ оформлен'), at: order.createdAt, note: t('оплату обсудили в чате') },
+		{ title: t('Продавец упаковал'), at: order.packedAt },
+		{ title: t('Заказали курьера Ылдам'), at: order.courierOrderedAt },
+		{ title: t('Курьер забрал с рынка'), at: order.pickedUpAt, note: placeComma(order.shop.place) },
+		{ title: order.region === 'BISHKEK' ? t('Едет к вам') : t('Едет в {0}', toRegion(destination)), at: order.status === 'DELIVERED' ? order.deliveredAt : null },
+		{ title: t('Курьер привезёт домой'), at: order.deliveredAt, note: t('{0} · позвонит заранее', order.address) },
 	]
 	// Steps may be skipped (the seller can mark «Курьер забрал» before the admin): everything before the last done is done.
 	const lastDone = steps.reduce((last, step, i) => (step.at ? i : last), -1)
@@ -124,7 +125,7 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 						const line = done
 							? [step.at ? dayTime(step.at) : null, step.note].filter(Boolean).join(' · ')
 							: now && i === 4
-								? 'Сейчас'
+								? t('Сейчас')
 								: (step.note ?? '')
 						return (
 							<View key={step.title} style={{ flexDirection: 'row', gap: 12 }}>
@@ -153,7 +154,7 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 
 				<View style={{ borderRadius: 16, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center' }}>
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>Трек-номер</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>{t('Трек-номер')}</Text>
 						<Text style={{ fontSize: 17.5, fontFamily: fontFamily(800), color: c.ink }}>{order.number}</Text>
 					</View>
 					{/* No clipboard module in the app — the share sheet has «Скопировать». */}
@@ -161,7 +162,7 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 						onPress={() => Share.share({ message: order.number })}
 						style={{ height: 38, paddingHorizontal: 14, borderRadius: 19, borderWidth: 1.5, borderColor: c.border, justifyContent: 'center' }}
 					>
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>Скопировать</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>{t('Скопировать')}</Text>
 					</Pressable>
 				</View>
 			</ScrollView>
@@ -169,7 +170,7 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 			<View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: bottom + 12, gap: 10 }}>
 				<QueryErrorBanner error={receive.error} />
 				{order.status === 'PICKED_UP' || order.status === 'COURIER_ORDERED' ? (
-					<BigButton label="Получил посылку" tone="green" onPress={() => receive.mutate()} loading={receive.isPending} />
+					<BigButton label={t('Получил посылку')} tone="green" onPress={() => receive.mutate()} loading={receive.isPending} />
 				) : null}
 				<View style={{ flexDirection: 'row', gap: 10 }}>
 					{order.chatId ? (
@@ -177,7 +178,7 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 							onPress={() => router.push({ pathname: '/chat', params: { chatId: String(order.chatId) } })}
 							style={{ flex: 1, height: 52, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}
 						>
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Чат с продавцом</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Чат с продавцом')}</Text>
 						</Pressable>
 					) : null}
 					{order.courierWhatsappUrl ? (
@@ -197,7 +198,7 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 							}}
 						>
 							<WhatsAppIcon size={22} color="#FFFFFF" />
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Курьер Ылдам</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Курьер Ылдам')}</Text>
 						</Pressable>
 					) : null}
 				</View>
@@ -219,17 +220,17 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 	const handed = order.status === 'PICKED_UP' || order.status === 'DELIVERED'
 	const weightKg = Number(weight.replace(',', '.'))
 	const weightOk = weightKg >= 0.1 && weightKg <= 100
-	const when = order.pickupToday ? 'сегодня' : 'завтра'
+	const when = order.pickupToday ? t('сегодня') : t('завтра')
 	const caption =
 		order.status === 'NEW'
-			? 'Новый заказ'
+			? t('Новый заказ')
 			: order.status === 'CANCELLED'
-				? 'Отменён'
+				? t('Отменён')
 				: order.status === 'DELIVERED'
-					? 'Доставлен'
+					? t('Доставлен')
 					: handed
-						? 'Отдан курьеру'
-						: 'Упакован'
+						? t('Отдан курьеру')
+						: t('Упакован')
 	const buyerName = order.buyer?.name ?? order.recipientName
 
 	const step = (n: number, done: boolean, title: string, body: string, extra?: React.ReactNode) => (
@@ -259,11 +260,11 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 				<View style={{ borderRadius: 18, backgroundColor: '#FCEBB0', padding: 16, gap: 4 }}>
 					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1, color: '#7A5A00' }}>
-						{`${caption} · в ${toRegion(destination)}`.toUpperCase()}
+						{t('{0} · в {1}', caption, toRegion(destination)).toUpperCase()}
 					</Text>
 					<Text style={{ fontSize: 20, lineHeight: 25.5, fontFamily: fontFamily(800), color: c.ink }}>{order.part.title}</Text>
 					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>
-						{priceDigits(order.part.price)} сом · покупатель {buyerName}
+						{t('{0} сом · покупатель {1}', priceDigits(order.part.price), buyerName)}
 					</Text>
 				</View>
 
@@ -271,8 +272,8 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 					{step(
 						1,
 						packed,
-						'Упакуйте посылку',
-						`Подпишите: «${destination} · ${order.recipientName}»`,
+						t('Упакуйте посылку'),
+						t('Подпишите: «{0} · {1}»', destination, order.recipientName),
 						<View style={{ flexDirection: 'row', gap: 8, paddingTop: 6 }}>
 							<View
 								style={{
@@ -286,7 +287,7 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 									gap: 8,
 								}}
 							>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(500), color: c.muted }}>Вес, кг</Text>
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(500), color: c.muted }}>{t('Вес, кг')}</Text>
 								<TextInput
 									value={weight}
 									onChangeText={setWeight}
@@ -324,12 +325,12 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 								>
 									{fragile ? <TickIcon size={11} color="#FFFFFF" /> : null}
 								</View>
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>Хрупкое</Text>
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>{t('Хрупкое')}</Text>
 							</Pressable>
 						</View>
 					)}
-					{step(2, packed, 'Нажмите «Упаковал»', 'До 17:30 — курьер заберёт сегодня, позже — завтра. Курьера закажем мы сами')}
-					{step(3, handed, 'Отдайте курьеру', `Он сам придёт в ${placeComma(order.shop.place)} — потом нажмите «Курьер забрал»`)}
+					{step(2, packed, t('Нажмите «Упаковал»'), t('До 17:30 — курьер заберёт сегодня, позже — завтра. Курьера закажем мы сами'))}
+					{step(3, handed, t('Отдайте курьеру'), t('Он сам придёт в {0} — потом нажмите «Курьер забрал»', placeComma(order.shop.place)))}
 				</View>
 
 				<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -337,13 +338,13 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 						<ClockOutline size={20} color={c.brandStrong} />
 					</View>
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>Курьер</Text>
+						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>{t('Курьер')}</Text>
 						<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(700), color: c.ink }}>
 							{order.status === 'DELIVERED'
-								? 'Покупатель получил посылку'
+								? t('Покупатель получил посылку')
 								: handed
-									? `Забрал посылку${order.pickedUpAt ? ` ${formatWhenAt(order.pickedUpAt)}` : ''}`
-									: `Приедет ${when} — будьте в контейнере`}
+									? t('Забрал посылку') + (order.pickedUpAt ? ` ${formatWhenAt(order.pickedUpAt)}` : '')
+									: t('Приедет {0} — будьте в контейнере', when)}
 						</Text>
 					</View>
 				</View>
@@ -354,8 +355,8 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 						style={{ borderRadius: 12, backgroundColor: c.brandTint, paddingVertical: 10, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 8 }}
 					>
 						<BubbleIcon size={18} color={c.brandStrong} />
-						<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(600), color: c.brandStrong }}>Оплату договоритесь с покупателем в чате</Text>
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Чат</Text>
+						<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(600), color: c.brandStrong }}>{t('Оплату договоритесь с покупателем в чате')}</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Чат')}</Text>
 					</Pressable>
 				) : null}
 
@@ -365,17 +366,17 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 			<View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: bottom + 12 }}>
 				{order.status === 'NEW' ? (
 					<BigButton
-						label="Упаковал — жду курьера"
+						label={t('Упаковал — жду курьера')}
 						tone="green"
 						disabled={!weightOk}
 						loading={pack.isPending}
 						onPress={() => pack.mutate({ weightKg: Math.round(weightKg * 10) / 10, fragile })}
 					/>
 				) : order.status === 'PACKED' || order.status === 'COURIER_ORDERED' ? (
-					<BigButton label="Курьер забрал" tone="green" loading={pickedUp.isPending} onPress={() => pickedUp.mutate()} />
+					<BigButton label={t('Курьер забрал')} tone="green" loading={pickedUp.isPending} onPress={() => pickedUp.mutate()} />
 				) : (
 					<BigButton
-						label={order.status === 'DELIVERED' ? 'Покупатель получил' : order.status === 'CANCELLED' ? 'Заказ отменён' : 'Отдали курьеру'}
+						label={order.status === 'DELIVERED' ? t('Покупатель получил') : order.status === 'CANCELLED' ? t('Заказ отменён') : t('Отдали курьеру')}
 						tone="grey"
 						disabled
 					/>

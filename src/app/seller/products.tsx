@@ -12,6 +12,7 @@ import { flattenPages } from '@/api/pagination'
 import { useMyParts, useMyPartsSummary } from '@/api/parts'
 import type { MyPartItem, MyPartsFilter } from '@/api/types'
 import { usePartDraft } from '@/store/usePartDraft'
+import { t } from '@/i18n'
 
 /** 24 «Мои запчасти» (tab «Товары»). Counters come from GET /my/parts/summary. */
 export default function SellerProductsScreen() {
@@ -24,10 +25,10 @@ export default function SellerProductsScreen() {
 	const s = summary.data
 
 	const filters: { value: MyPartsFilter; label: string }[] = [
-		{ value: 'ALL', label: `Все · ${s?.all ?? 0}` },
-		{ value: 'IN_STOCK', label: `В наличии · ${s?.inStock ?? 0}` },
-		{ value: 'OUT_OF_STOCK', label: `Нет · ${s?.outOfStock ?? 0}` },
-		...(s?.drafts ? [{ value: 'DRAFT' as const, label: `Черновики · ${s.drafts}` }] : []),
+		{ value: 'ALL', label: t('Все · {0}', s?.all ?? 0) },
+		{ value: 'IN_STOCK', label: t('В наличии · {0}', s?.inStock ?? 0) },
+		{ value: 'OUT_OF_STOCK', label: t('Нет · {0}', s?.outOfStock ?? 0) },
+		...(s?.drafts ? [{ value: 'DRAFT' as const, label: t('Черновики · {0}', s.drafts) }] : []),
 	]
 
 	const newPart = (to: '/new-part' | '/camera') => {
@@ -38,9 +39,7 @@ export default function SellerProductsScreen() {
 	return (
 		<Screen padding={0}>
 			<View style={{ paddingTop: 8, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>
-					Мои запчасти
-				</Text>
+				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>{t('Мои запчасти')}</Text>
 				<Pressable
 					onPress={() => router.push('/seller-video')}
 					style={{
@@ -54,7 +53,7 @@ export default function SellerProductsScreen() {
 					}}
 				>
 					<ReelsIcon size={20} color={c.brandStrong} strokeWidth={2.2} />
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Видео</Text>
+					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Видео')}</Text>
 				</Pressable>
 				<Pressable
 					onPress={() => newPart('/camera')}
@@ -92,7 +91,7 @@ export default function SellerProductsScreen() {
 							<TextInput
 								value={q}
 								onChangeText={setQ}
-								placeholder="Поиск по моим запчастям"
+								placeholder={t('Поиск по моим запчастям')}
 								placeholderTextColor="#7D7979"
 								style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 							/>
@@ -126,17 +125,17 @@ export default function SellerProductsScreen() {
 
 						{s ? (
 							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
-								Покупатели посмотрели ваши запчасти{' '}
+								{t('Покупатели посмотрели ваши запчасти')}{' '}
 								<Text style={{ fontFamily: fontFamily(700), color: c.ink }}>
-									{formatNumber(s.viewsWeek)} {plural(s.viewsWeek, ['раз', 'раза', 'раз'])}
+									{formatNumber(s.viewsWeek)} {plural(s.viewsWeek, [t('раз'), t('раза'), t('раз')])}
 								</Text>{' '}
-								за неделю
+								{t('за неделю')}
 							</Text>
 						) : null}
 
 						{parts.isSuccess && items.length === 0 ? (
 							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
-								{q.trim() ? 'Ничего не нашли' : 'Товаров нет'}
+								{q.trim() ? t('Ничего не нашли') : t('Товаров нет')}
 							</Text>
 						) : null}
 					</View>
@@ -166,7 +165,7 @@ export default function SellerProductsScreen() {
 				}}
 			>
 				<PlusIcon size={22} color="#FFFFFF" strokeWidth={2.6} />
-				<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Выложить запчасть</Text>
+				<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Выложить запчасть')}</Text>
 			</Pressable>
 		</Screen>
 	)
@@ -177,12 +176,12 @@ function PartRow({ part }: { part: MyPartItem }) {
 	const photo = resolveUrl(part.mainPhoto?.thumbUrl ?? part.mainPhoto?.url)
 	const badge =
 		part.status === 'DRAFT'
-			? { label: 'Черновик', tone: 'neutral' as const }
+			? { label: t('Черновик'), tone: 'neutral' as const }
 			: part.status === 'ARCHIVED'
-				? { label: 'В архиве', tone: 'muted' as const }
+				? { label: t('В архиве'), tone: 'muted' as const }
 				: part.stockStatus === 'IN_STOCK'
-					? { label: 'В наличии', tone: 'success' as const }
-					: { label: 'Нет', tone: 'muted' as const }
+					? { label: t('В наличии'), tone: 'success' as const }
+					: { label: t('Нет'), tone: 'muted' as const }
 
 	return (
 		<Pressable
@@ -196,11 +195,11 @@ function PartRow({ part }: { part: MyPartItem }) {
 			)}
 			<View style={{ flex: 1, gap: 6 }}>
 				<Text numberOfLines={2} style={{ fontSize: 16.5, lineHeight: 20.5, fontFamily: fontFamily(700), color: c.ink }}>
-					{part.title || 'Без названия'}
+					{part.title || t('Без названия')}
 				</Text>
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
 					<Text numberOfLines={1} style={{ flexShrink: 1, fontSize: 14.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>
-						{part.fitmentLabels.join(', ') || 'Машины не указаны'}
+						{part.fitmentLabels.join(', ') || t('Машины не указаны')}
 					</Text>
 					{part.brands[0] ? <BrandLogo brand={part.brands[0]} size={18} /> : null}
 				</View>
