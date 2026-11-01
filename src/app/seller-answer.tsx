@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { BrandLogo } from '@/components/ui'
-import { VoicePlayer, useVoiceNote, voiceClock } from '@/components/voice'
+import { VoicePlayer, VoiceRecordingPanel, VoiceResultPanel, useVoiceNote } from '@/components/voice'
 import { Label, MicIcon, PlaneIcon, TickIcon } from '@/components/seller-v23'
 import { MediaStrip, photosAsMedia } from '@/components/media-strip'
 import { isPlaceholderText } from '@/components/request-text'
@@ -118,19 +118,9 @@ export default function SellerAnswerScreen() {
 					) : null}
 
 					{note.recording || note.uploading ? (
-						<Recording seconds={note.seconds} uploading={note.uploading} onDone={note.stop} onCancel={note.cancel} />
+						<VoiceRecordingPanel seconds={note.seconds} uploading={note.uploading} onDone={note.stop} onCancel={note.cancel} />
 					) : voice ? (
-						<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 10, gap: 8 }}>
-							<VoicePlayer voice={voice} background={c.card} />
-							<View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start', paddingHorizontal: 4 }}>
-								<Text style={{ flex: 1, fontSize: 16.5, lineHeight: 22.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.inkSecondary }}>
-									{voice.transcript ? `«${voice.transcript}»` : 'Ваше голосовое'}
-								</Text>
-								<Text onPress={rerecord} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
-									Перезаписать
-								</Text>
-							</View>
-						</View>
+						<VoiceResultPanel voice={voice} onRerecord={rerecord} />
 					) : (
 						<Pressable
 							onPress={note.start}
@@ -229,47 +219,5 @@ function Choice({ label, active, onPress }: { label: string; active: boolean; on
 		>
 			<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{label}</Text>
 		</Pressable>
-	)
-}
-
-/** While recording: red dot, timer, «Готово»; then «Слушаем…» while the server hears it. */
-function Recording({ seconds, uploading, onDone, onCancel }: { seconds: number; uploading: boolean; onDone: () => void; onCancel: () => void }) {
-	const c = useColors()
-	return (
-		<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 10, gap: 8 }}>
-			<View
-				style={{
-					height: 44,
-					borderRadius: 22,
-					backgroundColor: c.card,
-					paddingLeft: 14,
-					paddingRight: 6,
-					flexDirection: 'row',
-					alignItems: 'center',
-					gap: 10,
-				}}
-			>
-				<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: uploading ? c.brand : c.danger }} />
-				<Text style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(600), color: c.ink }}>
-					{uploading ? 'Слушаем…' : `Говорите · ${voiceClock(seconds)}`}
-				</Text>
-				{uploading ? null : (
-					<Pressable
-						onPress={onDone}
-						style={{ height: 32, paddingHorizontal: 14, borderRadius: 16, backgroundColor: c.success, justifyContent: 'center' }}
-					>
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Готово</Text>
-					</Pressable>
-				)}
-			</View>
-			{uploading ? null : (
-				<View style={{ flexDirection: 'row', paddingHorizontal: 4 }}>
-					<View style={{ flex: 1 }} />
-					<Text onPress={onCancel} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.danger }}>
-						Отмена
-					</Text>
-				</View>
-			)}
-		</View>
 	)
 }

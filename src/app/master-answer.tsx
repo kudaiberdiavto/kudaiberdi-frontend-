@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Stack, router, useLocalSearchParams } from 'expo-router'
-import { VoicePlayer, useVoiceNote, voiceClock } from '@/components/voice'
+import { VoicePlayer, VoiceRecordingPanel, VoiceResultPanel, useVoiceNote } from '@/components/voice'
 import { CheckMark, MicOutline, SendPlane } from '@/components/master-v23'
 import { MediaStrip } from '@/components/media-strip'
 import { fontFamily, useColors } from '@/theme'
@@ -121,31 +121,9 @@ export default function MasterAnswerScreen() {
 					) : null}
 
 					{voice.recording || voice.uploading ? (
-						<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 10, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-							<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: voice.recording ? c.danger : c.brand, alignItems: 'center', justifyContent: 'center' }}>
-								<MicOutline size={22} color="#FFFFFF" />
-							</View>
-							<Text style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(600), color: c.ink }}>
-								{voice.recording ? `Говорите… ${voiceClock(voice.seconds)}` : 'Загружаем…'}
-							</Text>
-							{voice.recording ? (
-								<Pressable onPress={voice.stop} style={{ height: 40, paddingHorizontal: 16, borderRadius: 12, backgroundColor: c.brand, justifyContent: 'center' }}>
-									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Готово</Text>
-								</Pressable>
-							) : null}
-						</View>
+						<VoiceRecordingPanel seconds={voice.seconds} uploading={voice.uploading} onDone={voice.stop} onCancel={voice.cancel} />
 					) : voice.result ? (
-						<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 10, gap: 8 }}>
-							<VoicePlayer voice={voice.result.voice} background={c.card} />
-							<View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start', paddingHorizontal: 4 }}>
-								<Text style={{ flex: 1, fontSize: 16.5, lineHeight: 22.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.inkSecondary }}>
-									{voice.result.voice.transcript ? `«${voice.result.voice.transcript}»` : 'Ваше голосовое'}
-								</Text>
-								<Text onPress={voice.start} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
-									Перезаписать
-								</Text>
-							</View>
-						</View>
+						<VoiceResultPanel voice={voice.result.voice} onRerecord={() => (voice.reset(), voice.start())} />
 					) : (
 						<Pressable
 							onPress={voice.start}

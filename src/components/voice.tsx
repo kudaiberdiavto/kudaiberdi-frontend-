@@ -5,6 +5,7 @@ import { Pressable, Text, View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
 import { useVoiceRecorder } from '@/components/chat-media'
+import { MicIcon } from '@/components/icons'
 import { resolveUrl, uploadVoice, type VoicePurpose } from '@/lib/api'
 import { fontFamily, useColors } from '@/theme'
 import type { Voice, VoiceUpload } from '@/api/types'
@@ -170,4 +171,56 @@ export function useVoiceNote(purpose: VoicePurpose, onUploaded?: (result: VoiceU
 			setUploadError(null)
 		},
 	}
+}
+
+/** While recording: red mic, timer, then two equal buttons «Отмена» · «Готово»; «Слушаем…» while uploading. */
+export function VoiceRecordingPanel({ seconds, uploading, onDone, onCancel }: { seconds: number; uploading: boolean; onDone: () => void; onCancel: () => void }) {
+	const c = useColors()
+	return (
+		<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 12, gap: 12 }}>
+			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+				<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: uploading ? c.brand : c.danger, alignItems: 'center', justifyContent: 'center' }}>
+					<MicIcon size={22} color="#FFFFFF" />
+				</View>
+				<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
+					{uploading ? 'Слушаем…' : `Говорите · ${voiceClock(seconds)}`}
+				</Text>
+			</View>
+			{uploading ? null : (
+				<View style={{ flexDirection: 'row', gap: 10 }}>
+					<Pressable
+						onPress={onCancel}
+						style={{ flex: 1, height: 48, borderRadius: 14, borderWidth: 2, borderColor: c.border, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}
+					>
+						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Отмена</Text>
+					</Pressable>
+					<Pressable onPress={onDone} style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}>
+						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Готово</Text>
+					</Pressable>
+				</View>
+			)}
+		</View>
+	)
+}
+
+/** The recorded answer: player, what was heard, and a real «Перезаписать» button. */
+export function VoiceResultPanel({ voice, onRerecord }: { voice: Pick<Voice, 'url' | 'durationSec' | 'waveform' | 'transcript'>; onRerecord: () => void }) {
+	const c = useColors()
+	return (
+		<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 10, gap: 10 }}>
+			<VoicePlayer voice={voice} background={c.card} />
+			{voice.transcript ? (
+				<Text style={{ fontSize: 16.5, lineHeight: 22.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.inkSecondary, paddingHorizontal: 4 }}>
+					«{voice.transcript}»
+				</Text>
+			) : null}
+			<Pressable
+				onPress={onRerecord}
+				style={{ height: 44, borderRadius: 12, borderWidth: 2, borderColor: c.border, backgroundColor: c.card, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+			>
+				<MicIcon size={18} color={c.brandStrong} />
+				<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>Перезаписать</Text>
+			</Pressable>
+		</View>
+	)
 }
