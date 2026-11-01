@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import * as ImagePicker from 'expo-image-picker'
 import { router, useLocalSearchParams } from 'expo-router'
 import { QueryErrorBanner } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
@@ -12,24 +11,21 @@ import {
 	CrossIcon,
 	MicV23Icon,
 	PaperPlaneIcon,
-	PassportIcon,
 	PlusThinIcon,
 	TopBar,
 } from '@/components/buyer-v23'
 import { VoicePlayer, useVoiceNote, voiceClock } from '@/components/voice'
 import { fontFamily, useColors } from '@/theme'
 import { plural } from '@/lib/format'
-import { ApiError } from '@/lib/api'
-import { useAddCar, useCars } from '@/api/garage'
+import { useCars } from '@/api/garage'
 import { usePhotoUploads } from '@/api/media'
-import { useReadTechPassport } from '@/api/ocr'
 import { useCreateRequest, useRecipientsEstimate } from '@/api/requests'
 import { useClientCar } from '@/store/useClientCar'
 import { useSession } from '@/store/useSession'
 
 /**
- * 04 «Найти запчасть»: car (or a photo of the tech passport), photo + voice + text, ask the whole market.
- * «Другая машина» — a client's car for this request only (masters and СТО have no car of their own).
+ * 04 «Найти запчасть»: car, photo + voice + text, the request goes to sellers of the car's brand.
+ * «Машина клиента» — a car for this request only (masters and СТО have no car of their own).
  */
 export default function SearchPartScreen() {
 	const c = useColors()
@@ -47,8 +43,6 @@ export default function SearchPartScreen() {
 		const said = result.voice.transcript?.trim() ?? ''
 		if (said) setText((current) => (current.trim() ? current : said.slice(0, 200)))
 	})
-	const passport = useReadTechPassport()
-	const addCar = useAddCar()
 	const create = useCreateRequest()
 
 	// The client's car lives only while this screen is open.
@@ -70,51 +64,6 @@ export default function SearchPartScreen() {
 	const hasPart = typed.length > 0 || uploads.mediaIds.length > 0 || Boolean(voiceId)
 	const busy = uploads.uploading || voice.uploading || voice.recording
 
-	/**
-	 * Tech passport photo → car in the garage (a master — the client's car, not saved);
-	 * model not read → the manual picker with what was read.
-	 */
-	const scanPassport = async () => {
-		const permission = await ImagePicker.requestCameraPermissionsAsync()
-		const result = permission.granted
-			? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 })
-			: await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 })
-		if (result.canceled) return
-		passport.mutate(result.assets[0].uri, {
-			onSuccess: (read) => {
-				if (read.brand && read.model && read.year && isMaster) {
-					useClientCar.getState().set({ brand: read.brand, model: read.model, year: read.year })
-				} else if (read.model && read.year) {
-					addCar.mutate(
-						{
-							modelId: read.model.id,
-							year: read.year,
-							vin: read.vin ?? undefined,
-							engineVolume: read.engineVolume ?? undefined,
-							fuel: read.fuel ?? undefined,
-							fromTechPassport: true,
-						},
-						{ onSuccess: (car) => setCarId(car.id) }
-					)
-				} else {
-					router.push({
-						pathname: '/garage-add',
-						params: {
-							once: isMaster ? '1' : undefined,
-							select: isMaster ? undefined : '1',
-							brand: read.brand ? JSON.stringify(read.brand) : undefined,
-							year: read.year ? String(read.year) : undefined,
-							vin: read.vin ?? undefined,
-							engineVolume: read.engineVolume ? String(read.engineVolume) : undefined,
-							fuel: read.fuel ?? undefined,
-						},
-					})
-				}
-			},
-			onError: () => router.push({ pathname: '/garage-add', params: isMaster ? { once: '1' } : { select: '1' } }),
-		})
-	}
-
 	const send = () =>
 		hasCar &&
 		create.mutate(
@@ -131,8 +80,10 @@ export default function SearchPartScreen() {
 	const recipients = estimate.data?.recipients
 	const brand =
 		estimate.data?.brand ?? (useClient && clientCar ? clientCar.brand.name : carList.find((car) => car.id === carId)?.brand.name)
-	const passportBusy = passport.isPending || addCar.isPending
-	const error = create.error ?? (passport.error instanceof ApiError && passport.error.code !== 'OCR_UNAVAILABLE' ? passport.error : null)
+	const error = create.error
+	// No car yet — the chip says «Выбрать машину»; otherwise it adds one more (a master — the client's car).
+	const addCarLabel = isMaster ? 'Машина клиента' : carList.length || clientCar ? 'Добавить машину' : 'Выбрать машину'
+	const pickCar = () => router.push({ pathname: '/garage-add', params: isMaster ? { once: '1' } : { select: '1' } })
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
@@ -194,41 +145,22 @@ export default function SearchPartScreen() {
 						</Pressable>
 					) : null}
 					<Pressable
-						onPress={() => router.push({ pathname: '/garage-add', params: { once: '1' } })}
+						onPress={pickCar}
 						style={{
 							height: 40,
 							paddingHorizontal: 14,
 							borderRadius: 20,
 							borderWidth: 2,
-							borderStyle: 'dashed',
-							borderColor: '#B8C3D3',
+							borderStyle: hasCar ? 'dashed' : 'solid',
+							borderColor: hasCar ? '#B8C3D3' : c.brand,
+							backgroundColor: hasCar ? 'transparent' : c.brandTint,
 							flexDirection: 'row',
 							alignItems: 'center',
 							gap: 6,
 						}}
 					>
 						<PlusThinIcon size={14} color={c.brandStrong} strokeWidth={2.6} />
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Другая машина</Text>
-					</Pressable>
-					<Pressable
-						onPress={scanPassport}
-						disabled={passportBusy}
-						style={{
-							height: 40,
-							paddingHorizontal: 14,
-							borderRadius: 20,
-							borderWidth: 2,
-							borderStyle: 'dashed',
-							borderColor: '#B8C3D3',
-							flexDirection: 'row',
-							alignItems: 'center',
-							gap: 6,
-						}}
-					>
-						{passportBusy ? <ActivityIndicator size="small" color={c.brandStrong} /> : <PassportIcon size={18} color={c.brandStrong} />}
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
-							{passportBusy ? 'Читаем техпаспорт…' : 'Фото техпаспорта'}
-						</Text>
+						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{addCarLabel}</Text>
 					</Pressable>
 				</ScrollView>
 
@@ -358,8 +290,8 @@ export default function SearchPartScreen() {
 					<View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start', borderRadius: 14, backgroundColor: c.brandTint, paddingVertical: 12, paddingHorizontal: 14 }}>
 						<PaperPlaneIcon size={18} color={c.brandStrong} strokeWidth={2.2} />
 						<Text style={{ flex: 1, fontSize: 15.5, lineHeight: 21.5, fontFamily: fontFamily(400), color: '#1D2B53' }}>
-							Спросим <Text style={{ fontFamily: fontFamily(700) }}>всех продавцов {brand}</Text> на рынке
-							{recipients != null ? ` — ${recipients} ${plural(recipients, ['контейнер', 'контейнера', 'контейнеров'])}` : ''}. Обычно
+							Спросим <Text style={{ fontFamily: fontFamily(700) }}>всех продавцов {brand}</Text>
+							{recipients != null ? ` — ${recipients} ${plural(recipients, ['магазин', 'магазина', 'магазинов'])}` : ''}. Обычно
 							отвечают за 5–10 минут.
 						</Text>
 					</View>
@@ -379,12 +311,12 @@ export default function SearchPartScreen() {
 				}}
 			>
 				<BigButton
-					label="Спросить весь рынок"
+					label={!hasCar ? 'Сначала выберите машину' : !hasPart ? 'Опишите, что нужно' : 'Отправить запрос'}
 					height={58}
-					icon={<PaperPlaneIcon size={20} color="#FFFFFF" />}
-					disabled={!hasCar || !hasPart || busy}
+					icon={hasCar && hasPart ? <PaperPlaneIcon size={20} color="#FFFFFF" /> : undefined}
+					disabled={hasCar && (!hasPart || busy)}
 					loading={create.isPending}
-					onPress={send}
+					onPress={hasCar ? send : pickCar}
 				/>
 			</View>
 		</View>

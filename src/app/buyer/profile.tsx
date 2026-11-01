@@ -5,7 +5,7 @@ import { router } from 'expo-router'
 import { API_URL } from '@/lib/env'
 import { BottomSheet, QueryErrorBanner, SettingsRow, Toggle } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
-import { BellIcon, Caps, ChevronIcon, GlobeIcon, HelpIcon, PassportIcon, PlusThinIcon, TopBar } from '@/components/buyer-v23'
+import { BellIcon, Caps, ChevronIcon, GlobeIcon, HelpIcon, PlusThinIcon, TopBar } from '@/components/buyer-v23'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatE164 } from '@/lib/phone'
@@ -16,7 +16,7 @@ import { openSupport } from '@/lib/support'
 
 /** «Помощь в WhatsApp» — the support number from the build config (digits, e.g. 996555000000). */
 
-/** 10 «Профиль»: name and phone, cars (tech passport mark), language, notifications, help. */
+/** 10 «Профиль»: name and phone, cars, language, notifications, help. */
 export default function BuyerProfileScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
@@ -79,12 +79,6 @@ export default function BuyerProfileScreen() {
 							</View>
 
 						</View>
-						{car.fromTechPassport ? (
-							<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-								<PassportIcon size={18} color={c.success} strokeWidth={2.2} />
-								<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(500), color: c.success }}>По техпаспорту</Text>
-							</View>
-						) : null}
 					</Pressable>
 				))}
 				<Pressable
