@@ -212,6 +212,8 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 				>
 					{replies.map((reply) => {
 						const positive = reply.code ? POSITIVE.has(reply.code) : false
+						// Greetings stand out — a filled blue chip, the first thing to tap.
+						const greeting = !reply.code && (isSalam(reply.text) || reply.text === 'Алейкум ассалам!')
 						return (
 							<Pressable
 								key={`${reply.code ?? reply.templateId}-${reply.text}`}
@@ -221,14 +223,14 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 									paddingHorizontal: 14,
 									borderRadius: 20,
 									borderWidth: 2,
-									borderColor: positive ? c.success : c.border,
-									backgroundColor: positive ? c.successTint : c.card,
+									borderColor: greeting ? c.brand : positive ? c.success : c.border,
+									backgroundColor: greeting ? c.brand : positive ? c.successTint : c.card,
 									alignItems: 'center',
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(positive ? 700 : 600), color: positive ? c.success : c.ink }}>
-									{reply.text}
+								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(positive || greeting ? 700 : 600), color: greeting ? '#FFFFFF' : positive ? c.success : c.ink }}>
+									{greeting ? `👋 ${reply.text}` : reply.text}
 								</Text>
 							</Pressable>
 						)
