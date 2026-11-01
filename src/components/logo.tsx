@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Animated, Easing, View } from 'react-native'
 
 /**
- * Bottom → top, like a watch: plate, brass wheels, the steel gear, the medallion, «К», the crystal.
+ * Bottom → top, like a watch: brass wheels, the steel gear, the dial, «К», the crystal.
  * `edge` — the colour of the layer's side, so a turned layer shows its thickness; `side` — the picture for it
  * when the face has a soft shadow (tinted, the shadow would turn into a block); `thick` — fewer copies for the thin «К».
  */
@@ -15,16 +15,15 @@ interface Layer {
 }
 
 const LAYERS: Layer[] = [
-	{ source: require('../../assets/images/layer-plate.png'), spin: 0, edge: '#3E4656' },
-	{ source: require('../../assets/images/layer-gears.png'), spin: -1, edge: '#B48C3C' },
-	{ source: require('../../assets/images/layer-gear.png'), spin: 1, edge: '#9AA2B1' },
-	{ source: require('../../assets/images/layer-medal.png'), spin: 0, edge: '#2A50C8' },
-	{ source: require('../../assets/images/layer-k.png'), side: require('../../assets/images/layer-k-flat.png'), spin: 0, edge: '#C9D2E3', thick: 1 },
+	{ source: require('../../assets/images/layer-gears.png'), spin: -1, edge: '#6E5218' },
+	{ source: require('../../assets/images/layer-gear.png'), spin: 1, edge: '#5A6272' },
+	{ source: require('../../assets/images/layer-medal.png'), spin: 0, edge: '#1B1F27' },
+	{ source: require('../../assets/images/layer-k.png'), side: require('../../assets/images/layer-k-flat.png'), spin: 0, edge: '#5B6372', thick: 2 },
 	{ source: require('../../assets/images/layer-glass.png'), spin: 0, edge: null },
 ]
 
 /** Copies behind each face that make up its side. */
-const THICKNESS = 3
+const THICKNESS = 4
 
 /**
  * The logo taking itself apart like a watch in an exploded view, face to the viewer: the crystal, «К» and the dial come
@@ -56,13 +55,10 @@ export function ExplodedLogo({ size }: { size: number }) {
 		return () => (show.stop(), spin.stop())
 	}, [tilt, spread, turn])
 
-	const gap = size * 0.28
-	const depth = size * 0.01
+	const gap = size * 0.38
+	const depth = size * 0.012
 	const middle = (LAYERS.length - 1) / 2
-	// a slight turn only — every part keeps its face to the viewer
-	const rotateY = tilt.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '22deg'] })
-	const rotateX = tilt.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '10deg'] })
-	const forward = turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] })
+		const forward = turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] })
 	const backward = turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-540deg'] })
 
 	return (
@@ -75,6 +71,7 @@ export function ExplodedLogo({ size }: { size: number }) {
 						spread.interpolate({ inputRange: [0, 1], outputRange: [0, -z * gap] }),
 						tilt.interpolate({ inputRange: [0, 1], outputRange: [0, k * depth] })
 					)
+				const yk = (k: number) => Animated.add(y, tilt.interpolate({ inputRange: [0, 1], outputRange: [0, k * depth] }))
 				const y = spread.interpolate({ inputRange: [0, 1], outputRange: [0, z * gap * 0.18] })
 				const scale = spread.interpolate({ inputRange: [0, 1], outputRange: [1, 1 + z * 0.1] })
 				const rotate = layer.spin > 0 ? forward : layer.spin < 0 ? backward : '0deg'
@@ -92,7 +89,7 @@ export function ExplodedLogo({ size }: { size: number }) {
 							zIndex: i * 10 + (10 - k),
 							width: size,
 							height: size,
-							transform: [{ perspective: size * 6 }, { translateX: x(k) }, { translateY: y }, { scale }, { rotateY }, { rotateX }, { rotate }],
+							transform: [{ translateX: x(k) }, { translateY: yk(k) }, { scale }, { rotate }],
 						}}
 					/>
 				))
