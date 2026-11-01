@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Image, Keyboard, Linking, Pressable, Text, TextInput, View } from 'react-native'
+import { Keyboard, Linking, Pressable, Text, TextInput, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Button } from '@/components/ui'
+import { SpinningLogo } from '@/components/logo'
 import { AUTH_FIELD_HEIGHT, AuthLayout } from '@/components/auth-layout'
 import { fontFamily, useColors } from '@/theme'
 import { COUNTRY_CODE, formatLocalPhone, isValidLocalPhone, toE164 } from '@/lib/phone'
@@ -97,7 +98,7 @@ export default function PhoneScreen() {
 					end={{ x: 0.9, y: 1 }}
 					style={{ height: 196, borderRadius: 28, paddingHorizontal: 22, flexDirection: 'row', alignItems: 'center', gap: 16 }}
 				>
-					<Image source={require('../../assets/images/logo-mark.png')} style={{ width: 92, height: 92 }} />
+					<SpinningLogo size={92} />
 					<View style={{ flex: 1, gap: 6 }}>
 						<Text style={{ fontSize: 28, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.5, color: '#FFFFFF' }}>{t('Кудайберген')}</Text>
 						<Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.85)' }}>{t('Авторынок запчастей в Бишкеке')}</Text>
