@@ -15,6 +15,7 @@ import { uploadPartVideo } from '@/lib/api'
 import { usePublishPart, useSavePart } from '@/api/parts'
 import type { PartVideoUpload } from '@/api/types'
 import { t } from '@/i18n'
+import { usePartDraft } from '@/store/usePartDraft'
 
 const MAX_SEC = 30
 
@@ -44,6 +45,13 @@ export default function SellerVideoScreen() {
 	const [price, setPrice] = useState('')
 	const [condition, setCondition] = useState<'NEW' | 'USED'>('NEW')
 	const [ships, setShips] = useState(true)
+	// «Подходит к машинам» — optional; picked on the same screen as for a photo part, kept in the part draft
+	const fitments = usePartDraft((d) => d.fitments)
+	const removeFitment = usePartDraft((d) => d.removeFitment)
+	useEffect(() => {
+		usePartDraft.getState().reset()
+		return () => usePartDraft.getState().reset()
+	}, [])
 
 	const draft = uploaded?.draft
 	const fromVoice = Boolean(draft && (draft.title || draft.price || draft.condition))
@@ -97,6 +105,7 @@ export default function SellerVideoScreen() {
 					quantity: 1,
 					videoMediaId: uploaded.video.id,
 					shipsToRegions: ships,
+					fitments: fitments.map(({ brandId, modelId, yearFrom, yearTo }) => ({ brandId, modelId, yearFrom, yearTo })),
 				},
 			})
 			draftId.current = part.id
@@ -254,6 +263,28 @@ export default function SellerVideoScreen() {
 								))}
 							</View>
 						</View>
+					</View>
+				</View>
+
+				<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 10 }}>
+					<Text style={label}>{t('Подходит к машинам · необязательно')}</Text>
+					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+						{fitments.map((fitment, index) => (
+							<Pressable
+								key={`${fitment.brandId}-${fitment.modelId ?? 'all'}-${index}`}
+								onPress={() => removeFitment(index)}
+								style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: c.brandTint, flexDirection: 'row', alignItems: 'center', gap: 6 }}
+							>
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>{fitment.label}</Text>
+								<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>×</Text>
+							</Pressable>
+						))}
+						<Pressable
+							onPress={() => router.push('/fitment-add')}
+							style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, borderWidth: 2, borderStyle: 'dashed', borderColor: '#B8C3D3', justifyContent: 'center' }}
+						>
+							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('+ Добавить машину')}</Text>
+						</Pressable>
 					</View>
 				</View>
 

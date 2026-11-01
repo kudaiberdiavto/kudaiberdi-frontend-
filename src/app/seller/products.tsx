@@ -13,6 +13,7 @@ import { useMyParts, useMyPartsSummary } from '@/api/parts'
 import type { MyPartItem, MyPartsFilter } from '@/api/types'
 import { usePartDraft } from '@/store/usePartDraft'
 import { t } from '@/i18n'
+import { PlayIcon } from '@/components/voice'
 
 /** 24 «Мои запчасти» (tab «Товары»). Counters come from GET /my/parts/summary. */
 export default function SellerProductsScreen() {
@@ -173,7 +174,8 @@ export default function SellerProductsScreen() {
 
 function PartRow({ part }: { part: MyPartItem }) {
 	const c = useColors()
-	const photo = resolveUrl(part.mainPhoto?.thumbUrl ?? part.mainPhoto?.url)
+	// a video part has no photo — its poster is the thumbnail
+	const photo = resolveUrl(part.mainPhoto?.thumbUrl ?? part.mainPhoto?.url ?? part.videoPosterUrl)
 	const badge =
 		part.status === 'DRAFT'
 			? { label: t('Черновик'), tone: 'neutral' as const }
@@ -188,11 +190,18 @@ function PartRow({ part }: { part: MyPartItem }) {
 			onPress={() => router.push({ pathname: '/new-part', params: { id: String(part.id) } })}
 			style={{ flexDirection: 'row', gap: 12, borderRadius: 16, backgroundColor: c.card, padding: 10 }}
 		>
-			{photo ? (
-				<Image source={{ uri: photo }} style={{ width: 80, height: 80, borderRadius: 10 }} />
-			) : (
-				<PhotoPlaceholder width={80} height={80} radius={10} />
-			)}
+			<View>
+				{photo ? (
+					<Image source={{ uri: photo }} style={{ width: 80, height: 80, borderRadius: 10 }} />
+				) : (
+					<PhotoPlaceholder width={80} height={80} radius={10} />
+				)}
+				{part.videoPosterUrl ? (
+					<View style={{ position: 'absolute', right: 5, bottom: 5, width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', paddingLeft: 2 }}>
+						<PlayIcon size={10} />
+					</View>
+				) : null}
+			</View>
 			<View style={{ flex: 1, gap: 6 }}>
 				<Text numberOfLines={2} style={{ fontSize: 16.5, lineHeight: 20.5, fontFamily: fontFamily(700), color: c.ink }}>
 					{part.title || t('Без названия')}

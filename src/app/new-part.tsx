@@ -3,10 +3,14 @@ import { Image, Pressable, ScrollView, Text, TextInput, View } from 'react-nativ
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { QueryErrorBanner, Segmented, Toggle } from '@/components/ui'
+import { MediaViewer } from '@/components/media-viewer'
+import { PlayIcon } from '@/components/voice'
+import { resolveUrl } from '@/lib/api'
 import { BrandLogo } from '@/components/ui/brand'
 import { CameraIcon, ChevronLeftIcon, CloseIcon, PlusIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
 import { ApiError } from '@/lib/api'
+import type { MediaItem } from '@/api/types'
 import { formatNumber } from '@/lib/format'
 import { useCategories } from '@/api/directory'
 import { useMyPart, usePublishPart, useSavePart } from '@/api/parts'
@@ -88,6 +92,9 @@ export default function NewPartScreen() {
 	}
 
 	const [main, second, third] = draft.photos
+	// a part filmed for the feed: its video plays here, not only its poster
+	const video = existing.data?.video ?? null
+	const [watch, setWatch] = useState<MediaItem[] | null>(null)
 	const photoTile = (photo: typeof main | undefined, isMain: boolean) =>
 		photo ? (
 			<Pressable
@@ -161,10 +168,24 @@ export default function NewPartScreen() {
 				) : null}
 			</View>
 
+			<MediaViewer items={watch} onClose={() => setWatch(null)} />
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 14, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={existing.error ?? categories.error} onRetry={() => existing.refetch()} />
 
 				<View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+					{video ? (
+						<Pressable
+							onPress={() => setWatch([{ id: video.id, kind: 'VIDEO', url: video.url, thumbUrl: video.posterUrl, width: null, height: null, durationSec: video.durationSec }])}
+							style={{ width: 80, height: 80, borderRadius: 12, overflow: 'hidden', backgroundColor: '#1D2433' }}
+						>
+							{video.posterUrl ? <Image source={{ uri: resolveUrl(video.posterUrl) }} style={{ width: '100%', height: '100%' }} /> : null}
+							<View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.25)' }}>
+								<View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', justifyContent: 'center', paddingLeft: 3 }}>
+									<PlayIcon size={14} />
+								</View>
+							</View>
+						</Pressable>
+					) : null}
 					{photoTile(main, true)}
 					{photoTile(second, false)}
 					{photoTile(third, false)}

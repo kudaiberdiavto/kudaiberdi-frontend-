@@ -121,12 +121,14 @@ export default function RequestScreen() {
 							<Pressable
 								onPress={() => extend.mutate(30)}
 								disabled={extend.isPending}
-								style={{ height: 34, paddingHorizontal: 12, borderRadius: 17, backgroundColor: c.brandTint, justifyContent: 'center' }}
+								// a real button: filled, with a verb — the old tinted chip read as a status
+								style={{ height: 38, paddingHorizontal: 14, borderRadius: 12, backgroundColor: c.brand, justifyContent: 'center',
+									shadowColor: c.brand, shadowOpacity: 0.3, shadowOffset: { width: 0, height: 4 }, shadowRadius: 8, elevation: 3 }}
 							>
 								{extend.isPending ? (
-									<ActivityIndicator size="small" color={c.brandStrong} />
+									<ActivityIndicator size="small" color="#FFFFFF" />
 								) : (
-									<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Ещё 30 мин')}</Text>
+									<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Продлить +30 мин')}</Text>
 								)}
 							</Pressable>
 						) : null}
