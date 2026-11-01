@@ -27,8 +27,8 @@ const LAYERS: Layer[] = [
 const THICKNESS = 3
 
 /**
- * The logo taking itself apart like a watch in an exploded view: it turns a third toward the viewer, the layers slide
- * apart horizontally — the crystal and «К» come forward, the plate stays at the back — while the gears keep turning, then it closes back up — and rests assembled for a while.
+ * The logo taking itself apart like a watch in an exploded view, face to the viewer: the crystal, «К» and the dial come
+ * forward and grow, the gear, wheels and plate go back and shrink — while the gears keep turning, then it closes back up — and rests assembled for a while.
  */
 export function ExplodedLogo({ size }: { size: number }) {
 	const [tilt] = useState(() => new Animated.Value(0))
@@ -56,22 +56,27 @@ export function ExplodedLogo({ size }: { size: number }) {
 		return () => (show.stop(), spin.stop())
 	}, [tilt, spread, turn])
 
-	const gap = size * 0.30
+	const gap = size * 0.28
 	const depth = size * 0.01
 	const middle = (LAYERS.length - 1) / 2
-	const rotateY = tilt.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '38deg'] })
-	const rotateX = tilt.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '16deg'] })
+	// a slight turn only — every part keeps its face to the viewer
+	const rotateY = tilt.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '22deg'] })
+	const rotateX = tilt.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '10deg'] })
 	const forward = turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] })
 	const backward = turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-540deg'] })
 
 	return (
 		<View style={{ width: size, height: size }}>
 			{LAYERS.flatMap((layer, i) => {
+				// z > 0 — toward the viewer: front parts come forward-left and grow, back ones go back-right and shrink
+				const z = i - middle
 				const x = (k: number) =>
 					Animated.add(
-						spread.interpolate({ inputRange: [0, 1], outputRange: [0, -(i - middle) * gap] }),
+						spread.interpolate({ inputRange: [0, 1], outputRange: [0, -z * gap] }),
 						tilt.interpolate({ inputRange: [0, 1], outputRange: [0, k * depth] })
 					)
+				const y = spread.interpolate({ inputRange: [0, 1], outputRange: [0, z * gap * 0.18] })
+				const scale = spread.interpolate({ inputRange: [0, 1], outputRange: [1, 1 + z * 0.1] })
 				const rotate = layer.spin > 0 ? forward : layer.spin < 0 ? backward : '0deg'
 				// the side first (farthest copy first), then the face on top
 				const n = layer.thick ?? THICKNESS
@@ -83,9 +88,11 @@ export function ExplodedLogo({ size }: { size: number }) {
 						tintColor={k ? (layer.edge ?? undefined) : undefined}
 						style={{
 							position: 'absolute',
+							// explicit order: the browser would otherwise sort turned layers by depth and bury «К»
+							zIndex: i * 10 + (10 - k),
 							width: size,
 							height: size,
-							transform: [{ perspective: size * 6 }, { translateX: x(k) }, { rotateY }, { rotateX }, { rotate }],
+							transform: [{ perspective: size * 6 }, { translateX: x(k) }, { translateY: y }, { scale }, { rotateY }, { rotateX }, { rotate }],
 						}}
 					/>
 				))
