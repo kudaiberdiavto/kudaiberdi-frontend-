@@ -1,35 +1,44 @@
 import { useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Image, Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
+import { LinearGradient } from 'expo-linear-gradient'
 import { Button } from '@/components/ui'
-import { BoxOutlineIcon, LoupeIcon, TickIcon, TopBar, WrenchIcon } from '@/components/buyer-v23'
+import { BoxOutlineIcon, LoupeIcon, TickIcon, WrenchIcon } from '@/components/buyer-v23'
 import { fontFamily, useColors } from '@/theme'
 import { useSetRole } from '@/api/me'
 import type { UserRole } from '@/api/types'
 
 const ROLES = [
-	{ value: 'BUYER' as const, title: 'Найти запчасть или мастера', description: 'Для своей машины', icon: LoupeIcon },
-	{ value: 'SELLER' as const, title: 'Продаю на рынке', description: 'У меня контейнер на Кудайбергене', icon: BoxOutlineIcon },
-	{ value: 'MASTER' as const, title: 'Я мастер / СТО', description: 'Ремонт, шиномонтаж, эвакуатор, мойка…', icon: WrenchIcon },
+	{ value: 'BUYER' as const, who: 'покупатель', title: 'Ищу запчасти', description: 'Для своей машины — продавцы рынка ответят с ценой, найду и мастера', icon: LoupeIcon },
+	{ value: 'SELLER' as const, who: 'продавец', title: 'Продаю запчасти', description: 'Контейнер на Кудайбергене или магазин в городе — получаю запросы покупателей', icon: BoxOutlineIcon },
+	{ value: 'MASTER' as const, who: 'мастер', title: 'Я мастер или СТО', description: 'Ремонт, шиномонтаж, эвакуатор — получаю заявки от водителей рядом', icon: WrenchIcon },
 ]
 
-/** 02 «Что вы хотите?»: buyer, seller or master. */
+/** 02 «Кто вы?» — buyer, seller or master; chosen once, the app is built around it. */
 export default function RoleScreen() {
 	const c = useColors()
 	const insets = useSafeAreaInsets()
 	const [role, setRole] = useState<UserRole>('BUYER')
 	const saveRole = useSetRole()
+	const chosen = ROLES.find((item) => item.value === role) ?? ROLES[0]
 
 	return (
-		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar onBack={router.canGoBack() ? undefined : false} />
-			<View style={{ flex: 1, paddingTop: 4, paddingHorizontal: 20, paddingBottom: 16, gap: 12 }}>
-				<Text style={{ fontSize: 28, lineHeight: 36.4, fontFamily: fontFamily(800), letterSpacing: -0.28, color: c.ink }}>
-					Что вы хотите?
+		<View style={{ flex: 1, backgroundColor: c.surface }}>
+			<LinearGradient
+				colors={['#2355E8', '#142F8C']}
+				start={{ x: 0, y: 0 }}
+				end={{ x: 1, y: 1 }}
+				style={{ paddingTop: insets.top + 20, paddingBottom: 26, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, gap: 6 }}
+			>
+				<Image source={require('../../assets/images/logo-mark.png')} style={{ width: 56, height: 56, marginBottom: 8 }} />
+				<Text style={{ fontSize: 28, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.3, color: '#FFFFFF' }}>Кто вы?</Text>
+				<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>
+					Приложение подстроится под вас
 				</Text>
-				<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>Можно поменять потом в профиле</Text>
-				<View style={{ height: 6 }} />
+			</LinearGradient>
+
+			<ScrollView contentContainerStyle={{ padding: 20, gap: 12 }} showsVerticalScrollIndicator={false}>
 				{ROLES.map(({ value, title, description, icon: Icon }) => {
 					const selected = role === value
 					return (
@@ -40,28 +49,24 @@ export default function RoleScreen() {
 								borderRadius: 20,
 								borderWidth: 2,
 								borderColor: selected ? c.brand : c.card,
-								backgroundColor: selected ? c.brandTint : c.card,
-								padding: 18,
+								backgroundColor: c.card,
+								padding: 16,
 								flexDirection: 'row',
 								alignItems: 'center',
-								gap: 16,
+								gap: 14,
+								shadowColor: '#142F8C',
+								shadowOpacity: selected ? 0.14 : 0,
+								shadowOffset: { width: 0, height: 8 },
+								shadowRadius: 14,
+								elevation: selected ? 4 : 0,
 							}}
 						>
-							<View
-								style={{
-									width: 56,
-									height: 56,
-									borderRadius: 14,
-									backgroundColor: selected ? c.brand : c.brandTint,
-									alignItems: 'center',
-									justifyContent: 'center',
-								}}
-							>
-								<Icon size={22} color={selected ? '#FFFFFF' : c.brandStrong} />
+							<View style={{ width: 54, height: 54, borderRadius: 16, backgroundColor: selected ? c.brand : c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+								<Icon size={24} color={selected ? '#FFFFFF' : c.brandStrong} />
 							</View>
-							<View style={{ flex: 1, gap: 4 }}>
-								<Text style={{ fontSize: 19, lineHeight: 27, fontFamily: fontFamily(700), color: c.ink }}>{title}</Text>
-								<Text style={{ fontSize: 16, lineHeight: 20.5, fontFamily: fontFamily(400), color: c.muted }}>{description}</Text>
+							<View style={{ flex: 1, gap: 3 }}>
+								<Text style={{ fontSize: 19, lineHeight: 25, fontFamily: fontFamily(800), color: c.ink }}>{title}</Text>
+								<Text style={{ fontSize: 15, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>{description}</Text>
 							</View>
 							<View
 								style={{
@@ -83,10 +88,11 @@ export default function RoleScreen() {
 				{saveRole.error ? (
 					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{saveRole.error.message}</Text>
 				) : null}
-			</View>
+			</ScrollView>
+
 			<View style={{ paddingTop: 12, paddingHorizontal: 20, paddingBottom: Math.max(insets.bottom, 34) }}>
 				<Button
-					label="Дальше"
+					label={`Продолжить как ${chosen.who}`}
 					loading={saveRole.isPending}
 					onPress={() =>
 						saveRole.mutate(role, {
