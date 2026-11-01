@@ -1,9 +1,8 @@
-import { useState } from 'react'
-import { Keyboard, Linking, Pressable, Text, TextInput, View } from 'react-native'
+import { useEffect, useState } from 'react'
+import { Image, Keyboard, Linking, Pressable, Text, TextInput, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
-import { LinearGradient } from 'expo-linear-gradient'
+import { useVideoPlayer, VideoView } from 'expo-video'
 import { Button } from '@/components/ui'
-import { ExplodedLogo } from '@/components/logo'
 import { AUTH_FIELD_HEIGHT, AuthLayout } from '@/components/auth-layout'
 import { fontFamily, useColors } from '@/theme'
 import { COUNTRY_CODE, formatLocalPhone, isValidLocalPhone, toE164 } from '@/lib/phone'
@@ -20,6 +19,17 @@ const LANGS = [
 
 export default function PhoneScreen() {
 	const c = useColors()
+	// silent, endless — it is part of the screen, not a video to watch
+	const logoLoop = useVideoPlayer(require('../../assets/video/login-loop.mp4'), (p) => {
+		p.loop = true
+		p.muted = true
+		p.play()
+	})
+	// on the web the first play() comes before the file is loaded — start again once it is ready
+	useEffect(() => {
+		const sub = logoLoop.addListener('statusChange', ({ status }) => status === 'readyToPlay' && logoLoop.play())
+		return () => sub.remove()
+	}, [logoLoop])
 	const signedIn = useSession((s) => s.status === 'authed')
 	const role = useSession((s) => s.role)
 	const onboarded = useSession((s) => s.onboarded)
@@ -91,20 +101,15 @@ export default function PhoneScreen() {
 				</View>
 			}
 			header={
-				// The brand card in the logo's style: the gear mark, the name, what it is
-				<LinearGradient
-					colors={['#2355E8', '#142F8C']}
-					start={{ x: 0.1, y: 0 }}
-					end={{ x: 0.9, y: 1 }}
-					style={{ borderRadius: 28, paddingTop: 22, paddingBottom: 20, paddingHorizontal: 22, alignItems: 'center', gap: 12, overflow: 'hidden' }}
-				>
-					{/* room on the sides — the logo comes apart horizontally */}
-					<ExplodedLogo size={96} />
-					<View style={{ alignItems: 'center', gap: 4 }}>
+				// The brand card: a pre-rendered 3D loop (the logo comes apart like a watch), the name over it
+				<View style={{ marginTop: 12, borderRadius: 28, overflow: 'hidden', aspectRatio: 1086 / 690, backgroundColor: '#1C44B8' }}>
+					<Image source={require('../../assets/video/login-poster.jpg')} style={{ position: 'absolute', width: '100%', height: '100%' }} />
+					<VideoView player={logoLoop} nativeControls={false} contentFit="cover" style={{ position: 'absolute', width: '100%', height: '100%' }} />
+					<View style={{ position: 'absolute', left: 0, right: 0, bottom: 16, alignItems: 'center', gap: 2 }}>
 						<Text style={{ fontSize: 28, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.5, color: '#FFFFFF' }}>{t('Кудайберген')}</Text>
 						<Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.85)' }}>{t('Авторынок запчастей в Бишкеке')}</Text>
 					</View>
-				</LinearGradient>
+				</View>
 			}
 			label={t('Номер телефона')}
 			field={
