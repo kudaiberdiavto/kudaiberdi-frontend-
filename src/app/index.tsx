@@ -96,10 +96,11 @@ export default function PhoneScreen() {
 					colors={['#2355E8', '#142F8C']}
 					start={{ x: 0.1, y: 0 }}
 					end={{ x: 0.9, y: 1 }}
-					style={{ height: 196, borderRadius: 28, paddingHorizontal: 22, flexDirection: 'row', alignItems: 'center', gap: 16 }}
+					style={{ borderRadius: 28, paddingTop: 22, paddingBottom: 20, paddingHorizontal: 22, alignItems: 'center', gap: 12, overflow: 'hidden' }}
 				>
-					<ExplodedLogo size={100} />
-					<View style={{ flex: 1, gap: 6 }}>
+					{/* room on the sides — the logo comes apart horizontally */}
+					<ExplodedLogo size={96} />
+					<View style={{ alignItems: 'center', gap: 4 }}>
 						<Text style={{ fontSize: 28, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.5, color: '#FFFFFF' }}>{t('Кудайберген')}</Text>
 						<Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.85)' }}>{t('Авторынок запчастей в Бишкеке')}</Text>
 					</View>
