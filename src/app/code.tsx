@@ -125,6 +125,9 @@ export default function CodeScreen() {
 							setCode(text.replace(/\D/g, '').slice(0, CODE_LENGTH))
 						}}
 						keyboardType="number-pad"
+						// iOS offers the code from the SMS above the keyboard, Android fills it from the SMS.
+						textContentType="oneTimeCode"
+						autoComplete="sms-otp"
 						maxLength={CODE_LENGTH}
 						style={{ position: 'absolute', width: 0, height: 0, opacity: 0 }}
 					/>

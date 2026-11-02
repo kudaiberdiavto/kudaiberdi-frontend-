@@ -1,5 +1,6 @@
+import { useRef } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
-import { router } from 'expo-router'
+import { router, useScrollToTop } from 'expo-router'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { BrandLogo, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRequestCard } from '@/components/ui'
 import { RequestsIcon } from '@/components/icons'
@@ -23,6 +24,9 @@ import { t } from '@/i18n'
 /** 13 «Запросы» — new requests on top with «Ответить голосом», answered ones below. */
 export default function SellerRequestsScreen() {
 	const c = useColors()
+	// Tapping the active tab again scrolls back to the top, as in every app.
+	const list = useRef<FlatList<IncomingRequest>>(null)
+	useScrollToTop(list)
 	const shop = useMyShop()
 	const fresh = useIncomingRequests('NEW')
 	const answered = useIncomingRequests('ANSWERED')
@@ -40,6 +44,7 @@ export default function SellerRequestsScreen() {
 			</View>
 
 			<FlatList
+				ref={list}
 				data={items}
 				keyExtractor={(item) => String(item.id)}
 				contentContainerStyle={{ flexGrow: 1, paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}

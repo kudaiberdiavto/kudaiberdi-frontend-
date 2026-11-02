@@ -14,13 +14,14 @@ export const photosAsMedia = (photos: Photo[]): MediaItem[] =>
 /** Attached photos and videos of a request: 64 px thumbnails (▶ on videos), a tap opens them full screen. */
 export function MediaStrip({ media }: { media: MediaItem[] }) {
 	const [viewing, setViewing] = useState<MediaItem[] | null>(null)
+	const [start, setStart] = useState(0)
 	const items = media.filter((item) => item.kind !== 'AUDIO')
 	if (!items.length) return null
 	return (
 		<>
 			<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-				{items.map((item) => (
-					<Pressable key={item.id} onPress={() => setViewing(items)}>
+				{items.map((item, i) => (
+					<Pressable key={item.id} onPress={() => (setStart(i), setViewing(items))}>
 						<Image
 							source={{ uri: resolveUrl(item.thumbUrl ?? (item.kind === 'PHOTO' ? item.url : null)) ?? undefined }}
 							style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: fixed.media }}
@@ -35,7 +36,7 @@ export function MediaStrip({ media }: { media: MediaItem[] }) {
 					</Pressable>
 				))}
 			</View>
-			<MediaViewer items={viewing} onClose={() => setViewing(null)} />
+			<MediaViewer items={viewing} initialIndex={start} onClose={() => setViewing(null)} />
 		</>
 	)
 }
@@ -43,13 +44,14 @@ export function MediaStrip({ media }: { media: MediaItem[] }) {
 /** The same media large — one under another across the width (▶ on videos), a tap opens them full screen. */
 export function MediaGallery({ media }: { media: MediaItem[] }) {
 	const [viewing, setViewing] = useState<MediaItem[] | null>(null)
+	const [start, setStart] = useState(0)
 	const items = media.filter((item) => item.kind !== 'AUDIO')
 	if (!items.length) return null
 	return (
 		<>
 			<View style={{ gap: 8 }}>
-				{items.map((item) => (
-					<Pressable key={item.id} onPress={() => setViewing(items)}>
+				{items.map((item, i) => (
+					<Pressable key={item.id} onPress={() => (setStart(i), setViewing(items))}>
 						<Image
 							source={{ uri: resolveUrl(item.kind === 'PHOTO' ? item.url : item.thumbUrl) ?? undefined }}
 							contentFit="cover"
@@ -65,7 +67,7 @@ export function MediaGallery({ media }: { media: MediaItem[] }) {
 					</Pressable>
 				))}
 			</View>
-			<MediaViewer items={viewing} onClose={() => setViewing(null)} />
+			<MediaViewer items={viewing} initialIndex={start} onClose={() => setViewing(null)} />
 		</>
 	)
 }

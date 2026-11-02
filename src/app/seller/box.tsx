@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Linking, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from 'react-native'
 import { Image } from '@/components/ui/image'
-import { router } from 'expo-router'
+import { router, useScrollToTop } from 'expo-router'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { API_URL } from '@/lib/env'
 import Svg, { Path } from 'react-native-svg'
@@ -33,6 +33,9 @@ import { t } from '@/i18n'
  */
 export default function SellerBoxScreen() {
 	const c = useColors()
+	// Tapping the active tab again scrolls back to the top, as in every app.
+	const list = useRef<FlatList<MyPartItem>>(null)
+	useScrollToTop(list)
 	const { width } = useWindowDimensions()
 	const shop = useMyShop()
 	const summary = useMyPartsSummary()
@@ -167,6 +170,7 @@ export default function SellerBoxScreen() {
 			</View>
 
 			<FlatList
+				ref={list}
 				data={items}
 				keyExtractor={(item) => String(item.id)}
 				numColumns={3}

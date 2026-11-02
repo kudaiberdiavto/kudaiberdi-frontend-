@@ -11,6 +11,13 @@ describe('phone', () => {
 		expect(formatLocalPhone('(555) 12-34-56 78')).toBe('555 12 34 56')
 	})
 
+	it('takes an autofilled number with the country code or a trunk zero', () => {
+		expect(formatLocalPhone('+996 555 12 34 56')).toBe('555 12 34 56')
+		expect(formatLocalPhone('+996555123456')).toBe('555 12 34 56')
+		expect(formatLocalPhone('0555 12 34 56')).toBe('555 12 34 56')
+		expect(isValidLocalPhone('+996 555 12 34 56')).toBe(true)
+	})
+
 	it('accepts exactly 9 digits', () => {
 		expect(isValidLocalPhone('555 12 34 56')).toBe(true)
 		expect(isValidLocalPhone('555 12 34 5')).toBe(false)

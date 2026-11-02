@@ -139,6 +139,9 @@ export default function PhoneScreen() {
 							if (isValidLocalPhone(next)) Keyboard.dismiss()
 						}}
 						keyboardType="phone-pad"
+						// The phone's own number / contacts autofill — they come as «+996 555…» or «0555…», see formatLocalPhone.
+						textContentType="telephoneNumber"
+						autoComplete="tel"
 						placeholder="555 12 34 56"
 						placeholderTextColor={c.muted}
 						style={{ flex: 1, fontSize: fs.xxl, fontFamily: fontFamily(400), letterSpacing: 0.4, color: c.ink, padding: 0 }}

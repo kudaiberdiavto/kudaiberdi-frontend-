@@ -1,10 +1,10 @@
-import { useState, type ComponentType, type ReactNode } from 'react'
-import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native'
+import { useRef, useState, type ComponentType, type ReactNode } from 'react'
+import { Pressable, RefreshControl, ScrollView, Text, View, type ScrollViewInstance } from 'react-native'
 import { onNearEnd } from '@/lib/scroll'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
-import { router } from 'expo-router'
+import { router, useScrollToTop } from 'expo-router'
 import { resolveUrl } from '@/lib/api'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { QueryErrorBanner, Skeleton, SkeletonRepeat } from '@/components/ui'
@@ -50,6 +50,9 @@ const PREVIEW = 3
 /** 03 Главная: the car, «Найти запчасть», «Нужен мастер?», «Видео с рынка», parcels on the way, «Мои запросы». */
 export default function BuyerHomeScreen() {
 	const c = useColors()
+	// Tapping the active tab again scrolls back to the top, as in every app.
+	const list = useRef<ScrollViewInstance>(null)
+	useScrollToTop(list)
 	const insets = useSafeAreaInsets()
 	const me = useMe()
 	const cars = useCars()
@@ -101,6 +104,7 @@ export default function BuyerHomeScreen() {
 			</View>
 
 			<ScrollView
+				ref={list}
 				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
 				showsVerticalScrollIndicator={false}
 				scrollEventThrottle={200}

@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { FlatList, Pressable, Text, TextInput, View } from 'react-native'
 import { Image } from '@/components/ui/image'
-import { router } from 'expo-router'
+import { router, useScrollToTop } from 'expo-router'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { Badge, PhotoPlaceholder, QueryErrorBanner, Screen, Skeleton, SkeletonRepeat } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
@@ -20,6 +20,9 @@ import { PlayIcon } from '@/components/voice'
 /** 24 «Мои запчасти» (tab «Товары»). Counters come from GET /my/parts/summary. */
 export default function SellerProductsScreen() {
 	const c = useColors()
+	// Tapping the active tab again scrolls back to the top, as in every app.
+	const list = useRef<FlatList<MyPartItem>>(null)
+	useScrollToTop(list)
 	const [filter, setFilter] = useState<MyPartsFilter>('ALL')
 	const [q, setQ] = useState('')
 	const summary = useMyPartsSummary()
@@ -68,6 +71,7 @@ export default function SellerProductsScreen() {
 			</View>
 
 			<FlatList
+				ref={list}
 				data={items}
 				keyExtractor={(item) => String(item.id)}
 				contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 10, paddingBottom: 88 }}

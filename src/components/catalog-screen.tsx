@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { FlatList, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { router } from 'expo-router'
+import { router, useScrollToTop } from 'expo-router'
 import { EmptyState, ProductCard, QueryErrorBanner, Skeleton, SkeletonProductGrid } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { SearchIcon } from '@/components/icons'
@@ -33,6 +33,9 @@ const SORTS: { value: CatalogSort; label: string }[] = [
  */
 export function CatalogScreen() {
 	const c = useColors()
+	// Tapping the active tab again scrolls back to the top, as in every app.
+	const list = useRef<FlatList<Row>>(null)
+	useScrollToTop(list)
 	const insets = useSafeAreaInsets()
 	const signedIn = useSignedIn()
 	const f = useCatalogFilters()
@@ -272,6 +275,7 @@ export function CatalogScreen() {
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
 			<FlatList
+				ref={list}
 				data={rows}
 				keyExtractor={(row) => (row.kind === 'others' ? 'others' : row.parts.map((part) => part.id).join('-'))}
 				ListHeaderComponent={header}

@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { FlatList, Pressable, Text, TextInput, View } from 'react-native'
 import { Image } from '@/components/ui/image'
-import { router } from 'expo-router'
+import { router, useScrollToTop } from 'expo-router'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { Avatar, Chip, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRow } from '@/components/ui'
 import { ChatIcon, SearchIcon } from '@/components/icons'
@@ -20,6 +20,9 @@ import { t } from '@/i18n'
  */
 export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 	const c = useColors()
+	// Tapping the active tab again scrolls back to the top, as in every app.
+	const list = useRef<FlatList<ChatListItem>>(null)
+	useScrollToTop(list)
 	const chats = useChats(as)
 	const extra = useChats(also ?? as, Boolean(also))
 	const pull = usePullRefresh(() => [chats.refetch(), also && extra.refetch()])
@@ -81,6 +84,7 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 			/>
 
 			<FlatList
+				ref={list}
 				data={shown}
 				keyboardShouldPersistTaps="handled"
 				keyExtractor={(item) => String(item.id)}

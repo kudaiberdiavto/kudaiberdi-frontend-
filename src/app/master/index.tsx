@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { haptic } from '@/lib/haptics'
 import { Image } from '@/components/ui/image'
-import { Redirect, router } from 'expo-router'
+import { Redirect, router, useScrollToTop } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { EmptyState, QueryErrorBanner, Screen, ServiceIcon, SkeletonRepeat, SkeletonRequestCard } from '@/components/ui'
@@ -25,6 +25,9 @@ import { t } from '@/i18n'
 /** 18 «Заявки» — new requests and the ones already answered; reply by voice, «Не моё» or «Могу помочь». */
 export default function MasterRequestsScreen() {
 	const c = useColors()
+	// Tapping the active tab again scrolls back to the top, as in every app.
+	const list = useRef<FlatList<MasterFeedItem>>(null)
+	useScrollToTop(list)
 	const types = useServiceTypes().data
 	const profile = useMyMaster()
 	const fresh = useMasterFeed('NEW')
@@ -137,6 +140,7 @@ export default function MasterRequestsScreen() {
 	return (
 		<Screen>
 			<FlatList
+				ref={list}
 				data={items}
 				keyExtractor={(item) => String(item.id)}
 				ListHeaderComponent={header}

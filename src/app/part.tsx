@@ -20,6 +20,8 @@ import type { PartCondition } from '@/api/types'
 import { toPartFilters, useCatalogFilters } from '@/store/useCatalogFilters'
 import { useCars } from '@/api/garage'
 import { ComplainLink, ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
+import { MediaViewer } from '@/components/media-viewer'
+import { photosAsMedia } from '@/components/media-strip'
 import { openShopRoute, shopPlace } from '@/lib/shop-place'
 import { t } from '@/i18n'
 
@@ -48,6 +50,8 @@ export default function PartScreen() {
 	const openChat = useOpenChat()
 	const [photoIndex, setPhotoIndex] = useState(0)
 	const [complaint, setComplaint] = useState<ComplaintTarget | null>(null)
+	/** The photo opened full screen (pinch / double tap to read the part number). */
+	const [viewing, setViewing] = useState<number | null>(null)
 
 	const photos = part?.photos ?? []
 	const shop = part?.shop
@@ -73,8 +77,15 @@ export default function PartScreen() {
 						showsHorizontalScrollIndicator={false}
 						onMomentumScrollEnd={(e) => setPhotoIndex(Math.round(e.nativeEvent.contentOffset.x / width))}
 					>
-						{photos.map((photo) => (
-							<Image key={photo.id} source={{ uri: resolveUrl(photo.url) }} style={{ width, height: 320 }} contentFit="cover" />
+						{photos.map((photo, i) => (
+							<Pressable
+								key={photo.id}
+								onPress={() => setViewing(i)}
+								accessibilityRole="imagebutton"
+								accessibilityLabel={t('Открыть фото {0} из {1}', i + 1, photos.length)}
+							>
+								<Image source={{ uri: resolveUrl(photo.url) }} style={{ width, height: 320 }} contentFit="cover" />
+							</Pressable>
 						))}
 					</ScrollView>
 				) : part?.video?.posterUrl ? (
@@ -238,6 +249,7 @@ export default function PartScreen() {
 				{part ? <ComplainLink onPress={() => setComplaint({ type: 'PART', targetId: part.id })} /> : null}
 			</ScrollView>
 			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />
+			<MediaViewer items={viewing === null ? null : photosAsMedia(photos)} initialIndex={viewing ?? 0} onClose={() => setViewing(null)} />
 
 			<View
 				style={{
