@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Кудайберген",
+    "name": "KUDAIBERDI",
     "slug": "kudaibergen-v2",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,7 +15,7 @@
         "NSPhotoLibraryUsageDescription": "Прикрепите фото или видео запчасти к запросу, товару или сообщению.",
         "NSCameraUsageDescription": "Сфотографируйте или снимите видео запчасти, чтобы показать продавцу или покупателям."
       },
-      "bundleIdentifier": "kg.kudaibergen.app",
+      "bundleIdentifier": "kg.kudaiberdi.app",
       "associatedDomains": [
         "applinks:kudaibergen.kg"
       ],
@@ -42,7 +42,7 @@
         "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
         "android.permission.CAMERA"
       ],
-      "package": "kg.kudaibergen.app",
+      "package": "kg.kudaiberdi.app",
       "intentFilters": [
         {
           "action": "VIEW",

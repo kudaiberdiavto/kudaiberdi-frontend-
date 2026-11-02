@@ -268,7 +268,7 @@ export default function PartScreen() {
 					<ChatIcon size={20} color="#FFFFFF" />
 					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Написать')}</Text>
 				</Pressable>
-				{/* WhatsApp at the right edge — «Я из приложения Кудайберген. Меня интересует «…»» (only when the shop's number is visible). */}
+				{/* WhatsApp at the right edge — «Я из приложения KUDAIBERDI. Меня интересует «…»» (only when the shop's number is visible). */}
 				{shop?.phone ? (
 					<Pressable
 						onPress={() => shop.phone && openWhatsApp(shop.phone, part?.title)}
