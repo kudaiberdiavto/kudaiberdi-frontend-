@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { useState, useRef } from 'react'
+import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Text, TextInput, View, type TextInputInstance } from 'react-native'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -22,6 +22,9 @@ import { t } from '@/i18n'
  */
 export default function DeliveryScreen() {
 	const c = useColors()
+	// «Далее» on the keyboard walks the address → name → phone.
+	const nameRef = useRef<TextInputInstance>(null)
+	const phoneRef = useRef<TextInputInstance>(null)
 	const insets = useSafeAreaInsets()
 	const partId = Number(useLocalSearchParams<{ partId: string }>().partId) || 0
 	const part = usePart(partId).data
@@ -133,19 +136,23 @@ export default function DeliveryScreen() {
 				<Caps>{t('Курьер привезёт домой')}</Caps>
 				<View style={{ gap: 6 }}>
 					<Text style={label}>{region ? t('Адрес в {0}', region.inName) : t('Адрес')}</Text>
-					<TextInput value={address} onChangeText={setAddress} placeholder={t('ул. Ленина 45, кв. 12')} placeholderTextColor={c.fillInk} style={input} />
+					<TextInput value={address} onChangeText={setAddress} placeholder={t('ул. Ленина 45, кв. 12')} placeholderTextColor={c.fillInk} style={input} textContentType="fullStreetAddress" autoComplete="street-address" returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => nameRef.current?.focus()} />
 				</View>
 				<View style={{ flexDirection: 'row', gap: 10 }}>
 					<View style={{ flex: 1, gap: 6 }}>
 						<Text style={label}>{t('Получатель')}</Text>
-						<TextInput value={recipient} onChangeText={setName} placeholder={t('Имя')} placeholderTextColor={c.fillInk} style={input} />
+						<TextInput ref={nameRef} value={recipient} onChangeText={setName} placeholder={t('Имя')} placeholderTextColor={c.fillInk} style={input} textContentType="name" autoComplete="name" returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => phoneRef.current?.focus()} />
 					</View>
 					<View style={{ flex: 1.2, gap: 6 }}>
 						<Text style={label}>{t('Телефон')}</Text>
 						<TextInput
+							ref={phoneRef}
 							value={recipientPhone}
 							onChangeText={setPhone}
 							keyboardType="phone-pad"
+							textContentType="telephoneNumber"
+							autoComplete="tel"
+							returnKeyType="done"
 							placeholder="+996 555 123 456"
 							placeholderTextColor={c.fillInk}
 							style={input}

@@ -13,7 +13,7 @@ export { PhotoPlaceholder } from './photo'
 export { ProductCard } from './product-card'
 export { EmptyState, NoticeBanner, QueryErrorBanner } from './notice'
 export { BottomSheet } from './sheet'
-export { toast } from './toast'
+export { toast, undoToast } from './toast'
 export { MoreButton } from './more-button'
 export { ScreenHeader } from './screen-header'
 export {

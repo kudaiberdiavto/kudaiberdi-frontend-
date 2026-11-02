@@ -5,7 +5,7 @@ import { onNearEnd } from '@/lib/scroll'
 import { PaperPlaneIcon } from '@/components/buyer-v23'
 import { ModalSheet } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
-import { Skeleton, SkeletonRepeat, MoreButton } from '@/components/ui'
+import { MoreButton, Skeleton, SkeletonRepeat, undoToast } from '@/components/ui'
 import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { formatAgo } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
@@ -40,10 +40,21 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 		add.mutate(value, { onSuccess: () => setText('') })
 	}
 
+	// Hidden at once with «Вернуть» for 4 s; the server call waits for it.
+	const [hidden, setHidden] = useState<number[]>([])
+	const removeComment = (id: number) => {
+		setHidden((list) => [...list, id])
+		undoToast({
+			text: t('Комментарий удалён'),
+			restore: () => setHidden((list) => list.filter((x) => x !== id)),
+			commit: () => remove.mutate(id, { onError: () => setHidden((list) => list.filter((x) => x !== id)) }),
+		})
+	}
+
 	const actions = (comment: PartComment) =>
 		Alert.alert(t('Комментарий'), comment.text, [
 			...(comment.canDelete
-				? [{ text: t('Удалить'), style: 'destructive' as const, onPress: () => remove.mutate(comment.id) }]
+				? [{ text: t('Удалить'), style: 'destructive' as const, onPress: () => removeComment(comment.id) }]
 				: []),
 			...(!comment.mine && signedIn ? [{ text: t('Пожаловаться'), onPress: () => setComplaint({ type: 'PART_COMMENT', targetId: comment.id }) }] : []),
 			{ text: t('Отмена'), style: 'cancel' as const },
@@ -70,7 +81,7 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 						</View>
 					</SkeletonRepeat>
 				) : null}
-				{items.map((comment) => (
+				{items.filter((comment) => !hidden.includes(comment.id)).map((comment) => (
 					<Pressable key={comment.id} onLongPress={() => actions(comment)} delayLongPress={400} style={{ gap: 3 }}>
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
 							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.ink }}>{comment.mine ? t('Вы') : (comment.authorName ?? t('Покупатель'))}</Text>

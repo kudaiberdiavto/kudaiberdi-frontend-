@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Linking, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from 'react-native'
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Linking, Platform, Pressable, Text, TextInput, View, useWindowDimensions, type TextInputInstance } from 'react-native'
 import { Image } from '@/components/ui/image'
 import { router, useScrollToTop } from 'expo-router'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
@@ -334,6 +334,7 @@ function Stat({ value, label, color }: { value: string; label: string; color?: s
 /** «Изменить»: name of the box and the phone buyers call. */
 function EditSheet({ shop, onClose }: { shop: MyShop; onClose: () => void }) {
 	const c = useColors()
+	const phoneRef = useRef<TextInputInstance>(null)
 	const update = useUpdateShop()
 	const [name, setName] = useState(shop.name)
 	const [phone, setPhone] = useState(shop.phone?.startsWith(COUNTRY_CODE) ? formatLocalPhone(shop.phone.slice(COUNTRY_CODE.length)) : '')
@@ -365,14 +366,19 @@ function EditSheet({ shop, onClose }: { shop: MyShop; onClose: () => void }) {
 				footer={<Button label={t('Сохранить')} disabled={name.trim().length < 2 || !phoneOk} loading={update.isPending} onPress={save} />}
 			>
 				<Label>{t('Название')}</Label>
-				<TextInput value={name} onChangeText={setName} maxLength={60} placeholder={t('Автодеталь Азамат')} placeholderTextColor={c.fillInk} style={field} />
+				<TextInput value={name} onChangeText={setName} maxLength={60} placeholder={t('Автодеталь Азамат')} placeholderTextColor={c.fillInk} style={field} returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => phoneRef.current?.focus()} />
 				<Label>{t('Телефон для покупателей')}</Label>
 				<View style={{ ...field, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 					<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: c.muted }}>{COUNTRY_CODE}</Text>
 					<TextInput
+						ref={phoneRef}
 						value={phone}
 						onChangeText={(text) => setPhone(formatLocalPhone(text))}
 						keyboardType="phone-pad"
+						textContentType="telephoneNumber"
+						autoComplete="tel"
+						returnKeyType="done"
+						onSubmitEditing={save}
 						placeholder="700 11 22 33"
 						placeholderTextColor={c.fillInk}
 						style={{ flex: 1, fontSize: fs.xl, fontFamily: fontFamily(600), color: c.ink, padding: 0 }}

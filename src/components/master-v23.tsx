@@ -8,6 +8,7 @@ import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, wi
 import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { formatClock, formatNumber } from '@/lib/format'
 import { t } from '@/i18n'
+import { ToastHost } from '@/components/ui/toast'
 
 type IconProps = { size?: number; color: string; strokeWidth?: number }
 
@@ -223,6 +224,8 @@ export function ModalSheet({ visible = true, onClose, children }: { visible?: bo
 					{children}
 				</View>
 			</KeyboardAvoidingView>
+			{/* A Modal covers the root toast — show it here too («Комментарий удалён · Вернуть»). */}
+			<ToastHost />
 		</Modal>
 	)
 }

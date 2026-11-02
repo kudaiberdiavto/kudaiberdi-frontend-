@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, View, type TextInputInstance } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera'
@@ -33,6 +33,7 @@ interface Recorded {
  */
 export default function SellerVideoScreen() {
 	const c = useColors()
+	const priceRef = useRef<TextInputInstance>(null)
 	const insets = useSafeAreaInsets()
 	const save = useSavePart()
 	const publish = usePublishPart()
@@ -212,6 +213,8 @@ export default function SellerVideoScreen() {
 					<TextInput
 						value={title}
 						onChangeText={setTitle}
+						returnKeyType="next" submitBehavior="submit"
+						onSubmitEditing={() => priceRef.current?.focus()}
 						placeholder={t('Стойки передние KYB, пара')}
 						placeholderTextColor={c.fillInk}
 						maxLength={120}
@@ -230,7 +233,9 @@ export default function SellerVideoScreen() {
 						<View style={{ flex: 1, gap: 6 }}>
 							<Text style={label}>{t('Цена, сом')}</Text>
 							<TextInput
+								ref={priceRef}
 								value={price}
+								returnKeyType="done"
 								onChangeText={(text) => {
 									const digits = text.replace(/\D/g, '')
 									setPrice(digits ? priceDigits(Number(digits)) : '')

@@ -1,10 +1,11 @@
 import { useState, type ReactNode } from 'react'
-import { Alert, Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { API_URL } from '@/lib/env'
-import { BottomSheet, QueryErrorBanner, ScreenHeader, SettingsRow, Toggle } from '@/components/ui'
+import { BottomSheet, QueryErrorBanner, ScreenHeader, SettingsRow, Toggle, undoToast } from '@/components/ui'
+import { CloseIcon } from '@/components/icons'
 import { BrandLogo } from '@/components/ui/brand'
 import { BellIcon, Caps, ChevronIcon, GlobeIcon, HelpIcon, PlusThinIcon } from '@/components/buyer-v23'
 import { fixed, fontFamily, fs, useColors } from '@/theme'
@@ -25,11 +26,16 @@ export default function BuyerProfileScreen() {
 	const me = useMe()
 	const cars = useCars()
 	const deleteCar = useDeleteCar()
-	const askDelete = (id: number, title: string) =>
-		Alert.alert('Удалить машину?', title, [
-			{ text: t('Отмена'), style: 'cancel' },
-			{ text: t('Удалить'), style: 'destructive', onPress: () => deleteCar.mutate(id) },
-		])
+	// Gone at once with «Вернуть» for 4 s — the server call waits for it (no «Удалить?» dialog).
+	const [hidden, setHidden] = useState<number[]>([])
+	const removeCar = (id: number) => {
+		setHidden((list) => [...list, id])
+		undoToast({
+			text: t('Машина удалена'),
+			restore: () => setHidden((list) => list.filter((x) => x !== id)),
+			commit: () => deleteCar.mutate(id, { onError: () => setHidden((list) => list.filter((x) => x !== id)) }),
+		})
+	}
 	const updateMe = useUpdateMe()
 	const lang = useSession((s) => s.lang)
 	const [notifications, setNotifications] = useState(false)
@@ -65,23 +71,25 @@ export default function BuyerProfileScreen() {
 				</View>
 
 				<Caps>{t('Мои машины')}</Caps>
-				{(cars.data ?? []).map((car) => (
-					<Pressable
-						key={car.id}
-						// Tap — «Удалить машину?»; no main car to pick.
-						onPress={() => askDelete(car.id, `${car.title} · ${car.year}`)}
-						disabled={deleteCar.isPending}
-						style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10 }}
-					>
+				{(cars.data ?? []).filter((car) => !hidden.includes(car.id)).map((car) => (
+					<View key={car.id} style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10 }}>
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 							<BrandLogo brand={car.brand} size={44} />
 							<View style={{ flex: 1, gap: 2 }}>
 								<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: c.ink }}>{car.title}</Text>
 								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>{car.subtitle}</Text>
 							</View>
-
+							<Pressable
+								onPress={() => removeCar(car.id)}
+								hitSlop={10}
+								accessibilityRole="button"
+								accessibilityLabel={t('Удалить машину {0}', car.title)}
+								style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: c.fill, alignItems: 'center', justifyContent: 'center' }}
+							>
+								<CloseIcon size={16} color={c.muted} strokeWidth={2.4} />
+							</Pressable>
 						</View>
-					</Pressable>
+					</View>
 				))}
 				<Pressable
 					onPress={() => router.push('/garage-add')}
