@@ -6,7 +6,7 @@ import { setAudioModeAsync } from 'expo-audio'
 import * as SplashScreen from 'expo-splash-screen'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { QueryClientProvider } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import {
 	Inter_300Light,
 	Inter_400Regular,
@@ -16,7 +16,7 @@ import {
 	Inter_800ExtraBold,
 	useFonts,
 } from '@expo-google-fonts/inter'
-import { queryClient } from '@/lib/query-client'
+import { persistOptions, queryClient } from '@/lib/query-client'
 import { RealtimeProvider } from '@/lib/realtime'
 import { PushProvider } from '@/lib/push'
 import { useDictionariesVersion } from '@/lib/dictionaries'
@@ -57,7 +57,7 @@ export default function RootLayout() {
 
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
-			<QueryClientProvider client={queryClient}>
+			<PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
 				<RealtimeProvider>
 					<PushProvider>
 						<SafeAreaProvider>
@@ -73,7 +73,7 @@ export default function RootLayout() {
 						</SafeAreaProvider>
 					</PushProvider>
 				</RealtimeProvider>
-			</QueryClientProvider>
+			</PersistQueryClientProvider>
 		</GestureHandlerRootView>
 	)
 }

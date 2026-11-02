@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { router } from 'expo-router'
 import { type ApiLang, apiFetch, configureApi, getRefreshToken, loadTokens, saveTokens } from '@/lib/api'
 import { getItem, setItem } from '@/lib/secure-storage'
-import { queryClient } from '@/lib/query-client'
+import { clearQueryCache, queryClient } from '@/lib/query-client'
 import type { Lang, Me, TokenResponse, UserRole } from '@/api/types'
 import { meKeys } from '@/api/keys'
 import { setAppLang } from '@/i18n'
@@ -55,7 +55,7 @@ async function persistSnapshot(snapshot: Snapshot | null) {
 async function clearSession() {
 	await saveTokens(null)
 	await persistSnapshot(null)
-	queryClient.clear()
+	await clearQueryCache()
 }
 
 function goToStart() {
