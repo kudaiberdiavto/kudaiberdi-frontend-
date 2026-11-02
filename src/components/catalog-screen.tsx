@@ -16,6 +16,7 @@ import { useCars } from '@/api/garage'
 import type { PartCard } from '@/api/types'
 import { type CatalogSort, toPartFilters, useCatalogFilters } from '@/store/useCatalogFilters'
 import { useSession } from '@/store/useSession'
+import { useRecentSearches } from '@/store/useRecentSearches'
 import { briefPlace } from '@/lib/shop-place'
 import { t } from '@/i18n'
 
@@ -38,6 +39,8 @@ export function CatalogScreen() {
 	const cars = useCars()
 	const categories = useCategories()
 	const [text, setText] = useState(f.q)
+	const [focused, setFocused] = useState(false)
+	const recent = useRecentSearches()
 
 	// Debounce typing — the search runs 350 ms after the last key.
 	useEffect(() => {
@@ -104,9 +107,44 @@ export function CatalogScreen() {
 					placeholder={t('Стойки, колодки, номер детали…')}
 					placeholderTextColor="#7D7979"
 					returnKeyType="search"
+					onFocus={() => setFocused(true)}
+					onBlur={() => {
+						setFocused(false)
+						// Left the field with something found — worth offering again next time.
+						if (text.trim() && total) recent.add(text)
+					}}
+					onSubmitEditing={() => {
+						useCatalogFilters.getState().setQ(text)
+						recent.add(text)
+					}}
 					style={{ flex: 1, minWidth: 0, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 				/>
 			</View>
+
+			{focused && !text && recent.items.length ? (
+				<View style={{ gap: 8 }}>
+					<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+						<Text style={{ flex: 1, fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('НЕДАВНО ИСКАЛИ')}</Text>
+						<Text onPress={recent.clear} style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.brandStrong }}>{t('Очистить')}</Text>
+					</View>
+					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+						{recent.items.map((item) => (
+							<Pressable
+								key={item}
+								onPress={() => {
+									setText(item)
+									useCatalogFilters.getState().setQ(item)
+									recent.add(item)
+								}}
+								onLongPress={() => recent.remove(item)}
+								style={{ height: 36, paddingHorizontal: 14, borderRadius: 18, backgroundColor: c.card, borderWidth: 1, borderColor: c.border, justifyContent: 'center' }}
+							>
+								<Text numberOfLines={1} style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.ink }}>{item}</Text>
+							</Pressable>
+						))}
+					</View>
+				</View>
+			) : null}
 
 			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ИЩУ ДЛЯ МАШИНЫ')}</Text>
 
@@ -261,6 +299,17 @@ export function CatalogScreen() {
 							title={t('Ничего не нашли')}
 							icon={SearchIcon}
 							hint={t('Спросите у продавцов рынка — кто-то наверняка держит её не на витрине')}
+							secondary={
+								f.categoryId != null || f.brand
+									? {
+											label: t('Сбросить фильтры'),
+											onPress: () => {
+												f.setCategory(null)
+												if (f.brand) f.pickBrand(null)
+											},
+										}
+									: undefined
+							}
 							action={{
 								label: t('Спросить у продавцов'),
 								onPress: () =>

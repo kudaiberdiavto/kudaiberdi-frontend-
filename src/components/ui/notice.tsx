@@ -64,11 +64,14 @@ export function EmptyState({
 	icon: Icon,
 	hint,
 	action,
+	secondary,
 }: {
 	title: string
 	icon?: ComponentType<IconProps>
 	hint?: string
 	action?: { label: string; onPress: () => void }
+	/** A quieter way out under the main action («Сбросить фильтры»). */
+	secondary?: { label: string; onPress: () => void }
 }) {
 	const c = useColors()
 	return (
@@ -92,6 +95,11 @@ export function EmptyState({
 				>
 					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{action.label}</Text>
 				</Pressable>
+			) : null}
+			{secondary ? (
+				<Text onPress={secondary.onPress} accessibilityRole="button" style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>
+					{secondary.label}
+				</Text>
 			) : null}
 		</View>
 	)

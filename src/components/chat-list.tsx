@@ -1,10 +1,11 @@
-import { FlatList, Pressable, Text, View } from 'react-native'
+import { useState } from 'react'
+import { FlatList, Pressable, Text, TextInput, View } from 'react-native'
 import { Image } from '@/components/ui/image'
 import { router } from 'expo-router'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
-import { Avatar, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRow } from '@/components/ui'
-import { ChatIcon } from '@/components/icons'
-import { fontFamily, useColors } from '@/theme'
+import { Avatar, Chip, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRow } from '@/components/ui'
+import { ChatIcon, SearchIcon } from '@/components/icons'
+import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatChatTime } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
@@ -27,12 +28,50 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 				(y.lastMessage?.at ?? y.updatedAt).localeCompare(x.lastMessage?.at ?? x.updatedAt)
 			)
 		: flattenPages(chats.data)
+	// The server has no search — filter what's loaded; scrolling keeps loading more pages.
+	const [q, setQ] = useState('')
+	const [onlyUnread, setOnlyUnread] = useState(false)
+	const needle = q.trim().toLowerCase()
+	const unreadCount = items.filter((chat) => chat.unread > 0).length
+	const shown = items.filter(
+		(chat) =>
+			(!onlyUnread || chat.unread > 0) &&
+			(!needle || [chat.title, chat.subtitle, chat.lastMessage?.text].some((text) => text?.toLowerCase().includes(needle)))
+	)
+	const filtered = Boolean(needle) || onlyUnread
 
 	return (
 		<Screen padding={0}>
 			<View style={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 12 }}>
 				<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.52, color: c.ink }}>{t('Чаты')}</Text>
 			</View>
+
+			{items.length ? (
+				<View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 10 }}>
+					<View style={{ height: 44, borderRadius: 12, backgroundColor: c.card, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12 }}>
+						<SearchIcon size={20} color={c.muted} strokeWidth={2.4} />
+						<TextInput
+							value={q}
+							onChangeText={setQ}
+							placeholder={t('Поиск по чатам')}
+							placeholderTextColor={raw.fillInk}
+							returnKeyType="search"
+							clearButtonMode="while-editing"
+							style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+						/>
+					</View>
+					<View style={{ flexDirection: 'row', gap: 8 }}>
+						<Chip label={t('Все')} selected={!onlyUnread} onPress={() => setOnlyUnread(false)} height={36} radius={18} />
+						<Chip
+							label={unreadCount ? t('Непрочитанные · {0}', unreadCount) : t('Непрочитанные')}
+							selected={onlyUnread}
+							onPress={() => setOnlyUnread(true)}
+							height={36}
+							radius={18}
+						/>
+					</View>
+				</View>
+			) : null}
 
 			<QueryErrorBanner
 				error={chats.error ?? (also ? extra.error : null)}
@@ -42,7 +81,8 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 			/>
 
 			<FlatList
-				data={items}
+				data={shown}
+				keyboardShouldPersistTaps="handled"
 				keyExtractor={(item) => String(item.id)}
 				onEndReached={() => {
 					if (chats.hasNextPage && !chats.isFetchingNextPage) chats.fetchNextPage()
@@ -50,10 +90,12 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 				}}
 				onRefresh={pull.onRefresh}
 				refreshing={pull.refreshing}
-				renderItem={({ item, index }) => <ChatRow chat={item} highlight={index === 0} />}
+				renderItem={({ item }) => <ChatRow chat={item} />}
 				contentContainerStyle={{ flexGrow: 1 }}
 				ListEmptyComponent={
-					chats.isSuccess ? (
+					filtered && items.length ? (
+						<EmptyState title={onlyUnread && !needle ? t('Всё прочитано') : t('Ничего не нашли')} icon={onlyUnread && !needle ? ChatIcon : SearchIcon} />
+					) : chats.isSuccess ? (
 						<EmptyState title={t('Чатов нет')} icon={ChatIcon} />
 					) : chats.isLoading ? (
 						<SkeletonRepeat count={8}>
@@ -66,7 +108,7 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 	)
 }
 
-function ChatRow({ chat, highlight }: { chat: ChatListItem; highlight: boolean }) {
+function ChatRow({ chat }: { chat: ChatListItem }) {
 	const c = useColors()
 	const last = chat.lastMessage
 	const lastText = last ? (last.text ?? QUICK_TEXT[last.code ?? ''] ?? SYSTEM_TEXT[last.code ?? ''] ?? (last.type === 'PHOTO' ? t('Фото') : last.type === 'VOICE' ? t('Голосовое') : '')) : ''
@@ -91,7 +133,7 @@ function ChatRow({ chat, highlight }: { chat: ChatListItem; highlight: boolean }
 			{chat.avatarUrl ? (
 				<Image source={{ uri: resolveUrl(chat.avatarUrl) }} style={{ width: 52, height: 52, borderRadius: 14 }} />
 			) : (
-				<Avatar letter={chat.title.charAt(0).toUpperCase()} color={highlight ? c.brandStrong : c.inkSecondary} />
+				<Avatar letter={chat.title.charAt(0).toUpperCase()} color={chat.unread ? c.brandStrong : c.inkSecondary} />
 			)}
 
 			<View style={{ flex: 1, gap: 3 }}>
