@@ -1,12 +1,12 @@
 import { useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View, type ScrollViewInstance } from 'react-native'
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View, type ScrollViewInstance } from 'react-native'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Location from 'expo-location'
 import { addressAt, currentCoords } from '@/lib/locate'
 import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceGrid, Skeleton, Toggle, toast } from '@/components/ui'
-import { ChevronLeftIcon, LocateIcon, MapPinIcon, PhotoIcon } from '@/components/icons'
+import { ChevronLeftIcon, CloseIcon, LocateIcon, MapPinIcon, PhotoIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
 import { useBrands } from '@/api/directory'
 import { useMe } from '@/api/me'
@@ -344,11 +344,28 @@ function MasterMedia({ master: initial }: { master: MyMaster }) {
 				</Pressable>
 			</View>
 			<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-				{master.photos.map((photo) => (
-					<Pressable key={photo.id} onLongPress={() => setPhotos.mutate(ids.filter((id) => id !== photo.id))}>
-						<Image source={{ uri: resolveUrl(photo.thumbUrl) }} style={{ width: 76, height: 76, borderRadius: 12, backgroundColor: raw.fill }} />
-					</Pressable>
-				))}
+				{master.photos.map((photo) => {
+					// Removing goes straight to the server — ask first; ✕ is visible, long press does the same.
+					const remove = () =>
+						Alert.alert(t('Удалить фото?'), t('Клиенты больше не увидят его в вашем профиле.'), [
+							{ text: t('Отмена'), style: 'cancel' },
+							{ text: t('Удалить'), style: 'destructive', onPress: () => setPhotos.mutate(ids.filter((id) => id !== photo.id)) },
+						])
+					return (
+						<Pressable key={photo.id} onLongPress={remove}>
+							<Image source={{ uri: resolveUrl(photo.thumbUrl) }} style={{ width: 76, height: 76, borderRadius: 12, backgroundColor: raw.fill }} />
+							<Pressable
+								onPress={remove}
+								hitSlop={8}
+								accessibilityRole="button"
+								accessibilityLabel={t('Удалить фото')}
+								style={{ position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(32,31,29,0.72)', alignItems: 'center', justifyContent: 'center' }}
+							>
+								<CloseIcon size={12} color="#FFFFFF" strokeWidth={2.6} />
+							</Pressable>
+						</Pressable>
+					)
+				})}
 				{photos.photos.map((photo) => (
 					<Image key={photo.key} source={{ uri: photo.uri }} style={{ width: 76, height: 76, borderRadius: 12, opacity: 0.5 }} />
 				))}

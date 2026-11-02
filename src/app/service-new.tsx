@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { useConfirmLeave } from '@/lib/use-confirm-leave'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -64,6 +65,7 @@ export default function ServiceNewScreen() {
 	const text = description.trim()
 	// Something to go on: text, photos / videos or a voice note — no minimum length.
 	const described = text.length > 0 || media.mediaIds.length > 0 || Boolean(voice.result)
+	const leave = useConfirmLeave(described || media.uploading || voice.recording)
 	const ready = Boolean(car) && described && !media.uploading && !voice.uploading && !voice.recording && recipients !== 0
 
 	const hint = !car
@@ -106,7 +108,7 @@ export default function ServiceNewScreen() {
 				lng: point.lng,
 				address: point.address,
 			},
-			{ onSuccess: (request) => router.replace({ pathname: '/service-offers', params: { id: String(request.id) } }) }
+			{ onSuccess: (request) => leave(() => router.replace({ pathname: '/service-offers', params: { id: String(request.id) } })) }
 		)
 	}
 

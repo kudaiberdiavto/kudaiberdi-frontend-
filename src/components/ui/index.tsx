@@ -14,6 +14,7 @@ export { ProductCard } from './product-card'
 export { EmptyState, NoticeBanner, QueryErrorBanner } from './notice'
 export { BottomSheet } from './sheet'
 export { toast } from './toast'
+export { MoreButton } from './more-button'
 export {
 	Skeleton,
 	SkeletonCard,

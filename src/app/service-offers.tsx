@@ -3,7 +3,7 @@ import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { QueryErrorBanner, ServiceIcon, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus } from '@/components/ui'
+import { QueryErrorBanner, ServiceIcon, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus, MoreButton } from '@/components/ui'
 import { BackChevron, CallRow, SmallChip, offerWhen } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
 import { VoicePlayer } from '@/components/voice'
@@ -232,6 +232,7 @@ function OfferCard({ offer, best, onComplain }: { offer: ServiceOffer; best: boo
 						<Text style={{ fontSize: 13, lineHeight: 17, fontFamily: fontFamily(600), color: c.muted }}>{t('сом')}</Text>
 					</View>
 				) : null}
+				<MoreButton label={t('Пожаловаться на мастера')} onPress={onComplain} />
 			</Pressable>
 			{when || offer.message ? (
 				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>

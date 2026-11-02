@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Stack, router, useLocalSearchParams } from 'expo-router'
+import { useConfirmLeave } from '@/lib/use-confirm-leave'
 import { toast } from '@/components/ui'
 import { VoicePlayer, VoiceRecordingPanel, VoiceResultPanel, useVoiceNote } from '@/components/voice'
 import { CheckMark, MicOutline, SendPlane } from '@/components/master-v23'
@@ -54,6 +55,7 @@ export default function MasterAnswerScreen() {
 
 	const priceValue = price ? Number(price) : null
 	const busy = voice.recording || voice.uploading || offer.isPending
+	const leave = useConfirmLeave(Boolean(price) || Boolean(voice.result) || voice.recording)
 	const close = () => {
 		if (voice.recording) voice.cancel()
 		router.back()
@@ -72,7 +74,7 @@ export default function MasterAnswerScreen() {
 					voiceMediaId: voice.result?.voice.id,
 				},
 			},
-			{ onSuccess: () => (toast(t('Ответ отправлен клиенту')), router.back()) }
+			{ onSuccess: () => (toast(t('Ответ отправлен клиенту')), leave(() => router.back())) }
 		)
 	}
 

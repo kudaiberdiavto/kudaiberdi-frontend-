@@ -28,7 +28,7 @@ export interface DraftFitment {
 	brand?: Brand
 }
 
-interface PartDraft {
+export interface PartDraft {
 	id?: number
 	title: string
 	categoryId?: number

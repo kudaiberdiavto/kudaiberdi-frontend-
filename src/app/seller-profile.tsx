@@ -4,7 +4,7 @@ import { onNearEnd } from '@/lib/scroll'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { LocationCard, QueryErrorBanner, Skeleton, SkeletonProductGrid, SkeletonRepeat } from '@/components/ui'
+import { LocationCard, QueryErrorBanner, Skeleton, SkeletonProductGrid, SkeletonRepeat, MoreButton } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { ChatIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, PhoneIcon, ShareIcon, WhatsAppIcon } from '@/components/icons'
 import { openWhatsApp } from '@/lib/whatsapp'
@@ -335,7 +335,10 @@ export default function SellerProfileForBuyerScreen() {
 											{'★'.repeat(review.stars)}
 											<Text style={{ color: raw.dashed }}>{'★'.repeat(5 - review.stars)}</Text>
 										</Text>
-										<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>{formatDay(review.createdAt)}</Text>
+										<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+											<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>{formatDay(review.createdAt)}</Text>
+											<MoreButton label={t('Пожаловаться на отзыв')} onPress={() => setComplaint({ type: 'REVIEW', targetId: review.id })} />
+										</View>
 									</View>
 									<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>
 										{review.buyerName ?? t('Покупатель')}

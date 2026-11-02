@@ -5,7 +5,7 @@ import { onNearEnd } from '@/lib/scroll'
 import { PaperPlaneIcon } from '@/components/buyer-v23'
 import { ModalSheet } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
-import { Skeleton, SkeletonRepeat } from '@/components/ui'
+import { Skeleton, SkeletonRepeat, MoreButton } from '@/components/ui'
 import { fontFamily, useColors } from '@/theme'
 import { formatAgo } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
@@ -41,7 +41,7 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 	}
 
 	const actions = (comment: PartComment) =>
-		Alert.alert('Комментарий', comment.text, [
+		Alert.alert(t('Комментарий'), comment.text, [
 			...(comment.canDelete
 				? [{ text: t('Удалить'), style: 'destructive' as const, onPress: () => remove.mutate(comment.id) }]
 				: []),
@@ -80,6 +80,12 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 								</View>
 							) : null}
 							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{formatAgo(comment.createdAt, { short: true })}</Text>
+							{comment.canDelete || (!comment.mine && signedIn) ? (
+								<>
+									<View style={{ flex: 1 }} />
+									<MoreButton onPress={() => actions(comment)} />
+								</>
+							) : null}
 						</View>
 						<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(400), color: c.ink }}>{comment.text}</Text>
 					</Pressable>

@@ -5,6 +5,7 @@ import { router } from 'expo-router'
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera'
 import * as ImagePicker from 'expo-image-picker'
 import { getThumbnailAsync } from 'expo-video-thumbnails'
+import { useConfirmLeave } from '@/lib/use-confirm-leave'
 import { BigButton, TickIcon, TopBar, priceDigits } from '@/components/buyer-v23'
 import { QueryErrorBanner, toast } from '@/components/ui'
 import { CloseIcon, GalleryIcon } from '@/components/icons'
@@ -93,6 +94,7 @@ export default function SellerVideoScreen() {
 
 	// The draft created by the first tap — if publishing fails, the retry updates it instead of creating a second part.
 	const draftId = useRef<number | null>(null)
+	const leave = useConfirmLeave(Boolean(video) || Boolean(title.trim()) || Boolean(price))
 	const submit = async () => {
 		if (!uploaded) return
 		try {
@@ -111,7 +113,7 @@ export default function SellerVideoScreen() {
 			draftId.current = part.id
 			await publish.mutateAsync(part.id)
 			toast(t('Видео в ленте'))
-			router.back()
+			leave(() => router.back())
 		} catch {
 			// shown by the error banner (save.error / publish.error)
 		}

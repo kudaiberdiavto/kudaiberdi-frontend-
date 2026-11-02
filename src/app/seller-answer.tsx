@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
+import { useConfirmLeave } from '@/lib/use-confirm-leave'
 import { BrandLogo, toast } from '@/components/ui'
 import { VoicePlayer, VoiceRecordingPanel, VoiceResultPanel, useVoiceNote } from '@/components/voice'
 import { Label, MicIcon, PlaneIcon, TickIcon } from '@/components/seller-v23'
@@ -43,6 +44,7 @@ export default function SellerAnswerScreen() {
 	const data = request.data
 	const voice = note.result?.voice
 	const amount = Number(price)
+	const leave = useConfirmLeave(Boolean(price) || Boolean(voice) || note.recording)
 
 	const rerecord = () => {
 		note.reset()
@@ -58,7 +60,7 @@ export default function SellerAnswerScreen() {
 				original: original ?? undefined,
 				voiceMediaId: voice?.id,
 			},
-			{ onSuccess: () => (toast(t('Ответ отправлен покупателю')), router.back()) }
+			{ onSuccess: () => (toast(t('Ответ отправлен покупателю')), leave(() => router.back())) }
 		)
 
 	return (

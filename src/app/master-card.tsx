@@ -3,7 +3,7 @@ import { Linking, Pressable, ScrollView, Share, Text, View } from 'react-native'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceBadge, Skeleton } from '@/components/ui'
+import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceBadge, Skeleton, MoreButton } from '@/components/ui'
 import { ChatIcon, ChevronLeftIcon, MapPinIcon, PhoneIcon, ShareIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
@@ -192,7 +192,10 @@ export default function MasterCardScreen() {
 									{'★'.repeat(review.stars)}
 									<Text style={{ color: raw.dashed }}>{'★'.repeat(5 - review.stars)}</Text>
 								</Text>
-								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>{formatDay(review.createdAt)}</Text>
+								<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+									<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>{formatDay(review.createdAt)}</Text>
+									<MoreButton label={t('Пожаловаться на отзыв')} onPress={() => setComplaint({ type: 'MASTER_REVIEW', targetId: review.id })} />
+								</View>
 							</View>
 							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>
 								{review.buyerName ?? t('Клиент')}

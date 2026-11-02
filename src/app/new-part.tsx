@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { useConfirmLeave } from '@/lib/use-confirm-leave'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -16,7 +17,7 @@ import { formatNumber } from '@/lib/format'
 import { useCategories } from '@/api/directory'
 import { useMyPart, usePublishPart, useSavePart } from '@/api/parts'
 import type { PartCondition } from '@/api/types'
-import { MAX_PART_PHOTOS, partBody, usePartDraft } from '@/store/usePartDraft'
+import { MAX_PART_PHOTOS, type PartDraft, partBody, usePartDraft } from '@/store/usePartDraft'
 import { t } from '@/i18n'
 
 const CONDITIONS: { value: PartCondition; label: string }[] = [
@@ -34,6 +35,20 @@ const MISSING: Record<string, string> = {
 	mediaIds: t('фото'),
 	fitments: t('машины'),
 }
+
+/** What the seller typed or picked — to tell an untouched form from one with unsaved input. */
+const fingerprint = (d: Pick<PartDraft, 'title' | 'categoryId' | 'condition' | 'price' | 'quantity' | 'oemNumber' | 'fitments' | 'photos'>) =>
+	JSON.stringify([
+		d.title.trim(),
+		d.categoryId,
+		d.condition,
+		d.price,
+		d.quantity,
+		d.oemNumber,
+		d.fitments.map((f) => [f.brandId, f.modelId, f.yearFrom, f.yearTo]),
+		d.photos.map((p) => p.key),
+	])
+const EMPTY = fingerprint({ title: '', categoryId: undefined, condition: 'NEW', price: '', quantity: 1, oemNumber: undefined, fitments: [], photos: [] })
 
 /** 26 «Новая запчасть» — create (after 24 / 25) or edit (`id`). Draft → publish. */
 export default function NewPartScreen() {
@@ -71,6 +86,13 @@ export default function NewPartScreen() {
 		? t('Заполните: {0}', missing.map((m) => MISSING[m] ?? m).join(', '))
 		: error?.message
 
+	// Unsaved input: a new part — anything entered (camera photos too); an edited one — any change since it loaded.
+	const [baseline, setBaseline] = useState<string | null>(id ? null : EMPTY)
+	useEffect(() => {
+		if (!loading && baseline === null) setBaseline(fingerprint(usePartDraft.getState()))
+	}, [loading, baseline])
+	const dirty = baseline !== null && fingerprint(draft) !== baseline
+
 	const saveDraft = async () => {
 		const state = usePartDraft.getState()
 		const part = await save.mutateAsync({ id: state.id, body: partBody(state) })
@@ -79,11 +101,13 @@ export default function NewPartScreen() {
 		return part
 	}
 
+	const leave = useConfirmLeave(dirty, published ? undefined : () => saveDraft().then(() => toast(t('Черновик сохранён'))))
+
 	const onDraft = async () => {
 		try {
 			await saveDraft()
 			toast(t('Черновик сохранён'))
-			router.back()
+			leave(() => router.back())
 		} catch {}
 	}
 
@@ -92,7 +116,7 @@ export default function NewPartScreen() {
 			const part = await saveDraft()
 			if (part.status !== 'ACTIVE') await publish.mutateAsync(part.id)
 			toast(part.status === 'ACTIVE' ? t('Изменения сохранены') : t('Опубликовано'))
-			router.back()
+			leave(() => router.back())
 		} catch {}
 	}
 
@@ -128,6 +152,15 @@ export default function NewPartScreen() {
 						}}
 					/>
 				) : null}
+				<Pressable
+					onPress={() => draft.removePhoto(photo.key)}
+					hitSlop={8}
+					accessibilityRole="button"
+					accessibilityLabel={t('Удалить фото')}
+					style={{ position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(32,31,29,0.72)', alignItems: 'center', justifyContent: 'center' }}
+				>
+					<CloseIcon size={12} color="#FFFFFF" strokeWidth={2.6} />
+				</Pressable>
 				{isMain ? (
 					<View
 						style={{

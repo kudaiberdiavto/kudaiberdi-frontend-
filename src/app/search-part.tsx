@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { useConfirmLeave } from '@/lib/use-confirm-leave'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -65,6 +66,7 @@ export default function SearchPartScreen() {
 	// Something to go on: text, a photo or a voice note — no minimum length.
 	const hasPart = typed.length > 0 || uploads.mediaIds.length > 0 || Boolean(voiceId)
 	const busy = uploads.uploading || voice.uploading || voice.recording
+	const leave = useConfirmLeave(hasPart || busy)
 
 	const send = () =>
 		hasCar &&
@@ -75,7 +77,7 @@ export default function SearchPartScreen() {
 				mediaIds: uploads.mediaIds,
 				voiceMediaId: voiceId,
 			},
-			{ onSuccess: (request) => router.replace({ pathname: '/request', params: { id: String(request.id) } }) }
+			{ onSuccess: (request) => leave(() => router.replace({ pathname: '/request', params: { id: String(request.id) } })) }
 		)
 
 	const photo = uploads.photos[0]
