@@ -3,13 +3,16 @@
 import { type InfiniteData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch, compressPhoto, fileFormData, newIdempotencyKey, uploadForm } from '@/lib/api'
 import { chatKeys } from './keys'
-import { cursorPaging } from './pagination'
+import { cursorPaging, flattenPages, mapPages } from './pagination'
 import type { Chat, ChatListItem, ChatListPage, ChatMessage, MessagePage, QuickReply, SendMessageBody, Unread } from './types'
 
 /** Message side (`mySide`). A master writes as `SHOP`. */
 export type ChatSide = 'BUYER' | 'SHOP'
 /** Whose chats to list: `MASTER` — the master's chats with clients. */
 export type ChatListAs = ChatSide | 'MASTER'
+
+/** Which `Unread` counter a list feeds. */
+const UNREAD_SIDE: Record<ChatListAs, keyof Unread> = { BUYER: 'asBuyer', SHOP: 'asShop', MASTER: 'asMaster' }
 
 /** Chats list [16] — buyer's, the box's or the master's chats. */
 export function useChats(as: ChatListAs, enabled = true) {
@@ -205,7 +208,28 @@ export function useMarkRead(chatId: number) {
 	return useMutation({
 		mutationFn: (upToMessageId: number) =>
 			apiFetch<void>(`/chats/${chatId}/read`, { method: 'POST', body: { upToMessageId } }),
-		onSuccess: () => {
+		// The badge and the row's counter go out the moment the chat is opened, not after the round trip.
+		onMutate: () => {
+			const lists = queryClient.getQueriesData<InfiniteData<ChatListPage>>({ queryKey: chatKeys.list })
+			const unread = queryClient.getQueryData<Unread>(chatKeys.unread)
+			let cleared: { side: keyof Unread; count: number } | null = null
+			for (const [key, data] of lists) {
+				const row = flattenPages(data).find((chat) => chat.id === chatId)
+				if (row?.unread) cleared = { side: UNREAD_SIDE[key[2] as ChatListAs], count: row.unread }
+			}
+			if (!cleared) return { lists, unread }
+			queryClient.setQueriesData<InfiniteData<ChatListPage>>({ queryKey: chatKeys.list }, (data) =>
+				mapPages(data, (items) => items.map((chat) => (chat.id === chatId ? { ...chat, unread: 0 } : chat)))
+			)
+			const { side, count } = cleared
+			if (unread) queryClient.setQueryData<Unread>(chatKeys.unread, { ...unread, [side]: Math.max(0, unread[side] - count) })
+			return { lists, unread }
+		},
+		onError: (_, __, context) => {
+			context?.lists.forEach(([key, data]) => queryClient.setQueryData(key, data))
+			if (context?.unread) queryClient.setQueryData(chatKeys.unread, context.unread)
+		},
+		onSettled: () => {
 			queryClient.invalidateQueries({ queryKey: chatKeys.unread })
 			queryClient.invalidateQueries({ queryKey: chatKeys.list })
 		},

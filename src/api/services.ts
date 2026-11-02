@@ -1,11 +1,11 @@
 // Service requests [16, 17] and the master side [18–20] — contract sections 12 and 13.5.
 import { useRef } from 'react'
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { type InfiniteData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ApiError, apiFetch, newIdempotencyKey } from '@/lib/api'
 import { useSession } from '@/store/useSession'
 import { BUNDLED_SERVICE_TYPES, SERVICE_SHORT } from '@/data/service-types'
 import { masterKeys, meKeys, serviceKeys } from './keys'
-import { cursorPaging } from './pagination'
+import { cursorPaging, mapPages } from './pagination'
 import type {
 	CarOrigin,
 	CloseServiceBody,
@@ -268,10 +268,22 @@ export function useMasterOffer() {
 			keys.current.set(id, key)
 			return apiFetch<ServiceOffer>(`/my/master/requests/${id}/offer`, { method: 'POST', body, idempotencyKey: key })
 		},
+		// «Не моё» takes the card off «Новые» at once; it comes back if the server says no.
+		onMutate: async ({ id, body }) => {
+			if (body.answer !== 'NOT_MINE') return
+			const key = masterKeys.feed('NEW')
+			await queryClient.cancelQueries({ queryKey: key })
+			const previous = queryClient.getQueryData<InfiniteData<MasterFeedPage>>(key)
+			queryClient.setQueryData<InfiniteData<MasterFeedPage>>(key, (data) => mapPages(data, (items) => items.filter((item) => item.id !== id)))
+			return { key, previous }
+		},
+		onError: (_, __, context) => {
+			if (context) queryClient.setQueryData(context.key, context.previous)
+		},
 		onSuccess: (_, { id }) => {
 			keys.current.delete(id)
-			queryClient.invalidateQueries({ queryKey: masterKeys.feedAll })
 		},
+		onSettled: () => queryClient.invalidateQueries({ queryKey: masterKeys.feedAll }),
 	})
 }
 
