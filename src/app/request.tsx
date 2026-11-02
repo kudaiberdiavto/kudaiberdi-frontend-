@@ -3,7 +3,7 @@ import { ActivityIndicator, Linking, Pressable, ScrollView, Text, View } from 'r
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BottomSheet, QueryErrorBanner, ScreenHeader, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus, toast } from '@/components/ui'
+import { BottomSheet, Button, QueryErrorBanner, ScreenHeader, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus, toast } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { BubbleIcon, CallIcon, ChevronIcon, CrossIcon, LoupeIcon, RouteIcon, TickIcon, priceDigits, replyChips } from '@/components/buyer-v23'
 import { VoicePlayer } from '@/components/voice'
@@ -73,6 +73,9 @@ export default function RequestScreen() {
 	const answered = counts ? counts.have + counts.notHave : have.length
 
 	const title = detail?.text ?? ' '
+	// Pinned under the thumb: «Нашли запчасть?» once someone has it, «Продлить» when the search is about to end.
+	const extendSoon = Boolean(detail?.canExtend) && !closed && left <= 3
+	const bar = !closed && (have.length > 0 || extendSoon)
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
@@ -82,7 +85,7 @@ export default function RequestScreen() {
 			/>
 
 			<ScrollView
-				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16 + insets.bottom, gap: 10 }}
+				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: bar ? 16 : 16 + insets.bottom, gap: 10 }}
 				showsVerticalScrollIndicator={false}
 			>
 				<QueryErrorBanner error={request.error ?? replies.error} onRetry={() => {
@@ -186,11 +189,6 @@ export default function RequestScreen() {
 						{shown.map((reply, index) => (
 							<ReplyCard key={reply.id} reply={reply} best={index === 0} />
 						))}
-						{have.length > 0 && !closed ? (
-							<Pressable onPress={() => setSheet(true)} style={{ alignItems: 'center', paddingVertical: 10 }}>
-								<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Нашли запчасть?')}</Text>
-							</Pressable>
-						) : null}
 					</>
 				) : (
 					<View style={{ borderRadius: 18, backgroundColor: c.card, paddingHorizontal: 14 }}>
@@ -215,6 +213,33 @@ export default function RequestScreen() {
 					</View>
 				)}
 			</ScrollView>
+
+			{bar ? (
+				<View
+					style={{
+						paddingHorizontal: 16,
+						paddingTop: 12,
+						paddingBottom: insets.bottom + 12,
+						borderTopWidth: 1,
+						borderTopColor: c.hairline,
+						backgroundColor: c.card,
+						flexDirection: 'row',
+						gap: 8,
+					}}
+				>
+					{extendSoon ? (
+						<Button
+							label={t('Продлить +30 мин')}
+							variant={have.length ? 'secondary' : 'primary'}
+							height={52}
+							style={{ flex: 1 }}
+							loading={extend.isPending}
+							onPress={() => extend.mutate(30)}
+						/>
+					) : null}
+					{have.length ? <Button label={t('Нашли запчасть?')} height={52} style={{ flex: 1.4 }} onPress={() => setSheet(true)} /> : null}
+				</View>
+			) : null}
 
 			{showSheet ? (
 				<FoundSheet

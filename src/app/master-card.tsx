@@ -101,10 +101,6 @@ export default function MasterCardScreen() {
 						<View style={{ gap: 12 }}>
 							<Skeleton width="60%" height={26} />
 							<Skeleton width="40%" height={15} />
-							<View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
-								<Skeleton width="auto" height={48} radius={14} style={{ flex: 1 }} />
-								<Skeleton width="auto" height={48} radius={14} style={{ flex: 1.4 }} />
-							</View>
 							<Skeleton height={68} radius={14} />
 							<Skeleton width={90} height={14} style={{ marginTop: 4 }} />
 							{[0, 1, 2].map((i) => (
@@ -116,20 +112,6 @@ export default function MasterCardScreen() {
 						</View>
 					) : null}
 
-					{master ? (
-						<View style={{ flexDirection: 'row', gap: 8 }}>
-							<Button
-								label={t('Позвонить')}
-								variant="success"
-								icon={PhoneIcon}
-								height={48}
-								style={{ flex: 1 }}
-								disabled={!master.phone}
-								onPress={() => master.phone && Linking.openURL(`tel:${master.phone}`)}
-							/>
-							<Button label={t('Написать')} variant="success" icon={ChatIcon} height={48} style={{ flex: 1.4 }} loading={openChat.isPending} onPress={write} />
-						</View>
-					) : null}
 
 					{master ? (
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 14, backgroundColor: c.card, padding: 14 }}>
@@ -206,6 +188,32 @@ export default function MasterCardScreen() {
 					{master ? <ComplainLink onPress={() => setComplaint({ type: 'MASTER', targetId: master.id })} label={t('Пожаловаться на мастера')} /> : null}
 				</View>
 			</ScrollView>
+			{master ? (
+				// Pinned under the thumb; one main action — «Написать», the call is the secondary one.
+				<View
+					style={{
+						paddingHorizontal: 16,
+						paddingTop: 12,
+						paddingBottom: insets.bottom + 12,
+						borderTopWidth: 1,
+						borderTopColor: c.hairline,
+						backgroundColor: c.card,
+						flexDirection: 'row',
+						gap: 8,
+					}}
+				>
+					<Button
+						label={t('Позвонить')}
+						variant="secondary"
+						icon={PhoneIcon}
+						height={52}
+						style={{ flex: 1 }}
+						disabled={!master.phone}
+						onPress={() => master.phone && Linking.openURL(`tel:${master.phone}`)}
+					/>
+					<Button label={t('Написать')} variant="success" icon={ChatIcon} height={52} style={{ flex: 1.6 }} loading={openChat.isPending} onPress={write} />
+				</View>
+			) : null}
 			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />
 		</View>
 	)

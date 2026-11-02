@@ -220,40 +220,6 @@ export default function SellerProfileForBuyerScreen() {
 						</View>
 					) : null}
 
-					<View style={{ flexDirection: 'row', gap: 8 }}>
-						<Pressable
-							onPress={write}
-							disabled={!shop || openChat.isPending}
-							style={{ flex: 1, height: 48, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-						>
-							<ChatIcon size={20} color={fixed.white} />
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Написать')}</Text>
-						</Pressable>
-						<Pressable
-							onPress={route}
-							style={{ flex: 1, height: 48, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-						>
-							<MapPinIcon size={20} color={c.ink} />
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? t('2ГИС') : t('Маршрут')}</Text>
-						</Pressable>
-						{/* The phone, then WhatsApp at the edge — only when the shop made the number visible (or after a chat). */}
-						{shop?.phone ? (
-							<Pressable accessibilityRole="button" accessibilityLabel={t('Позвонить')}
-								onPress={() => Linking.openURL(`tel:${shop.phone}`)}
-								style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: c.fill, alignItems: 'center', justifyContent: 'center' }}
-							>
-								<PhoneIcon size={20} color={c.ink} />
-							</Pressable>
-						) : null}
-						{shop?.phone ? (
-							<Pressable accessibilityRole="button" accessibilityLabel={t('Написать в WhatsApp')}
-								onPress={() => shop.phone && openWhatsApp(shop.phone)}
-								style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: fixed.whatsapp, alignItems: 'center', justifyContent: 'center' }}
-							>
-								<WhatsAppIcon size={24} color={fixed.white} />
-							</Pressable>
-						) : null}
-					</View>
 					{openChat.error ? (
 						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{openChat.error.message}</Text>
 					) : null}
@@ -355,6 +321,54 @@ export default function SellerProfileForBuyerScreen() {
 				</View>
 				{shop ? <ComplainLink onPress={() => setComplaint({ type: 'SHOP', targetId: shop.id })} label={t('Пожаловаться на магазин')} /> : null}
 			</ScrollView>
+			{/* Pinned under the thumb: scrolling through parts and reviews doesn't take «Написать» away. */}
+			<View
+				style={{
+					paddingHorizontal: 16,
+					paddingTop: 12,
+					paddingBottom: insets.bottom + 12,
+					borderTopWidth: 1,
+					borderTopColor: c.hairline,
+					backgroundColor: c.card,
+					flexDirection: 'row',
+					gap: 8,
+				}}
+			>
+				<Pressable
+					onPress={route}
+					accessibilityRole="button"
+					style={{ flex: 1, height: 52, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+				>
+					<MapPinIcon size={20} color={c.ink} />
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? t('2ГИС') : t('Маршрут')}</Text>
+				</Pressable>
+				<Pressable
+					onPress={write}
+					disabled={!shop || openChat.isPending}
+					accessibilityRole="button"
+					style={{ flex: 1.6, height: 52, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: openChat.isPending ? 0.6 : 1 }}
+				>
+					<ChatIcon size={20} color={fixed.white} />
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Написать')}</Text>
+				</Pressable>
+				{/* The phone, then WhatsApp at the edge — only when the shop made the number visible (or after a chat). */}
+				{shop?.phone ? (
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Позвонить')}
+						onPress={() => Linking.openURL(`tel:${shop.phone}`)}
+						style={{ width: 52, height: 52, borderRadius: 14, backgroundColor: c.fill, alignItems: 'center', justifyContent: 'center' }}
+					>
+						<PhoneIcon size={20} color={c.ink} />
+					</Pressable>
+				) : null}
+				{shop?.phone ? (
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Написать в WhatsApp')}
+						onPress={() => shop.phone && openWhatsApp(shop.phone)}
+						style={{ width: 52, height: 52, borderRadius: 14, backgroundColor: fixed.whatsapp, alignItems: 'center', justifyContent: 'center' }}
+					>
+						<WhatsAppIcon size={24} color={fixed.white} />
+					</Pressable>
+				) : null}
+			</View>
 			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />
 		</View>
 	)

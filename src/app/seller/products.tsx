@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { FlatList, Pressable, Text, TextInput, View } from 'react-native'
 import { Image } from '@/components/ui/image'
 import { router, useScrollToTop } from 'expo-router'
+import Animated, { LinearTransition } from 'react-native-reanimated'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { Badge, PhotoPlaceholder, QueryErrorBanner, Screen, Skeleton, SkeletonRepeat } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
@@ -23,6 +24,8 @@ export default function SellerProductsScreen() {
 	// Tapping the active tab again scrolls back to the top, as in every app.
 	const list = useRef<FlatList<MyPartItem>>(null)
 	useScrollToTop(list)
+	const [compact, setCompact] = useState(false)
+	const lastY = useRef(0)
 	const [filter, setFilter] = useState<MyPartsFilter>('ALL')
 	const [q, setQ] = useState('')
 	const summary = useMyPartsSummary()
@@ -76,6 +79,13 @@ export default function SellerProductsScreen() {
 				keyExtractor={(item) => String(item.id)}
 				contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 10, paddingBottom: 88 }}
 				showsVerticalScrollIndicator={false}
+				scrollEventThrottle={100}
+				onScroll={(e) => {
+					const y = e.nativeEvent.contentOffset.y
+					if (y > lastY.current + 8 && y > 40) setCompact(true)
+					else if (y < lastY.current - 8 || y <= 0) setCompact(false)
+					lastY.current = y
+				}}
 				onEndReached={() => parts.hasNextPage && !parts.isFetchingNextPage && parts.fetchNextPage()}
 				onRefresh={pull.onRefresh}
 				refreshing={pull.refreshing}
@@ -156,30 +166,37 @@ export default function SellerProductsScreen() {
 				ListFooterComponent={parts.isFetchingNextPage ? <PartRowSkeleton /> : undefined}
 			/>
 
-			<Pressable
-				onPress={() => newPart('/new-part')}
-				style={{
-					position: 'absolute',
-					alignSelf: 'center',
-					bottom: 16,
-					height: 56,
-					borderRadius: 28,
-					backgroundColor: c.brand,
-					paddingHorizontal: 22,
-					paddingLeft: 18,
-					flexDirection: 'row',
-					alignItems: 'center',
-					gap: 8,
-					shadowColor: c.brand,
-					shadowOpacity: 0.35,
-					shadowOffset: { width: 0, height: 8 },
-					shadowRadius: 20,
-					elevation: 8,
-				}}
+			{/* Scrolling down folds it into «+» in the corner (it stops covering the last rows), scrolling up opens it again. */}
+			<Animated.View
+				layout={LinearTransition.duration(180)}
+				style={{ position: 'absolute', bottom: 16, ...(compact ? { right: 16 } : { alignSelf: 'center' }) }}
 			>
-				<PlusIcon size={22} color={fixed.white} strokeWidth={2.6} />
-				<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Выложить запчасть')}</Text>
-			</Pressable>
+				<Pressable
+					onPress={() => newPart('/new-part')}
+					accessibilityRole="button"
+					accessibilityLabel={t('Выложить запчасть')}
+					style={{
+						height: 56,
+						minWidth: 56,
+						borderRadius: 28,
+						backgroundColor: c.brand,
+						paddingHorizontal: compact ? 0 : 22,
+						paddingLeft: compact ? 0 : 18,
+						flexDirection: 'row',
+						alignItems: 'center',
+						justifyContent: 'center',
+						gap: 8,
+						shadowColor: c.brand,
+						shadowOpacity: 0.35,
+						shadowOffset: { width: 0, height: 8 },
+						shadowRadius: 20,
+						elevation: 8,
+					}}
+				>
+					<PlusIcon size={22} color={fixed.white} strokeWidth={2.6} />
+					{compact ? null : <Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Выложить запчасть')}</Text>}
+				</Pressable>
+			</Animated.View>
 		</Screen>
 	)
 }

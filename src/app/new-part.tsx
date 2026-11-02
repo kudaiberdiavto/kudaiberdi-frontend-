@@ -4,7 +4,7 @@ import { useConfirmLeave } from '@/lib/use-confirm-leave'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { QueryErrorBanner, ScreenHeader, Segmented, Skeleton, toast, Toggle } from '@/components/ui'
+import { Button, QueryErrorBanner, ScreenHeader, Segmented, Skeleton, toast, Toggle } from '@/components/ui'
 import { MediaViewer } from '@/components/media-viewer'
 import { PlayIcon } from '@/components/voice'
 import { BrandLogo } from '@/components/ui/brand'
@@ -180,17 +180,7 @@ export default function NewPartScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
-			<ScreenHeader
-				inset
-				title={id ? t('Запчасть') : t('Новая запчасть')}
-				right={
-					!published && !loading ? (
-						<Pressable disabled={save.isPending || uploading} onPress={onDraft} hitSlop={10}>
-							<Text style={{ fontSize: fs.base, fontFamily: fontFamily(600), color: c.muted }}>{t('Черновик')}</Text>
-						</Pressable>
-					) : null
-				}
-			/>
+			<ScreenHeader inset title={id ? t('Запчасть') : t('Новая запчасть')} />
 
 			<MediaViewer items={watch} onClose={() => setWatch(null)} />
 			{loading ? (
@@ -447,22 +437,36 @@ export default function NewPartScreen() {
 				{errorText ? (
 					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text>
 				) : null}
-				<Pressable
-					disabled={loading || save.isPending || publish.isPending || uploading}
-					onPress={onPublish}
-					style={{
-						height: 56,
-						borderRadius: 14,
-						backgroundColor: c.brand,
-						alignItems: 'center',
-						justifyContent: 'center',
-						opacity: loading || save.isPending || publish.isPending || uploading ? 0.4 : 1,
-					}}
-				>
-					<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: fixed.white }}>
-						{uploading ? t('Загружаем фото…') : published ? t('Сохранить') : t('Опубликовать')}
-					</Text>
-				</Pressable>
+				<View style={{ flexDirection: 'row', gap: 8 }}>
+					{/* Both actions in one place, under the thumb — not «Черновик» as grey text in the top corner. */}
+					{!published && !loading ? (
+						<Button
+							label={t('Черновик')}
+							variant="outline"
+							height={56}
+							style={{ flex: 1 }}
+							disabled={save.isPending || publish.isPending || uploading}
+							onPress={onDraft}
+						/>
+					) : null}
+					<Pressable
+						disabled={loading || save.isPending || publish.isPending || uploading}
+						onPress={onPublish}
+						style={{
+							flex: 1.6,
+							height: 56,
+							borderRadius: 14,
+							backgroundColor: c.brand,
+							alignItems: 'center',
+							justifyContent: 'center',
+							opacity: loading || save.isPending || publish.isPending || uploading ? 0.4 : 1,
+						}}
+					>
+						<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: fixed.white }}>
+							{uploading ? t('Загружаем фото…') : published ? t('Сохранить') : t('Опубликовать')}
+						</Text>
+					</Pressable>
+				</View>
 			</View>
 		</View>
 	)

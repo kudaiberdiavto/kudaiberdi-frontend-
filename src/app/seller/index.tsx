@@ -3,14 +3,13 @@ import { FlatList, Pressable, Text, View } from 'react-native'
 import { router, useScrollToTop } from 'expo-router'
 import { askForPushAt } from '@/lib/push'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
-import { BrandLogo, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRequestCard } from '@/components/ui'
+import { BrandLogo, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRequestCard, undoToast } from '@/components/ui'
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
 import { MediaGallery, MediaStrip, photosAsMedia } from '@/components/media-strip'
 import { isPlaceholderText } from '@/components/request-text'
 import { MicIcon, TickIcon } from '@/components/seller-v23'
 import { fixed, fontFamily, fs, useColors } from '@/theme'
-import { haptic } from '@/lib/haptics'
 import { formatAgo, formatNumber, formatRemaining } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
 import { useIncomingRequests, useReplyToRequest } from '@/api/incoming'
@@ -21,6 +20,7 @@ import { priceDigits } from '@/components/buyer-v23'
 import type { DeliveryOrder, IncomingRequest } from '@/api/types'
 import { AccountStatusBanner } from '@/components/account-status-banner'
 import { t } from '@/i18n'
+import { useHiddenCards, useHiddenIds } from '@/store/useHiddenCards'
 
 /** 13 «Запросы» — new requests on top with «Ответить голосом», answered ones below. */
 export default function SellerRequestsScreen() {
@@ -40,7 +40,8 @@ export default function SellerRequestsScreen() {
 	const pull = usePullRefresh(() => [fresh.refetch(), answered.refetch(), delivery.refetch()])
 	const orders = (delivery.data ?? []).filter((order) => order.status !== 'DELIVERED' && order.status !== 'CANCELLED')
 
-	const items = [...flattenPages(fresh.data), ...flattenPages(answered.data)]
+	const hiddenIds = useHiddenIds('incoming')
+	const items = [...flattenPages(fresh.data), ...flattenPages(answered.data)].filter((item) => !hiddenIds.includes(item.id))
 
 	return (
 		<Screen padding={0}>
@@ -127,6 +128,16 @@ function DeliveryCard({ order }: { order: DeliveryOrder }) {
 export function RequestCard({ request, full }: { request: IncomingRequest; full?: boolean }) {
 	const c = useColors()
 	const reply = useReplyToRequest(request.id)
+	// «Нет» sits next to «Есть» — a slip while scrolling would lose a buyer: hide at once, answer after «Вернуть» is gone.
+	const answerNo = () => {
+		const { hide, show } = useHiddenCards.getState()
+		hide('incoming', request.id)
+		undoToast({
+			text: t('Ответили «Нет»'),
+			restore: () => show('incoming', request.id),
+			commit: () => reply.mutate({ answer: 'NOT_HAVE' }, { onSettled: () => show('incoming', request.id) }),
+		})
+	}
 	const mine = request.myReply
 	const meta = mine
 		? formatAgo(request.notifiedAt)
@@ -218,7 +229,7 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 					<View style={{ flexDirection: 'row', gap: 8 }}>
 						<Pressable
 							disabled={reply.isPending}
-							onPress={() => (haptic.tap(), reply.mutate({ answer: 'NOT_HAVE' }))}
+							onPress={answerNo}
 							style={{
 								flex: 1,
 								height: 44,

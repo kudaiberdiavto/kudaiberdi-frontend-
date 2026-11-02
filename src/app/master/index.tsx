@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { askForPushAt } from '@/lib/push'
-import { haptic } from '@/lib/haptics'
 import { Image } from '@/components/ui/image'
 import { Redirect, router, useScrollToTop } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
-import { EmptyState, QueryErrorBanner, Screen, ServiceIcon, SkeletonRepeat, SkeletonRequestCard } from '@/components/ui'
+import { EmptyState, QueryErrorBanner, Screen, ServiceIcon, SkeletonRepeat, SkeletonRequestCard, undoToast } from '@/components/ui'
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
 import { MediaGallery, MediaStrip } from '@/components/media-strip'
@@ -22,6 +21,7 @@ import { useMyRequests } from '@/api/requests'
 import { LoupeIcon } from '@/components/buyer-v23'
 import type { MasterFeedItem } from '@/api/types'
 import { t } from '@/i18n'
+import { useHiddenCards, useHiddenIds } from '@/store/useHiddenCards'
 
 /** 18 «Заявки» — new requests and the ones already answered; reply by voice, «Не моё» or «Могу помочь». */
 export default function MasterRequestsScreen() {
@@ -39,7 +39,11 @@ export default function MasterRequestsScreen() {
 	const answered = useMasterFeed('ANSWERED')
 	const offer = useMasterOffer()
 	const pull = usePullRefresh(() => [fresh.refetch(), answered.refetch()])
-	const items = useMemo(() => [...flattenPages(fresh.data), ...flattenPages(answered.data)], [fresh.data, answered.data])
+	const hiddenIds = useHiddenIds('master-feed')
+	const items = useMemo(
+		() => [...flattenPages(fresh.data), ...flattenPages(answered.data)].filter((item) => !hiddenIds.includes(item.id)),
+		[fresh.data, answered.data, hiddenIds]
+	)
 	const [now, setNow] = useState(() => new Date())
 	// A master or СТО also buys parts — for a client's car [04]; their active part requests are here.
 	const partRequests = flattenPages(useMyRequests('ACTIVE').data)
@@ -63,6 +67,17 @@ export default function MasterRequestsScreen() {
 	if (profile.isSuccess && !profile.data) return <Redirect href={{ pathname: '/master-profile', params: { first: '1' } }} />
 
 	const sectionStyle = { fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted } as const
+
+	// «Не моё» next to «Могу помочь»: hide at once, answer after the «Вернуть» toast is gone.
+	const skip = (id: number) => {
+		const { hide, show } = useHiddenCards.getState()
+		hide('master-feed', id)
+		undoToast({
+			text: t('Ответили «Не моё»'),
+			restore: () => show('master-feed', id),
+			commit: () => offer.mutate({ id, body: { answer: 'NOT_MINE' } }, { onSettled: () => show('master-feed', id) }),
+		})
+	}
 
 	const answer = (item: MasterFeedItem, record: boolean) =>
 		router.push({ pathname: '/master-answer', params: { id: String(item.id), ...(record ? { record: '1' } : {}) } })
@@ -174,7 +189,7 @@ export default function MasterRequestsScreen() {
 						now={now}
 						onVoice={() => answer(item, true)}
 						onHelp={() => answer(item, false)}
-						onSkip={() => (haptic.tap(), offer.mutate({ id: item.id, body: { answer: 'NOT_MINE' } }))}
+						onSkip={() => skip(item.id)}
 					/>
 				)}
 			/>

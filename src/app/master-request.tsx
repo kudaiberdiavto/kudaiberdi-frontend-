@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { ScrollView } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
-import { haptic } from '@/lib/haptics'
-import { QueryErrorBanner, Screen, ScreenHeader, SkeletonRequestCard } from '@/components/ui'
+import { QueryErrorBanner, Screen, ScreenHeader, SkeletonRequestCard, undoToast } from '@/components/ui'
 
 import { minutesLeft } from '@/lib/format'
 import { markServiceSeen, serviceName, useMasterOffer, useMasterRequest, useServiceTypes } from '@/api/services'
 import { RequestCard } from './master/index'
 import { t } from '@/i18n'
+import { useHiddenCards } from '@/store/useHiddenCards'
 
 /** A client's request opened from «Заявки»: the same card, photos and videos large, the answer buttons below. */
 export default function MasterRequestScreen() {
@@ -37,7 +37,16 @@ export default function MasterRequestScreen() {
 						now={now}
 						onVoice={() => answer(true)}
 						onHelp={() => answer(false)}
-						onSkip={() => (haptic.tap(), offer.mutate({ id, body: { answer: 'NOT_MINE' } }, { onSuccess: () => router.back() }))}
+						onSkip={() => {
+							const { hide, show } = useHiddenCards.getState()
+							hide('master-feed', id)
+							router.back()
+							undoToast({
+								text: t('Ответили «Не моё»'),
+								restore: () => show('master-feed', id),
+								commit: () => offer.mutate({ id, body: { answer: 'NOT_MINE' } }, { onSettled: () => show('master-feed', id) }),
+							})
+						}}
 						full
 					/>
 				) : request.isLoading ? (

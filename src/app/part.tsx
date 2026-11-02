@@ -280,7 +280,8 @@ export default function PartScreen() {
 					disabled={!shop || openChat.isPending}
 					onPress={write}
 					style={{
-						flex: 1,
+						// the main action — wider, nearer the thumb
+						flex: 1.6,
 						height: 54,
 						paddingHorizontal: 10,
 						borderRadius: 14,
