@@ -3,6 +3,8 @@ import { router } from 'expo-router'
 import { type ApiLang, apiFetch, configureApi, getRefreshToken, loadTokens, saveTokens } from '@/lib/api'
 import { getItem, setItem } from '@/lib/secure-storage'
 import { clearQueryCache, queryClient } from '@/lib/query-client'
+import { useRecentlyViewed } from '@/store/useRecentlyViewed'
+import { useRecentSearches } from '@/store/useRecentSearches'
 import type { Lang, Me, TokenResponse, UserRole } from '@/api/types'
 import { meKeys } from '@/api/keys'
 import { setAppLang } from '@/i18n'
@@ -56,6 +58,9 @@ async function clearSession() {
 	await saveTokens(null)
 	await persistSnapshot(null)
 	await clearQueryCache()
+	// What this person looked at and searched for stays theirs.
+	useRecentlyViewed.getState().clear()
+	useRecentSearches.getState().clear()
 }
 
 function goToStart() {

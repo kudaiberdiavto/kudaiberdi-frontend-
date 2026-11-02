@@ -8,6 +8,7 @@ import { SearchIcon } from '@/components/icons'
 import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { useVideoViewer } from '@/store/useVideoViewer'
 import { MarketVideos } from '@/components/market-videos'
+import { RecentlyViewed } from '@/components/recently-viewed'
 import { resolveUrl } from '@/lib/api'
 import { countLabel, formatPrice, plural } from '@/lib/format'
 import { useSearchParts, useSignedIn } from '@/api/catalog'
@@ -235,7 +236,10 @@ export function CatalogScreen() {
 
 			{/* Video ads from the market — the same strip as on the home screen. */}
 			{!f.q.trim() && f.categoryId == null ? (
-				<MarketVideos />
+				<>
+					<MarketVideos />
+					<RecentlyViewed />
+				</>
 			) : null}
 
 			<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>

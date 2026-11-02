@@ -9,6 +9,7 @@ import { ClockOutline, routeTitle, toRegion } from '@/components/video-v23'
 import { WhatsAppIcon } from '@/components/icons'
 import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { formatDay, formatWhenAt } from '@/lib/format'
+import { askForReview } from '@/lib/store-review'
 import { useMe } from '@/api/me'
 import {
 	useDeliveryOrder,
@@ -191,7 +192,7 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 			<View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: bottom + 12, gap: 10 }}>
 				<QueryErrorBanner error={receive.error} />
 				{order.status === 'PICKED_UP' || order.status === 'COURIER_ORDERED' ? (
-					<BigButton label={t('Получил посылку')} tone="green" onPress={() => receive.mutate()} loading={receive.isPending} />
+					<BigButton label={t('Получил посылку')} tone="green" onPress={() => receive.mutate(undefined, { onSuccess: () => askForReview() })} loading={receive.isPending} />
 				) : null}
 				<View style={{ flexDirection: 'row', gap: 10 }}>
 					{order.chatId ? (

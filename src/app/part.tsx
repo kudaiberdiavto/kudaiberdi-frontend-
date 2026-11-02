@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Pressable, ScrollView, Share, Text, View, useWindowDimensions } from 'react-native'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -18,6 +18,7 @@ import { PartTile } from '@/components/catalog-screen'
 import { useOpenChat } from '@/api/chats'
 import type { PartCondition } from '@/api/types'
 import { toPartFilters, useCatalogFilters } from '@/store/useCatalogFilters'
+import { useRecentlyViewed } from '@/store/useRecentlyViewed'
 import { useCars } from '@/api/garage'
 import { ComplainLink, ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
 import { MediaViewer } from '@/components/media-viewer'
@@ -45,6 +46,10 @@ export default function PartScreen() {
 	const query = params.publicId ? byPublicId : byId
 	const part = query.data
 	const loading = !part && query.isLoading
+	// «Недавно смотрели» on the home screen.
+	useEffect(() => {
+		if (part) useRecentlyViewed.getState().add(part)
+	}, [part])
 
 	const favorite = useTogglePartFavorite(part?.id ?? 0)
 	const openChat = useOpenChat()

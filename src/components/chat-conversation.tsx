@@ -1,10 +1,11 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react'
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { QueryErrorBanner, Skeleton } from '@/components/ui'
+import { QueryErrorBanner, Skeleton, toast } from '@/components/ui'
 import * as ImagePicker from 'expo-image-picker'
+import * as Clipboard from 'expo-clipboard'
 import { SendIcon } from '@/components/icons'
 import { CameraV23Icon, MicV23Icon, TickIcon } from '@/components/buyer-v23'
 import { VoicePlayer } from '@/components/voice'
@@ -421,8 +422,26 @@ function Message({
 		)
 	}
 
+	// Long press — the usual message menu: copy the text (a part number, an address), report the other side's message.
+	const copyable = message.text?.trim()
+	const menu = () =>
+		Alert.alert('', copyable ?? undefined, [
+			...(copyable
+				? [
+						{
+							text: t('Копировать'),
+							onPress: () => {
+								Clipboard.setStringAsync(copyable).then(() => toast(t('Скопировано')))
+							},
+						},
+					]
+				: []),
+			...(onComplain ? [{ text: t('Пожаловаться'), style: 'destructive' as const, onPress: onComplain }] : []),
+			{ text: t('Отмена'), style: 'cancel' as const },
+		])
+
 	return (
-		<Pressable onLongPress={onComplain} disabled={!onComplain} delayLongPress={450} style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '78%', gap: 3 }}>
+		<Pressable onLongPress={menu} disabled={!copyable && !onComplain} delayLongPress={400} style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '78%', gap: 3 }}>
 			<View
 				style={{
 					maxWidth: 260,

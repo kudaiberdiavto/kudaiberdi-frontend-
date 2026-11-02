@@ -23,6 +23,7 @@ import {
 } from '@/components/buyer-v23'
 import { TruckIcon, deliveryStatusText } from '@/components/video-v23'
 import { MarketVideos } from '@/components/market-videos'
+import { RecentlyViewed } from '@/components/recently-viewed'
 import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { minutesLeft, plural } from '@/lib/format'
 import { useMe } from '@/api/me'
@@ -173,6 +174,8 @@ export default function BuyerHomeScreen() {
 				</View>
 
 				<MarketVideos />
+
+				<RecentlyViewed />
 
 				{parcels.map((order) => (
 					<ParcelRow key={order.id} order={order} />

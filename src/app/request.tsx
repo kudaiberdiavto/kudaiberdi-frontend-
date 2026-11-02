@@ -10,6 +10,7 @@ import { VoicePlayer } from '@/components/voice'
 import { MediaStrip, photosAsMedia } from '@/components/media-strip'
 import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { minutesLeft, plural } from '@/lib/format'
+import { askForReview } from '@/lib/store-review'
 import { resolveUrl } from '@/lib/api'
 import {
 	useCloseRequest,
@@ -417,6 +418,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 										close.mutate({ shopId: shop.id }, {
 											onSuccess: () => {
 												toast(t('Запрос закрыт — спасибо!'))
+												askForReview()
 												onClose()
 												router.back()
 											},

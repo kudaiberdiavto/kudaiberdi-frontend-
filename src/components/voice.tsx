@@ -1,6 +1,6 @@
 // Voice notes in the v23 flow [04, 05, 12–14, 16–19]: the pill player from the design and
 // record → upload (POST /media/voices) → what the server understood (`reply` / `offer`).
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
@@ -9,6 +9,7 @@ import { MicIcon } from '@/components/icons'
 import { resolveUrl, uploadVoice, type VoicePurpose } from '@/lib/api'
 import { fixed, fontFamily, fs, useColors } from '@/theme'
 import type { Voice, VoiceUpload } from '@/api/types'
+import { useVoiceSpeed } from '@/store/useVoiceSpeed'
 import { t } from '@/i18n'
 
 const BAR_WIDTH = 4
@@ -74,11 +75,19 @@ export function VoicePlayer({
 	const progress = started && duration ? Math.min(1, status.currentTime / duration) : 0
 	const color = tone === 'green' ? c.success : c.brand
 	const bars = barHeights(voice.waveform, barsWidth)
+	const { speed, next: nextSpeed } = useVoiceSpeed()
+
+	// 1× → 1.5× → 2×, pitch kept natural; the same speed for every note.
+	useEffect(() => {
+		player.setPlaybackRate(speed, 'high')
+	}, [player, speed])
 
 	const toggle = () => {
 		if (status.playing) player.pause()
 		else {
 			if (finished || progress >= 0.99) player.seekTo(0)
+			// again here: before the audio has loaded, some platforms drop a rate set earlier
+			player.setPlaybackRate(speed, 'high')
 			player.play()
 		}
 	}
@@ -124,6 +133,17 @@ export function VoicePlayer({
 					{row(1)}
 				</View>
 			</View>
+			{started ? (
+				<Pressable
+					onPress={nextSpeed}
+					hitSlop={8}
+					accessibilityRole="button"
+					accessibilityLabel={t('Скорость {0}', speed)}
+					style={{ height: 24, minWidth: 36, paddingHorizontal: 6, borderRadius: 12, backgroundColor: color, alignItems: 'center', justifyContent: 'center' }}
+				>
+					<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), color: fixed.white }}>{`${speed}×`.replace('.', ',')}</Text>
+				</Pressable>
+			) : null}
 			<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.muted, minWidth: 30, textAlign: 'right' }}>
 				{voiceClock(started ? status.currentTime : duration)}
 			</Text>
