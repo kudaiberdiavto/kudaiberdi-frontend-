@@ -156,6 +156,7 @@ export default function MasterProfileTab() {
 				</View>
 
 				<View style={{ borderRadius: 18, backgroundColor: c.card, overflow: 'hidden', marginTop: 4 }}>
+					<SettingsRow label={t('Избранное')} value="›" onPress={() => router.push('/favorites')} />
 					<SettingsRow label={t('Язык')} height={60} right={<LanguageSwitch value={lang === 'ky' ? 'kg' : 'ru'} onChange={changeLang} />} />
 					<SettingsRow label={t('Помощь в WhatsApp')} value="›" onPress={openSupport} />
 					<SettingsRow label={t('Политика конфиденциальности')} value="›" onPress={() => Linking.openURL(`${API_URL}/privacy`)} />

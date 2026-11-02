@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, Tex
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import * as Location from 'expo-location'
+import { askForPushAt } from '@/lib/push'
 import { BottomSheet, BrandLogo, Button, QueryErrorBanner, ScreenHeader, toast } from '@/components/ui'
 import { BrandTile, Label, PlusIcon, TickIcon } from '@/components/seller-v23'
 import { LocateIcon, SearchIcon } from '@/components/icons'
@@ -130,7 +131,7 @@ export default function BoxSelectScreen() {
 		}
 		if (!slot) return
 		if (hasShop) relocate.mutate(slot.id, { onSuccess: () => (toast(t('Контейнер изменён')), router.back()) })
-		else register.mutate({ containerId: slot.id, brandIds: picked }, { onSuccess: () => router.replace('/seller') })
+		else register.mutate({ containerId: slot.id, brandIds: picked }, { onSuccess: () => (router.replace('/seller'), askForPushAt('shop')) })
 	}
 
 	return (

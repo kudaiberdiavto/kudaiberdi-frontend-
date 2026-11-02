@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
 import { useSession } from '@/store/useSession'
 import { meKeys } from './keys'
-import type { Me, Settings, UpdateMeBody, UpdateSettingsBody, UserRole } from './types'
+import type { Me, PartCard, Settings, ShopCard, UpdateMeBody, UpdateSettingsBody, UserRole } from './types'
 
 export function useMe() {
 	const signedIn = useSession((s) => s.status === 'authed')
@@ -41,5 +41,22 @@ export function useUpdateSettings() {
 	return useMutation({
 		mutationFn: (body: UpdateSettingsBody) => apiFetch<Settings>('/me/settings', { method: 'PATCH', body }),
 		onSuccess: (settings) => queryClient.setQueryData(meKeys.settings, settings),
+	})
+}
+
+/** «Избранное» — parts and shops the user tapped ♥ on; refreshed by the ♥ toggles (catalog.ts). */
+export function useFavoriteParts(enabled = true) {
+	return useQuery({
+		queryKey: meKeys.favoriteParts,
+		queryFn: ({ signal }) => apiFetch<PartCard[]>('/me/favorite-parts', { signal }),
+		enabled,
+	})
+}
+
+export function useFavoriteShops(enabled = true) {
+	return useQuery({
+		queryKey: meKeys.favoriteShops,
+		queryFn: ({ signal }) => apiFetch<ShopCard[]>('/me/favorite-shops', { signal }),
+		enabled,
 	})
 }

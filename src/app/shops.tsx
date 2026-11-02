@@ -80,7 +80,7 @@ export default function ShopsScreen() {
 	)
 }
 
-function ShopRow({ shop }: { shop: ShopCard }) {
+export function ShopRow({ shop }: { shop: ShopCard }) {
 	const c = useColors()
 	return (
 		<Pressable
@@ -109,7 +109,7 @@ function ShopRow({ shop }: { shop: ShopCard }) {
 	)
 }
 
-function ShopRowSkeleton() {
+export function ShopRowSkeleton() {
 	const c = useColors()
 	return (
 		<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 14 }}>

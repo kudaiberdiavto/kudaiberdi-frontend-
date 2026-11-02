@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { API_URL } from '@/lib/env'
 import { BottomSheet, QueryErrorBanner, ScreenHeader, SettingsRow, Toggle, undoToast } from '@/components/ui'
-import { CloseIcon } from '@/components/icons'
+import { CloseIcon, HeartIcon } from '@/components/icons'
 import { BrandLogo } from '@/components/ui/brand'
 import { BellIcon, Caps, ChevronIcon, GlobeIcon, HelpIcon, PlusThinIcon } from '@/components/buyer-v23'
 import { fixed, fontFamily, fs, useColors } from '@/theme'
@@ -111,6 +111,7 @@ export default function BuyerProfileScreen() {
 
 				<View style={{ height: 4 }} />
 				<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 6 }}>
+					<MenuRow icon={<HeartIcon size={22} color={c.ink} />} label={t('Избранное')} onPress={() => router.push('/favorites')} />
 					<MenuRow icon={<GlobeIcon size={22} color={c.ink} />} label={t('Язык')}>
 						<View style={{ height: 34, borderRadius: 17, backgroundColor: c.card, borderWidth: 1.5, borderColor: c.border, flexDirection: 'row', padding: 2 }}>
 							{(['ru', 'ky'] as const).map((value) => {

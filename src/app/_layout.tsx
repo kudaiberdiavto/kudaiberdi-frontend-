@@ -23,6 +23,7 @@ import { useDictionariesVersion } from '@/lib/dictionaries'
 import { useSession } from '@/store/useSession'
 import { useColors } from '@/theme'
 import { ToastHost } from '@/components/ui/toast'
+import { PushPrimer } from '@/components/push-primer'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -71,6 +72,7 @@ export default function RootLayout() {
 									contentStyle: { backgroundColor: c.surface },
 								}}
 							/>
+							<PushPrimer />
 							<ToastHost />
 						</SafeAreaProvider>
 					</PushProvider>

@@ -3,9 +3,10 @@
 // NEW_SERVICE_REQUEST push [12].
 
 import { type ReactNode, useEffect } from 'react'
-import { Platform } from 'react-native'
+import { Linking, Platform } from 'react-native'
 import Constants, { ExecutionEnvironment } from 'expo-constants'
 import * as Notifications from 'expo-notifications'
+import { create } from 'zustand'
 import { router } from 'expo-router'
 import { apiFetch } from '@/lib/api'
 import { getItem, setItem } from '@/lib/secure-storage'
@@ -61,15 +62,60 @@ if (Platform.OS !== 'web') {
 	]).catch(() => {})
 }
 
-/** Device token → POST /devices. Android: the FCM token; iOS: see BACKEND_QUESTIONS.md (APNs). */
-async function registerDevice() {
+/**
+ * Device token → POST /devices. Android: the FCM token; iOS: see BACKEND_QUESTIONS.md (APNs).
+ * `ask` — show the system prompt; without it only an already granted permission registers (at sign-in).
+ */
+async function registerDevice({ ask = false } = {}) {
 	if (!pushAvailable) return
-	const permission = await Notifications.requestPermissionsAsync()
+	const permission = ask ? await Notifications.requestPermissionsAsync() : await Notifications.getPermissionsAsync()
 	if (!permission.granted) return
 	const { data: token } = await Notifications.getDevicePushTokenAsync()
 	if (typeof token !== 'string' || !token) return
 	await apiFetch('/devices', { method: 'POST', body: { token, platform: Platform.OS === 'ios' ? 'IOS' : 'ANDROID' } })
 	await setItem(TOKEN_KEY, token)
+}
+
+// ─── Asking at the moment it's worth it ───────────────────────────────────────
+// Not the system prompt right after sign-in (most say «no» to a cold prompt, and the app lives on «продавцы
+// ответили»): our own sheet when the value is obvious — a request just sent, a box just opened — then the system one.
+
+export type PushMoment = 'request' | 'service' | 'shop' | 'master'
+
+const SNOOZE_KEY = 'push.primer.snoozed'
+const SNOOZE_MS = 3 * 24 * 60 * 60 * 1000
+
+interface PushPrimerState {
+	moment: PushMoment | null
+	/** Turned off earlier and the system won't ask again — the sheet offers the settings instead. */
+	denied: boolean
+}
+
+export const usePushPrimer = create<PushPrimerState>(() => ({ moment: null, denied: false }))
+
+/** Call after the action that makes pushes worth it. Shows the sheet unless already allowed or snoozed. */
+export async function askForPushAt(moment: PushMoment) {
+	if (!pushAvailable) return
+	const permission = await Notifications.getPermissionsAsync().catch(() => null)
+	if (!permission) return
+	if (permission.granted) return registerDevice().catch(() => {})
+	const snoozed = Number(await getItem(SNOOZE_KEY))
+	if (snoozed && Date.now() - snoozed < SNOOZE_MS) return
+	usePushPrimer.setState({ moment, denied: !permission.canAskAgain })
+}
+
+/** «Разрешить» on the sheet: the system prompt, or the settings when it can't be shown any more. */
+export async function allowPush() {
+	const { denied } = usePushPrimer.getState()
+	usePushPrimer.setState({ moment: null })
+	if (denied) return Linking.openSettings()
+	await registerDevice({ ask: true }).catch(() => {})
+}
+
+/** «Не сейчас» — the sheet comes back at the next good moment, not before 3 days. */
+export function snoozePush() {
+	usePushPrimer.setState({ moment: null })
+	setItem(SNOOZE_KEY, String(Date.now())).catch(() => {})
 }
 
 /** On sign-out: the device stops getting this user's pushes. */

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View, type ScrollViewInstance } from 'react-native'
+import { askForPushAt } from '@/lib/push'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -295,7 +296,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 								brandIds: form.allBrands ? [] : form.brandIds,
 								phone: form.phone || undefined,
 							},
-							{ onSuccess: () => (toast(t('Профиль сохранён')), first ? router.replace('/master') : router.back()) }
+							{ onSuccess: () => (toast(t('Профиль сохранён')), first ? (router.replace('/master'), askForPushAt('master')) : router.back()) }
 						)
 					}
 				/>

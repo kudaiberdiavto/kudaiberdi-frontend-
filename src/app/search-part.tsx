@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { askForPushAt } from '@/lib/push'
 import { useConfirmLeave } from '@/lib/use-confirm-leave'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -68,7 +69,12 @@ export default function SearchPartScreen() {
 				mediaIds: uploads.mediaIds,
 				voiceMediaId: voiceId,
 			},
-			{ onSuccess: (request) => leave(() => router.replace({ pathname: '/request', params: { id: String(request.id) } })) }
+			{
+				onSuccess: (request) => {
+					leave(() => router.replace({ pathname: '/request', params: { id: String(request.id) } }))
+					askForPushAt('request')
+				},
+			}
 		)
 
 	const photo = uploads.photos[0]

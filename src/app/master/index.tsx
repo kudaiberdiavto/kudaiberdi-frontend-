@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
+import { askForPushAt } from '@/lib/push'
 import { haptic } from '@/lib/haptics'
 import { Image } from '@/components/ui/image'
 import { Redirect, router, useScrollToTop } from 'expo-router'
@@ -28,6 +29,10 @@ export default function MasterRequestsScreen() {
 	// Tapping the active tab again scrolls back to the top, as in every app.
 	const list = useRef<FlatList<MasterFeedItem>>(null)
 	useScrollToTop(list)
+	// Requests reach this side by push — ask (once per few days) if it isn't allowed yet.
+	useEffect(() => {
+		askForPushAt('master')
+	}, [])
 	const types = useServiceTypes().data
 	const profile = useMyMaster()
 	const fresh = useMasterFeed('NEW')

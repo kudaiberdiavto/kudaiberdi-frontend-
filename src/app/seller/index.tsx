@@ -1,6 +1,7 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { router, useScrollToTop } from 'expo-router'
+import { askForPushAt } from '@/lib/push'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { BrandLogo, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRequestCard } from '@/components/ui'
 import { RequestsIcon } from '@/components/icons'
@@ -27,6 +28,10 @@ export default function SellerRequestsScreen() {
 	// Tapping the active tab again scrolls back to the top, as in every app.
 	const list = useRef<FlatList<IncomingRequest>>(null)
 	useScrollToTop(list)
+	// Requests reach this side by push — ask (once per few days) if it isn't allowed yet.
+	useEffect(() => {
+		askForPushAt('shop')
+	}, [])
 	const shop = useMyShop()
 	const fresh = useIncomingRequests('NEW')
 	const answered = useIncomingRequests('ANSWERED')

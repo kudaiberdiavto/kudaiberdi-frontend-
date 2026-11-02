@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { askForPushAt } from '@/lib/push'
 import { useConfirmLeave } from '@/lib/use-confirm-leave'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -108,7 +109,12 @@ export default function ServiceNewScreen() {
 				lng: point.lng,
 				address: point.address,
 			},
-			{ onSuccess: (request) => leave(() => router.replace({ pathname: '/service-offers', params: { id: String(request.id) } })) }
+			{
+				onSuccess: (request) => {
+					leave(() => router.replace({ pathname: '/service-offers', params: { id: String(request.id) } }))
+					askForPushAt('service')
+				},
+			}
 		)
 	}
 
