@@ -49,10 +49,14 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@react-native/jest-preset": "^0.88.1",
     "@types/geojson": "^7946.0.16",
+    "@types/jest": "30.0.0",
     "@types/react": "~19.3.0",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~58.0.4",
+    "jest": "~30.5.2",
+    "jest-expo": "~58.0.13",
     "openapi-typescript": "^7.13.0",
     "tailwindcss": "^3.4.19",
     "typescript": "~6.0.3"
@@ -64,12 +68,23 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "api:types": "openapi-typescript ${API_DOCS_URL:-http://localhost:8080/v3/api-docs} -o src/api/schema.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
   },
   "private": true,
   "overrides": {
     "openapi-typescript": {
       "typescript": "$typescript"
     }
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "testMatch": [
+      "<rootDir>/src/**/*.test.ts?(x)"
+    ],
+    "moduleDirectories": [
+      "node_modules",
+      "node_modules/expo/node_modules"
+    ]
   }
 }

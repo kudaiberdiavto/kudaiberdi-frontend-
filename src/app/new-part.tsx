@@ -7,16 +7,14 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { QueryErrorBanner, Segmented, Skeleton, Toggle, toast } from '@/components/ui'
 import { MediaViewer } from '@/components/media-viewer'
 import { PlayIcon } from '@/components/voice'
-import { resolveUrl } from '@/lib/api'
 import { BrandLogo } from '@/components/ui/brand'
 import { CameraIcon, ChevronLeftIcon, CloseIcon, PlusIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
-import { ApiError } from '@/lib/api'
-import type { MediaItem } from '@/api/types'
+import { ApiError, resolveUrl } from '@/lib/api'
 import { formatNumber } from '@/lib/format'
 import { useCategories } from '@/api/directory'
 import { useMyPart, usePublishPart, useSavePart } from '@/api/parts'
-import type { PartCondition } from '@/api/types'
+import type { MediaItem, PartCondition } from '@/api/types'
 import { MAX_PART_PHOTOS, type PartDraft, partBody, usePartDraft } from '@/store/usePartDraft'
 import { t } from '@/i18n'
 
@@ -88,9 +86,8 @@ export default function NewPartScreen() {
 
 	// Unsaved input: a new part — anything entered (camera photos too); an edited one — any change since it loaded.
 	const [baseline, setBaseline] = useState<string | null>(id ? null : EMPTY)
-	useEffect(() => {
-		if (!loading && baseline === null) setBaseline(fingerprint(usePartDraft.getState()))
-	}, [loading, baseline])
+	// The edited part just landed in the draft — that's the «unchanged» state (set during render, not in an effect).
+	if (!loading && baseline === null) setBaseline(fingerprint(draft))
 	const dirty = baseline !== null && fingerprint(draft) !== baseline
 
 	const saveDraft = async () => {
