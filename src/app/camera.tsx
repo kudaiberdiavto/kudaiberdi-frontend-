@@ -28,6 +28,8 @@ export default function CameraScreen() {
 	const [permission, requestPermission] = useCameraPermissions()
 	const mode = Number(params.mode ?? 0)
 	const [torch, setTorch] = useState(false)
+	// The shutter waits for the camera: a shot before onCameraReady throws «Camera is not ready yet».
+	const [ready, setReady] = useState(false)
 
 	const draft = usePartDraft()
 	const recognize = useRecognizeOem()
@@ -56,8 +58,13 @@ export default function CameraScreen() {
 			boxUploads.pick('camera')
 			return
 		}
-		const photo = await cameraRef.current?.takePictureAsync({ quality: 1 })
-		if (photo) take(photo.uri)
+		if (!ready) return
+		try {
+			const photo = await cameraRef.current?.takePictureAsync({ quality: 1 })
+			if (photo) take(photo.uri)
+		} catch {
+			// the camera went away mid-shot (app in background, screen closed) — nothing to keep
+		}
 	}
 
 	const fromGallery = async () => {
@@ -90,7 +97,7 @@ export default function CameraScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: fixed.camera }}>
-			<CameraView ref={cameraRef} style={{ flex: 1 }} enableTorch={torch} />
+			<CameraView ref={cameraRef} style={{ flex: 1 }} enableTorch={torch} onCameraReady={() => setReady(true)} />
 
 			<View
 				style={{
@@ -257,7 +264,9 @@ export default function CameraScreen() {
 
 				<Pressable
 					onPress={capture}
-					disabled={recognize.isPending}
+					disabled={recognize.isPending || (mode !== 2 && !ready)}
+					accessibilityRole="button"
+					accessibilityLabel={t('Сделать снимок')}
 					style={{
 						width: 80,
 						height: 80,
@@ -266,7 +275,7 @@ export default function CameraScreen() {
 						borderColor: fixed.white,
 						alignItems: 'center',
 						justifyContent: 'center',
-						opacity: recognize.isPending ? 0.5 : 1,
+						opacity: recognize.isPending || (mode !== 2 && !ready) ? 0.5 : 1,
 					}}
 				>
 					<View style={{ width: 62, height: 62, borderRadius: 31, backgroundColor: fixed.white }} />

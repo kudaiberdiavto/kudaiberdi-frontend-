@@ -347,6 +347,8 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 	const [cameraPermission, requestCamera] = useCameraPermissions()
 	const [micPermission, requestMic] = useMicrophonePermissions()
 	const [active, setActive] = useState(false)
+	// Recording waits for the camera: recordAsync before onCameraReady throws «Camera is not ready yet».
+	const [ready, setReady] = useState(false)
 	const [seconds, setSeconds] = useState(0)
 	const started = useRef(0)
 	// Closed while recording (✕ or Android back) — the recording is thrown away, not uploaded.
@@ -372,7 +374,7 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 	const granted = cameraPermission?.granted && micPermission?.granted
 
 	const record = async () => {
-		if (!camera.current) return
+		if (!camera.current || !ready) return
 		if (active) {
 			camera.current.stopRecording()
 			return
@@ -384,6 +386,8 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 			const result = await camera.current.recordAsync({ maxDuration: MAX_SEC })
 			const durationSec = Math.max(1, Math.round((Date.now() - started.current) / 1000))
 			if (result?.uri && !cancelled.current) onDone({ uri: result.uri, mimeType: Platform.OS === 'ios' ? 'video/quicktime' : 'video/mp4', durationSec })
+		} catch {
+			// stopped by the system or the camera went away — no video to keep
 		} finally {
 			setActive(false)
 		}
@@ -403,7 +407,7 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 	return (
 		<View style={{ flex: 1, backgroundColor: fixed.black }}>
 			{granted ? (
-				<CameraView ref={camera} style={{ flex: 1 }} mode="video" facing="back" />
+				<CameraView ref={camera} style={{ flex: 1 }} mode="video" facing="back" onCameraReady={() => setReady(true)} />
 			) : (
 				<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 }}>
 					<Text style={{ fontSize: fs.lg, lineHeight: 24, fontFamily: fontFamily(500), color: fixed.white, textAlign: 'center' }}>{t('Разрешите камеру и микрофон — снимите деталь и скажите, что это и сколько стоит')}</Text>
@@ -447,8 +451,10 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 				</Pressable>
 				<Pressable
 					onPress={record}
-					disabled={!granted}
-					style={{ width: 76, height: 76, borderRadius: 38, borderWidth: 4, borderColor: fixed.white, alignItems: 'center', justifyContent: 'center' }}
+					disabled={!granted || !ready}
+					accessibilityRole="button"
+					accessibilityLabel={active ? t('Остановить запись') : t('Начать запись')}
+					style={{ width: 76, height: 76, borderRadius: 38, borderWidth: 4, borderColor: fixed.white, alignItems: 'center', justifyContent: 'center', opacity: granted && ready ? 1 : 0.5 }}
 				>
 					<View style={{ width: active ? 30 : 58, height: active ? 30 : 58, borderRadius: active ? 8 : 29, backgroundColor: fixed.recording }} />
 				</Pressable>
