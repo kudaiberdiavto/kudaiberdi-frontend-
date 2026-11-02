@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Image, Linking, Pressable, ScrollView, Share, Text, View } from 'react-native'
+import { Linking, Pressable, ScrollView, Share, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceBadge, Skeleton } from '@/components/ui'
@@ -55,13 +56,13 @@ export default function MasterCardScreen() {
 			<ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
 				<View style={{ height: 200 + insets.top, backgroundColor: raw.fill }}>
 					{loading ? <Skeleton height="100%" radius={0} style={{ position: 'absolute' }} /> : null}
-					{cover ? <Image source={{ uri: resolveUrl(cover.url) }} style={{ position: 'absolute', inset: 0 }} resizeMode="cover" /> : null}
+					{cover ? <Image source={{ uri: resolveUrl(cover.url) }} style={{ position: 'absolute', inset: 0 }} contentFit="cover" /> : null}
 					<View style={{ paddingTop: insets.top + 8, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between' }}>
-						<Pressable onPress={() => router.back()} style={roundButton}>
+						<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} style={roundButton}>
 							<ChevronLeftIcon size={24} color={c.ink} />
 						</Pressable>
 						{master ? (
-							<Pressable onPress={() => Share.share({ message: `${master.name}\nhttps://kudaibergen.kg/m/${master.publicId}` })} style={roundButton}>
+							<Pressable accessibilityRole="button" accessibilityLabel={t('Поделиться')} onPress={() => Share.share({ message: `${master.name}\nhttps://kudaibergen.kg/m/${master.publicId}` })} style={roundButton}>
 								<ShareIcon size={20} color={c.ink} />
 							</Pressable>
 						) : null}

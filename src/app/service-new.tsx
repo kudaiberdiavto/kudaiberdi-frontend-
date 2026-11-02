@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Location from 'expo-location'

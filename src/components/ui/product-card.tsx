@@ -1,4 +1,5 @@
-import { Image, Pressable, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
+import { Image } from './image'
 import { CheckIcon, HeartIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import Svg, { Path } from 'react-native-svg'
@@ -47,7 +48,7 @@ export function ProductCard({
 		<Pressable onPress={onPress} style={{ width: width ?? '100%', gap: 8, opacity: dimmed ? 0.6 : 1 }}>
 			<View style={{ borderRadius: 16, overflow: 'hidden', backgroundColor: c.card }}>
 				{photoUrl ? (
-					<Image source={{ uri: photoUrl }} style={{ width: '100%', aspectRatio: 1 }} resizeMode="cover" />
+					<Image source={{ uri: photoUrl }} style={{ width: '100%', aspectRatio: 1 }} contentFit="cover" />
 				) : (
 					<View style={{ width: '100%', aspectRatio: 1, overflow: 'hidden' }}>
 						<PhotoPlaceholder width={width ?? 200} height={width ?? 200} radius={0} />

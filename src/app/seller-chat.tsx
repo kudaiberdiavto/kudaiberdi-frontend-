@@ -31,7 +31,7 @@ export default function SellerChatScreen() {
 						borderBottomColor: c.hairline,
 					}}
 				>
-					<Pressable onPress={() => router.back()}>
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()}>
 						<ChevronLeftIcon size={24} color={c.ink} />
 					</Pressable>
 					<View style={{ flex: 1, gap: 2 }}>

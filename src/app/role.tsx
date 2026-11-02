@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Image, Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'

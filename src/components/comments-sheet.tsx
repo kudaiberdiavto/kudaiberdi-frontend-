@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Alert, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native'
 import { router } from 'expo-router'
+import { onNearEnd } from '@/lib/scroll'
 import { PaperPlaneIcon } from '@/components/buyer-v23'
 import { ModalSheet } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
@@ -54,7 +55,13 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 				{t('Комментарии')}{total ? ` · ${total}` : ''}
 			</Text>
 
-			<ScrollView style={{ maxHeight: height * 0.45 }} contentContainerStyle={{ gap: 14, paddingVertical: 4 }} keyboardShouldPersistTaps="handled">
+			<ScrollView
+				style={{ maxHeight: height * 0.45 }}
+				contentContainerStyle={{ gap: 14, paddingVertical: 4 }}
+				keyboardShouldPersistTaps="handled"
+				scrollEventThrottle={200}
+				onScroll={onNearEnd(() => comments.hasNextPage && !comments.isFetchingNextPage && comments.fetchNextPage(), 200)}
+			>
 				{comments.isLoading ? (
 					<SkeletonRepeat count={4} gap={14}>
 						<View style={{ gap: 7 }}>
@@ -77,9 +84,7 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 						<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(400), color: c.ink }}>{comment.text}</Text>
 					</Pressable>
 				))}
-				{comments.hasNextPage ? (
-					<Text onPress={() => comments.fetchNextPage()} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong, textAlign: 'center' }}>{t('Показать ещё')}</Text>
-				) : null}
+				{comments.isFetchingNextPage ? <Skeleton width="70%" height={15} /> : null}
 			</ScrollView>
 
 			{add.error ? <Text style={{ fontSize: 15, fontFamily: fontFamily(500), color: c.danger }}>{add.error.message}</Text> : null}
@@ -107,7 +112,7 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 						color: c.ink,
 					}}
 				/>
-				<Pressable
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Отправить')}
 					onPress={send}
 					disabled={signedIn && (!value || add.isPending)}
 					hitSlop={6}

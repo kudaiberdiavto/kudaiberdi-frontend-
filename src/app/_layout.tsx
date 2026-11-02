@@ -22,6 +22,7 @@ import { PushProvider } from '@/lib/push'
 import { useDictionariesVersion } from '@/lib/dictionaries'
 import { useSession } from '@/store/useSession'
 import { lightColors } from '@/theme'
+import { ToastHost } from '@/components/ui/toast'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -68,6 +69,7 @@ export default function RootLayout() {
 									contentStyle: { backgroundColor: lightColors.surface },
 								}}
 							/>
+							<ToastHost />
 						</SafeAreaProvider>
 					</PushProvider>
 				</RealtimeProvider>

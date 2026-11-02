@@ -1,5 +1,6 @@
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { router } from 'expo-router'
+import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { BrandLogo, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRequestCard } from '@/components/ui'
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
@@ -7,6 +8,7 @@ import { MediaGallery, MediaStrip, photosAsMedia } from '@/components/media-stri
 import { isPlaceholderText } from '@/components/request-text'
 import { MicIcon, TickIcon } from '@/components/seller-v23'
 import { fontFamily, useColors } from '@/theme'
+import { haptic } from '@/lib/haptics'
 import { formatAgo, formatNumber, formatRemaining } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
 import { useIncomingRequests, useReplyToRequest } from '@/api/incoming'
@@ -26,6 +28,7 @@ export default function SellerRequestsScreen() {
 	const answered = useIncomingRequests('ANSWERED')
 	// Orders with delivery still to pack or hand to the courier — on top.
 	const delivery = useDeliveryOrders('SHOP')
+	const pull = usePullRefresh(() => [fresh.refetch(), answered.refetch(), delivery.refetch()])
 	const orders = (delivery.data ?? []).filter((order) => order.status !== 'DELIVERED' && order.status !== 'CANCELLED')
 
 	const items = [...flattenPages(fresh.data), ...flattenPages(answered.data)]
@@ -54,12 +57,8 @@ export default function SellerRequestsScreen() {
 					if (fresh.hasNextPage && !fresh.isFetchingNextPage) fresh.fetchNextPage()
 					else if (!fresh.hasNextPage && answered.hasNextPage && !answered.isFetchingNextPage) answered.fetchNextPage()
 				}}
-				onRefresh={() => {
-					fresh.refetch()
-					answered.refetch()
-					delivery.refetch()
-				}}
-				refreshing={false}
+				onRefresh={pull.onRefresh}
+				refreshing={pull.refreshing}
 				ListHeaderComponent={
 					<View style={{ gap: 10 }}>
 						<AccountStatusBanner
@@ -209,7 +208,7 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 					<View style={{ flexDirection: 'row', gap: 8 }}>
 						<Pressable
 							disabled={reply.isPending}
-							onPress={() => reply.mutate({ answer: 'NOT_HAVE' })}
+							onPress={() => (haptic.tap(), reply.mutate({ answer: 'NOT_HAVE' }))}
 							style={{
 								flex: 1,
 								height: 44,

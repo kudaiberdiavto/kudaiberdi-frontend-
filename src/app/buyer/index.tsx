@@ -1,9 +1,12 @@
 import { useState, type ComponentType, type ReactNode } from 'react'
-import { Image, Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native'
+import { onNearEnd } from '@/lib/scroll'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { resolveUrl } from '@/lib/api'
+import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { QueryErrorBanner, Skeleton, SkeletonRepeat } from '@/components/ui'
 import {
 	BoxOutlineIcon,
@@ -53,7 +56,11 @@ export default function BuyerHomeScreen() {
 	const requests = useMyRequests()
 	const services = useMyServiceRequests()
 	const [all, setAll] = useState(false)
-	const parcels = useDeliveryOrders('BUYER', useSignedIn()).data ?? []
+	const signedIn = useSignedIn()
+	const delivery = useDeliveryOrders('BUYER', signedIn)
+	const parcels = delivery.data ?? []
+	// refetch() runs even a disabled query — a guest has no parcels to ask for.
+	const pull = usePullRefresh(() => [cars.refetch(), requests.refetch(), services.refetch(), signedIn && delivery.refetch()])
 	// Parts requests and service requests in one list, newest first.
 	const items: Row[] = [
 		...flattenPages(requests.data).map((request) => ({ kind: 'part' as const, request })),
@@ -96,6 +103,13 @@ export default function BuyerHomeScreen() {
 			<ScrollView
 				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
 				showsVerticalScrollIndicator={false}
+				scrollEventThrottle={200}
+				onScroll={onNearEnd(() => {
+					if (!all) return
+					if (requests.hasNextPage && !requests.isFetchingNextPage) requests.fetchNextPage()
+					if (services.hasNextPage && !services.isFetchingNextPage) services.fetchNextPage()
+				})}
+				refreshControl={<RefreshControl refreshing={pull.refreshing} onRefresh={pull.onRefresh} tintColor={c.muted} />}
 			>
 				<Pressable onPress={() => router.push('/search-part')}>
 					<LinearGradient
@@ -188,15 +202,7 @@ export default function BuyerHomeScreen() {
 						<ServiceRow key={`service-${item.request.id}`} request={item.request} />
 					)
 				)}
-				{all && (requests.hasNextPage || services.hasNextPage) ? (
-					<Text
-						onPress={() => {
-							if (requests.hasNextPage) requests.fetchNextPage()
-							if (services.hasNextPage) services.fetchNextPage()
-						}}
-						style={{ textAlign: 'center', paddingVertical: 8, fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}
-					>{t('Показать ещё')}</Text>
-				) : null}
+				{requests.isFetchingNextPage || services.isFetchingNextPage ? <RequestCardSkeleton /> : null}
 
 
 			</ScrollView>

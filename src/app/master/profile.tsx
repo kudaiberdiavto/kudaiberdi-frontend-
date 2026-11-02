@@ -1,4 +1,5 @@
-import { Image, Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { API_URL } from '@/lib/env'

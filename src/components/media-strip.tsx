@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Image, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { MediaViewer } from '@/components/media-viewer'
 import { PlayIcon } from '@/components/voice'
 import { resolveUrl } from '@/lib/api'
@@ -50,7 +51,7 @@ export function MediaGallery({ media }: { media: MediaItem[] }) {
 					<Pressable key={item.id} onPress={() => setViewing(items)}>
 						<Image
 							source={{ uri: resolveUrl(item.kind === 'PHOTO' ? item.url : item.thumbUrl) ?? undefined }}
-							resizeMode="cover"
+							contentFit="cover"
 							style={{ width: '100%', aspectRatio: item.width && item.height ? Math.max(0.75, Math.min(1.6, item.width / item.height)) : 4 / 3, borderRadius: 16, backgroundColor: '#1F2329' }}
 						/>
 						{item.kind === 'VIDEO' ? (

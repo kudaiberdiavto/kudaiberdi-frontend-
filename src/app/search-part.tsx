@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { QueryErrorBanner } from '@/components/ui'
@@ -176,7 +177,7 @@ export default function SearchPartScreen() {
 									<ActivityIndicator color={c.brand} />
 								</View>
 							) : null}
-							<Pressable
+							<Pressable accessibilityRole="button" accessibilityLabel={t('Удалить фото')}
 								onPress={() => uploads.remove(photo.key)}
 								hitSlop={6}
 								style={{

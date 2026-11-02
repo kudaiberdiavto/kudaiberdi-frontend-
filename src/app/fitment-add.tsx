@@ -72,7 +72,7 @@ export default function FitmentAddScreen() {
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
 			<View style={{ paddingTop: insets.top + 12, paddingHorizontal: 16, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<Pressable onPress={() => router.back()} hitSlop={10}>
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} hitSlop={10}>
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>{t('Подходит к машинам')}</Text>

@@ -184,7 +184,7 @@ export function TopBar({
 	return (
 		<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 			{onBack !== false && !onClose ? (
-				<Pressable onPress={onBack || (() => router.back())} hitSlop={10}>
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={onBack || (() => router.back())} hitSlop={10}>
 					<BackIcon color={c.ink} />
 				</Pressable>
 			) : null}
@@ -196,7 +196,7 @@ export function TopBar({
 			</Text>
 			{right}
 			{onClose ? (
-				<Pressable onPress={onClose} hitSlop={10}>
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Закрыть')} onPress={onClose} hitSlop={10}>
 					<CrossIcon color={c.ink} />
 				</Pressable>
 			) : null}

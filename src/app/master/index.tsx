@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { FlatList, Image, Pressable, Text, View } from 'react-native'
+import { FlatList, Pressable, Text, View } from 'react-native'
+import { haptic } from '@/lib/haptics'
+import { Image } from '@/components/ui/image'
 import { Redirect, router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
+import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { EmptyState, QueryErrorBanner, Screen, ServiceIcon, SkeletonRepeat, SkeletonRequestCard } from '@/components/ui'
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
@@ -27,6 +30,7 @@ export default function MasterRequestsScreen() {
 	const fresh = useMasterFeed('NEW')
 	const answered = useMasterFeed('ANSWERED')
 	const offer = useMasterOffer()
+	const pull = usePullRefresh(() => [fresh.refetch(), answered.refetch()])
 	const items = useMemo(() => [...flattenPages(fresh.data), ...flattenPages(answered.data)], [fresh.data, answered.data])
 	const [now, setNow] = useState(() => new Date())
 	// A master or СТО also buys parts — for a client's car [04]; their active part requests are here.
@@ -151,8 +155,8 @@ export default function MasterRequestsScreen() {
 					if (fresh.hasNextPage && !fresh.isFetchingNextPage) fresh.fetchNextPage()
 					else if (answered.hasNextPage && !answered.isFetchingNextPage) answered.fetchNextPage()
 				}}
-				onRefresh={() => (fresh.refetch(), answered.refetch())}
-				refreshing={false}
+				onRefresh={pull.onRefresh}
+				refreshing={pull.refreshing}
 				renderItem={({ item }) => (
 					<RequestCard
 						item={item}
@@ -161,7 +165,7 @@ export default function MasterRequestsScreen() {
 						now={now}
 						onVoice={() => answer(item, true)}
 						onHelp={() => answer(item, false)}
-						onSkip={() => offer.mutate({ id: item.id, body: { answer: 'NOT_MINE' } })}
+						onSkip={() => (haptic.tap(), offer.mutate({ id: item.id, body: { answer: 'NOT_MINE' } }))}
 					/>
 				)}
 			/>

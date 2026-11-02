@@ -69,7 +69,7 @@ export default function CodeScreen() {
 	return (
 		<AuthLayout
 			topBar={
-				<Pressable
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')}
 					onPress={() => router.back()}
 					style={{
 						width: 48,

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BottomSheet, BrandLogo, Button, QueryErrorBanner } from '@/components/ui'
+import { BottomSheet, BrandLogo, Button, QueryErrorBanner, toast } from '@/components/ui'
 import { ChevronLeftIcon, SearchIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { useBrands, useModels } from '@/api/directory'
@@ -101,7 +101,7 @@ export default function GarageAddScreen() {
 					gap: 10,
 				}}
 			>
-				<Pressable onPress={() => router.back()}>
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()}>
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
@@ -233,6 +233,7 @@ export default function GarageAddScreen() {
 										{
 											onSuccess: (car) => {
 												if (passport.select === '1') useClientCar.getState().select(car.id)
+												toast(t('Машина добавлена'))
 												router.back()
 											},
 										}

@@ -1,4 +1,5 @@
-import { Image, Linking, Pressable, Text, View } from 'react-native'
+import { Linking, Pressable, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ChatConversation, presenceLabel } from '@/components/chat-conversation'
 import { BackIcon, BoxOutlineIcon, CallIcon, WrenchIcon } from '@/components/buyer-v23'
@@ -50,7 +51,7 @@ export default function BuyerChatScreen() {
 						borderBottomColor: c.hairline,
 					}}
 				>
-					<Pressable onPress={() => router.back()} hitSlop={10}>
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} hitSlop={10}>
 						<BackIcon color={c.ink} />
 					</Pressable>
 					{/* Avatar and name — the shop's profile (or the master's card). */}

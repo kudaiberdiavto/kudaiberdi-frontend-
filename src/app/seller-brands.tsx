@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { QueryErrorBanner } from '@/components/ui'
+import { QueryErrorBanner, toast } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { CheckIcon, ChevronLeftIcon, SearchIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
@@ -40,7 +40,7 @@ export default function SellerBrandsScreen() {
 					gap: 10,
 				}}
 			>
-				<Pressable onPress={() => router.back()}>
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()}>
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>{t('Марки, которые продаю')}</Text>
@@ -185,7 +185,7 @@ export default function SellerBrandsScreen() {
 			>
 				<Pressable
 					disabled={selected.length === 0 || save.isPending}
-					onPress={() => save.mutate(selected, { onSuccess: () => router.back() })}
+					onPress={() => save.mutate(selected, { onSuccess: () => (toast(t('Марки сохранены')), router.back()) })}
 					style={{
 						height: 56,
 						borderRadius: 14,

@@ -1,17 +1,18 @@
 // Источник: design/brands.json. Логотипы — только те 5 марок, для которых есть файл в assets/brands;
 // у остальных показываем цветную букву-заглушку, как в макете (fallback, пока нет файла).
-import type { ImageSourcePropType } from 'react-native'
+/** A bundled logo (`require`) or a remote one. */
+export type LogoSource = number | { uri: string }
 
 export interface Brand {
 	name: string
 	slug: string
 	placeholder: string
 	color: string
-	logo: ImageSourcePropType | null
+	logo: LogoSource | null
 }
 
 /** Bundled logos — shown instantly and offline; other brands use the server's `logoUrl`. */
-export const logos: Record<string, ImageSourcePropType> = {
+export const logos: Record<string, LogoSource> = {
 	toyota: require('../../assets/brands/toyota.png'),
 	lexus: require('../../assets/brands/lexus.png'),
 	honda: require('../../assets/brands/honda.png'),

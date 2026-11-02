@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BrandLogo } from '@/components/ui'
+import { BrandLogo, toast } from '@/components/ui'
 import { VoicePlayer, VoiceRecordingPanel, VoiceResultPanel, useVoiceNote } from '@/components/voice'
 import { Label, MicIcon, PlaneIcon, TickIcon } from '@/components/seller-v23'
 import { MediaStrip, photosAsMedia } from '@/components/media-strip'
@@ -58,7 +58,7 @@ export default function SellerAnswerScreen() {
 				original: original ?? undefined,
 				voiceMediaId: voice?.id,
 			},
-			{ onSuccess: () => router.back() }
+			{ onSuccess: () => (toast(t('Ответ отправлен покупателю')), router.back()) }
 		)
 
 	return (

@@ -6,7 +6,7 @@ import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo
 import * as ImagePicker from 'expo-image-picker'
 import { getThumbnailAsync } from 'expo-video-thumbnails'
 import { BigButton, TickIcon, TopBar, priceDigits } from '@/components/buyer-v23'
-import { QueryErrorBanner } from '@/components/ui'
+import { QueryErrorBanner, toast } from '@/components/ui'
 import { CloseIcon, GalleryIcon } from '@/components/icons'
 import { LoopVideo, TruckTile } from '@/components/video-v23'
 import { voiceClock } from '@/components/voice'
@@ -110,6 +110,7 @@ export default function SellerVideoScreen() {
 			})
 			draftId.current = part.id
 			await publish.mutateAsync(part.id)
+			toast(t('Видео в ленте'))
 			router.back()
 		} catch {
 			// shown by the error banner (save.error / publish.error)
@@ -410,7 +411,7 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 				</View>
 			)}
 
-			<Pressable onPress={close} hitSlop={12} style={{ position: 'absolute', top: insets.top + 12, left: 16 }}>
+			<Pressable accessibilityRole="button" accessibilityLabel={t('Закрыть')} onPress={close} hitSlop={12} style={{ position: 'absolute', top: insets.top + 12, left: 16 }}>
 				<CloseIcon size={28} color="#FFFFFF" />
 			</Pressable>
 			{active ? (
@@ -434,7 +435,7 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 			) : null}
 
 			<View style={{ position: 'absolute', left: 0, right: 0, bottom: insets.bottom + 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-				<Pressable onPress={fromGallery} disabled={active} style={{ position: 'absolute', left: 32, opacity: active ? 0.3 : 1 }}>
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Выбрать из галереи')} onPress={fromGallery} disabled={active} style={{ position: 'absolute', left: 32, opacity: active ? 0.3 : 1 }}>
 					<GalleryIcon size={30} color="#FFFFFF" />
 				</Pressable>
 				<Pressable

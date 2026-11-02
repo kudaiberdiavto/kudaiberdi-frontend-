@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Image, Keyboard, Linking, Pressable, Text, TextInput, View } from 'react-native'
+import { Keyboard, Linking, Pressable, Text, TextInput, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { Redirect, router } from 'expo-router'
 import { useVideoPlayer, VideoView } from 'expo-video'
 import { Button } from '@/components/ui'

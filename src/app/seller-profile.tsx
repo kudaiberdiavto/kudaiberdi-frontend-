@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Image, Linking, Pressable, ScrollView, Share, Text, View, useWindowDimensions } from 'react-native'
+import { Linking, Pressable, ScrollView, Share, Text, View, useWindowDimensions } from 'react-native'
+import { onNearEnd } from '@/lib/scroll'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { LocationCard, QueryErrorBanner, Skeleton, SkeletonProductGrid, SkeletonRepeat } from '@/components/ui'
@@ -63,11 +65,18 @@ export default function SellerProfileForBuyerScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
-			<ScrollView showsVerticalScrollIndicator={false}>
+			<ScrollView
+				showsVerticalScrollIndicator={false}
+				scrollEventThrottle={200}
+				onScroll={onNearEnd(() => {
+					const list = tab === 'parts' ? parts : reviews
+					if (list.hasNextPage && !list.isFetchingNextPage) list.fetchNextPage()
+				})}
+			>
 				<View>
 					{/* One banner — the box's first photo; no gallery. */}
 					{banner ? (
-						<Image source={{ uri: resolveUrl(banner.url) }} style={{ width, height: 210 }} resizeMode="cover" />
+						<Image source={{ uri: resolveUrl(banner.url) }} style={{ width, height: 210 }} contentFit="cover" />
 					) : loading ? (
 						<Skeleton height={210} radius={0} />
 					) : (
@@ -84,17 +93,17 @@ export default function SellerProfileForBuyerScreen() {
 							alignItems: 'center',
 						}}
 					>
-						<Pressable onPress={() => router.back()} style={roundButton}>
+						<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} style={roundButton}>
 							<ChevronLeftIcon size={24} color={c.ink} />
 						</Pressable>
 						<View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
 							{signedIn && shop ? (
-								<Pressable onPress={() => favorite.mutate(!shop.isFavorite)} style={roundButton}>
+								<Pressable accessibilityRole="button" accessibilityLabel={shop.isFavorite ? t('Убрать из избранного') : t('В избранное')} onPress={() => favorite.mutate(!shop.isFavorite)} style={roundButton}>
 									<HeartIcon size={20} color={shop.isFavorite ? c.danger : c.ink} filled={shop.isFavorite} />
 								</Pressable>
 							) : null}
 							{shop ? (
-								<Pressable
+								<Pressable accessibilityRole="button" accessibilityLabel={t('Поделиться')}
 									onPress={() => Share.share({ message: `${shop.name}\nhttps://kudaibergen.kg/s/${shop.publicId}` })}
 									style={roundButton}
 								>
@@ -229,7 +238,7 @@ export default function SellerProfileForBuyerScreen() {
 						</Pressable>
 						{/* The phone, then WhatsApp at the edge — only when the shop made the number visible (or after a chat). */}
 						{shop?.phone ? (
-							<Pressable
+							<Pressable accessibilityRole="button" accessibilityLabel={t('Позвонить')}
 								onPress={() => Linking.openURL(`tel:${shop.phone}`)}
 								style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}
 							>
@@ -237,7 +246,7 @@ export default function SellerProfileForBuyerScreen() {
 							</Pressable>
 						) : null}
 						{shop?.phone ? (
-							<Pressable
+							<Pressable accessibilityRole="button" accessibilityLabel={t('Написать в WhatsApp')}
 								onPress={() => shop.phone && openWhatsApp(shop.phone)}
 								style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#25D366', alignItems: 'center', justifyContent: 'center' }}
 							>
@@ -286,10 +295,10 @@ export default function SellerProfileForBuyerScreen() {
 									<PartTile part={part} />
 								</View>
 							))}
-							{parts.hasNextPage ? (
-								<Pressable onPress={() => parts.fetchNextPage()} style={{ width: '100%', paddingVertical: 12, alignItems: 'center' }}>
-									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Показать ещё')}</Text>
-								</Pressable>
+							{parts.isFetchingNextPage ? (
+								<View style={{ width: '100%' }}>
+									<SkeletonProductGrid rows={1} gap={10} />
+								</View>
 							) : null}
 							{loading || parts.isLoading ? (
 								<View style={{ width: '100%' }}>
@@ -337,11 +346,7 @@ export default function SellerProfileForBuyerScreen() {
 									) : null}
 								</Pressable>
 							))}
-							{reviews.hasNextPage ? (
-								<Pressable onPress={() => reviews.fetchNextPage()} style={{ paddingVertical: 12, alignItems: 'center' }}>
-									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Показать ещё')}</Text>
-								</Pressable>
-							) : null}
+							{reviews.isFetchingNextPage ? <Skeleton height={64} radius={14} /> : null}
 						</View>
 					) : null}
 				</View>

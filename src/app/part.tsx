@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Image, Pressable, ScrollView, Share, Text, View, useWindowDimensions } from 'react-native'
+import { Pressable, ScrollView, Share, Text, View, useWindowDimensions } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { PhotoPlaceholder, QueryErrorBanner, Skeleton, SkeletonProductGrid } from '@/components/ui'
@@ -73,7 +74,7 @@ export default function PartScreen() {
 						onMomentumScrollEnd={(e) => setPhotoIndex(Math.round(e.nativeEvent.contentOffset.x / width))}
 					>
 						{photos.map((photo) => (
-							<Image key={photo.id} source={{ uri: resolveUrl(photo.url) }} style={{ width, height: 320 }} resizeMode="cover" />
+							<Image key={photo.id} source={{ uri: resolveUrl(photo.url) }} style={{ width, height: 320 }} contentFit="cover" />
 						))}
 					</ScrollView>
 				) : part?.video?.posterUrl ? (
@@ -84,7 +85,7 @@ export default function PartScreen() {
 							router.push('/videos')
 						}}
 					>
-						<Image source={{ uri: resolveUrl(part.video.posterUrl) }} style={{ width, height: 320 }} resizeMode="cover" />
+						<Image source={{ uri: resolveUrl(part.video.posterUrl) }} style={{ width, height: 320 }} contentFit="cover" />
 						<View style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
 							<View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', justifyContent: 'center' }}>
 								<PlayIcon size={26} />
@@ -107,16 +108,16 @@ export default function PartScreen() {
 						justifyContent: 'space-between',
 					}}
 				>
-					<Pressable onPress={() => router.back()} style={roundButton}>
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} style={roundButton}>
 						<ChevronLeftIcon size={24} color={c.ink} />
 					</Pressable>
 					<View style={{ flexDirection: 'row', gap: 8 }}>
 						{signedIn && part ? (
-							<Pressable onPress={() => favorite.mutate(!part.isFavorite)} style={roundButton}>
+							<Pressable accessibilityRole="button" accessibilityLabel={part.isFavorite ? t('Убрать из избранного') : t('В избранное')} onPress={() => favorite.mutate(!part.isFavorite)} style={roundButton}>
 								<HeartIcon size={20} color={part.isFavorite ? c.danger : c.ink} filled={part.isFavorite} />
 							</Pressable>
 						) : null}
-						<Pressable onPress={share} style={roundButton}>
+						<Pressable accessibilityRole="button" accessibilityLabel={t('Поделиться')} onPress={share} style={roundButton}>
 							<ShareIcon size={20} color={c.ink} />
 						</Pressable>
 					</View>
@@ -279,7 +280,7 @@ export default function PartScreen() {
 				</Pressable>
 				{/* WhatsApp at the right edge — «Я из приложения KUDAIBERDI. Меня интересует «…»» (only when the shop's number is visible). */}
 				{shop?.phone ? (
-					<Pressable
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Написать в WhatsApp')}
 						onPress={() => shop.phone && openWhatsApp(shop.phone, part?.title)}
 						style={{ width: 54, height: 54, borderRadius: 14, backgroundColor: '#25D366', alignItems: 'center', justifyContent: 'center' }}
 					>

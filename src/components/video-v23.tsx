@@ -1,7 +1,8 @@
 // Videos from the market: icons of the feed, the autoplaying tile of «Видео с рынка» and the delivery pieces
 // (truck, «Ылдам Экспресс», day / price labels, the 17:30 cut-off). Sizes and colours — from the mockup.
 import { useEffect, type ReactNode } from 'react'
-import { Image, Pressable, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import Svg, { Circle, Path, Rect } from 'react-native-svg'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useVideoPlayer, VideoView, type VideoPlayer } from 'expo-video'

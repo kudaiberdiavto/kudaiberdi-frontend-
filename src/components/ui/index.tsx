@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { fontFamily, raw, useColors } from '@/theme'
+import { haptic } from '@/lib/haptics'
 import { t } from '@/i18n'
 
 export { Button } from './button'
@@ -12,6 +13,7 @@ export { PhotoPlaceholder } from './photo'
 export { ProductCard } from './product-card'
 export { EmptyState, NoticeBanner, QueryErrorBanner } from './notice'
 export { BottomSheet } from './sheet'
+export { toast } from './toast'
 export {
 	Skeleton,
 	SkeletonCard,
@@ -149,7 +151,10 @@ export function Segmented({
 				return (
 					<Pressable
 						key={label}
-						onPress={() => onChange(i)}
+						onPress={() => {
+							if (i !== value) haptic.select()
+							onChange(i)
+						}}
 						style={{
 							flex: 1,
 							height: itemHeight,
@@ -179,7 +184,12 @@ export function Toggle({ value, onChange }: { value: boolean; onChange?: (next: 
 	const c = useColors()
 	return (
 		<Pressable
-			onPress={() => onChange?.(!value)}
+			onPress={() => {
+				haptic.select()
+				onChange?.(!value)
+			}}
+			accessibilityRole="switch"
+			accessibilityState={{ checked: value }}
 			style={{
 				width: 44,
 				height: 28,

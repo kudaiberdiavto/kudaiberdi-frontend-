@@ -85,7 +85,7 @@ export function SelectSheet<K extends string | number>({
 			<View style={{ flex: 1, backgroundColor: c.surface, paddingBottom: insets.bottom }}>
 				<View style={{ height: 60, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 					<Text style={{ flex: 1, fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{title}</Text>
-					<Pressable onPress={onClose} hitSlop={10} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}>
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Закрыть')} onPress={onClose} hitSlop={10} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}>
 						<CloseIcon size={18} color={c.ink} />
 					</Pressable>
 				</View>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Image, Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { QueryErrorBanner, ServiceIcon, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus } from '@/components/ui'
@@ -66,7 +67,7 @@ export default function ServiceOffersScreen() {
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<Pressable onPress={() => router.back()} hitSlop={10}>
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} hitSlop={10}>
 					<BackChevron size={24} color={c.ink} />
 				</Pressable>
 				<Text numberOfLines={1} style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>

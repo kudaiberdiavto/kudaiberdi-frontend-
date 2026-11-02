@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { ActivityIndicator, Image, Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BottomSheet, QueryErrorBanner, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus } from '@/components/ui'
+import { BottomSheet, QueryErrorBanner, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus, toast } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import {
 	BubbleIcon,
@@ -426,6 +427,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 									shopCard(shop, close.variables?.shopId === shop.id, () =>
 										close.mutate({ shopId: shop.id }, {
 											onSuccess: () => {
+												toast(t('Запрос закрыт — спасибо!'))
 												onClose()
 												router.back()
 											},

@@ -257,7 +257,19 @@ export function CatalogScreen() {
 				ListFooterComponent={search.isFetchingNextPage ? <SkeletonProductGrid rows={1} /> : undefined}
 				ListEmptyComponent={
 					search.isSuccess ? (
-						<EmptyState title={t('Ничего не нашли')} icon={SearchIcon} />
+						<EmptyState
+							title={t('Ничего не нашли')}
+							icon={SearchIcon}
+							hint={t('Спросите у продавцов рынка — кто-то наверняка держит её не на витрине')}
+							action={{
+								label: t('Спросить у продавцов'),
+								onPress: () =>
+									router.push({
+										pathname: '/search-part',
+										params: { ...(f.q.trim() ? { text: f.q.trim() } : {}), ...(carId ? { carId: String(carId) } : {}) },
+									}),
+							}}
+						/>
 					) : search.isLoading ? (
 						<SkeletonProductGrid rows={3} />
 					) : undefined

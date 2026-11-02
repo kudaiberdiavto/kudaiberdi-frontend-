@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { ActivityIndicator, FlatList, Image, KeyboardAvoidingView, Linking, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from 'react-native'
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Linking, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { router } from 'expo-router'
+import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { API_URL } from '@/lib/env'
 import Svg, { Path } from 'react-native-svg'
-import { BottomSheet, Button, EmptyState, LanguageSwitch, PhotoPlaceholder, QueryErrorBanner, Screen, SettingsRow, Skeleton, Toggle } from '@/components/ui'
+import { BottomSheet, Button, EmptyState, LanguageSwitch, PhotoPlaceholder, QueryErrorBanner, Screen, SettingsRow, Skeleton, Toggle, toast } from '@/components/ui'
 import { PlusIcon, TagIcon } from '@/components/icons'
 import { Label } from '@/components/seller-v23'
 import { BrandLogo } from '@/components/ui/brand'
@@ -36,6 +38,7 @@ export default function SellerBoxScreen() {
 	const summary = useMyPartsSummary()
 	const parts = useMyParts('ALL')
 	const items = flattenPages(parts.data)
+	const pull = usePullRefresh(() => [shop.refetch(), parts.refetch(), summary.refetch()])
 	const setAvatar = useSetShopAvatar()
 	const avatarUpload = usePhotoUploads('AVATAR', 1, (photo) => setAvatar.mutateAsync(photo.id))
 	const [editing, setEditing] = useState(false)
@@ -156,7 +159,7 @@ export default function SellerBoxScreen() {
 						{data?.name ?? t('Мой контейнер')}
 					</Text>
 				)}
-				<Pressable onPress={() => setMenu(true)} hitSlop={10} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Меню')} onPress={() => setMenu(true)} hitSlop={10} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
 					<Svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke={c.ink} strokeWidth={2.2} strokeLinecap="round">
 						<Path d="M4 7h16M4 12h16M4 17h16" />
 					</Svg>
@@ -172,12 +175,8 @@ export default function SellerBoxScreen() {
 				showsVerticalScrollIndicator={false}
 				ListHeaderComponent={header}
 				onEndReached={() => parts.hasNextPage && !parts.isFetchingNextPage && parts.fetchNextPage()}
-				onRefresh={() => {
-					shop.refetch()
-					parts.refetch()
-					summary.refetch()
-				}}
-				refreshing={false}
+				onRefresh={pull.onRefresh}
+				refreshing={pull.refreshing}
 				ListEmptyComponent={
 					parts.isLoading ? (
 						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
@@ -339,7 +338,7 @@ function EditSheet({ shop, onClose }: { shop: MyShop; onClose: () => void }) {
 	const save = () =>
 		update.mutate(
 			{ name: name.trim(), phone: phone ? toE164(phone) : '', phoneVisible: Boolean(phone) },
-			{ onSuccess: onClose }
+			{ onSuccess: () => (toast(t('Сохранено')), onClose()) }
 		)
 
 	const field = {

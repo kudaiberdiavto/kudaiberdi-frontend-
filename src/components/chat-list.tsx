@@ -1,5 +1,7 @@
-import { FlatList, Image, Pressable, Text, View } from 'react-native'
+import { FlatList, Pressable, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { router } from 'expo-router'
+import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { Avatar, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRow } from '@/components/ui'
 import { ChatIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
@@ -19,6 +21,7 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 	const c = useColors()
 	const chats = useChats(as)
 	const extra = useChats(also ?? as, Boolean(also))
+	const pull = usePullRefresh(() => [chats.refetch(), also && extra.refetch()])
 	const items = also
 		? [...flattenPages(chats.data), ...flattenPages(extra.data)].sort((x, y) =>
 				(y.lastMessage?.at ?? y.updatedAt).localeCompare(x.lastMessage?.at ?? x.updatedAt)
@@ -45,8 +48,8 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 					if (chats.hasNextPage && !chats.isFetchingNextPage) chats.fetchNextPage()
 					if (also && extra.hasNextPage && !extra.isFetchingNextPage) extra.fetchNextPage()
 				}}
-				onRefresh={() => (chats.refetch(), also && extra.refetch())}
-				refreshing={false}
+				onRefresh={pull.onRefresh}
+				refreshing={pull.refreshing}
 				renderItem={({ item, index }) => <ChatRow chat={item} highlight={index === 0} />}
 				contentContainerStyle={{ flexGrow: 1 }}
 				ListEmptyComponent={

@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import { FlatList, Image, Pressable, Text, TextInput, View } from 'react-native'
+import { FlatList, Pressable, Text, TextInput, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { router } from 'expo-router'
+import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { Badge, PhotoPlaceholder, QueryErrorBanner, Screen, Skeleton, SkeletonRepeat } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { CameraIcon, PlusIcon, SearchIcon } from '@/components/icons'
@@ -22,6 +24,7 @@ export default function SellerProductsScreen() {
 	const [q, setQ] = useState('')
 	const summary = useMyPartsSummary()
 	const parts = useMyParts(filter, q.trim())
+	const pull = usePullRefresh(() => [parts.refetch(), summary.refetch()])
 	const items = flattenPages(parts.data)
 	const s = summary.data
 
@@ -56,7 +59,7 @@ export default function SellerProductsScreen() {
 					<ReelsIcon size={20} color={c.brandStrong} strokeWidth={2.2} />
 					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Видео')}</Text>
 				</Pressable>
-				<Pressable
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Снять запчасть')}
 					onPress={() => newPart('/camera')}
 					style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}
 				>
@@ -70,11 +73,8 @@ export default function SellerProductsScreen() {
 				contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 10, paddingBottom: 88 }}
 				showsVerticalScrollIndicator={false}
 				onEndReached={() => parts.hasNextPage && !parts.isFetchingNextPage && parts.fetchNextPage()}
-				onRefresh={() => {
-					parts.refetch()
-					summary.refetch()
-				}}
-				refreshing={false}
+				onRefresh={pull.onRefresh}
+				refreshing={pull.refreshing}
 				ListHeaderComponent={
 					<View style={{ gap: 10 }}>
 						<View

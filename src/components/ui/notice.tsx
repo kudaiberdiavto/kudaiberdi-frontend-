@@ -55,8 +55,21 @@ export function QueryErrorBanner({
 	return <NoticeBanner text={text} onPress={onRetry} style={style} />
 }
 
-/** An empty list: an icon in a tinted circle and a short title, centred in the free space (the list needs `contentContainerStyle.flexGrow: 1`). */
-export function EmptyState({ title, icon: Icon }: { title: string; icon?: ComponentType<IconProps> }) {
+/**
+ * An empty list: an icon in a tinted circle and a short title, centred in the free space (the list needs `contentContainerStyle.flexGrow: 1`).
+ * `hint` and `action` turn a dead end into a next step («Ничего не нашли» → «Спросить у продавцов»).
+ */
+export function EmptyState({
+	title,
+	icon: Icon,
+	hint,
+	action,
+}: {
+	title: string
+	icon?: ComponentType<IconProps>
+	hint?: string
+	action?: { label: string; onPress: () => void }
+}) {
 	const c = useColors()
 	return (
 		<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 60, gap: 16 }}>
@@ -65,7 +78,21 @@ export function EmptyState({ title, icon: Icon }: { title: string; icon?: Compon
 					<Icon size={44} color={c.brandStrong} strokeWidth={1.8} />
 				</View>
 			) : null}
-			<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink, textAlign: 'center' }}>{title}</Text>
+			<View style={{ gap: 6 }}>
+				<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink, textAlign: 'center' }}>{title}</Text>
+				{hint ? (
+					<Text style={{ fontSize: 16, lineHeight: 22, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>{hint}</Text>
+				) : null}
+			</View>
+			{action ? (
+				<Pressable
+					onPress={action.onPress}
+					accessibilityRole="button"
+					style={{ height: 50, paddingHorizontal: 22, borderRadius: 14, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}
+				>
+					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{action.label}</Text>
+				</Pressable>
+			) : null}
 		</View>
 	)
 }

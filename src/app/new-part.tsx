@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { QueryErrorBanner, Segmented, Skeleton, Toggle } from '@/components/ui'
+import { QueryErrorBanner, Segmented, Skeleton, Toggle, toast } from '@/components/ui'
 import { MediaViewer } from '@/components/media-viewer'
 import { PlayIcon } from '@/components/voice'
 import { resolveUrl } from '@/lib/api'
@@ -81,6 +82,7 @@ export default function NewPartScreen() {
 	const onDraft = async () => {
 		try {
 			await saveDraft()
+			toast(t('Черновик сохранён'))
 			router.back()
 		} catch {}
 	}
@@ -89,6 +91,7 @@ export default function NewPartScreen() {
 		try {
 			const part = await saveDraft()
 			if (part.status !== 'ACTIVE') await publish.mutateAsync(part.id)
+			toast(part.status === 'ACTIVE' ? t('Изменения сохранены') : t('Опубликовано'))
 			router.back()
 		} catch {}
 	}
@@ -157,7 +160,7 @@ export default function NewPartScreen() {
 					gap: 10,
 				}}
 			>
-				<Pressable onPress={() => router.back()}>
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()}>
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
@@ -271,7 +274,7 @@ export default function NewPartScreen() {
 							>
 								{fitment.brand ? <BrandLogo brand={fitment.brand} size={28} /> : null}
 								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{fitment.label}</Text>
-								<Pressable
+								<Pressable accessibilityRole="button" accessibilityLabel={t('Убрать машину')}
 									onPress={() => draft.removeFitment(index)}
 									style={{ width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}
 								>

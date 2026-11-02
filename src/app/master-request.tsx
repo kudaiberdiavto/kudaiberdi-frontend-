@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ScrollView } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
+import { haptic } from '@/lib/haptics'
 import { QueryErrorBanner, Screen, SkeletonRequestCard } from '@/components/ui'
 import { TopBar } from '@/components/buyer-v23'
 import { minutesLeft } from '@/lib/format'
@@ -36,7 +37,7 @@ export default function MasterRequestScreen() {
 						now={now}
 						onVoice={() => answer(true)}
 						onHelp={() => answer(false)}
-						onSkip={() => offer.mutate({ id, body: { answer: 'NOT_MINE' } }, { onSuccess: () => router.back() })}
+						onSkip={() => (haptic.tap(), offer.mutate({ id, body: { answer: 'NOT_MINE' } }, { onSuccess: () => router.back() }))}
 						full
 					/>
 				) : request.isLoading ? (

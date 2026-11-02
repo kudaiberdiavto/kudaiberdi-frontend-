@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
-import { Alert, Image, Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { Alert, Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { API_URL } from '@/lib/env'

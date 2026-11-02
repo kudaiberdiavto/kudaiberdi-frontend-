@@ -1,5 +1,6 @@
-import { Image, Pressable, Text, View, type ImageSourcePropType } from 'react-native'
-import { logos } from '@/data/brands'
+import { Pressable, Text, View } from 'react-native'
+import { Image } from './image'
+import { logos, type LogoSource } from '@/data/brands'
 import { resolveUrl } from '@/lib/api'
 import { fontFamily, useColors } from '@/theme'
 
@@ -9,7 +10,7 @@ interface BrandLike {
 	name: string
 	placeholder: string
 	color: string
-	logo?: ImageSourcePropType | null
+	logo?: LogoSource | null
 	logoUrl?: string | null
 }
 
@@ -37,7 +38,7 @@ export function BrandLogo({ brand: input, size = 36 }: { brand: BrandLike; size?
 			}}
 		>
 			{brand.logo ? (
-				<Image source={brand.logo} resizeMode="contain" style={{ width: size * 0.7, height: size * 0.7 }} />
+				<Image source={brand.logo} contentFit="contain" style={{ width: size * 0.7, height: size * 0.7 }} />
 			) : (
 				<Text
 					style={{

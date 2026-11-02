@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react'
-import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { QueryErrorBanner, Skeleton } from '@/components/ui'
@@ -11,6 +12,7 @@ import { TruckTile } from '@/components/video-v23'
 import { RecordingBar, useVoiceRecorder, VideoBubble } from '@/components/chat-media'
 import { MediaViewer } from '@/components/media-viewer'
 import { fontFamily, raw, useColors } from '@/theme'
+import { haptic } from '@/lib/haptics'
 import { newIdempotencyKey, resolveUrl } from '@/lib/api'
 import { formatAgo, formatClock, formatPrice, formatWhenAt } from '@/lib/format'
 import { useRealtime, useChatChannel } from '@/lib/realtime'
@@ -114,6 +116,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 	const send = () => {
 		const value = text.trim()
 		if (!value) return
+		haptic.tap()
 		sender.send({ text: value })
 		setText('')
 	}
@@ -150,6 +153,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 
 	const pressQuick = (reply: QuickReply) => {
 		if (reply.kind === 'ACTION') return onAction(reply)
+		haptic.tap()
 		if (reply.code) sender.send({ quickReply: reply.code })
 		else sender.send({ text: reply.text })
 	}
@@ -263,7 +267,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 				}}
 			>
 				{canWrite && !voice.recording ? (
-					<Pressable
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Отправить фото')}
 						onPress={attach}
 						style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' }}
 					>
@@ -297,7 +301,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 					/>
 				)}
 				{text.trim() || voice.recording ? (
-					<Pressable
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Отправить')}
 						onPress={voice.recording ? voice.send : send}
 						disabled={!canWrite}
 						style={{
@@ -313,8 +317,8 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 					</Pressable>
 				) : (
 					// Empty field — the mic: tap to record a voice message (up to 60 s), send with the arrow.
-					<Pressable
-						onPress={voice.start}
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Записать голосовое')}
+						onPress={() => (haptic.tap(), voice.start())}
 						disabled={!canWrite}
 						style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}
 					>

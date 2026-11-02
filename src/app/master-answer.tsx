@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Stack, router, useLocalSearchParams } from 'expo-router'
+import { toast } from '@/components/ui'
 import { VoicePlayer, VoiceRecordingPanel, VoiceResultPanel, useVoiceNote } from '@/components/voice'
 import { CheckMark, MicOutline, SendPlane } from '@/components/master-v23'
 import { MediaStrip } from '@/components/media-strip'
@@ -71,7 +72,7 @@ export default function MasterAnswerScreen() {
 					voiceMediaId: voice.result?.voice.id,
 				},
 			},
-			{ onSuccess: () => router.back() }
+			{ onSuccess: () => (toast(t('Ответ отправлен клиенту')), router.back()) }
 		)
 	}
 

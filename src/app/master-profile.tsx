@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react'
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View, type ScrollViewInstance } from 'react-native'
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View, type ScrollViewInstance } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Location from 'expo-location'
 import { addressAt, currentCoords } from '@/lib/locate'
-import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceGrid, Skeleton, Toggle } from '@/components/ui'
+import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceGrid, Skeleton, Toggle, toast } from '@/components/ui'
 import { ChevronLeftIcon, LocateIcon, MapPinIcon, PhotoIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
 import { useBrands } from '@/api/directory'
@@ -49,7 +50,7 @@ function MasterProfileSkeleton() {
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				{router.canGoBack() ? (
-					<Pressable onPress={() => router.back()}>
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()}>
 						<ChevronLeftIcon size={24} color={c.ink} />
 					</Pressable>
 				) : null}
@@ -145,7 +146,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				{router.canGoBack() ? (
-					<Pressable onPress={() => router.back()}>
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()}>
 						<ChevronLeftIcon size={24} color={c.ink} />
 					</Pressable>
 				) : null}
@@ -308,7 +309,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 								brandIds: form.allBrands ? [] : form.brandIds,
 								phone: form.phone || undefined,
 							},
-							{ onSuccess: () => (first ? router.replace('/master') : router.back()) }
+							{ onSuccess: () => (toast(t('Профиль сохранён')), first ? router.replace('/master') : router.back()) }
 						)
 					}
 				/>

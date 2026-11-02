@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import { Image, Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { CameraView, useCameraPermissions } from 'expo-camera'
@@ -102,14 +103,14 @@ export default function CameraScreen() {
 					gap: 12,
 				}}
 			>
-				<Pressable
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Закрыть')}
 					onPress={() => router.back()}
 					style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' }}
 				>
 					<CloseIcon size={20} color="#FFFFFF" />
 				</Pressable>
 				<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{title}</Text>
-				<Pressable
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Вспышка')}
 					onPress={() => setTorch((v) => !v)}
 					style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' }}
 				>
@@ -247,7 +248,7 @@ export default function CameraScreen() {
 					justifyContent: 'space-between',
 				}}
 			>
-				<Pressable
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Выбрать из галереи')}
 					onPress={fromGallery}
 					style={{ width: 52, height: 52, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' }}
 				>

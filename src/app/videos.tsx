@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { FlatList, Image, Pressable, Share, Text, View, type ListViewToken } from 'react-native'
+import { FlatList, Pressable, Share, Text, View, type ListViewToken } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router, useIsFocused } from 'expo-router'
 import { useEvent } from 'expo'
 import { useVideoPlayer, VideoView } from 'expo-video'
+import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { BackIcon, CONDITION_CHIP, PaperPlaneIcon, priceDigits } from '@/components/buyer-v23'
 import { BookmarkIcon, SoundOffIcon, SoundOnIcon, TruckIcon, YellowChip, setPlayerMuted } from '@/components/video-v23'
 import { fontFamily, useColors } from '@/theme'
@@ -33,6 +35,7 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 	const startPartId = useVideoViewer((s) => s.startPartId)
 	// Ads from the market — the same for everyone, not tied to a car.
 	const feed = useVideoFeed()
+	const pull = usePullRefresh(() => feed.refetch())
 	const items = flattenPages(feed.data)
 	const [height, setHeight] = useState(0)
 	const [index, setIndex] = useState(0)
@@ -101,13 +104,13 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 						</View>
 						)
 					}
-					onRefresh={() => feed.refetch()}
-					refreshing={false}
+					onRefresh={pull.onRefresh}
+					refreshing={pull.refreshing}
 				/>
 			) : null}
 
 			<View style={{ position: 'absolute', top: top + 8, left: 16, right: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-				<Pressable
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')}
 					onPress={() => router.back()}
 					hitSlop={10}
 					style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.16)', alignItems: 'center', justifyContent: 'center' }}
@@ -197,7 +200,7 @@ function FeedPage({
 
 	return (
 		<View style={{ height, backgroundColor: '#000000' }}>
-			{poster ? <Image source={{ uri: poster }} resizeMode="cover" style={{ position: 'absolute', width: '100%', height: '100%' }} /> : null}
+			{poster ? <Image source={{ uri: poster }} contentFit="cover" style={{ position: 'absolute', width: '100%', height: '100%' }} /> : null}
 			{near ? <FeedVideo url={item.video.url} active={active} muted={muted} durationSec={item.video.durationSec} bottom={bottom} /> : null}
 			<LinearGradient
 				colors={['rgba(0,0,0,0.45)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.85)']}

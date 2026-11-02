@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { FlatList, Image, Pressable, Text, TextInput, View } from 'react-native'
+import { FlatList, Pressable, Text, TextInput, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { BackIcon } from '@/components/buyer-v23'
@@ -31,7 +32,7 @@ export default function ShopsScreen() {
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<View style={{ height: 56, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-				<Pressable onPress={() => router.back()} hitSlop={10}>
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} hitSlop={10}>
 					<BackIcon color={c.ink} />
 				</Pressable>
 				<Text style={{ flex: 1, fontSize: 24, fontFamily: fontFamily(700), color: c.ink }}>{t('Магазины')}</Text>

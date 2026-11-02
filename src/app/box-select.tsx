@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, Tex
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import * as Location from 'expo-location'
-import { BottomSheet, BrandLogo, Button, QueryErrorBanner } from '@/components/ui'
+import { BottomSheet, BrandLogo, Button, QueryErrorBanner, toast } from '@/components/ui'
 import { BackIcon, BrandTile, Label, PlusIcon, TickIcon } from '@/components/seller-v23'
 import { LocateIcon, SearchIcon } from '@/components/icons'
 import { addressAt, currentCoords } from '@/lib/locate'
@@ -129,7 +129,7 @@ export default function BoxSelectScreen() {
 			return
 		}
 		if (!slot) return
-		if (hasShop) relocate.mutate(slot.id, { onSuccess: () => router.back() })
+		if (hasShop) relocate.mutate(slot.id, { onSuccess: () => (toast(t('Контейнер изменён')), router.back()) })
 		else register.mutate({ containerId: slot.id, brandIds: picked }, { onSuccess: () => router.replace('/seller') })
 	}
 
@@ -137,7 +137,7 @@ export default function BoxSelectScreen() {
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				{router.canGoBack() ? (
-					<Pressable onPress={() => router.back()} hitSlop={10}>
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} hitSlop={10}>
 						<BackIcon color={c.ink} />
 					</Pressable>
 				) : null}

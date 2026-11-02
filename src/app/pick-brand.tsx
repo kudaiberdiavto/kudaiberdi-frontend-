@@ -10,6 +10,7 @@ import { useSearchCount } from '@/api/catalog'
 import { useBrands, useModels } from '@/api/directory'
 import type { Brand } from '@/api/types'
 import { toPartFilters, useCatalogFilters } from '@/store/useCatalogFilters'
+import { t } from '@/i18n'
 
 /** 28 «Марка авто» — for the catalog when the car is not in the garage. */
 export default function PickBrandScreen() {
@@ -49,7 +50,7 @@ export default function PickBrandScreen() {
 					gap: 10,
 				}}
 			>
-				<Pressable onPress={() => router.back()}>
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()}>
 					<ChevronLeftIcon size={24} color={c.ink} />
 				</Pressable>
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
