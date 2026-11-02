@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 import { Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { fixed, fontFamily, fs, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { haptic } from '@/lib/haptics'
 import { t } from '@/i18n'
+import { PlacePlate } from './place-plate'
 
 export { Button } from './button'
 export { Chip } from './chip'
@@ -16,6 +17,7 @@ export { BottomSheet } from './sheet'
 export { toast, undoToast } from './toast'
 export { MoreButton } from './more-button'
 export { ScreenHeader } from './screen-header'
+export { PlacePlate } from './place-plate'
 export {
 	Skeleton,
 	SkeletonCard,
@@ -84,20 +86,12 @@ export function Card({
 	)
 }
 
-/** Overline-заголовок секции: 13px, weight 700, letterSpacing .08em, uppercase. */
+/** A section heading — sentence case (see `sectionTitle`). */
 export function SectionLabel({ children, style }: { children: string; style?: StyleProp<ViewStyle> }) {
 	const c = useColors()
 	return (
 		<View style={style}>
-			<Text
-				style={{
-					fontSize: fs.sm,
-					fontFamily: fontFamily(700),
-					letterSpacing: 1.04,
-					textTransform: 'uppercase',
-					color: c.muted,
-				}}
-			>
+			<Text accessibilityRole="header" style={{ ...sectionTitle, color: c.inkSecondary }}>
 				{children}
 			</Text>
 		</View>
@@ -291,28 +285,9 @@ export function LanguageSwitch({ value, onChange }: { value: 'ru' | 'kg'; onChan
 }
 
 /** Карточка «РЯД / КОНТЕЙНЕР» с крупными цифрами — экраны 22 и 30. */
-export function LocationCard({
-	rowLabel,
-	boxLabel,
-	style,
-}: {
-	rowLabel: string
-	boxLabel: string
-	style?: StyleProp<ViewStyle>
-}) {
-	const c = useColors()
-	const cell = (title: string, value: string) => (
-		<View style={{ flex: 1, borderRadius: 12, backgroundColor: c.surface, paddingVertical: 8, paddingHorizontal: 12, gap: 2 }}>
-			<Text style={{ fontSize: fs.xxs, fontFamily: fontFamily(700), letterSpacing: 0.88, color: c.muted }}>{title}</Text>
-			<Text style={{ fontSize: fs.h1, lineHeight: 29.9, fontFamily: fontFamily(800), color: c.ink }}>{value}</Text>
-		</View>
-	)
-	return (
-		<View style={[{ flexDirection: 'row', gap: 12 }, style]}>
-			{cell(t('РЯД'), rowLabel)}
-			{cell(t('КОНТЕЙНЕР'), boxLabel)}
-		</View>
-	)
+/** The shop's place on its own page — the large place plate. */
+export function LocationCard({ rowLabel, boxLabel, style }: { rowLabel: string; boxLabel: string; style?: StyleProp<ViewStyle> }) {
+	return <PlacePlate row={rowLabel} box={boxLabel} size="lg" style={style} />
 }
 
 /** Шаг количества «−  N  +» — экран 26. */

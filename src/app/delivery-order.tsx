@@ -128,8 +128,8 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 					end={{ x: 0.75, y: 1 }}
 					style={{ borderRadius: 20, padding: 16, gap: 6 }}
 				>
-					<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), letterSpacing: 1, color: 'rgba(255,255,255,0.85)' }}>
-						{CAPTION[order.status].toUpperCase()}
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: 'rgba(255,255,255,0.85)' }}>
+						{CAPTION[order.status]}
 					</Text>
 					<Text style={{ fontSize: fs.h2, fontFamily: fontFamily(800), letterSpacing: -0.4, color: fixed.white }}>{routeTitle(order)}</Text>
 					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.9)' }}>{arrivalText(order)}</Text>
@@ -281,8 +281,8 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 		<>
 			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 				<View style={{ borderRadius: 18, backgroundColor: c.warningSoft, padding: 16, gap: 4 }}>
-					<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), letterSpacing: 1, color: c.warningInk }}>
-						{t('{0} · в {1}', caption, toRegion(destination)).toUpperCase()}
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.warningInk }}>
+						{t('{0} · в {1}', caption, toRegion(destination))}
 					</Text>
 					<Text style={{ fontSize: fs.xxl, lineHeight: 25.5, fontFamily: fontFamily(800), color: c.ink }}>{order.part.title}</Text>
 					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.inkSecondary }}>

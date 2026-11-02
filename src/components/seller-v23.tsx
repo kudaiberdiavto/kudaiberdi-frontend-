@@ -2,7 +2,7 @@
 import { Pressable, Text, View } from 'react-native'
 import Svg, { Path, Rect } from 'react-native-svg'
 import { BrandLogo } from '@/components/ui'
-import { fixed, fontFamily, fs, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import type { Brand } from '@/api/types'
 
 interface IconProps {
@@ -84,13 +84,13 @@ export function PlusIcon({ size = 20, color, strokeWidth = 2.6 }: IconProps) {
 	)
 }
 
-/** The mockup's section caption: 13 px, 700, letter-spacing .08em, upper case. */
+/** A section heading — sentence case (see `sectionTitle`). */
 export function Label({ children, right }: { children: string; right?: React.ReactNode }) {
 	const c = useColors()
 	return (
 		<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 			<Text
-				style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}
+				style={{ ...sectionTitle, color: c.inkSecondary }}
 			>
 				{children}
 			</Text>

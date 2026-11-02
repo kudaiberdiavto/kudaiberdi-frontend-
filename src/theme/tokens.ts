@@ -7,6 +7,7 @@
 //             Не для кнопок — у Button / BigButton зелёного варианта нет.
 //   danger  — ошибки и необратимое (удалить аккаунт).
 //   fixed.whatsapp — только кнопка WhatsApp.
+//   fixed.plate — только табличка места (ряд и контейнер): жёлтый всегда значит «идти сюда».
 
 export const lightColors = {
 	surface: '#F3F5F8',
@@ -118,6 +119,14 @@ export const fixed = {
 	live: '#22C55E',
 	/** Link on the dark «Не нашли?» bar. */
 	linkOnDark: '#8FB0FF',
+	/**
+	 * The place plate — row and container painted like the marking on the market's containers. The signature
+	 * of the app: only the plate is this yellow, so yellow always means «go here». Same in both themes.
+	 */
+	plate: '#F2C230',
+	plateInk: '#1A1A17',
+	/** Labels on the plate («ряд», «конт.»). */
+	plateMuted: '#5E4F12',
 	/** The one brand gradient: home banners, the role screen, the master's profile header. */
 	brandGradient: ['#2D63F0', '#1D46BF'] as [string, string],
 	brandShadow: '#1D46BF',
@@ -229,5 +238,11 @@ export const fs = {
 	/** Big numbers: the price being typed, the SMS code title. */
 	hero: 32,
 } as const
+
+/**
+ * A section heading — sentence case, not the tracked ALL-CAPS overline («ИЩУ ДЛЯ МАШИНЫ» → «Ищу для машины»).
+ * Colour at the call site: `{ ...sectionTitle, color: c.inkSecondary }`.
+ */
+export const sectionTitle = { fontSize: fs.base, fontFamily: font.bold, letterSpacing: -0.1 } as const
 
 export type Colors = typeof lightColors

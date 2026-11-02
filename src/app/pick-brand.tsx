@@ -5,7 +5,7 @@ import { router } from 'expo-router'
 import { QueryErrorBanner, ScreenHeader } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { SearchIcon } from '@/components/icons'
-import { fixed, fontFamily, fs, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { useSearchCount } from '@/api/catalog'
 import { useBrands, useModels } from '@/api/directory'
 import type { Brand } from '@/api/types'
@@ -69,7 +69,7 @@ export default function PickBrandScreen() {
 				<QueryErrorBanner error={all.error} onRetry={() => all.refetch()} />
 
 				{popular.length ? (
-					<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ПОПУЛЯРНЫЕ</Text>
+					<Text style={{ ...sectionTitle, color: c.inkSecondary }}>ПОПУЛЯРНЫЕ</Text>
 				) : null}
 
 				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -104,7 +104,7 @@ export default function PickBrandScreen() {
 				</View>
 
 				{others.length ? (
-					<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
+					<Text style={{ ...sectionTitle, color: c.inkSecondary }}>
 						{searching ? 'НАЙДЕНО' : 'ВСЕ МАРКИ А–Я'}
 					</Text>
 				) : null}

@@ -5,7 +5,7 @@ import { router, useScrollToTop } from 'expo-router'
 import { EmptyState, ProductCard, QueryErrorBanner, Skeleton, SkeletonProductGrid } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { SearchIcon } from '@/components/icons'
-import { fixed, fontFamily, fs, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { useVideoViewer } from '@/store/useVideoViewer'
 import { MarketVideos } from '@/components/market-videos'
 import { RecentlyViewed } from '@/components/recently-viewed'
@@ -128,7 +128,7 @@ export function CatalogScreen() {
 			{focused && !text && recent.items.length ? (
 				<View style={{ gap: 8 }}>
 					<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-						<Text style={{ flex: 1, fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('НЕДАВНО ИСКАЛИ')}</Text>
+						<Text style={{ flex: 1, ...sectionTitle, color: c.inkSecondary }}>{t('Недавно искали')}</Text>
 						<Text onPress={recent.clear} style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.brandStrong }}>{t('Очистить')}</Text>
 					</View>
 					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -150,7 +150,7 @@ export function CatalogScreen() {
 				</View>
 			) : null}
 
-			<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ИЩУ ДЛЯ МАШИНЫ')}</Text>
+			<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('Ищу для машины')}</Text>
 
 			<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 				{carList.map((car) => {
@@ -288,7 +288,7 @@ export function CatalogScreen() {
 				onEndReached={() => search.hasNextPage && !search.isFetchingNextPage && search.fetchNextPage()}
 				renderItem={({ item: row }) =>
 					row.kind === 'others' ? (
-						<Text style={{ paddingTop: 8, fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ОСТАЛЬНЫЕ ЗАПЧАСТИ')}</Text>
+						<Text style={{ paddingTop: 8, ...sectionTitle, color: c.inkSecondary }}>{t('Остальные запчасти')}</Text>
 					) : (
 						<View style={{ flexDirection: 'row', gap: 12 }}>
 							{row.parts.map((part) => (

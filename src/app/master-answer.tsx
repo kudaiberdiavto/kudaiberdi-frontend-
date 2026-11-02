@@ -7,7 +7,7 @@ import { toast } from '@/components/ui'
 import { VoicePlayer, VoiceRecordingPanel, VoiceResultPanel, useVoiceNote } from '@/components/voice'
 import { CheckMark, MicOutline, SendPlane } from '@/components/master-v23'
 import { MediaStrip } from '@/components/media-strip'
-import { fixed, fontFamily, fs, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { formatClock, formatNumber } from '@/lib/format'
 import { useMasterOffer, useMasterRequest } from '@/api/services'
 import { t } from '@/i18n'
@@ -140,7 +140,7 @@ export default function MasterAnswerScreen() {
 					{voice.error ? <Text style={{ fontSize: fs.sm, fontFamily: fontFamily(500), color: c.danger }}>{voice.error}</Text> : null}
 
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}>
+						<Text style={{ ...sectionTitle, color: c.inkSecondary }}>
 							{voice.result ? t('Заполнили из голоса') : t('Цена и время')}
 						</Text>
 						<View style={{ flex: 1 }} />

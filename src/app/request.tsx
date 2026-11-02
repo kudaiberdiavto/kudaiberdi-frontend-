@@ -3,12 +3,12 @@ import { ActivityIndicator, Linking, Pressable, ScrollView, Text, View } from 'r
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BottomSheet, Button, QueryErrorBanner, ScreenHeader, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus, toast } from '@/components/ui'
+import { BottomSheet, Button, PlacePlate, QueryErrorBanner, ScreenHeader, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus, toast } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { BubbleIcon, CallIcon, ChevronIcon, CrossIcon, LoupeIcon, RouteIcon, TickIcon, priceDigits, replyChips } from '@/components/buyer-v23'
 import { VoicePlayer } from '@/components/voice'
 import { MediaStrip, photosAsMedia } from '@/components/media-strip'
-import { fixed, fontFamily, fs, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { minutesLeft, plural } from '@/lib/format'
 import { askForReview } from '@/lib/store-review'
 import { resolveUrl } from '@/lib/api'
@@ -148,30 +148,27 @@ export default function RequestScreen() {
 					<SortChip label={t('Новые')} active={onlyNew} onPress={() => setOnlyNew(!onlyNew)} />
 				</ScrollView>
 
-				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-					<Text
-						onPress={() => setTab('HAVE')}
-						style={{
-							fontSize: fs.sm,
-							fontFamily: fontFamily(tab === 'HAVE' ? 700 : 600),
-							letterSpacing: tab === 'HAVE' ? 1.04 : 0,
-							color: c.muted,
-						}}
-					>
-						{tab === 'HAVE' ? t('ЕСТЬ · {0}', have.length) : t('Есть · {0}', have.length)}
-					</Text>
-					<View style={{ flex: 1 }} />
-					<Text
-						onPress={() => setTab('NOT_HAVE')}
-						style={{
-							fontSize: fs.sm,
-							fontFamily: fontFamily(tab === 'NOT_HAVE' ? 700 : 600),
-							letterSpacing: tab === 'NOT_HAVE' ? 1.04 : 0,
-							color: c.muted,
-						}}
-					>
-						{tab === 'NOT_HAVE' ? t('НЕТ · {0}', counts?.notHave ?? 0) : t('Нет · {0}', counts?.notHave ?? 0)}
-					</Text>
+				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }} accessibilityRole="tablist">
+					{(
+						[
+							{ value: 'HAVE', label: t('Есть · {0}', have.length) },
+							{ value: 'NOT_HAVE', label: t('Нет · {0}', counts?.notHave ?? 0) },
+						] as const
+					).map((item) => {
+						const active = tab === item.value
+						return (
+							<Pressable
+								key={item.value}
+								onPress={() => setTab(item.value)}
+								hitSlop={8}
+								accessibilityRole="tab"
+								accessibilityState={{ selected: active }}
+								style={{ paddingVertical: 6, borderBottomWidth: 2, borderBottomColor: active ? c.brand : 'transparent' }}
+							>
+								<Text style={{ ...sectionTitle, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.ink : c.muted }}>{item.label}</Text>
+							</Pressable>
+						)
+					})}
 				</View>
 
 				{tab === 'HAVE' ? (
@@ -293,19 +290,21 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 	const c = useColors()
 	const shop = reply.shop
 	if (!shop) return null
-	const place = shop.location
-		? t('Ряд {0} · конт. {1}', shop.location.rowCode, shop.location.number) + (reply.walkMinutes != null ? t(' · {0} мин', reply.walkMinutes) : '')
-		: (shop.address ?? '')
 	const chips = replyChips(reply)
 	return (
 		<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10, borderWidth: 2, borderColor: best ? c.success : c.card }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				<ShopAvatar name={shop.name} url={shop.avatarUrl} />
-				<View style={{ flex: 1, gap: 2 }}>
+				<View style={{ flex: 1, gap: 6 }}>
 					<Text numberOfLines={1} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>
 						{shop.name}
 					</Text>
-					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>{place}</Text>
+					{/* Where to go — the place plate; a shop off the market — its address. */}
+					{shop.location ? (
+						<PlacePlate row={shop.location.rowCode} box={shop.location.number} walk={reply.walkMinutes} />
+					) : (
+						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>{shop.address ?? ''}</Text>
+					)}
 				</View>
 				{reply.price != null ? (
 					<View style={{ alignItems: 'flex-end' }}>

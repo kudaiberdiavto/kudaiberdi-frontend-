@@ -4,7 +4,7 @@ import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { SearchIcon } from '@/components/icons'
-import { QueryErrorBanner, ScreenHeader, Skeleton, SkeletonRepeat } from '@/components/ui'
+import { PlacePlate, QueryErrorBanner, ScreenHeader, Skeleton, SkeletonRepeat } from '@/components/ui'
 import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { shopPlace } from '@/lib/shop-place'
@@ -94,15 +94,21 @@ export function ShopRow({ shop }: { shop: ShopCard }) {
 					<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop.name.charAt(0).toUpperCase()}</Text>
 				</View>
 			)}
-			<View style={{ flex: 1, gap: 3 }}>
+			<View style={{ flex: 1, gap: 6 }}>
 				<Text numberOfLines={1} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>
 					{shop.name}
+					{shop.reviewsCount ? (
+						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.muted }}>
+							{'  '}
+							<Text style={{ color: fixed.star }}>★</Text> {shop.rating.toFixed(1)}
+						</Text>
+					) : null}
 				</Text>
-				<Text numberOfLines={1} style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>
-					{shop.reviewsCount ? <Text style={{ color: fixed.star }}>★ </Text> : null}
-					{shop.reviewsCount ? `${shop.rating.toFixed(1)} · ` : ''}
-					{shopPlace(shop)}
-				</Text>
+				{shop.location ? (
+					<PlacePlate row={shop.location.rowCode} box={shop.location.number} />
+				) : (
+					<Text numberOfLines={1} style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>{shopPlace(shop)}</Text>
+				)}
 			</View>
 			<Text style={{ fontSize: fs.h2, color: c.muted }}>›</Text>
 		</Pressable>

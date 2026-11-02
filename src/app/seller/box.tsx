@@ -5,7 +5,7 @@ import { router, useScrollToTop } from 'expo-router'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { API_URL } from '@/lib/env'
 import Svg, { Path } from 'react-native-svg'
-import { BottomSheet, Button, EmptyState, LanguageSwitch, PhotoPlaceholder, QueryErrorBanner, Screen, SettingsRow, Skeleton, Toggle, toast } from '@/components/ui'
+import { BottomSheet, Button, EmptyState, LanguageSwitch, PhotoPlaceholder, PlacePlate, QueryErrorBanner, Screen, SettingsRow, Skeleton, toast, Toggle } from '@/components/ui'
 import { PlusIcon, TagIcon } from '@/components/icons'
 import { Label } from '@/components/seller-v23'
 import { BrandLogo } from '@/components/ui/brand'
@@ -121,7 +121,9 @@ export default function SellerBoxScreen() {
 				</View>
 			) : null}
 			<View style={{ gap: 2 }}>
-				{place ? (
+				{data?.location ? (
+					<PlacePlate row={data.location.rowCode} box={data.location.number} style={{ marginBottom: 4 }} />
+				) : place ? (
 					<Text numberOfLines={2} style={{ fontSize: fs.md, lineHeight: 21, fontFamily: fontFamily(500), color: c.ink }}>
 						{place}
 					</Text>

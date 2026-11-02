@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CheckIcon, CloseIcon, SearchIcon } from '@/components/icons'
-import { fontFamily, fs, useColors } from '@/theme'
+import { fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { t } from '@/i18n'
 
 export interface SelectOption<K extends string | number> {
@@ -29,7 +29,7 @@ export function SelectField({
 	const c = useColors()
 	return (
 		<View style={{ gap: 6, opacity: disabled ? 0.5 : 1 }}>
-			<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{label.toUpperCase()}</Text>
+			<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{label}</Text>
 			<Pressable
 				onPress={onPress}
 				disabled={disabled}

@@ -5,7 +5,7 @@ import { router } from 'expo-router'
 import { QueryErrorBanner, ScreenHeader, toast } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { CheckIcon, SearchIcon } from '@/components/icons'
-import { fixed, fontFamily, fs, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { plural } from '@/lib/format'
 import { useBrands } from '@/api/directory'
 import { useMyShop, useSetShopBrands } from '@/api/shop'
@@ -60,8 +60,8 @@ export default function SellerBrandsScreen() {
 
 
 				<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
-					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-						{searching ? t('НАЙДЕНО') : t('ПОПУЛЯРНЫЕ')}
+					<Text style={{ ...sectionTitle, color: c.inkSecondary }}>
+						{searching ? t('Найдено') : t('Популярные')}
 					</Text>
 					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: c.brandStrong }}>Выбрано {selected.length}</Text>
 				</View>
@@ -117,7 +117,7 @@ export default function SellerBrandsScreen() {
 				</View>
 
 				{!searching ? (
-					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ВСЕ МАРКИ А–Я')}</Text>
+					<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('Все марки А–Я')}</Text>
 				) : null}
 
 				<View style={{ borderRadius: 16, backgroundColor: c.card, overflow: 'hidden' }}>

@@ -3,7 +3,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
 import { BottomSheet, BrandLogo, Button, QueryErrorBanner, ScreenHeader, toast } from '@/components/ui'
 import { SearchIcon } from '@/components/icons'
-import { fontFamily, fs, useColors } from '@/theme'
+import { fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { useBrands, useModels } from '@/api/directory'
 import { useAddCar } from '@/api/garage'
 import type { Brand, CarModel, CarOrigin, FuelType } from '@/api/types'
@@ -119,7 +119,7 @@ export default function GarageAddScreen() {
 
 				{popular.length ? (
 					<>
-						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ПОПУЛЯРНЫЕ')}</Text>
+						<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('Популярные')}</Text>
 						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 							{popular.map((b) => {
 								const active = brand?.id === b.id
@@ -151,8 +151,8 @@ export default function GarageAddScreen() {
 				) : null}
 
 				{rest.length ? (
-					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-						{q.trim() ? t('НАЙДЕНО') : t('ВСЕ МАРКИ А–Я')}
+					<Text style={{ ...sectionTitle, color: c.inkSecondary }}>
+						{q.trim() ? t('Найдено') : t('Все марки А–Я')}
 					</Text>
 				) : null}
 				{rest.map((b) => (
@@ -237,15 +237,15 @@ export default function GarageAddScreen() {
 
 					{year && !once ? (
 						<>
-							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ОБЪЁМ, Л · НЕОБЯЗАТЕЛЬНО')}</Text>
+							<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('ОБЪЁМ, Л · НЕОБЯЗАТЕЛЬНО')}</Text>
 							<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 								{VOLUMES.map((v) => chip(v.toFixed(1), v === engineVolume, () => setEngineVolume(v === engineVolume ? null : v), v))}
 							</ScrollView>
-							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ТОПЛИВО')}</Text>
+							<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('Топливо')}</Text>
 							<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 								{FUELS.map((f) => chip(f.label, f.value === fuel, () => setFuel(f.value === fuel ? null : f.value), f.value))}
 							</View>
-							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ОТКУДА МАШИНА')}</Text>
+							<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('Откуда машина')}</Text>
 							<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 								{ORIGINS.filter((o) => o.value !== 'UNKNOWN').map((o) => chip(o.label, o.value === origin, () => setOrigin(o.value === origin ? null : o.value), o.value))}
 							</View>

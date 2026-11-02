@@ -12,7 +12,7 @@ import { MediaGallery, MediaStrip } from '@/components/media-strip'
 import { isPlaceholderText } from '@/components/request-text'
 import { CheckMark, MicOutline, UrgentChip, myOfferLine } from '@/components/master-v23'
 import { AccountStatusBanner } from '@/components/account-status-banner'
-import { fixed, fontFamily, fs, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { formatAgo, formatDistance, formatPrice, minutesLeft } from '@/lib/format'
 import { markServiceSeen, serviceName, useMasterFeed, useMasterOffer, useMyMaster, useServiceTypes } from '@/api/services'
 import { flattenPages } from '@/api/pagination'
@@ -66,7 +66,7 @@ export default function MasterRequestsScreen() {
 	// First master entry: fill the profile before the feed.
 	if (profile.isSuccess && !profile.data) return <Redirect href={{ pathname: '/master-profile', params: { first: '1' } }} />
 
-	const sectionStyle = { fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted } as const
+	const sectionStyle = { ...sectionTitle, color: c.inkSecondary } as const
 
 	// «Не моё» next to «Могу помочь»: hide at once, answer after the «Вернуть» toast is gone.
 	const skip = (id: number) => {

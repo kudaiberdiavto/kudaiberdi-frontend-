@@ -2,7 +2,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { Image } from '@/components/ui/image'
 import { PhotoPlaceholder } from '@/components/ui'
-import { fontFamily, fs, useColors } from '@/theme'
+import { fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatPrice } from '@/lib/format'
 import { useRecentlyViewed } from '@/store/useRecentlyViewed'
@@ -18,7 +18,7 @@ export function RecentlyViewed() {
 	return (
 		<View style={{ gap: 10, paddingTop: 2 }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-				<Text style={{ flex: 1, fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}>
+				<Text style={{ flex: 1, ...sectionTitle, color: c.inkSecondary }}>
 					{t('Недавно смотрели')}
 				</Text>
 				<Pressable onPress={clear} hitSlop={12} accessibilityRole="button">

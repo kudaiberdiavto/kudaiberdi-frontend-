@@ -10,7 +10,7 @@ import { addressAt, currentCoords } from '@/lib/locate'
 import { BrandLogo, ServiceIcon } from '@/components/ui'
 import { VoicePlayer, useVoiceNote, voiceClock } from '@/components/voice'
 import { CameraOutline, CloseX, MicOutline, ModalSheet, PinOutline, SendPlane } from '@/components/master-v23'
-import { fixed, fontFamily, fs, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, raw, sectionTitle, useColors } from '@/theme'
 import { plural } from '@/lib/format'
 import { useCars } from '@/api/garage'
 import { useServiceMedia } from '@/api/media'
@@ -119,7 +119,7 @@ export default function ServiceNewScreen() {
 	}
 
 	const label = (value: string) => (
-		<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}>{value}</Text>
+		<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{value}</Text>
 	)
 
 	return (

@@ -8,7 +8,7 @@ import { LocationCard, QueryErrorBanner, Skeleton, SkeletonProductGrid, Skeleton
 import { BrandLogo } from '@/components/ui/brand'
 import { ChatIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, PhoneIcon, ShareIcon, WhatsAppIcon } from '@/components/icons'
 import { openWhatsApp } from '@/lib/whatsapp'
-import { fixed, fontFamily, fs, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatDay, formatSide, plural } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
@@ -178,7 +178,7 @@ export default function SellerProfileForBuyerScreen() {
 
 					{brands.length ? (
 						<View style={{ gap: 8 }}>
-							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ПРОДАЁТ ДЛЯ МАРОК')}</Text>
+							<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('Продаёт для марок')}</Text>
 							{showAllBrands ? (
 								// all brands as chips: logo + name
 								<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>

@@ -3,7 +3,7 @@ import { Linking, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { MarketMapLive, type MarketMapLiveHandle } from '@/components/market-map-live'
-import { QueryErrorBanner, ScreenHeader } from '@/components/ui'
+import { PlacePlate, QueryErrorBanner, ScreenHeader } from '@/components/ui'
 import { LinearGradient } from 'expo-linear-gradient'
 import { BigButton, BubbleIcon, CallIcon } from '@/components/buyer-v23'
 import { schemaToGeo } from '@/lib/geo'
@@ -73,8 +73,7 @@ export default function RouteScreen() {
 
 				{data ? (
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-						<PlaceBox label={t('РЯД')} value={data.target.rowCode} />
-						<PlaceBox label={t('КОНТ.')} value={String(data.target.number)} />
+						<PlacePlate row={data.target.rowCode} box={data.target.number} size="md" />
 						<View style={{ flex: 1, gap: 2 }}>
 							<Text numberOfLines={1} style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: c.ink }}>
 								{params.shopName ?? formatPlace(data.target)}
@@ -120,12 +119,3 @@ export default function RouteScreen() {
 }
 
 /** «РЯД 14» / «КОНТ. 12» — blue boxes in the sheet [06]. */
-function PlaceBox({ label, value }: { label: string; value: string }) {
-	const c = useColors()
-	return (
-		<View style={{ borderRadius: 14, backgroundColor: c.brand, paddingVertical: 8, paddingHorizontal: 14, alignItems: 'center' }}>
-			<Text style={{ fontSize: fs.xxs, fontFamily: fontFamily(700), letterSpacing: 0.88, color: 'rgba(255,255,255,0.85)' }}>{label}</Text>
-			<Text style={{ fontSize: fs.h2, lineHeight: 28.5, fontFamily: fontFamily(800), color: fixed.white }}>{value}</Text>
-		</View>
-	)
-}

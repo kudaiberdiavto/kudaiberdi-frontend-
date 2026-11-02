@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react'
 import { ActivityIndicator, Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-native'
 import Svg, { Circle, Path, Rect } from 'react-native-svg'
-import { fixed, fontFamily, fs, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { t } from '@/i18n'
 
 // ─── Icons (24×24 strokes from the mockup) ──────────────────────────────────
@@ -166,13 +166,13 @@ export const DotsIcon = (p: V23IconProps) => (
  * 52px bar under the status bar: ‹ back, title (20px / 700; 26px for big titles), right slot.
  * `onClose` instead of `onBack` puts × on the right, as on «Найти запчасть» [04].
  */
-/** «НУЖЕН МАСТЕР?» — 13px / 700, letter-spacing .08em, uppercase; optional link on the right. */
+/** A section heading («Нужен мастер?», sentence case) with an optional link on the right. */
 export function Caps({ children, link, onLink }: { children: string; link?: string; onLink?: () => void }) {
 	const c = useColors()
 	return (
 		<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-			<Text style={{ flex: 1, fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-				{children.toUpperCase()}
+			<Text style={{ flex: 1, ...sectionTitle, color: c.inkSecondary }}>
+				{children}
 			</Text>
 			{link ? (
 				<Text onPress={onLink} style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>

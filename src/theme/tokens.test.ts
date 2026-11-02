@@ -38,6 +38,11 @@ describe.each([
 		expect(contrast(colors[text], colors[background])).toBeGreaterThanOrEqual(4.5)
 	})
 
+	it('the place plate: numbers ≥ 7:1, labels ≥ 4.5:1', () => {
+		expect(contrast(fixed.plateInk, fixed.plate)).toBeGreaterThanOrEqual(7)
+		expect(contrast(fixed.plateMuted, fixed.plate)).toBeGreaterThanOrEqual(4.5)
+	})
+
 	it('white text on the brand button ≥ 4.5:1', () => {
 		expect(contrast(fixed.white, colors.brand)).toBeGreaterThanOrEqual(4.5)
 	})
