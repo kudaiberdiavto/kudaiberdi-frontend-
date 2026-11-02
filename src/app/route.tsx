@@ -98,16 +98,15 @@ export default function RouteScreen() {
 				<View style={{ flexDirection: 'row', gap: 10 }}>
 					<BigButton
 						label={t('Позвонить')}
-						tone="green"
+						tone="grey"
 						height={52}
-						icon={<CallIcon size={20} color={fixed.white} strokeWidth={2.4} />}
+						icon={<CallIcon size={20} color={c.ink} strokeWidth={2.4} />}
 						disabled={!params.phone}
 						onPress={() => params.phone && Linking.openURL(`tel:${params.phone}`)}
 						style={{ flex: 1 }}
 					/>
 					<BigButton
 						label={t('Написать')}
-						tone="green"
 						height={52}
 						icon={<BubbleIcon size={20} color={fixed.white} strokeWidth={2.4} />}
 						disabled={!chatId}

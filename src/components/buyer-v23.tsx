@@ -183,7 +183,7 @@ export function Caps({ children, link, onLink }: { children: string; link?: stri
 	)
 }
 
-/** 56–58px main button: blue action or green «Есть / Позвонить». */
+/** 56–58px button: blue — the screen's main action, grey — a secondary one. Green is for statuses, not buttons. */
 export function BigButton({
 	label,
 	onPress,
@@ -196,7 +196,7 @@ export function BigButton({
 }: {
 	label: string
 	onPress?: () => void
-	tone?: 'blue' | 'green' | 'grey'
+	tone?: 'blue' | 'grey'
 	icon?: ReactNode
 	height?: number
 	loading?: boolean
@@ -204,7 +204,7 @@ export function BigButton({
 	style?: StyleProp<ViewStyle>
 }) {
 	const c = useColors()
-	const background = tone === 'green' ? c.success : tone === 'grey' ? c.fill : c.brand
+	const background = tone === 'grey' ? c.fill : c.brand
 	const color = tone === 'grey' ? c.ink : fixed.white
 	return (
 		<Pressable

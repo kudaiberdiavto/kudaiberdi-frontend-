@@ -285,7 +285,7 @@ export default function PartScreen() {
 						height: 54,
 						paddingHorizontal: 10,
 						borderRadius: 14,
-						backgroundColor: c.success,
+						backgroundColor: c.brand,
 						flexDirection: 'row',
 						alignItems: 'center',
 						justifyContent: 'center',

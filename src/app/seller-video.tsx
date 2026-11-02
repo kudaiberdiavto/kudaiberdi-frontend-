@@ -323,7 +323,7 @@ export default function SellerVideoScreen() {
 			</ScrollView>
 
 			<View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: insets.bottom + 12 }}>
-				<BigButton label={t('Выложить в ленту')} tone="green" onPress={submit} disabled={!ready} loading={save.isPending || publish.isPending} />
+				<BigButton label={t('Выложить в ленту')} onPress={submit} disabled={!ready} loading={save.isPending || publish.isPending} />
 			</View>
 
 			<Modal visible={recording} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setRecording(false)}>

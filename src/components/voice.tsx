@@ -215,7 +215,7 @@ export function VoiceRecordingPanel({ seconds, uploading, onDone, onCancel }: { 
 					>
 						<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{t('Отмена')}</Text>
 					</Pressable>
-					<Pressable onPress={onDone} style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}>
+					<Pressable onPress={onDone} style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}>
 						<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Готово')}</Text>
 					</Pressable>
 				</View>

@@ -137,7 +137,7 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 						width: 56,
 						height: 56,
 						borderRadius: 28,
-						backgroundColor: c.success,
+						backgroundColor: c.brand,
 						alignItems: 'center',
 						justifyContent: 'center',
 						opacity: !signedIn || value ? 1 : 0.5,

@@ -265,7 +265,7 @@ function FeedPage({
 							flex: 1,
 							height: 52,
 							borderRadius: 14,
-							backgroundColor: c.success,
+							backgroundColor: c.brand,
 							opacity: openChat.isPending ? 0.7 : 1,
 							flexDirection: 'row',
 							alignItems: 'center',

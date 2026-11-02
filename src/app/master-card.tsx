@@ -211,7 +211,7 @@ export default function MasterCardScreen() {
 						disabled={!master.phone}
 						onPress={() => master.phone && Linking.openURL(`tel:${master.phone}`)}
 					/>
-					<Button label={t('Написать')} variant="success" icon={ChatIcon} height={52} style={{ flex: 1.6 }} loading={openChat.isPending} onPress={write} />
+					<Button label={t('Написать')} icon={ChatIcon} height={52} style={{ flex: 1.6 }} loading={openChat.isPending} onPress={write} />
 				</View>
 			) : null}
 			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />

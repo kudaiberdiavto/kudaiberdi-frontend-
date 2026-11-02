@@ -1,4 +1,12 @@
 // Источник: design/tokens.json. Значения менять только вместе с макетом.
+//
+// Роли цветов (как в макетах design/specs):
+//   brand   — главная кнопка экрана, одна на экран: отправить, опубликовать, написать, могу помочь, сохранить.
+//   fill    — второстепенные кнопки: позвонить, маршрут, черновик, «Нет», «Не моё».
+//   success — только статусы и подтверждения: «Есть», «Подходит», «Получено», включённый переключатель.
+//             Не для кнопок — у Button / BigButton зелёного варианта нет.
+//   danger  — ошибки и необратимое (удалить аккаунт).
+//   fixed.whatsapp — только кнопка WhatsApp.
 
 export const lightColors = {
 	surface: '#F3F5F8',
@@ -103,15 +111,16 @@ export const fixed = {
 	mutedOnLight: '#605D5D',
 	star: '#F5A623',
 	whatsapp: '#25D366',
+	/** Over the camera / video (always dark) — `danger` is too dark there. */
 	recording: '#E5484D',
 	flash: '#FFD54A',
+	/** The toast's tick on the dark pill — `success` is too dark there. */
 	live: '#22C55E',
 	/** Link on the dark «Не нашли?» bar. */
 	linkOnDark: '#8FB0FF',
+	/** The one brand gradient: home banners, the role screen, the master's profile header. */
 	brandGradient: ['#2D63F0', '#1D46BF'] as [string, string],
 	brandShadow: '#1D46BF',
-	roleGradient: ['#2355E8', '#142F8C'] as [string, string],
-	roleShadow: '#142F8C',
 	brandCard: '#1C44B8',
 	cancelledGradient: ['#8C8888', '#6B6767'] as [string, string],
 } as const

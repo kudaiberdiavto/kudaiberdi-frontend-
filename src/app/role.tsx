@@ -28,7 +28,7 @@ export default function RoleScreen() {
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
 			<LinearGradient
-				colors={fixed.roleGradient}
+				colors={fixed.brandGradient}
 				start={{ x: 0, y: 0 }}
 				end={{ x: 1, y: 1 }}
 				style={{ paddingTop: insets.top + 20, paddingBottom: 26, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, gap: 6 }}
@@ -54,7 +54,7 @@ export default function RoleScreen() {
 								flexDirection: 'row',
 								alignItems: 'center',
 								gap: 14,
-								shadowColor: fixed.roleShadow,
+								shadowColor: fixed.brandShadow,
 								shadowOpacity: selected ? 0.14 : 0,
 								shadowOffset: { width: 0, height: 8 },
 								shadowRadius: 14,

@@ -57,7 +57,7 @@ export default function MasterProfileTab() {
 			<ScrollView contentContainerStyle={{ paddingTop: 4, paddingBottom: 16, gap: 12 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={me.error ?? profile.error ?? save.error} onRetry={() => (me.refetch(), profile.refetch())} />
 
-				<LinearGradient colors={fixed.roleGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 16 }}>
+				<LinearGradient colors={fixed.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 22, padding: 16 }}>
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
 						{master?.avatarUrl ? (
 							<Image source={{ uri: resolveUrl(master.avatarUrl) }} style={{ width: 64, height: 64, borderRadius: 32, borderWidth: 2, borderColor: fixed.white }} />

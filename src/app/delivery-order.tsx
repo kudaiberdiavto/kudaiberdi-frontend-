@@ -192,13 +192,13 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 			<View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: bottom + 12, gap: 10 }}>
 				<QueryErrorBanner error={receive.error} />
 				{order.status === 'PICKED_UP' || order.status === 'COURIER_ORDERED' ? (
-					<BigButton label={t('Получил посылку')} tone="green" onPress={() => receive.mutate(undefined, { onSuccess: () => askForReview() })} loading={receive.isPending} />
+					<BigButton label={t('Получил посылку')} onPress={() => receive.mutate(undefined, { onSuccess: () => askForReview() })} loading={receive.isPending} />
 				) : null}
 				<View style={{ flexDirection: 'row', gap: 10 }}>
 					{order.chatId ? (
 						<Pressable
 							onPress={() => router.push({ pathname: '/chat', params: { chatId: String(order.chatId) } })}
-							style={{ flex: 1, height: 52, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}
+							style={{ flex: 1, height: 52, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}
 						>
 							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Чат с продавцом')}</Text>
 						</Pressable>
@@ -389,13 +389,12 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 				{order.status === 'NEW' ? (
 					<BigButton
 						label={t('Упаковал — жду курьера')}
-						tone="green"
 						disabled={!weightOk}
 						loading={pack.isPending}
 						onPress={() => pack.mutate({ weightKg: Math.round(weightKg * 10) / 10, fragile })}
 					/>
 				) : order.status === 'PACKED' || order.status === 'COURIER_ORDERED' ? (
-					<BigButton label={t('Курьер забрал')} tone="green" loading={pickedUp.isPending} onPress={() => pickedUp.mutate()} />
+					<BigButton label={t('Курьер забрал')} loading={pickedUp.isPending} onPress={() => pickedUp.mutate()} />
 				) : (
 					<BigButton
 						label={order.status === 'DELIVERED' ? t('Покупатель получил') : order.status === 'CANCELLED' ? t('Заказ отменён') : t('Отдали курьеру')}

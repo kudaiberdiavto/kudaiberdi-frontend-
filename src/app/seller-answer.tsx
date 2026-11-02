@@ -185,7 +185,7 @@ export default function SellerAnswerScreen() {
 						style={{
 							height: 58,
 							borderRadius: 14,
-							backgroundColor: c.success,
+							backgroundColor: c.brand,
 							flexDirection: 'row',
 							alignItems: 'center',
 							justifyContent: 'center',

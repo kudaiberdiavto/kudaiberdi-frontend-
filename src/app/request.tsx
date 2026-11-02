@@ -342,7 +342,7 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 						flex: 1,
 						height: 48,
 						borderRadius: 14,
-						backgroundColor: shop.phone ? c.success : c.brand,
+						backgroundColor: c.brand,
 						flexDirection: 'row',
 						alignItems: 'center',
 						justifyContent: 'center',

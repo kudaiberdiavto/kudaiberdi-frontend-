@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { ChatConversation, presenceLabel } from '@/components/chat-conversation'
 import { BackIcon, BoxOutlineIcon, CallIcon, WrenchIcon } from '@/components/buyer-v23'
 import { resolveUrl } from '@/lib/api'
-import { fixed, fontFamily, fs, useColors } from '@/theme'
+import { fontFamily, fs, useColors } from '@/theme'
 import { useChat } from '@/api/chats'
 import { openShopRoute } from '@/lib/shop-place'
 import { t } from '@/i18n'
@@ -93,9 +93,9 @@ export default function BuyerChatScreen() {
 						<Pressable
 							onPress={() => Linking.openURL(`tel:${phone}`)}
 							accessibilityLabel={t('Позвонить')}
-							style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}
+							style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.fill, alignItems: 'center', justifyContent: 'center' }}
 						>
-							<CallIcon size={22} color={fixed.white} />
+							<CallIcon size={22} color={c.ink} />
 						</Pressable>
 					) : null}
 				</View>

@@ -169,7 +169,7 @@ export default function DeliveryScreen() {
 						<Text style={{ fontSize: fs.md, lineHeight: 21, fontFamily: fontFamily(400), color: c.inkSecondary }}>{t('Цену доставки обговорите с ними')}</Text>
 					</View>
 				</View>
-				<BigButton label={t('Заказать доставку')} tone="green" onPress={submit} loading={create.isPending} disabled={!ready} />
+				<BigButton label={t('Заказать доставку')} onPress={submit} loading={create.isPending} disabled={!ready} />
 			</View>
 		</KeyboardAvoidingView>
 	)

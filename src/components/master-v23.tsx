@@ -136,6 +136,7 @@ export function CallRow({ onCall, onChat, onRoute }: { onCall?: () => void; onCh
 	)
 	return (
 		<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+			{/* As in the mockup [37]: «Позвонить» grey, «Написать» the main blue one, the route a square. */}
 			<Pressable
 				onPress={onCall}
 				disabled={!onCall}
@@ -143,7 +144,7 @@ export function CallRow({ onCall, onChat, onRoute }: { onCall?: () => void; onCh
 					flex: 1,
 					height: 48,
 					borderRadius: 14,
-					backgroundColor: c.success,
+					backgroundColor: c.fill,
 					flexDirection: 'row',
 					alignItems: 'center',
 					justifyContent: 'center',
@@ -151,11 +152,28 @@ export function CallRow({ onCall, onChat, onRoute }: { onCall?: () => void; onCh
 					opacity: onCall ? 1 : 0.5,
 				}}
 			>
-				<PhoneOutline size={20} color={fixed.white} />
-				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Позвонить')}</Text>
+				<PhoneOutline size={20} color={c.ink} />
+				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{t('Позвонить')}</Text>
 			</Pressable>
-			{/* «Написать» — green like «Позвонить» */}
-			{square(<ChatBubble size={22} color={c.success} />, onChat, c.successSoft)}
+			<Pressable
+				onPress={onChat}
+				disabled={!onChat}
+				accessibilityRole="button"
+				style={{
+					flex: 1,
+					height: 48,
+					borderRadius: 14,
+					backgroundColor: c.brand,
+					flexDirection: 'row',
+					alignItems: 'center',
+					justifyContent: 'center',
+					gap: 8,
+					opacity: onChat ? 1 : 0.5,
+				}}
+			>
+				<ChatBubble size={20} color={fixed.white} />
+				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Написать')}</Text>
+			</Pressable>
 			{square(<RouteOutline size={22} color={c.brandStrong} />, onRoute)}
 		</View>
 	)
