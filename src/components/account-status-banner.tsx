@@ -1,5 +1,5 @@
 import { Pressable, Text, View } from 'react-native'
-import { fontFamily, useColors } from '@/theme'
+import { fontFamily, fs, useColors } from '@/theme'
 import { t } from '@/i18n'
 
 type Status = 'PENDING_VERIFICATION' | 'ACTIVE' | 'BLOCKED' | 'REJECTED'
@@ -45,13 +45,13 @@ export function AccountStatusBanner({
 
 	return (
 		<View style={{ borderRadius: 12, backgroundColor: bad ? c.dangerTint : c.brandTint, padding: 12, gap: 4 }}>
-			<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: bad ? c.danger : c.brandStrong }}>{title}</Text>
-			<Text style={{ fontSize: 14.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.inkSecondary }}>
+			<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: bad ? c.danger : c.brandStrong }}>{title}</Text>
+			<Text style={{ fontSize: fs.sm, lineHeight: 20, fontFamily: fontFamily(400), color: c.inkSecondary }}>
 				{reason && status === 'REJECTED' ? t('Причина: {0}', reason) : text}
 			</Text>
 			{action && status === 'REJECTED' ? (
 				<Pressable onPress={action.onPress} hitSlop={8} style={{ paddingTop: 4 }}>
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{action.label} ›</Text>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>{action.label} ›</Text>
 				</Pressable>
 			) : null}
 		</View>

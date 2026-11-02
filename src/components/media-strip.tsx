@@ -5,6 +5,7 @@ import { MediaViewer } from '@/components/media-viewer'
 import { PlayIcon } from '@/components/voice'
 import { resolveUrl } from '@/lib/api'
 import type { MediaItem, Photo } from '@/api/types'
+import { fixed } from '@/theme'
 
 /** A request's photos (PhotoDto) as media items — the same strip and viewer as for photos and videos. */
 export const photosAsMedia = (photos: Photo[]): MediaItem[] =>
@@ -22,7 +23,7 @@ export function MediaStrip({ media }: { media: MediaItem[] }) {
 					<Pressable key={item.id} onPress={() => setViewing(items)}>
 						<Image
 							source={{ uri: resolveUrl(item.thumbUrl ?? (item.kind === 'PHOTO' ? item.url : null)) ?? undefined }}
-							style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: '#1F2329' }}
+							style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: fixed.media }}
 						/>
 						{item.kind === 'VIDEO' ? (
 							<View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
@@ -52,7 +53,7 @@ export function MediaGallery({ media }: { media: MediaItem[] }) {
 						<Image
 							source={{ uri: resolveUrl(item.kind === 'PHOTO' ? item.url : item.thumbUrl) ?? undefined }}
 							contentFit="cover"
-							style={{ width: '100%', aspectRatio: item.width && item.height ? Math.max(0.75, Math.min(1.6, item.width / item.height)) : 4 / 3, borderRadius: 16, backgroundColor: '#1F2329' }}
+							style={{ width: '100%', aspectRatio: item.width && item.height ? Math.max(0.75, Math.min(1.6, item.width / item.height)) : 4 / 3, borderRadius: 16, backgroundColor: fixed.media }}
 						/>
 						{item.kind === 'VIDEO' ? (
 							<View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>

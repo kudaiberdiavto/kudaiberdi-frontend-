@@ -9,7 +9,7 @@ import { useVideoPlayer, VideoView } from 'expo-video'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { BackIcon, CONDITION_CHIP, PaperPlaneIcon, priceDigits } from '@/components/buyer-v23'
 import { BookmarkIcon, SoundOffIcon, SoundOnIcon, TruckIcon, YellowChip, setPlayerMuted } from '@/components/video-v23'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { flattenPages } from '@/api/pagination'
 import { useSignedIn, useToggleVideoFavorite, useSharePart, useVideoFeed } from '@/api/catalog'
@@ -64,7 +64,7 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 	}, [])
 
 	return (
-		<View style={{ flex: 1, backgroundColor: '#000000' }} onLayout={(event) => setHeight(event.nativeEvent.layout.height)}>
+		<View style={{ flex: 1, backgroundColor: fixed.black }} onLayout={(event) => setHeight(event.nativeEvent.layout.height)}>
 			{height ? (
 				<FlatList
 					ref={listRef}
@@ -97,7 +97,7 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 						) : (
 						<View style={{ height, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
 							{(
-								<Text style={{ fontSize: 17.5, lineHeight: 24, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
+								<Text style={{ fontSize: fs.lg, lineHeight: 24, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
 									{feed.error ? t('Не удалось загрузить видео') : t('Видео нет')}
 								</Text>
 							)}
@@ -115,7 +115,7 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 					hitSlop={10}
 					style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.16)', alignItems: 'center', justifyContent: 'center' }}
 				>
-					<BackIcon color="#FFFFFF" />
+					<BackIcon color={fixed.white} />
 				</Pressable>
 			</View>
 		</View>
@@ -172,19 +172,19 @@ function FeedPage({
 		{
 			key: 'save',
 			label: item.favoritesCount ? String(item.favoritesCount) : null,
-			icon: <BookmarkIcon size={22} color="#FFFFFF" filled={item.isFavorite} />,
+			icon: <BookmarkIcon size={22} color={fixed.white} filled={item.isFavorite} />,
 			onPress: () => (signedIn ? favorite.mutate({ partId: item.partId, favorite: !item.isFavorite }) : router.push('/')),
 		},
 		{
 			key: 'comments',
 			label: item.commentsCount ? String(item.commentsCount) : null,
-			icon: <ChatIcon size={22} color="#FFFFFF" strokeWidth={2.1} />,
+			icon: <ChatIcon size={22} color={fixed.white} strokeWidth={2.1} />,
 			onPress: () => setCommenting(true),
 		},
 		{
 			key: 'share',
 			label: item.sharesCount ? String(item.sharesCount) : null,
-			icon: <PaperPlaneIcon size={22} color="#FFFFFF" />,
+			icon: <PaperPlaneIcon size={22} color={fixed.white} />,
 			onPress: () =>
 				Share.share({ message: `${item.title}\nhttps://kudaibergen.kg/p/${item.publicId}` }).then((result) => {
 					if (result.action === Share.sharedAction) shared.mutate(item.partId)
@@ -193,13 +193,13 @@ function FeedPage({
 		{
 			key: 'sound',
 			label: null,
-			icon: muted ? <SoundOffIcon size={22} color="#FFFFFF" /> : <SoundOnIcon size={22} color="#FFFFFF" />,
+			icon: muted ? <SoundOffIcon size={22} color={fixed.white} /> : <SoundOnIcon size={22} color={fixed.white} />,
 			onPress: onToggleSound,
 		},
 	]
 
 	return (
-		<View style={{ height, backgroundColor: '#000000' }}>
+		<View style={{ height, backgroundColor: fixed.black }}>
 			{poster ? <Image source={{ uri: poster }} contentFit="cover" style={{ position: 'absolute', width: '100%', height: '100%' }} /> : null}
 			{near ? <FeedVideo url={item.video.url} active={active} muted={muted} durationSec={item.video.durationSec} bottom={bottom} /> : null}
 			<LinearGradient
@@ -216,7 +216,7 @@ function FeedPage({
 						<View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.16)', alignItems: 'center', justifyContent: 'center' }}>
 							{button.icon}
 						</View>
-						{button.label ? <Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{button.label}</Text> : null}
+						{button.label ? <Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: fixed.white }}>{button.label}</Text> : null}
 					</Pressable>
 				))}
 			</View>
@@ -230,29 +230,29 @@ function FeedPage({
 						<Image source={{ uri: resolveUrl(shop.avatarUrl) }} style={{ width: 32, height: 32, borderRadius: 16 }} />
 					) : (
 						<View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{shop.name.slice(0, 1).toUpperCase()}</Text>
+							<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: fixed.white }}>{shop.name.slice(0, 1).toUpperCase()}</Text>
 						</View>
 					)}
 					<View style={{ flex: 1 }}>
-						<Text numberOfLines={1} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+						<Text numberOfLines={1} style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: fixed.white }}>
 							{shop.name}
 						</Text>
-						<Text numberOfLines={1} style={{ fontSize: 14, fontFamily: fontFamily(400), color: 'rgba(255,255,255,0.75)' }}>
+						<Text numberOfLines={1} style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: 'rgba(255,255,255,0.75)' }}>
 							{meta}
 						</Text>
 					</View>
 				</Pressable>
-				<Text style={{ fontSize: 20, lineHeight: 27.5, fontFamily: fontFamily(800), color: '#FFFFFF', paddingRight: 64 }}>{item.title}</Text>
+				<Text style={{ fontSize: fs.xxl, lineHeight: 27.5, fontFamily: fontFamily(800), color: fixed.white, paddingRight: 64 }}>{item.title}</Text>
 				{description ? (
-					<Text numberOfLines={2} style={{ fontSize: 16, lineHeight: 21.5, fontFamily: fontFamily(400), color: 'rgba(255,255,255,0.88)', paddingRight: 64 }}>
+					<Text numberOfLines={2} style={{ fontSize: fs.base, lineHeight: 21.5, fontFamily: fontFamily(400), color: 'rgba(255,255,255,0.88)', paddingRight: 64 }}>
 						{description}
 					</Text>
 				) : null}
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-					<Text style={{ fontSize: 30, fontFamily: fontFamily(800), letterSpacing: -0.6, color: '#FFFFFF' }}>{t('{0} сом', priceDigits(item.price))}</Text>
+					<Text style={{ fontSize: fs.hero, fontFamily: fontFamily(800), letterSpacing: -0.6, color: fixed.white }}>{t('{0} сом', priceDigits(item.price))}</Text>
 					{condition ? (
 						<View style={{ height: 24, paddingHorizontal: 8, borderRadius: 7, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{condition}</Text>
+							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: fixed.white }}>{condition}</Text>
 						</View>
 					) : null}
 				</View>
@@ -273,8 +273,8 @@ function FeedPage({
 							gap: 8,
 						}}
 					>
-						<ChatIcon size={20} color="#FFFFFF" strokeWidth={2.2} />
-						<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Заказать')}</Text>
+						<ChatIcon size={20} color={fixed.white} strokeWidth={2.2} />
+						<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Заказать')}</Text>
 					</Pressable>
 					{item.shipsToRegions ? (
 						<Pressable
@@ -283,7 +283,7 @@ function FeedPage({
 								flex: 1,
 								height: 52,
 								borderRadius: 14,
-								backgroundColor: '#FFFFFF',
+								backgroundColor: fixed.white,
 								flexDirection: 'row',
 								alignItems: 'center',
 								justifyContent: 'center',
@@ -291,7 +291,7 @@ function FeedPage({
 							}}
 						>
 							<TruckIcon size={20} color={c.ink} />
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{t('Доставка')}</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{t('Доставка')}</Text>
 						</Pressable>
 					) : null}
 				</View>
@@ -344,7 +344,7 @@ function FeedVideo({ url, active, muted, durationSec, bottom }: { url: string; a
 				<VideoView player={player} nativeControls={false} contentFit="cover" style={{ width: '100%', height: '100%' }} />
 			</View>
 			<View pointerEvents="none" style={{ position: 'absolute', left: 16, right: 16, bottom: bottom + 6, height: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.3)' }}>
-				<View style={{ width: `${Math.min(100, (currentTime / duration) * 100)}%`, height: 3, borderRadius: 2, backgroundColor: '#FFFFFF' }} />
+				<View style={{ width: `${Math.min(100, (currentTime / duration) * 100)}%`, height: 3, borderRadius: 2, backgroundColor: fixed.white }} />
 			</View>
 		</>
 	)

@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react'
 import { ActivityIndicator, Pressable, Text, type StyleProp, type ViewStyle } from 'react-native'
 import type { IconProps } from '@/components/icons'
-import { fontFamily, useColors, raw } from '@/theme'
+import { fixed, fontFamily, useColors } from '@/theme'
 
 /** `success` — green: «Позвонить», «Написать». */
 type Variant = 'primary' | 'secondary' | 'outline' | 'success'
@@ -35,8 +35,8 @@ export function Button({
 	style,
 }: ButtonProps) {
 	const c = useColors()
-	const bg = variant === 'primary' ? c.brand : variant === 'success' ? c.success : variant === 'secondary' ? raw.fill : 'transparent'
-	const fg = variant === 'primary' || variant === 'success' ? '#FFFFFF' : variant === 'secondary' ? c.ink : c.inkSecondary
+	const bg = variant === 'primary' ? c.brand : variant === 'success' ? c.success : variant === 'secondary' ? c.fill : 'transparent'
+	const fg = variant === 'primary' || variant === 'success' ? fixed.white : variant === 'secondary' ? c.ink : c.inkSecondary
 
 	return (
 		<Pressable

@@ -8,7 +8,7 @@ import {
 	useAudioRecorderState,
 } from 'expo-audio'
 import { useVideoPlayer, VideoView } from 'expo-video'
-import { fontFamily, useColors } from '@/theme'
+import { fontFamily, fs, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { PlayIcon } from '@/components/voice'
 import { t } from '@/i18n'
@@ -122,10 +122,10 @@ export function RecordingBar({ seconds, onCancel }: { seconds: number; onCancel:
 			}}
 		>
 			<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: c.danger }} />
-			<Text style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(600), color: c.ink }}>
+			<Text style={{ flex: 1, fontSize: fs.base, fontFamily: fontFamily(600), color: c.ink }}>
 				{t('Запись {0} / {1}', clock(seconds), clock(MAX_VOICE_SECONDS))}
 			</Text>
-			<Text onPress={onCancel} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.danger }}>{t('Отмена')}</Text>
+			<Text onPress={onCancel} style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.danger }}>{t('Отмена')}</Text>
 		</View>
 	)
 }

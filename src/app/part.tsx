@@ -7,7 +7,7 @@ import { PhotoPlaceholder, QueryErrorBanner, Skeleton, SkeletonProductGrid } fro
 import { BrandLogo } from '@/components/ui/brand'
 import { ChatIcon, CheckIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, ShareIcon, WhatsAppIcon } from '@/components/icons'
 import { openWhatsApp } from '@/lib/whatsapp'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatPrice } from '@/lib/format'
 import { type PartFilters, usePart, usePublicPart, useSearchParts, useSignedIn, useTogglePartFavorite } from '@/api/catalog'
@@ -61,7 +61,7 @@ export default function PartScreen() {
 				)
 			: router.push('/'))
 
-	const roundButton = { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.92)', alignItems: 'center', justifyContent: 'center' } as const
+	const roundButton = { width: 40, height: 40, borderRadius: 20, backgroundColor: c.floating, alignItems: 'center', justifyContent: 'center' } as const
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
@@ -137,7 +137,7 @@ export default function PartScreen() {
 							justifyContent: 'center',
 						}}
 					>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+						<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), color: fixed.white }}>
 							{photoIndex + 1} / {photos.length}
 						</Text>
 					</View>
@@ -151,10 +151,10 @@ export default function PartScreen() {
 					<PartBodySkeleton />
 				) : (
 					<>
-						<Text style={{ fontSize: 28, fontFamily: fontFamily(800), letterSpacing: -0.28, color: c.ink }}>
+						<Text style={{ fontSize: fs.display, fontFamily: fontFamily(800), letterSpacing: -0.28, color: c.ink }}>
 							{formatPrice(part?.price) || ' '}
 						</Text>
-						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>{part?.title ?? ' '}</Text>
+						<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(400), color: c.inkSecondary }}>{part?.title ?? ' '}</Text>
 					</>
 				)}
 
@@ -173,16 +173,16 @@ export default function PartScreen() {
 						{part.fitments[0] ? (
 							<BrandLogo brand={part.fitments[0].brand} size={28} />
 						) : (
-							<View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: c.border }} />
+							<View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: fixed.white, borderWidth: 1, borderColor: c.border }} />
 						)}
-						<Text style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(400), color: part.fit.fits ? '#14532D' : c.danger }}>
+						<Text style={{ flex: 1, fontSize: fs.md, fontFamily: fontFamily(400), color: part.fit.fits ? c.successInk : c.danger }}>
 							<Text style={{ fontFamily: fontFamily(700) }}>{part.fit.fits ? t('Подходит') : t('Не подходит')}</Text>{' '}{t('к вашей')}{' '}
 							{part.fit.carLabel}
 						</Text>
 						{part.fit.fits ? <CheckIcon size={18} color={c.success} strokeWidth={3} /> : null}
 					</View>
 				) : part?.fitments.length ? (
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>
 						{t('Подходит: {0}', part.fitments.map((f) => f.label).join(', '))}
 					</Text>
 				) : null}
@@ -191,13 +191,13 @@ export default function PartScreen() {
 					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 						{part.condition ? (
 							<View style={{ height: 30, paddingHorizontal: 12, borderRadius: 15, backgroundColor: c.card, justifyContent: 'center' }}>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.ink }}>{CONDITION[part.condition]}</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.ink }}>{CONDITION[part.condition]}</Text>
 							</View>
 						) : null}
 						{/* Only when it ran out — in stock is the norm, not worth a line. */}
 						{part.stockStatus !== 'IN_STOCK' ? (
-							<View style={{ height: 30, paddingHorizontal: 12, borderRadius: 15, backgroundColor: '#FDECEC', justifyContent: 'center' }}>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.danger }}>{t('Нет в наличии')}</Text>
+							<View style={{ height: 30, paddingHorizontal: 12, borderRadius: 15, backgroundColor: c.dangerSoft, justifyContent: 'center' }}>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.danger }}>{t('Нет в наличии')}</Text>
 							</View>
 						) : null}
 					</View>
@@ -212,25 +212,25 @@ export default function PartScreen() {
 							<Image source={{ uri: resolveUrl(shop.avatarUrl) }} style={{ width: 44, height: 44, borderRadius: 22 }} />
 						) : (
 							<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-								<Text style={{ fontSize: 18, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop.name.charAt(0).toUpperCase()}</Text>
+								<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop.name.charAt(0).toUpperCase()}</Text>
 							</View>
 						)}
 						<View style={{ flex: 1, gap: 2 }}>
-							<Text numberOfLines={1} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text numberOfLines={1} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>
 								{shop.name}
 							</Text>
-							<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
-								{shop.reviewsCount ? <Text style={{ color: '#F5A623' }}>★ </Text> : null}
+							<Text numberOfLines={1} style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>
+								{shop.reviewsCount ? <Text style={{ color: fixed.star }}>★ </Text> : null}
 								{shop.reviewsCount ? `${shop.rating.toFixed(1)} · ` : ''}
 								{shopPlace(shop)}
 							</Text>
 						</View>
-						<Text style={{ fontSize: 22, color: c.muted }}>›</Text>
+						<Text style={{ fontSize: fs.h3, color: c.muted }}>›</Text>
 					</Pressable>
 				) : null}
 
 				{openChat.error ? (
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{openChat.error.message}</Text>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{openChat.error.message}</Text>
 				) : null}
 
 				{part ? <Similar partId={part.id} categoryId={part.category?.id} car={{ carId, brandId, modelId }} /> : null}
@@ -254,10 +254,10 @@ export default function PartScreen() {
 				<Pressable
 					disabled={!shop}
 					onPress={() => shop && openShopRoute(shop)}
-					style={{ flex: 1, height: 54, paddingHorizontal: 10, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+					style={{ flex: 1, height: 54, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 				>
 					<MapPinIcon size={20} color={c.ink} />
-					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? t('2ГИС') : t('Как пройти')}</Text>
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? t('2ГИС') : t('Как пройти')}</Text>
 				</Pressable>
 				<Pressable
 					disabled={!shop || openChat.isPending}
@@ -275,16 +275,16 @@ export default function PartScreen() {
 						opacity: openChat.isPending ? 0.6 : 1,
 					}}
 				>
-					<ChatIcon size={20} color="#FFFFFF" />
-					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Написать')}</Text>
+					<ChatIcon size={20} color={fixed.white} />
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Написать')}</Text>
 				</Pressable>
 				{/* WhatsApp at the right edge — «Я из приложения KUDAIBERDI. Меня интересует «…»» (only when the shop's number is visible). */}
 				{shop?.phone ? (
 					<Pressable accessibilityRole="button" accessibilityLabel={t('Написать в WhatsApp')}
 						onPress={() => shop.phone && openWhatsApp(shop.phone, part?.title)}
-						style={{ width: 54, height: 54, borderRadius: 14, backgroundColor: '#25D366', alignItems: 'center', justifyContent: 'center' }}
+						style={{ width: 54, height: 54, borderRadius: 14, backgroundColor: fixed.whatsapp, alignItems: 'center', justifyContent: 'center' }}
 					>
-						<WhatsAppIcon size={26} color="#FFFFFF" />
+						<WhatsAppIcon size={26} color={fixed.white} />
 					</Pressable>
 				) : null}
 			</View>
@@ -309,7 +309,7 @@ function Similar({ partId, categoryId, car }: { partId: number; categoryId?: num
 	if (!items.length) return null
 	return (
 		<View style={{ gap: 12, paddingTop: 8 }}>
-			<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>{t('Похожие запчасти')}</Text>
+			<Text style={{ fontSize: fs.xxl, fontFamily: fontFamily(800), color: c.ink }}>{t('Похожие запчасти')}</Text>
 			<View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 12, rowGap: 18 }}>
 				{items.map((item) => (
 					<View key={item.id} style={{ width: '47.8%' }}>

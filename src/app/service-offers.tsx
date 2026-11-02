@@ -3,12 +3,12 @@ import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { QueryErrorBanner, ServiceIcon, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus, MoreButton } from '@/components/ui'
-import { BackChevron, CallRow, SmallChip, offerWhen } from '@/components/master-v23'
+import { MoreButton, QueryErrorBanner, ScreenHeader, ServiceIcon, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus } from '@/components/ui'
+import { CallRow, SmallChip, offerWhen } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
 import { VoicePlayer } from '@/components/voice'
 import { MediaStrip } from '@/components/media-strip'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatDistance, formatNumber, minutesLeft, plural } from '@/lib/format'
 import { open2gis } from '@/lib/shop-place'
@@ -66,19 +66,16 @@ export default function ServiceOffersScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} hitSlop={10}>
-					<BackChevron size={24} color={c.ink} />
-				</Pressable>
-				<Text numberOfLines={1} style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					{title}
-				</Text>
-				{detail ? (
-					<View style={{ width: 34, height: 34, borderRadius: 14, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-						<ServiceIcon code={detail.service.code} size={22} color={c.brandStrong} strokeWidth={2.2} />
-					</View>
-				) : null}
-			</View>
+			<ScreenHeader
+				title={title}
+				right={
+					detail ? (
+						<View style={{ width: 34, height: 34, borderRadius: 14, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+							<ServiceIcon code={detail.service.code} size={22} color={c.brandStrong} strokeWidth={2.2} />
+						</View>
+					) : null
+				}
+			/>
 
 			<ScrollView contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16 + insets.bottom, gap: 10 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner
@@ -97,7 +94,7 @@ export default function ServiceOffersScreen() {
 								width: 20,
 								height: 20,
 								borderRadius: 10,
-								backgroundColor: active ? '#E7F6EC' : c.surface,
+								backgroundColor: active ? c.successSoft : c.surface,
 								alignItems: 'center',
 								justifyContent: 'center',
 							}}
@@ -105,14 +102,14 @@ export default function ServiceOffersScreen() {
 							<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: active ? c.success : c.border }} />
 						</View>
 						<View style={{ flex: 1, gap: 2 }}>
-							<Text style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text style={{ fontSize: fs.base, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>
 								{active
 									? t('Ищем ещё {0} {1}', left, plural(left, [t('минуту'), t('минуты'), t('минут')]))
 									: data.status === 'CLOSED'
 										? t('Заявка закрыта')
 										: t('Время вышло')}
 							</Text>
-							<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: fs.md, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
 								{t('Спросили {0} {1} · ответили {2}', asked, plural(asked, [t('мастера'), t('мастеров'), t('мастеров')]), answered)}
 							</Text>
 						</View>
@@ -123,7 +120,7 @@ export default function ServiceOffersScreen() {
 								onPress={() => (answered || !detail?.canWiden ? extend.mutate(30) : widen.mutate(undefined))}
 								style={{ height: 36, paddingHorizontal: 12, borderRadius: 12, backgroundColor: c.brandTint, justifyContent: 'center' }}
 							>
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>
 									{answered || !detail?.canWiden ? t('Ещё 30 мин') : t('+5 км')}
 								</Text>
 							</Pressable>
@@ -132,12 +129,12 @@ export default function ServiceOffersScreen() {
 				) : stats.isLoading ? (
 					<SkeletonStatus />
 				) : null}
-				{actionError ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{actionError.message}</Text> : null}
+				{actionError ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{actionError.message}</Text> : null}
 
 				{/* What the buyer attached — voice, photos, videos — not in the mockup, but they should see what they sent. */}
 				{detail?.voice || detail?.media.length ? (
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 8 }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Ваша заявка')}</Text>
+						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.muted }}>{t('Ваша заявка')}</Text>
 						{detail.voice ? <VoicePlayer voice={detail.voice} /> : null}
 						<MediaStrip media={detail.media} />
 					</View>
@@ -160,7 +157,7 @@ export default function ServiceOffersScreen() {
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: selected ? '#FFFFFF' : c.ink }}>{option.label}</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: selected ? fixed.white : c.ink }}>{option.label}</Text>
 							</Pressable>
 						)
 					})}
@@ -181,7 +178,7 @@ export default function ServiceOffersScreen() {
 				))}
 
 				{offers.isSuccess && list.length === 0 ? (
-					<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center', paddingVertical: 24 }}>
+					<Text style={{ fontSize: fs.base, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center', paddingVertical: 24 }}>
 						{all.length ? t('На сегодня никто не свободен') : active ? t('Ждём ответы мастеров') : t('Никто не ответил')}
 					</Text>
 				) : null}
@@ -212,24 +209,24 @@ function OfferCard({ offer, best, onComplain }: { offer: ServiceOffer; best: boo
 					<Image source={{ uri: resolveUrl(master.avatarUrl) }} style={{ width: 44, height: 44, borderRadius: 22 }} />
 				) : (
 					<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{name.replace(/^(СТО|Мастер)\s*«?/, '').slice(0, 1)}</Text>
+						<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: c.brandStrong }}>{name.replace(/^(СТО|Мастер)\s*«?/, '').slice(0, 1)}</Text>
 					</View>
 				)}
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text numberOfLines={1} style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.lg, lineHeight: 23, fontFamily: fontFamily(700), color: c.ink }}>
 						{name}
 					</Text>
-					<Text numberOfLines={1} style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.md, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted }}>
 						{offerPlace(offer)}
 					</Text>
 				</View>
 				{offer.priceFrom ? (
 					<View style={{ alignItems: 'flex-end' }}>
-						<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), letterSpacing: -0.22, color: c.ink }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted, letterSpacing: 0 }}>{t('от')}{' '}</Text>
+						<Text style={{ fontSize: fs.h3, lineHeight: 28.6, fontFamily: fontFamily(800), letterSpacing: -0.22, color: c.ink }}>
+							<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(600), color: c.muted, letterSpacing: 0 }}>{t('от')}{' '}</Text>
 							{formatNumber(offer.priceFrom)}
 						</Text>
-						<Text style={{ fontSize: 13, lineHeight: 17, fontFamily: fontFamily(600), color: c.muted }}>{t('сом')}</Text>
+						<Text style={{ fontSize: fs.xs, lineHeight: 17, fontFamily: fontFamily(600), color: c.muted }}>{t('сом')}</Text>
 					</View>
 				) : null}
 				<MoreButton label={t('Пожаловаться на мастера')} onPress={onComplain} />

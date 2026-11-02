@@ -23,7 +23,7 @@ import {
 } from '@/components/buyer-v23'
 import { TruckIcon, deliveryStatusText } from '@/components/video-v23'
 import { MarketVideos } from '@/components/market-videos'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { minutesLeft, plural } from '@/lib/format'
 import { useMe } from '@/api/me'
 import { useCars } from '@/api/garage'
@@ -73,8 +73,8 @@ export default function BuyerHomeScreen() {
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<View style={{ height: 60, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.muted }}>{name ? t('Салам, {0}', name) : t('Салам')}</Text>
-					<Text numberOfLines={1} style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.muted }}>{name ? t('Салам, {0}', name) : t('Салам')}</Text>
+					<Text numberOfLines={1} style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: c.ink }}>
 						{car ? `${car.title} · ${car.year}` : t('Машина не выбрана')}
 					</Text>
 				</View>
@@ -95,7 +95,7 @@ export default function BuyerHomeScreen() {
 						}}
 					>
 						<PlusThinIcon size={16} color={c.ink} />
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>{t('Добавить')}</Text>
+						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.ink }}>{t('Добавить')}</Text>
 					</Pressable>
 				)}
 			</View>
@@ -113,7 +113,7 @@ export default function BuyerHomeScreen() {
 			>
 				<Pressable onPress={() => router.push('/search-part')}>
 					<LinearGradient
-						colors={['#2D63F0', '#1D46BF']}
+						colors={fixed.brandGradient}
 						start={{ x: 0.25, y: 0 }}
 						end={{ x: 0.75, y: 1 }}
 						style={{
@@ -124,7 +124,7 @@ export default function BuyerHomeScreen() {
 							alignItems: 'center',
 							gap: 14,
 							overflow: 'hidden',
-							shadowColor: '#1D46BF',
+							shadowColor: fixed.brandShadow,
 							shadowOpacity: 0.32,
 							shadowOffset: { width: 0, height: 14 },
 							shadowRadius: 15,
@@ -141,11 +141,11 @@ export default function BuyerHomeScreen() {
 								justifyContent: 'center',
 							}}
 						>
-							<LoupeIcon size={24} color="#FFFFFF" strokeWidth={2.6} />
+							<LoupeIcon size={24} color={fixed.white} strokeWidth={2.6} />
 						</View>
 						<View style={{ flex: 1, gap: 3 }}>
-							<Text style={{ fontSize: 23, lineHeight: 29, fontFamily: fontFamily(800), letterSpacing: -0.4, color: '#FFFFFF' }}>{t('Найти запчасть')}</Text>
-							<Text style={{ fontSize: 15, lineHeight: 20, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>{t('Фото или голосом — продавцы ответят с ценой')}</Text>
+							<Text style={{ fontSize: fs.h3, lineHeight: 29, fontFamily: fontFamily(800), letterSpacing: -0.4, color: fixed.white }}>{t('Найти запчасть')}</Text>
+							<Text style={{ fontSize: fs.md, lineHeight: 20, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>{t('Фото или голосом — продавцы ответят с ценой')}</Text>
 						</View>
 					</LinearGradient>
 				</Pressable>
@@ -257,7 +257,7 @@ function ServiceTile({ label, icon, muted, onPress }: { label: string; icon: Rea
 			>
 				{icon}
 			</View>
-			<Text numberOfLines={1} style={{ fontSize: 14, lineHeight: 16, fontFamily: fontFamily(600), color: c.ink, textAlign: 'center' }}>
+			<Text numberOfLines={1} style={{ fontSize: fs.sm, lineHeight: 16, fontFamily: fontFamily(600), color: c.ink, textAlign: 'center' }}>
 				{label}
 			</Text>
 		</Pressable>
@@ -286,17 +286,17 @@ function RequestCard({
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				{tile}
 				<View style={{ flex: 1, gap: 3 }}>
-					<Text numberOfLines={1} style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>
 						{title}
 					</Text>
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
 						{live ? <LiveDot /> : null}
-						<Text numberOfLines={1} style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text numberOfLines={1} style={{ flex: 1, fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>
 							{status}
 						</Text>
 					</View>
 				</View>
-				<ChevronIcon size={20} color="#B8B4B4" />
+				<ChevronIcon size={20} color={c.chevron} />
 			</View>
 			{chip ? (
 				<View style={{ flexDirection: 'row' }}>

@@ -4,7 +4,7 @@ import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useVideoPlayer, VideoView } from 'expo-video'
 import { CloseIcon } from '@/components/icons'
-import { fontFamily } from '@/theme'
+import { fixed, fontFamily, fs } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import type { MediaItem } from '@/api/types'
 import { t } from '@/i18n'
@@ -17,7 +17,7 @@ export function MediaViewer({ items, onClose }: { items: MediaItem[] | null; onC
 
 	return (
 		<Modal visible={items !== null} animationType="fade" onRequestClose={onClose} supportedOrientations={['portrait']}>
-			<View style={{ flex: 1, backgroundColor: '#000000' }}>
+			<View style={{ flex: 1, backgroundColor: fixed.black }}>
 				<ScrollView
 					horizontal
 					pagingEnabled
@@ -41,9 +41,9 @@ export function MediaViewer({ items, onClose }: { items: MediaItem[] | null; onC
 					))}
 				</ScrollView>
 				<View style={{ position: 'absolute', top: insets.top + 8, left: 16, right: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{items && items.length > 1 ? `${index + 1} / ${items.length}` : ' '}</Text>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: fixed.white }}>{items && items.length > 1 ? `${index + 1} / ${items.length}` : ' '}</Text>
 					<Pressable accessibilityRole="button" accessibilityLabel={t('Закрыть')} onPress={onClose} hitSlop={12} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' }}>
-						<CloseIcon size={18} color="#FFFFFF" />
+						<CloseIcon size={18} color={fixed.white} />
 					</Pressable>
 				</View>
 			</View>

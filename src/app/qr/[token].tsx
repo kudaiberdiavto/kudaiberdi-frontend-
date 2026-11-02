@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native'
 import { Redirect, router, useLocalSearchParams } from 'expo-router'
 import { Button, QueryErrorBanner } from '@/components/ui'
-import { fontFamily, useColors } from '@/theme'
+import { fontFamily, fs, useColors } from '@/theme'
 import { useQrResolve } from '@/api/market'
 import { t } from '@/i18n'
 
@@ -23,7 +23,7 @@ export default function QrLink() {
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, padding: 24, justifyContent: 'center', gap: 14 }}>
 			<QueryErrorBanner error={qr.error} onRetry={() => qr.refetch()} />
-			<Text style={{ fontSize: 17.5, fontFamily: fontFamily(600), color: c.muted, textAlign: 'center' }}>
+			<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(600), color: c.muted, textAlign: 'center' }}>
 				{qr.error ? t('QR-код не относится к рынку') : t('Открываем место на рынке…')}
 			</Text>
 			{qr.error ? <Button label={t('На главную')} onPress={() => router.replace('/buyer')} /> : null}

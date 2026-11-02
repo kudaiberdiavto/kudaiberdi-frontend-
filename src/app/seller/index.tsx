@@ -7,7 +7,7 @@ import { VoicePlayer } from '@/components/voice'
 import { MediaGallery, MediaStrip, photosAsMedia } from '@/components/media-strip'
 import { isPlaceholderText } from '@/components/request-text'
 import { MicIcon, TickIcon } from '@/components/seller-v23'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { haptic } from '@/lib/haptics'
 import { formatAgo, formatNumber, formatRemaining } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
@@ -36,7 +36,7 @@ export default function SellerRequestsScreen() {
 	return (
 		<Screen padding={0}>
 			<View style={{ height: 60, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), color: c.ink }}>{t('Запросы')}</Text>
+				<Text style={{ flex: 1, fontSize: fs.h1, fontFamily: fontFamily(700), color: c.ink }}>{t('Запросы')}</Text>
 			</View>
 
 			<FlatList
@@ -95,17 +95,17 @@ function DeliveryCard({ order }: { order: DeliveryOrder }) {
 	return (
 		<Pressable
 			onPress={() => router.push({ pathname: '/delivery-order', params: { id: String(order.id), as: 'shop' } })}
-			style={{ borderRadius: 18, backgroundColor: '#FCEBB0', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}
+			style={{ borderRadius: 18, backgroundColor: c.warningSoft, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}
 		>
 			<TruckTile size={44} />
 			<View style={{ flex: 1, gap: 2 }}>
-				<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1, color: '#7A5A00' }}>
+				<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), letterSpacing: 1, color: c.warningInk }}>
 					{t('{0} · в {1}', order.status === 'NEW' ? t('Новый заказ') : t('Заказ с доставкой'), toRegion(order.districtName ?? order.regionName)).toUpperCase()}
 				</Text>
-				<Text numberOfLines={1} style={{ fontSize: 17.5, fontFamily: fontFamily(800), color: c.ink }}>
+				<Text numberOfLines={1} style={{ fontSize: fs.lg, fontFamily: fontFamily(800), color: c.ink }}>
 					{order.part.title}
 				</Text>
-				<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.inkSecondary }}>
+				<Text numberOfLines={1} style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.inkSecondary }}>
 					{t('{0} сом · {1}', priceDigits(order.part.price), status)}
 				</Text>
 			</View>
@@ -131,10 +131,10 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				<BrandLogo brand={request.car.brand} size={36} />
 				<View style={{ flex: 1, gap: 1 }}>
-					<Text numberOfLines={1} style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.base, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>
 						{request.car.label}
 					</Text>
-					<Text numberOfLines={1} style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.sm, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>
 						<Text style={{ fontFamily: fontFamily(600), color: c.inkSecondary }}>{request.buyerName?.trim() || t('Покупатель')}</Text> · {meta}
 					</Text>
 				</View>
@@ -142,7 +142,7 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 
 			<View style={{ gap: 8 }}>
 				{isPlaceholderText(request.text) ? null : (
-					<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{request.text}</Text>
+					<Text style={{ fontSize: fs.lg, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{request.text}</Text>
 				)}
 				{request.voice ? <VoicePlayer voice={request.voice} /> : null}
 				{full ? <MediaGallery media={photosAsMedia(request.photos)} /> : <MediaStrip media={photosAsMedia(request.photos)} />}
@@ -153,7 +153,7 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 					style={{
 						height: 44,
 						borderRadius: 12,
-						backgroundColor: '#E7F6EC',
+						backgroundColor: c.successSoft,
 						flexDirection: 'row',
 						alignItems: 'center',
 						justifyContent: 'center',
@@ -161,7 +161,7 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 					}}
 				>
 					<TickIcon size={18} color={c.success} strokeWidth={2.8} />
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.success }}>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.success }}>
 						{request.soldHere
 							? t('Купили у вас')
 							: mine.answer === 'HAVE'
@@ -198,12 +198,12 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 								justifyContent: 'center',
 							}}
 						>
-							<MicIcon size={20} color="#FFFFFF" />
+							<MicIcon size={20} color={fixed.white} />
 						</View>
-						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Ответить голосом')}</Text>
+						<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: fixed.white }}>{t('Ответить голосом')}</Text>
 					</Pressable>
 					{reply.error ? (
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text>
+						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text>
 					) : null}
 					<View style={{ flexDirection: 'row', gap: 8 }}>
 						<Pressable
@@ -213,13 +213,13 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 								flex: 1,
 								height: 44,
 								borderRadius: 14,
-								backgroundColor: '#EFEDEC',
+								backgroundColor: c.fill,
 								alignItems: 'center',
 								justifyContent: 'center',
 								opacity: reply.isPending ? 0.4 : 1,
 							}}
 						>
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>{t('Нет')}</Text>
+							<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{t('Нет')}</Text>
 						</Pressable>
 						<Pressable
 							onPress={() => router.push({ pathname: '/seller-answer', params: { id: String(request.id) } })}
@@ -227,7 +227,7 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 								flex: 1,
 								height: 44,
 								borderRadius: 14,
-								backgroundColor: '#E7F6EC',
+								backgroundColor: c.successSoft,
 								flexDirection: 'row',
 								alignItems: 'center',
 								justifyContent: 'center',
@@ -235,7 +235,7 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 							}}
 						>
 							<TickIcon size={20} color={c.success} />
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.success }}>{t('Есть')}</Text>
+							<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.success }}>{t('Есть')}</Text>
 						</Pressable>
 					</View>
 				</>

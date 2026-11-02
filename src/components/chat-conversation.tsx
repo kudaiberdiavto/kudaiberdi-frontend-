@@ -11,7 +11,7 @@ import { VoicePlayer } from '@/components/voice'
 import { TruckTile } from '@/components/video-v23'
 import { RecordingBar, useVoiceRecorder, VideoBubble } from '@/components/chat-media'
 import { MediaViewer } from '@/components/media-viewer'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { haptic } from '@/lib/haptics'
 import { newIdempotencyKey, resolveUrl } from '@/lib/api'
 import { formatAgo, formatClock, formatPrice, formatWhenAt } from '@/lib/format'
@@ -167,7 +167,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 			{pinned}
 
 			{voice.error || media.error ? (
-				<Text style={{ marginHorizontal: 16, marginTop: 8, fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>
+				<Text style={{ marginHorizontal: 16, marginTop: 8, fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>
 					{voice.error ?? media.error?.message}
 				</Text>
 			) : null}
@@ -244,7 +244,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(positive || greeting ? 700 : 600), color: greeting ? '#FFFFFF' : positive ? c.success : c.ink }}>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(positive || greeting ? 700 : 600), color: greeting ? fixed.white : positive ? c.success : c.ink }}>
 									{greeting ? `👋 ${reply.text}` : reply.text}
 								</Text>
 							</Pressable>
@@ -286,7 +286,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 						}}
 						onSubmitEditing={send}
 						placeholder={canWrite ? t('Сообщение') : chat.data?.blockedByOther ? t('Собеседник ограничил чат') : t('Чат недоступен')}
-						placeholderTextColor="#8C8888"
+						placeholderTextColor={c.fillInk}
 						maxLength={2000}
 						style={{
 							flex: 1,
@@ -294,7 +294,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 							borderRadius: 22,
 							backgroundColor: c.surface,
 							paddingHorizontal: 16,
-							fontSize: 17.5,
+							fontSize: fs.lg,
 							fontFamily: fontFamily(400),
 							color: c.ink,
 						}}
@@ -313,7 +313,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 							justifyContent: 'center',
 						}}
 					>
-						<SendIcon size={20} color="#FFFFFF" />
+						<SendIcon size={20} color={fixed.white} />
 					</Pressable>
 				) : (
 					// Empty field — the mic: tap to record a voice message (up to 60 s), send with the arrow.
@@ -322,7 +322,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 						disabled={!canWrite}
 						style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}
 					>
-						<MicV23Icon size={22} color="#FFFFFF" />
+						<MicV23Icon size={22} color={fixed.white} />
 					</Pressable>
 				)}
 			</View>
@@ -360,7 +360,7 @@ function Message({
 	if (message.code === 'HIDDEN_BY_ADMIN') {
 		return (
 			<View style={{ alignSelf: mine ? 'flex-end' : 'flex-start', borderRadius: 16, borderWidth: 1.5, borderColor: c.border, borderStyle: 'dashed', paddingVertical: 10, paddingHorizontal: 14 }}>
-				<Text style={{ fontSize: 15.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.muted }}>{t('Сообщение скрыто администрацией')}</Text>
+				<Text style={{ fontSize: fs.md, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.muted }}>{t('Сообщение скрыто администрацией')}</Text>
 			</View>
 		)
 	}
@@ -374,13 +374,13 @@ function Message({
 					typeof orderId === 'number' &&
 					router.push({ pathname: '/delivery-order', params: { id: String(orderId), ...(shopSide ? { as: 'shop' } : {}) } })
 				}
-				style={{ alignSelf: 'center', width: 280, borderRadius: 16, backgroundColor: '#FCEBB0', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}
+				style={{ alignSelf: 'center', width: 280, borderRadius: 16, backgroundColor: c.warningSoft, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}
 			>
 				<TruckTile size={40} />
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: c.ink }}>{t('Заказ с доставкой')}</Text>
-					{message.text ? <Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(500), color: c.inkSecondary }}>{message.text}</Text> : null}
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{shopSide ? t('Открыть заказ ›') : t('Где посылка ›')}</Text>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(800), color: c.ink }}>{t('Заказ с доставкой')}</Text>
+					{message.text ? <Text style={{ fontSize: fs.sm, lineHeight: 18.5, fontFamily: fontFamily(500), color: c.inkSecondary }}>{message.text}</Text> : null}
+					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: c.brandStrong }}>{shopSide ? t('Открыть заказ ›') : t('Где посылка ›')}</Text>
 				</View>
 			</Pressable>
 		)
@@ -389,7 +389,7 @@ function Message({
 	if (message.side === 'SYSTEM' || message.type === 'SYSTEM') {
 		return (
 			<View style={{ alignSelf: 'center', borderRadius: 10, backgroundColor: c.brandTint, paddingVertical: 6, paddingHorizontal: 12 }}>
-				<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.brandStrong }}>
+				<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.brandStrong }}>
 					{message.text ?? SYSTEM_TEXT[message.code ?? ''] ?? ''}
 				</Text>
 			</View>
@@ -414,7 +414,7 @@ function Message({
 					voice={{ url: message.mediaUrl, durationSec: message.durationSeconds ?? 0, waveform: message.waveform ?? [] }}
 					background={c.card}
 				/>
-				<Text style={{ fontSize: 12, fontFamily: fontFamily(400), color: raw.fillInk, alignSelf: mine ? 'flex-end' : 'flex-start' }}>
+				<Text style={{ fontSize: fs.xxs, fontFamily: fontFamily(400), color: c.fillInk, alignSelf: mine ? 'flex-end' : 'flex-start' }}>
 					{formatClock(message.createdAt)}
 				</Text>
 			</View>
@@ -437,7 +437,7 @@ function Message({
 				}}
 			>
 				{about ? (
-					<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(600), color: mine ? 'rgba(255,255,255,0.8)' : c.muted }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.xs, fontFamily: fontFamily(600), color: mine ? 'rgba(255,255,255,0.8)' : c.muted }}>
 						{about}
 					</Text>
 				) : null}
@@ -450,19 +450,19 @@ function Message({
 				{body && message.code === 'RESERVED' ? (
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
 						<TickIcon size={18} color={c.success} strokeWidth={2.8} />
-						<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: mine ? '#FFFFFF' : c.ink }}>{body}</Text>
+						<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: mine ? fixed.white : c.ink }}>{body}</Text>
 					</View>
 				) : body ? (
-					<Text style={{ fontSize: 17.5, lineHeight: 24, fontFamily: fontFamily(400), color: mine ? '#FFFFFF' : c.ink }}>{body}</Text>
+					<Text style={{ fontSize: fs.lg, lineHeight: 24, fontFamily: fontFamily(400), color: mine ? fixed.white : c.ink }}>{body}</Text>
 				) : null}
 				{price && !partReply && (message.type === 'REPLY' || message.type === 'PART') ? (
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: mine ? '#FFFFFF' : c.ink }}>{price}</Text>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(800), color: mine ? fixed.white : c.ink }}>{price}</Text>
 				) : null}
 				{message.type === 'REPLY' && (offerPrice || offerAt) ? (
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: mine ? '#FFFFFF' : c.ink }}>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(800), color: mine ? fixed.white : c.ink }}>
 						{offerPrice}
 						{offerPrice && offerAt ? ' · ' : ''}
-						{offerAt ? <Text style={{ fontFamily: fontFamily(700), color: mine ? '#FFFFFF' : c.success }}>{offerAt}</Text> : null}
+						{offerAt ? <Text style={{ fontFamily: fontFamily(700), color: mine ? fixed.white : c.success }}>{offerAt}</Text> : null}
 					</Text>
 				) : null}
 			</View>
@@ -470,9 +470,9 @@ function Message({
 				onPress={status === 'failed' ? onRetry : undefined}
 				style={{
 					alignSelf: mine ? 'flex-end' : 'flex-start',
-					fontSize: 12,
+					fontSize: fs.xxs,
 					fontFamily: fontFamily(status === 'failed' ? 700 : 400),
-					color: status === 'failed' ? c.danger : raw.fillInk,
+					color: status === 'failed' ? c.danger : c.fillInk,
 				}}
 			>
 				{status === 'failed' ? (
@@ -483,7 +483,7 @@ function Message({
 					<>
 						{formatClock(message.createdAt)}
 						{status ? (
-							<Text style={{ fontFamily: fontFamily(700), color: status === 'read' ? c.brand : raw.fillInk }}>
+							<Text style={{ fontFamily: fontFamily(700), color: status === 'read' ? c.brand : c.fillInk }}>
 								{status === 'read' ? '  ✓✓' : '  ✓'}
 								{last ? (status === 'read' ? t(' Прочитано') : t(' Доставлено')) : ''}
 							</Text>

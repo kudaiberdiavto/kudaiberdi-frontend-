@@ -5,9 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Location from 'expo-location'
 import { addressAt, currentCoords } from '@/lib/locate'
-import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceGrid, Skeleton, Toggle, toast } from '@/components/ui'
-import { ChevronLeftIcon, CloseIcon, LocateIcon, MapPinIcon, PhotoIcon } from '@/components/icons'
-import { fontFamily, raw, useColors } from '@/theme'
+import { BrandLogo, Button, Chip, QueryErrorBanner, ScreenHeader, SectionLabel, ServiceGrid, Skeleton, toast, Toggle } from '@/components/ui'
+import { CloseIcon, LocateIcon, MapPinIcon, PhotoIcon } from '@/components/icons'
+import { fixed, fontFamily, fs, raw, useColors } from '@/theme'
 import { useBrands } from '@/api/directory'
 import { useMe } from '@/api/me'
 import { useMyMaster, useSaveMaster, useServiceTypes, useSetMasterAvatar, useSetMasterPhotos } from '@/api/services'
@@ -48,14 +48,7 @@ function MasterProfileSkeleton() {
 	const insets = useSafeAreaInsets()
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				{router.canGoBack() ? (
-					<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()}>
-						<ChevronLeftIcon size={24} color={c.ink} />
-					</Pressable>
-				) : null}
-				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>{t('Мои услуги')}</Text>
-			</View>
+			<ScreenHeader title={t('Мои услуги')} />
 			<View style={{ paddingTop: 8, paddingHorizontal: 16, gap: 10 }}>
 				<Skeleton width={110} height={14} />
 				{[0, 1].map((row) => (
@@ -144,14 +137,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				{router.canGoBack() ? (
-					<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()}>
-						<ChevronLeftIcon size={24} color={c.ink} />
-					</Pressable>
-				) : null}
-				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>{t('Мои услуги')}</Text>
-			</View>
+			<ScreenHeader title={t('Мои услуги')} />
 
 			<ScrollView ref={scroll} contentContainerStyle={{ paddingTop: 8, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={error ?? save.error} />
@@ -164,8 +150,8 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 							value={form.name}
 							onChangeText={(name) => patch({ name: name.slice(0, 60) })}
 							placeholder={t('СТО «Ходовик» или Мастер Эрлан')}
-							placeholderTextColor={raw.fillInk}
-							style={{ height: 48, borderRadius: 12, backgroundColor: c.card, borderWidth: 2, borderColor: c.border, paddingHorizontal: 14, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}
+							placeholderTextColor={c.fillInk}
+							style={{ height: 48, borderRadius: 12, backgroundColor: c.card, borderWidth: 2, borderColor: c.border, paddingHorizontal: 14, fontSize: fs.base, fontFamily: fontFamily(400), color: c.ink }}
 						/>
 					</>
 				) : null}
@@ -196,11 +182,11 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 							justifyContent: 'center',
 						}}
 					>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Все марки')}</Text>
+						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Все марки')}</Text>
 					</Pressable>
 					{!pickBrands ? (
 						<Pressable onPress={() => setPickBrands(true)} style={{ height: 34, paddingHorizontal: 12, borderRadius: 17, backgroundColor: c.card, justifyContent: 'center' }}>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Выбрать…')}</Text>
+							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Выбрать…')}</Text>
 						</Pressable>
 					) : null}
 				</View>
@@ -244,13 +230,13 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 								value={form.address}
 								onChangeText={(address) => patch({ address })}
 								placeholder={t('Адрес: улица, дом, контейнер')}
-								placeholderTextColor={raw.fillInk}
-								style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}
+								placeholderTextColor={c.fillInk}
+								style={{ flex: 1, fontSize: fs.base, fontFamily: fontFamily(400), color: c.ink }}
 							/>
 						</View>
 						<Pressable onPress={locate} disabled={locating} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 36 }}>
 							{locating ? <ActivityIndicator color={c.brandStrong} /> : <LocateIcon size={18} color={c.brandStrong} />}
-							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
+							<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.brandStrong }}>
 								{form.lat !== null ? t('Точка определена · обновить') : t('Определить по геолокации')}
 							</Text>
 						</Pressable>
@@ -267,14 +253,14 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 					>
 						<MapPinIcon size={20} color={c.brandStrong} />
 						<View style={{ flex: 1, gap: 2 }}>
-							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>{form.address}</Text>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Принимаю заявки в радиусе {0} км', form.radiusKm)}</Text>
+							<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.ink }}>{form.address}</Text>
+							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>{t('Принимаю заявки в радиусе {0} км', form.radiusKm)}</Text>
 						</View>
 					</Pressable>
 				)}
 
 				<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 12, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14 }}>
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}>{t('Выезжаю к клиенту')}</Text>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(400), color: c.ink }}>{t('Выезжаю к клиенту')}</Text>
 					<Toggle value={form.mobile} onChange={(mobile) => patch({ mobile })} />
 				</View>
 
@@ -284,8 +270,8 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 					onChangeText={(phone) => patch({ phone: phone.replace(/[^\d+]/g, '').slice(0, 13) })}
 					keyboardType="phone-pad"
 					placeholder="+996 555 123 456"
-					placeholderTextColor={raw.fillInk}
-					style={{ height: 48, borderRadius: 12, backgroundColor: c.card, borderWidth: 2, borderColor: c.border, paddingHorizontal: 14, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink }}
+					placeholderTextColor={c.fillInk}
+					style={{ height: 48, borderRadius: 12, backgroundColor: c.card, borderWidth: 2, borderColor: c.border, paddingHorizontal: 14, fontSize: fs.base, fontFamily: fontFamily(400), color: c.ink }}
 				/>
 
 				{initial ? <MasterMedia master={initial} /> : null}
@@ -353,7 +339,7 @@ function MasterMedia({ master: initial }: { master: MyMaster }) {
 						])
 					return (
 						<Pressable key={photo.id} onLongPress={remove}>
-							<Image source={{ uri: resolveUrl(photo.thumbUrl) }} style={{ width: 76, height: 76, borderRadius: 12, backgroundColor: raw.fill }} />
+							<Image source={{ uri: resolveUrl(photo.thumbUrl) }} style={{ width: 76, height: 76, borderRadius: 12, backgroundColor: c.fill }} />
 							<Pressable
 								onPress={remove}
 								hitSlop={8}
@@ -361,7 +347,7 @@ function MasterMedia({ master: initial }: { master: MyMaster }) {
 								accessibilityLabel={t('Удалить фото')}
 								style={{ position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(32,31,29,0.72)', alignItems: 'center', justifyContent: 'center' }}
 							>
-								<CloseIcon size={12} color="#FFFFFF" strokeWidth={2.6} />
+								<CloseIcon size={12} color={fixed.white} strokeWidth={2.6} />
 							</Pressable>
 						</Pressable>
 					)
@@ -375,12 +361,12 @@ function MasterMedia({ master: initial }: { master: MyMaster }) {
 						style={{ width: 76, height: 76, borderRadius: 12, borderWidth: 2, borderStyle: 'dashed', borderColor: raw.mapRowBorder, alignItems: 'center', justifyContent: 'center', gap: 4 }}
 					>
 						<PhotoIcon size={20} color={c.brandStrong} />
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Фото')}</Text>
+						<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Фото')}</Text>
 					</Pressable>
 				) : null}
 			</View>
-			{master.photos.length ? <Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>{t('Удержите фото, чтобы удалить')}</Text> : null}
-			{error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
+			{master.photos.length ? <Text style={{ fontSize: fs.xs, fontFamily: fontFamily(400), color: c.muted }}>{t('Удержите фото, чтобы удалить')}</Text> : null}
+			{error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
 		</>
 	)
 }

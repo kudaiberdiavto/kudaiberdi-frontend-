@@ -5,7 +5,7 @@ import { router } from 'expo-router'
 import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { Avatar, Chip, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRow } from '@/components/ui'
 import { ChatIcon, SearchIcon } from '@/components/icons'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatChatTime } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
@@ -43,7 +43,7 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 	return (
 		<Screen padding={0}>
 			<View style={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 12 }}>
-				<Text style={{ fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.52, color: c.ink }}>{t('Чаты')}</Text>
+				<Text style={{ fontSize: fs.h1, fontFamily: fontFamily(700), letterSpacing: -0.52, color: c.ink }}>{t('Чаты')}</Text>
 			</View>
 
 			{items.length ? (
@@ -54,10 +54,10 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 							value={q}
 							onChangeText={setQ}
 							placeholder={t('Поиск по чатам')}
-							placeholderTextColor={raw.fillInk}
+							placeholderTextColor={c.fillInk}
 							returnKeyType="search"
 							clearButtonMode="while-editing"
-							style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+							style={{ flex: 1, fontSize: fs.base, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 						/>
 					</View>
 					<View style={{ flexDirection: 'row', gap: 8 }}>
@@ -138,16 +138,16 @@ function ChatRow({ chat }: { chat: ChatListItem }) {
 
 			<View style={{ flex: 1, gap: 3 }}>
 				<View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-					<Text numberOfLines={1} style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>
 						{chat.title}
 					</Text>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>
 						{formatChatTime(last?.at ?? chat.updatedAt)}
 					</Text>
 				</View>
 
 				{chat.subtitle ? (
-					<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>
 						{chat.subtitle}
 					</Text>
 				) : null}
@@ -155,7 +155,7 @@ function ChatRow({ chat }: { chat: ChatListItem }) {
 				<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
 					<Text
 						numberOfLines={1}
-						style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: chat.unread ? c.ink : c.muted }}
+						style={{ flex: 1, fontSize: fs.base, fontFamily: fontFamily(400), color: chat.unread ? c.ink : c.muted }}
 					>
 						{last?.fromMe ? t('Вы: {0}', lastText) : lastText}
 					</Text>
@@ -171,7 +171,7 @@ function ChatRow({ chat }: { chat: ChatListItem }) {
 								justifyContent: 'center',
 							}}
 						>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{chat.unread}</Text>
+							<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), color: fixed.white }}>{chat.unread}</Text>
 						</View>
 					) : null}
 				</View>

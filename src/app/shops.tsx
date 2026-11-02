@@ -3,10 +3,9 @@ import { FlatList, Pressable, Text, TextInput, View } from 'react-native'
 import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { BackIcon } from '@/components/buyer-v23'
 import { SearchIcon } from '@/components/icons'
-import { QueryErrorBanner, Skeleton, SkeletonRepeat } from '@/components/ui'
-import { fontFamily, raw, useColors } from '@/theme'
+import { QueryErrorBanner, ScreenHeader, Skeleton, SkeletonRepeat } from '@/components/ui'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { shopPlace } from '@/lib/shop-place'
 import { flattenPages } from '@/api/pagination'
@@ -31,12 +30,7 @@ export default function ShopsScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<View style={{ height: 56, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} hitSlop={10}>
-					<BackIcon color={c.ink} />
-				</Pressable>
-				<Text style={{ flex: 1, fontSize: 24, fontFamily: fontFamily(700), color: c.ink }}>{t('Магазины')}</Text>
-			</View>
+			<ScreenHeader title={t('Магазины')} />
 
 			<FlatList
 				data={items}
@@ -65,8 +59,8 @@ export default function ShopsScreen() {
 								value={text}
 								onChangeText={setText}
 								placeholder={t('Название магазина')}
-								placeholderTextColor={raw.fillInk}
-								style={{ flex: 1, fontSize: 17, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+								placeholderTextColor={c.fillInk}
+								style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 							/>
 						</View>
 						<QueryErrorBanner error={shops.error} onRetry={() => shops.refetch()} />
@@ -97,20 +91,20 @@ function ShopRow({ shop }: { shop: ShopCard }) {
 				<Image source={{ uri: resolveUrl(shop.avatarUrl) }} style={{ width: 56, height: 56, borderRadius: 28 }} />
 			) : (
 				<View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-					<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop.name.charAt(0).toUpperCase()}</Text>
+					<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop.name.charAt(0).toUpperCase()}</Text>
 				</View>
 			)}
 			<View style={{ flex: 1, gap: 3 }}>
-				<Text numberOfLines={1} style={{ fontSize: 18, fontFamily: fontFamily(700), color: c.ink }}>
+				<Text numberOfLines={1} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>
 					{shop.name}
 				</Text>
-				<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>
-					{shop.reviewsCount ? <Text style={{ color: '#F5A623' }}>★ </Text> : null}
+				<Text numberOfLines={1} style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>
+					{shop.reviewsCount ? <Text style={{ color: fixed.star }}>★ </Text> : null}
 					{shop.reviewsCount ? `${shop.rating.toFixed(1)} · ` : ''}
 					{shopPlace(shop)}
 				</Text>
 			</View>
-			<Text style={{ fontSize: 24, color: c.muted }}>›</Text>
+			<Text style={{ fontSize: fs.h2, color: c.muted }}>›</Text>
 		</Pressable>
 	)
 }

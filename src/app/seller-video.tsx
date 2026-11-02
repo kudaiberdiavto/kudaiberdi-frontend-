@@ -6,12 +6,12 @@ import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo
 import * as ImagePicker from 'expo-image-picker'
 import { getThumbnailAsync } from 'expo-video-thumbnails'
 import { useConfirmLeave } from '@/lib/use-confirm-leave'
-import { BigButton, TickIcon, TopBar, priceDigits } from '@/components/buyer-v23'
-import { QueryErrorBanner, toast } from '@/components/ui'
+import { BigButton, TickIcon, priceDigits } from '@/components/buyer-v23'
+import { QueryErrorBanner, ScreenHeader, toast } from '@/components/ui'
 import { CloseIcon, GalleryIcon } from '@/components/icons'
 import { LoopVideo, TruckTile } from '@/components/video-v23'
 import { voiceClock } from '@/components/voice'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { uploadPartVideo } from '@/lib/api'
 import { usePublishPart, useSavePart } from '@/api/parts'
 import type { PartVideoUpload } from '@/api/types'
@@ -119,26 +119,26 @@ export default function SellerVideoScreen() {
 		}
 	}
 
-	const label = { fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted } as const
+	const label = { fontSize: fs.sm, fontFamily: fontFamily(500), color: c.muted } as const
 
 	return (
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar title={t('Выложить видео')} />
+			<ScreenHeader title={t('Выложить видео')} />
 
 			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 12 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 				<View style={{ flexDirection: 'row', gap: 12 }}>
 					<Pressable
 						onPress={() => !video && setRecording(true)}
-						style={{ width: 112, height: 184, borderRadius: 14, overflow: 'hidden', backgroundColor: '#1F2329', alignItems: 'center', justifyContent: 'center' }}
+						style={{ width: 112, height: 184, borderRadius: 14, overflow: 'hidden', backgroundColor: fixed.media, alignItems: 'center', justifyContent: 'center' }}
 					>
 						{video ? (
 							<LoopVideo key={video.uri} url={video.uri} playing style={{ position: 'absolute', width: '100%', height: '100%' }} />
 						) : (
 							<View style={{ alignItems: 'center', gap: 8 }}>
-								<View style={{ width: 44, height: 44, borderRadius: 22, borderWidth: 3, borderColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
-									<View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: '#E5484D' }} />
+								<View style={{ width: 44, height: 44, borderRadius: 22, borderWidth: 3, borderColor: fixed.white, alignItems: 'center', justifyContent: 'center' }}>
+									<View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: fixed.recording }} />
 								</View>
-								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Снять')}</Text>
+								<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: fixed.white }}>{t('Снять')}</Text>
 							</View>
 						)}
 						{video ? (
@@ -150,14 +150,14 @@ export default function SellerVideoScreen() {
 									height: 20,
 									paddingHorizontal: 6,
 									borderRadius: 10,
-									backgroundColor: '#E5484D',
+									backgroundColor: fixed.recording,
 									flexDirection: 'row',
 									alignItems: 'center',
 									gap: 4,
 								}}
 							>
-								<View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#FFFFFF' }} />
-								<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{voiceClock(video.durationSec)}</Text>
+								<View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: fixed.white }} />
+								<Text style={{ fontSize: fs.xxs, fontFamily: fontFamily(700), color: fixed.white }}>{voiceClock(video.durationSec)}</Text>
 							</View>
 						) : null}
 						{video ? (
@@ -175,15 +175,15 @@ export default function SellerVideoScreen() {
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Переснять')}</Text>
+								<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: fixed.white }}>{t('Переснять')}</Text>
 							</Pressable>
 						) : null}
 					</Pressable>
 
 					<View style={{ flex: 1, gap: 8 }}>
-						<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(700), color: c.ink }}>{t('Снимите деталь 10–15 секунд и скажите вслух, что это и сколько стоит')}</Text>
+						<Text style={{ fontSize: fs.base, lineHeight: 22, fontFamily: fontFamily(700), color: c.ink }}>{t('Снимите деталь 10–15 секунд и скажите вслух, что это и сколько стоит')}</Text>
 						{progress !== null ? (
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.brandStrong }}>{t('Загружаем… {0}%', Math.round(progress * 100))}</Text>
+							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.brandStrong }}>{t('Загружаем… {0}%', Math.round(progress * 100))}</Text>
 						) : fromVoice ? (
 							<View
 								style={{
@@ -198,11 +198,11 @@ export default function SellerVideoScreen() {
 								}}
 							>
 								<TickIcon size={13} color={c.brandStrong} />
-								<Text style={{ fontSize: 14, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Заполнили из голоса')}</Text>
+								<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Заполнили из голоса')}</Text>
 							</View>
 						) : null}
 						{uploadError && video ? (
-							<Text onPress={() => upload(video)} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.danger }}>{t('Не загрузилось · повторить')}</Text>
+							<Text onPress={() => upload(video)} style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: c.danger }}>{t('Не загрузилось · повторить')}</Text>
 						) : null}
 					</View>
 				</View>
@@ -213,7 +213,7 @@ export default function SellerVideoScreen() {
 						value={title}
 						onChangeText={setTitle}
 						placeholder={t('Стойки передние KYB, пара')}
-						placeholderTextColor="#8C8888"
+						placeholderTextColor={c.fillInk}
 						maxLength={120}
 						style={{
 							height: 48,
@@ -221,7 +221,7 @@ export default function SellerVideoScreen() {
 							borderWidth: 1.5,
 							borderColor: c.border,
 							paddingHorizontal: 12,
-							fontSize: 17.5,
+							fontSize: fs.lg,
 							fontFamily: fontFamily(600),
 							color: c.ink,
 						}}
@@ -237,14 +237,14 @@ export default function SellerVideoScreen() {
 								}}
 								keyboardType="number-pad"
 								placeholder="3 200"
-								placeholderTextColor="#8C8888"
+								placeholderTextColor={c.fillInk}
 								style={{
 									height: 48,
 									borderRadius: 12,
 									borderWidth: 1.5,
 									borderColor: c.border,
 									paddingHorizontal: 12,
-									fontSize: 18.5,
+									fontSize: fs.xl,
 									fontFamily: fontFamily(700),
 									color: c.ink,
 								}}
@@ -252,14 +252,14 @@ export default function SellerVideoScreen() {
 						</View>
 						<View style={{ flex: 1, gap: 6 }}>
 							<Text style={label}>{t('Состояние')}</Text>
-							<View style={{ height: 48, borderRadius: 12, backgroundColor: raw.fill, padding: 4, flexDirection: 'row' }}>
+							<View style={{ height: 48, borderRadius: 12, backgroundColor: c.fill, padding: 4, flexDirection: 'row' }}>
 								{(['NEW', 'USED'] as const).map((value) => (
 									<Pressable
 										key={value}
 										onPress={() => setCondition(value)}
 										style={{ flex: 1, borderRadius: 9, backgroundColor: condition === value ? c.card : 'transparent', alignItems: 'center', justifyContent: 'center' }}
 									>
-										<Text style={{ fontSize: 16, fontFamily: fontFamily(condition === value ? 700 : 600), color: condition === value ? c.ink : c.muted }}>
+										<Text style={{ fontSize: fs.base, fontFamily: fontFamily(condition === value ? 700 : 600), color: condition === value ? c.ink : c.muted }}>
 											{value === 'NEW' ? t('Новая') : t('Б/у')}
 										</Text>
 									</Pressable>
@@ -278,15 +278,15 @@ export default function SellerVideoScreen() {
 								onPress={() => removeFitment(index)}
 								style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: c.brandTint, flexDirection: 'row', alignItems: 'center', gap: 6 }}
 							>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>{fitment.label}</Text>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>×</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>{fitment.label}</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>×</Text>
 							</Pressable>
 						))}
 						<Pressable
 							onPress={() => router.push('/fitment-add')}
-							style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, borderWidth: 2, borderStyle: 'dashed', borderColor: '#B8C3D3', justifyContent: 'center' }}
+							style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, borderWidth: 2, borderStyle: 'dashed', borderColor: c.dashedBrand, justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('+ Добавить машину')}</Text>
+							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('+ Добавить машину')}</Text>
 						</Pressable>
 					</View>
 				</View>
@@ -294,8 +294,8 @@ export default function SellerVideoScreen() {
 				<Pressable onPress={() => setShips(!ships)} style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 					<TruckTile />
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>{t('Отправлю в регионы')}</Text>
-						<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Курьер Ылдам Экспресс заберёт из контейнера')}</Text>
+						<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.ink }}>{t('Отправлю в регионы')}</Text>
+						<Text style={{ fontSize: fs.sm, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Курьер Ылдам Экспресс заберёт из контейнера')}</Text>
 					</View>
 					<View
 						style={{
@@ -303,13 +303,13 @@ export default function SellerVideoScreen() {
 							height: 24,
 							borderRadius: 6,
 							borderWidth: ships ? 0 : 2,
-							borderColor: '#B8B4B4',
+							borderColor: c.chevron,
 							backgroundColor: ships ? c.success : 'transparent',
 							alignItems: 'center',
 							justifyContent: 'center',
 						}}
 					>
-						{ships ? <TickIcon size={15} color="#FFFFFF" /> : null}
+						{ships ? <TickIcon size={15} color={fixed.white} /> : null}
 					</View>
 				</Pressable>
 
@@ -396,12 +396,12 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 	}
 
 	return (
-		<View style={{ flex: 1, backgroundColor: '#000000' }}>
+		<View style={{ flex: 1, backgroundColor: fixed.black }}>
 			{granted ? (
 				<CameraView ref={camera} style={{ flex: 1 }} mode="video" facing="back" />
 			) : (
 				<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 }}>
-					<Text style={{ fontSize: 17.5, lineHeight: 24, fontFamily: fontFamily(500), color: '#FFFFFF', textAlign: 'center' }}>{t('Разрешите камеру и микрофон — снимите деталь и скажите, что это и сколько стоит')}</Text>
+					<Text style={{ fontSize: fs.lg, lineHeight: 24, fontFamily: fontFamily(500), color: fixed.white, textAlign: 'center' }}>{t('Разрешите камеру и микрофон — снимите деталь и скажите, что это и сколько стоит')}</Text>
 					<BigButton
 						label={t('Разрешить')}
 						onPress={async () => {
@@ -414,7 +414,7 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 			)}
 
 			<Pressable accessibilityRole="button" accessibilityLabel={t('Закрыть')} onPress={close} hitSlop={12} style={{ position: 'absolute', top: insets.top + 12, left: 16 }}>
-				<CloseIcon size={28} color="#FFFFFF" />
+				<CloseIcon size={28} color={fixed.white} />
 			</Pressable>
 			{active ? (
 				<View
@@ -425,30 +425,30 @@ function Recorder({ onClose, onDone }: { onClose: () => void; onDone: (video: Re
 						height: 28,
 						paddingHorizontal: 10,
 						borderRadius: 14,
-						backgroundColor: '#E5484D',
+						backgroundColor: fixed.recording,
 						flexDirection: 'row',
 						alignItems: 'center',
 						gap: 6,
 					}}
 				>
-					<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#FFFFFF' }} />
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{voiceClock(seconds)}</Text>
+					<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: fixed.white }} />
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: fixed.white }}>{voiceClock(seconds)}</Text>
 				</View>
 			) : null}
 
 			<View style={{ position: 'absolute', left: 0, right: 0, bottom: insets.bottom + 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
 				<Pressable accessibilityRole="button" accessibilityLabel={t('Выбрать из галереи')} onPress={fromGallery} disabled={active} style={{ position: 'absolute', left: 32, opacity: active ? 0.3 : 1 }}>
-					<GalleryIcon size={30} color="#FFFFFF" />
+					<GalleryIcon size={30} color={fixed.white} />
 				</Pressable>
 				<Pressable
 					onPress={record}
 					disabled={!granted}
-					style={{ width: 76, height: 76, borderRadius: 38, borderWidth: 4, borderColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}
+					style={{ width: 76, height: 76, borderRadius: 38, borderWidth: 4, borderColor: fixed.white, alignItems: 'center', justifyContent: 'center' }}
 				>
-					<View style={{ width: active ? 30 : 58, height: active ? 30 : 58, borderRadius: active ? 8 : 29, backgroundColor: '#E5484D' }} />
+					<View style={{ width: active ? 30 : 58, height: active ? 30 : 58, borderRadius: active ? 8 : 29, backgroundColor: fixed.recording }} />
 				</Pressable>
 			</View>
-			<Text style={{ position: 'absolute', left: 24, right: 24, bottom: insets.bottom + 112, fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: '#FFFFFF', textAlign: 'center' }}>
+			<Text style={{ position: 'absolute', left: 24, right: 24, bottom: insets.bottom + 112, fontSize: fs.md, lineHeight: 21, fontFamily: fontFamily(500), color: fixed.white, textAlign: 'center' }}>
 				{active ? t('Скажите, что это и сколько стоит') : t('Снимите деталь 10–15 секунд')}
 			</Text>
 		</View>

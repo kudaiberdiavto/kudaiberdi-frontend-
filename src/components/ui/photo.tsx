@@ -1,6 +1,6 @@
 import { View, type StyleProp, type ViewStyle } from 'react-native'
 import { CameraIcon } from '@/components/icons'
-import { raw, useColors } from '@/theme'
+import { useColors } from '@/theme'
 
 /** Заглушка фото (товар, место, обложка) — реальные фото приходят от пользователя, здесь только форма и радиус из specs. */
 export function PhotoPlaceholder({
@@ -22,7 +22,7 @@ export function PhotoPlaceholder({
 					width,
 					height,
 					borderRadius: radius,
-					backgroundColor: raw.fill,
+					backgroundColor: c.fill,
 					alignItems: 'center',
 					justifyContent: 'center',
 					overflow: 'hidden',

@@ -6,7 +6,7 @@ import { PaperPlaneIcon } from '@/components/buyer-v23'
 import { ModalSheet } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
 import { Skeleton, SkeletonRepeat, MoreButton } from '@/components/ui'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { formatAgo } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
 import { useAddPartComment, useDeletePartComment, usePartComments, useSignedIn } from '@/api/catalog'
@@ -51,7 +51,7 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 
 	return (
 		<ModalSheet onClose={onClose}>
-			<Text numberOfLines={1} style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>
+			<Text numberOfLines={1} style={{ fontSize: fs.xxl, fontFamily: fontFamily(800), color: c.ink }}>
 				{t('Комментарии')}{total ? ` · ${total}` : ''}
 			</Text>
 
@@ -73,13 +73,13 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 				{items.map((comment) => (
 					<Pressable key={comment.id} onLongPress={() => actions(comment)} delayLongPress={400} style={{ gap: 3 }}>
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>{comment.mine ? t('Вы') : (comment.authorName ?? t('Покупатель'))}</Text>
+							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.ink }}>{comment.mine ? t('Вы') : (comment.authorName ?? t('Покупатель'))}</Text>
 							{comment.fromSeller ? (
 								<View style={{ height: 20, paddingHorizontal: 6, borderRadius: 6, backgroundColor: c.brandTint, justifyContent: 'center' }}>
-									<Text style={{ fontSize: 12.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Продавец')}</Text>
+									<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Продавец')}</Text>
 								</View>
 							) : null}
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{formatAgo(comment.createdAt, { short: true })}</Text>
+							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>{formatAgo(comment.createdAt, { short: true })}</Text>
 							{comment.canDelete || (!comment.mine && signedIn) ? (
 								<>
 									<View style={{ flex: 1 }} />
@@ -87,13 +87,13 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 								</>
 							) : null}
 						</View>
-						<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(400), color: c.ink }}>{comment.text}</Text>
+						<Text style={{ fontSize: fs.base, lineHeight: 22, fontFamily: fontFamily(400), color: c.ink }}>{comment.text}</Text>
 					</Pressable>
 				))}
 				{comments.isFetchingNextPage ? <Skeleton width="70%" height={15} /> : null}
 			</ScrollView>
 
-			{add.error ? <Text style={{ fontSize: 15, fontFamily: fontFamily(500), color: c.danger }}>{add.error.message}</Text> : null}
+			{add.error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{add.error.message}</Text> : null}
 			<View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10 }}>
 				<TextInput
 					value={text}
@@ -113,7 +113,7 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 						paddingHorizontal: 18,
 						paddingTop: 16,
 						paddingBottom: 16,
-						fontSize: 17.5,
+						fontSize: fs.lg,
 						fontFamily: fontFamily(400),
 						color: c.ink,
 					}}
@@ -132,7 +132,7 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 						opacity: !signedIn || value ? 1 : 0.5,
 					}}
 				>
-					<PaperPlaneIcon size={24} color="#FFFFFF" />
+					<PaperPlaneIcon size={24} color={fixed.white} />
 				</Pressable>
 			</View>
 			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />

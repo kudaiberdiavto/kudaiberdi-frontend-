@@ -3,7 +3,7 @@ import { FlatList, Text, View, type ListViewToken } from 'react-native'
 import { router, useIsFocused } from 'expo-router'
 import { VideoTile } from '@/components/video-v23'
 import { Skeleton } from '@/components/ui'
-import { fontFamily, useColors } from '@/theme'
+import { fontFamily, fs, useColors } from '@/theme'
 import { flattenPages } from '@/api/pagination'
 import { useVideoFeed } from '@/api/catalog'
 import { useVideoViewer } from '@/store/useVideoViewer'
@@ -51,7 +51,7 @@ export function MarketVideos() {
 		<View style={{ gap: 10, paddingTop: 2 }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
 				<View style={{ flex: 1 }} />
-				<Text onPress={() => openFeed()} style={{ flexShrink: 0, fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Смотреть все')}</Text>
+				<Text onPress={() => openFeed()} style={{ flexShrink: 0, fontSize: fs.base, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Смотреть все')}</Text>
 			</View>
 			<FlatList
 				horizontal

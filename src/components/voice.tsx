@@ -7,7 +7,7 @@ import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
 import { useVoiceRecorder } from '@/components/chat-media'
 import { MicIcon } from '@/components/icons'
 import { resolveUrl, uploadVoice, type VoicePurpose } from '@/lib/api'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import type { Voice, VoiceUpload } from '@/api/types'
 import { t } from '@/i18n'
 
@@ -31,7 +31,7 @@ function barHeights(waveform: number[] | null | undefined, width: number) {
 	})
 }
 
-export function PlayIcon({ size = 14, color = '#FFFFFF' }: { size?: number; color?: string }) {
+export function PlayIcon({ size = 14, color = fixed.white }: { size?: number; color?: string }) {
 	return (
 		<Svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke={color} strokeWidth={2} strokeLinejoin="round">
 			<Path d="M8 5.5v13l10-6.5z" />
@@ -39,7 +39,7 @@ export function PlayIcon({ size = 14, color = '#FFFFFF' }: { size?: number; colo
 	)
 }
 
-function PauseIcon({ size = 14, color = '#FFFFFF' }: { size?: number; color?: string }) {
+function PauseIcon({ size = 14, color = fixed.white }: { size?: number; color?: string }) {
 	return (
 		<Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
 			<Path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" />
@@ -124,7 +124,7 @@ export function VoicePlayer({
 					{row(1)}
 				</View>
 			</View>
-			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted, minWidth: 30, textAlign: 'right' }}>
+			<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.muted, minWidth: 30, textAlign: 'right' }}>
 				{voiceClock(started ? status.currentTime : duration)}
 			</Text>
 		</Pressable>
@@ -181,9 +181,9 @@ export function VoiceRecordingPanel({ seconds, uploading, onDone, onCancel }: { 
 		<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 12, gap: 12 }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				<View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: uploading ? c.brand : c.danger, alignItems: 'center', justifyContent: 'center' }}>
-					<MicIcon size={22} color="#FFFFFF" />
+					<MicIcon size={22} color={fixed.white} />
 				</View>
-				<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
+				<Text style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>
 					{uploading ? t('Слушаем…') : t('Говорите · {0}', voiceClock(seconds))}
 				</Text>
 			</View>
@@ -193,10 +193,10 @@ export function VoiceRecordingPanel({ seconds, uploading, onDone, onCancel }: { 
 						onPress={onCancel}
 						style={{ flex: 1, height: 48, borderRadius: 14, borderWidth: 2, borderColor: c.border, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}
 					>
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{t('Отмена')}</Text>
+						<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{t('Отмена')}</Text>
 					</Pressable>
 					<Pressable onPress={onDone} style={{ flex: 1, height: 48, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}>
-						<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Готово')}</Text>
+						<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Готово')}</Text>
 					</Pressable>
 				</View>
 			)}
@@ -211,7 +211,7 @@ export function VoiceResultPanel({ voice, onRerecord }: { voice: Pick<Voice, 'ur
 		<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 10, gap: 10 }}>
 			<VoicePlayer voice={voice} background={c.card} />
 			{voice.transcript ? (
-				<Text style={{ fontSize: 16.5, lineHeight: 22.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.inkSecondary, paddingHorizontal: 4 }}>
+				<Text style={{ fontSize: fs.base, lineHeight: 22.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.inkSecondary, paddingHorizontal: 4 }}>
 					«{voice.transcript}»
 				</Text>
 			) : null}
@@ -220,7 +220,7 @@ export function VoiceResultPanel({ voice, onRerecord }: { voice: Pick<Voice, 'ur
 				style={{ height: 44, borderRadius: 12, borderWidth: 2, borderColor: c.border, backgroundColor: c.card, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 			>
 				<MicIcon size={18} color={c.brandStrong} />
-				<Text style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Перезаписать')}</Text>
+				<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Перезаписать')}</Text>
 			</Pressable>
 		</View>
 	)

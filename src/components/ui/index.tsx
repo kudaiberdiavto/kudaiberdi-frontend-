@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { haptic } from '@/lib/haptics'
 import { t } from '@/i18n'
 
@@ -15,6 +15,7 @@ export { EmptyState, NoticeBanner, QueryErrorBanner } from './notice'
 export { BottomSheet } from './sheet'
 export { toast } from './toast'
 export { MoreButton } from './more-button'
+export { ScreenHeader } from './screen-header'
 export {
 	Skeleton,
 	SkeletonCard,
@@ -90,7 +91,7 @@ export function SectionLabel({ children, style }: { children: string; style?: St
 		<View style={style}>
 			<Text
 				style={{
-					fontSize: 14.5,
+					fontSize: fs.sm,
 					fontFamily: fontFamily(700),
 					letterSpacing: 1.04,
 					textTransform: 'uppercase',
@@ -167,9 +168,9 @@ export function Segmented({
 					>
 						<Text
 							style={{
-								fontSize: 15.5,
+								fontSize: fs.md,
 								fontFamily: fontFamily(active ? activeWeight : 600),
-								color: active ? '#FFFFFF' : (inactiveColor ?? c.inkSecondary),
+								color: active ? fixed.white : (inactiveColor ?? c.inkSecondary),
 							}}
 						>
 							{label}
@@ -195,7 +196,7 @@ export function Toggle({ value, onChange }: { value: boolean; onChange?: (next: 
 				width: 44,
 				height: 28,
 				borderRadius: 14,
-				backgroundColor: value ? c.success : raw.toggleOff,
+				backgroundColor: value ? c.success : c.toggleOff,
 				justifyContent: 'center',
 			}}
 		>
@@ -204,7 +205,7 @@ export function Toggle({ value, onChange }: { value: boolean; onChange?: (next: 
 					width: 22,
 					height: 22,
 					borderRadius: 11,
-					backgroundColor: value ? c.surface : raw.toggleOffKnob,
+					backgroundColor: value ? c.surface : c.toggleOffKnob,
 					marginLeft: value ? 19 : 3,
 				}}
 			/>
@@ -248,10 +249,10 @@ export function SettingsRow({
 				borderBottomColor: c.surface,
 			}}
 		>
-			<Text style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: labelColor ?? c.ink }}>{label}</Text>
+			<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(400), color: labelColor ?? c.ink }}>{label}</Text>
 			{right ??
 				(value ? (
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(valueWeight), color: valueColor ?? c.muted }}>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(valueWeight), color: valueColor ?? c.muted }}>
 						{value}
 					</Text>
 				) : null)}
@@ -279,7 +280,7 @@ export function LanguageSwitch({ value, onChange }: { value: 'ru' | 'kg'; onChan
 							backgroundColor: active ? c.brand : 'transparent',
 						}}
 					>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.muted }}>
+						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: active ? fixed.white : c.muted }}>
 							{code === 'ru' ? t('Русский') : t('Кыргызча')}
 						</Text>
 					</Pressable>
@@ -302,8 +303,8 @@ export function LocationCard({
 	const c = useColors()
 	const cell = (title: string, value: string) => (
 		<View style={{ flex: 1, borderRadius: 12, backgroundColor: c.surface, paddingVertical: 8, paddingHorizontal: 12, gap: 2 }}>
-			<Text style={{ fontSize: 12, fontFamily: fontFamily(700), letterSpacing: 0.88, color: c.muted }}>{title}</Text>
-			<Text style={{ fontSize: 26, lineHeight: 29.9, fontFamily: fontFamily(800), color: c.ink }}>{value}</Text>
+			<Text style={{ fontSize: fs.xxs, fontFamily: fontFamily(700), letterSpacing: 0.88, color: c.muted }}>{title}</Text>
+			<Text style={{ fontSize: fs.h1, lineHeight: 29.9, fontFamily: fontFamily(800), color: c.ink }}>{value}</Text>
 		</View>
 	)
 	return (
@@ -341,13 +342,13 @@ export function Stepper({
 				opacity: disabled ? 0.4 : 1,
 			}}
 		>
-			<Text style={{ fontSize: 20, fontFamily: fontFamily(400), color: c.ink }}>{label}</Text>
+			<Text style={{ fontSize: fs.xxl, fontFamily: fontFamily(400), color: c.ink }}>{label}</Text>
 		</Pressable>
 	)
 	return (
 		<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
 			{step('−', () => onChange(Math.max(min, value - 1)), value <= min)}
-			<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>{value}</Text>
+			<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{value}</Text>
 			{step('+', () => onChange(Math.min(max, value + 1)), value >= max)}
 		</View>
 	)

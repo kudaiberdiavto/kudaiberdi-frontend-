@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { Button, QueryErrorBanner } from '@/components/ui'
-import { ChevronLeftIcon, CloseIcon } from '@/components/icons'
+import { Button, QueryErrorBanner, ScreenHeader } from '@/components/ui'
+import { CloseIcon } from '@/components/icons'
 import { SelectField, SelectSheet } from '@/components/select-sheet'
-import { fontFamily, useColors } from '@/theme'
+import { fontFamily, fs, useColors } from '@/theme'
 import { useBrands, useModels } from '@/api/directory'
 import type { CarModel } from '@/api/types'
 import { usePartDraft } from '@/store/usePartDraft'
@@ -71,12 +71,7 @@ export default function FitmentAddScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
-			<View style={{ paddingTop: insets.top + 12, paddingHorizontal: 16, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} hitSlop={10}>
-					<ChevronLeftIcon size={24} color={c.ink} />
-				</Pressable>
-				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>{t('Подходит к машинам')}</Text>
-			</View>
+			<ScreenHeader inset title={t('Подходит к машинам')} />
 
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 16 }} keyboardShouldPersistTaps="handled">
 				<QueryErrorBanner error={brands.error ?? models.error} onRetry={() => (brands.refetch(), models.refetch())} />
@@ -106,7 +101,7 @@ export default function FitmentAddScreen() {
 									gap: 6,
 								}}
 							>
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{pickedLabel(id)}</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>{pickedLabel(id)}</Text>
 								<CloseIcon size={14} color={c.brandStrong} />
 							</Pressable>
 						))}

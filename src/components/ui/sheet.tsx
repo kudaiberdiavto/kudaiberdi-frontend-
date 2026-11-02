@@ -4,7 +4,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, { SlideInDown, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { scheduleOnRN } from 'react-native-worklets'
-import { useColors } from '@/theme'
+import { fixed, useColors } from '@/theme'
 
 interface BottomSheetProps {
 	/** Swipe down on the handle / header closes the sheet. */
@@ -52,7 +52,7 @@ export function BottomSheet({ onClose, header, footer, children, maxHeight = 0.7
 					borderTopLeftRadius: 24,
 					borderTopRightRadius: 24,
 					backgroundColor: c.card,
-					shadowColor: '#201F1D',
+					shadowColor: fixed.shadow,
 					shadowOpacity: 0.14,
 					shadowOffset: { width: 0, height: -6 },
 					shadowRadius: 20,

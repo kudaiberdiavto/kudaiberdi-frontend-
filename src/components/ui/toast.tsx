@@ -5,7 +5,7 @@ import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated'
 import { create } from 'zustand'
 import { CheckIcon } from '@/components/icons'
 import { haptic } from '@/lib/haptics'
-import { fontFamily } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 
 /**
  * A short «Опубликовано ✓» on top of whatever screen comes next — the form closes, the confirmation stays.
@@ -26,6 +26,7 @@ export function toast(text: string) {
 
 /** Mounted once in the root layout, above the navigator. */
 export function ToastHost() {
+	const c = useColors()
 	const insets = useSafeAreaInsets()
 	const { text, key } = useToast()
 
@@ -49,21 +50,21 @@ export function ToastHost() {
 					paddingHorizontal: 18,
 					paddingVertical: 12,
 					borderRadius: 24,
-					backgroundColor: '#201F1D',
+					backgroundColor: c.inverse,
 					flexDirection: 'row',
 					alignItems: 'center',
 					gap: 10,
-					shadowColor: '#000',
+					shadowColor: fixed.black,
 					shadowOpacity: 0.2,
 					shadowOffset: { width: 0, height: 6 },
 					shadowRadius: 14,
 					elevation: 8,
 				}}
 			>
-				<View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#22C55E', alignItems: 'center', justifyContent: 'center' }}>
-					<CheckIcon size={14} color="#FFFFFF" strokeWidth={3} />
+				<View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: fixed.live, alignItems: 'center', justifyContent: 'center' }}>
+					<CheckIcon size={14} color={fixed.white} strokeWidth={3} />
 				</View>
-				<Text style={{ fontSize: 16, fontFamily: fontFamily(600), color: '#FFFFFF' }}>{text}</Text>
+				<Text style={{ fontSize: fs.base, fontFamily: fontFamily(600), color: fixed.white }}>{text}</Text>
 			</Animated.View>
 		</View>
 	)

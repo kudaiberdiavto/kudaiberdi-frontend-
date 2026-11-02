@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { ScrollView, View } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
-import { QueryErrorBanner, Screen, SkeletonRequestCard } from '@/components/ui'
-import { TopBar } from '@/components/buyer-v23'
+import { QueryErrorBanner, Screen, ScreenHeader, SkeletonRequestCard } from '@/components/ui'
+
 import { useIncomingRequest, useMarkSeen } from '@/api/incoming'
 import { RequestCard } from './seller/index'
 import { t } from '@/i18n'
@@ -20,7 +20,7 @@ export default function IncomingRequestScreen() {
 
 	return (
 		<Screen padding={0}>
-			<TopBar title={t('Запрос')} />
+			<ScreenHeader title={t('Запрос')} />
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 4, gap: 12 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={request.error} onRetry={() => request.refetch()} />
 				{request.data ? <RequestCard request={request.data} full /> : request.isLoading ? <SkeletonRequestCard full /> : null}

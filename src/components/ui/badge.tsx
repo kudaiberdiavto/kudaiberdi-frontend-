@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fontFamily, fs, useColors } from '@/theme'
 
 type Tone = 'success' | 'neutral' | 'brand' | 'muted'
 
@@ -13,9 +13,9 @@ export function Badge({ label, tone = 'neutral' }: BadgeProps) {
 	const c = useColors()
 	const palette: Record<Tone, { bg: string; fg: string }> = {
 		success: { bg: c.successTint, fg: c.success },
-		neutral: { bg: raw.fill, fg: c.inkSecondary },
+		neutral: { bg: c.fill, fg: c.inkSecondary },
 		brand: { bg: c.brandTint, fg: c.brandStrong },
-		muted: { bg: 'transparent', fg: raw.fillInk },
+		muted: { bg: 'transparent', fg: c.fillInk },
 	}
 	const { bg, fg } = palette[tone]
 
@@ -30,7 +30,7 @@ export function Badge({ label, tone = 'neutral' }: BadgeProps) {
 				justifyContent: 'center',
 			}}
 		>
-			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: fg }}>{label}</Text>
+			<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: fg }}>{label}</Text>
 		</View>
 	)
 }

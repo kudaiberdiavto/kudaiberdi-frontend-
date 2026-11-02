@@ -12,7 +12,7 @@ import { MediaGallery, MediaStrip } from '@/components/media-strip'
 import { isPlaceholderText } from '@/components/request-text'
 import { CheckMark, MicOutline, UrgentChip, myOfferLine } from '@/components/master-v23'
 import { AccountStatusBanner } from '@/components/account-status-banner'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { formatAgo, formatDistance, formatPrice, minutesLeft } from '@/lib/format'
 import { markServiceSeen, serviceName, useMasterFeed, useMasterOffer, useMyMaster, useServiceTypes } from '@/api/services'
 import { flattenPages } from '@/api/pagination'
@@ -54,7 +54,7 @@ export default function MasterRequestsScreen() {
 	// First master entry: fill the profile before the feed.
 	if (profile.isSuccess && !profile.data) return <Redirect href={{ pathname: '/master-profile', params: { first: '1' } }} />
 
-	const sectionStyle = { fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted } as const
+	const sectionStyle = { fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted } as const
 
 	const answer = (item: MasterFeedItem, record: boolean) =>
 		router.push({ pathname: '/master-answer', params: { id: String(item.id), ...(record ? { record: '1' } : {}) } })
@@ -62,12 +62,12 @@ export default function MasterRequestsScreen() {
 	const header = (
 		<View style={{ gap: 10, paddingBottom: 4 }}>
 			<View style={{ height: 60, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), color: c.ink }}>{t('Заявки')}</Text>
+				<Text style={{ flex: 1, fontSize: fs.h1, fontFamily: fontFamily(700), color: c.ink }}>{t('Заявки')}</Text>
 			</View>
 			{/* A part for a client's car — the same big banner as the buyer's «Найти запчасть». */}
 			<Pressable onPress={() => router.push('/search-part')}>
 				<LinearGradient
-					colors={['#2D63F0', '#1D46BF']}
+					colors={fixed.brandGradient}
 					start={{ x: 0.25, y: 0 }}
 					end={{ x: 0.75, y: 1 }}
 					style={{
@@ -78,7 +78,7 @@ export default function MasterRequestsScreen() {
 						alignItems: 'center',
 						gap: 14,
 						overflow: 'hidden',
-						shadowColor: '#1D46BF',
+						shadowColor: fixed.brandShadow,
 						shadowOpacity: 0.32,
 						shadowOffset: { width: 0, height: 14 },
 						shadowRadius: 15,
@@ -86,11 +86,11 @@ export default function MasterRequestsScreen() {
 					}}
 				>
 					<View style={{ width: 46, height: 46, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' }}>
-						<LoupeIcon size={24} color="#FFFFFF" strokeWidth={2.6} />
+						<LoupeIcon size={24} color={fixed.white} strokeWidth={2.6} />
 					</View>
 					<View style={{ flex: 1, gap: 3 }}>
-						<Text style={{ fontSize: 23, lineHeight: 29, fontFamily: fontFamily(800), letterSpacing: -0.4, color: '#FFFFFF' }}>{t('Нужна запчасть?')}</Text>
-						<Text style={{ fontSize: 15, lineHeight: 20, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>{t('Для машины клиента — продавцы ответят с ценой')}</Text>
+						<Text style={{ fontSize: fs.h3, lineHeight: 29, fontFamily: fontFamily(800), letterSpacing: -0.4, color: fixed.white }}>{t('Нужна запчасть?')}</Text>
+						<Text style={{ fontSize: fs.md, lineHeight: 20, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>{t('Для машины клиента — продавцы ответят с ценой')}</Text>
 					</View>
 				</LinearGradient>
 			</Pressable>
@@ -110,10 +110,10 @@ export default function MasterRequestsScreen() {
 						</View>
 					)}
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text numberOfLines={1} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
+						<Text numberOfLines={1} style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.ink }}>
 							{request.text}
 						</Text>
-						<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(600), color: request.haveCount ? c.success : c.muted }}>
+						<Text numberOfLines={1} style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: request.haveCount ? c.success : c.muted }}>
 							{request.haveCount
 								? t('{0} есть', request.haveCount) + (request.minPrice != null ? t(' · от {0}', formatPrice(request.minPrice)) : '')
 								: t('Ищем ещё {0} мин', minutesLeft(request.expiresAt))}
@@ -209,10 +209,10 @@ export function RequestCard({
 					<ServiceIcon code={item.service.code} size={26} color={c.brandStrong} strokeWidth={2.2} />
 				</View>
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text numberOfLines={1} style={{ fontSize: 19, lineHeight: 24, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.xl, lineHeight: 24, fontFamily: fontFamily(700), color: c.ink }}>
 						{title}
 					</Text>
-					<Text numberOfLines={1} style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.md, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
 						<Text style={{ fontFamily: fontFamily(600), color: c.inkSecondary }}>{item.buyerName?.trim() || t('Клиент')}</Text> · {meta}
 					</Text>
 				</View>
@@ -221,7 +221,7 @@ export function RequestCard({
 
 			<View style={{ gap: 6 }}>
 				{isPlaceholderText(item.description) ? null : (
-					<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{item.description}</Text>
+					<Text style={{ fontSize: fs.lg, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{item.description}</Text>
 				)}
 				{item.voice ? <VoicePlayer voice={item.voice} /> : null}
 				{full ? <MediaGallery media={item.media} /> : <MediaStrip media={item.media} />}
@@ -232,7 +232,7 @@ export function RequestCard({
 					style={{
 						minHeight: 44,
 						borderRadius: 12,
-						backgroundColor: mine.answer === 'CAN_HELP' ? '#E7F6EC' : c.surface,
+						backgroundColor: mine.answer === 'CAN_HELP' ? c.successSoft : c.surface,
 						flexDirection: 'row',
 						alignItems: 'center',
 						justifyContent: 'center',
@@ -241,12 +241,12 @@ export function RequestCard({
 					}}
 				>
 					{mine.answer === 'CAN_HELP' ? <CheckMark size={18} color={c.success} strokeWidth={2.8} /> : null}
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: mine.answer === 'CAN_HELP' ? c.success : c.muted }}>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: mine.answer === 'CAN_HELP' ? c.success : c.muted }}>
 						{mine.answer === 'CAN_HELP' ? myOfferLine(mine.priceFrom, mine.availableAt, mine.createdAt) : t('Вы ответили «Не моё»')}
 					</Text>
 				</View>
 			) : !open ? (
-				<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.muted, textAlign: 'center', paddingVertical: 12 }}>{t('Время на ответ вышло')}</Text>
+				<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.muted, textAlign: 'center', paddingVertical: 12 }}>{t('Время на ответ вышло')}</Text>
 			) : (
 				<>
 					<Pressable
@@ -267,20 +267,20 @@ export function RequestCard({
 						}}
 					>
 						<View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-							<MicOutline size={20} color="#FFFFFF" />
+							<MicOutline size={20} color={fixed.white} />
 						</View>
-						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Ответить голосом')}</Text>
+						<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: fixed.white }}>{t('Ответить голосом')}</Text>
 					</Pressable>
 					<View style={{ flexDirection: 'row', gap: 8 }}>
-						<Pressable onPress={onSkip} style={{ flex: 1, height: 50, borderRadius: 14, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}>
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{t('Не моё')}</Text>
+						<Pressable onPress={onSkip} style={{ flex: 1, height: 50, borderRadius: 14, backgroundColor: c.fill, alignItems: 'center', justifyContent: 'center' }}>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{t('Не моё')}</Text>
 						</Pressable>
 						<Pressable
 							onPress={onHelp}
-							style={{ flex: 1, height: 50, borderRadius: 14, backgroundColor: '#E7F6EC', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+							style={{ flex: 1, height: 50, borderRadius: 14, backgroundColor: c.successSoft, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<CheckMark size={20} color={c.success} />
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.success }}>{t('Могу помочь')}</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.success }}>{t('Могу помочь')}</Text>
 						</Pressable>
 					</View>
 				</>

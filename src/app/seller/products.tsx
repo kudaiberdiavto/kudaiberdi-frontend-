@@ -7,7 +7,7 @@ import { Badge, PhotoPlaceholder, QueryErrorBanner, Screen, Skeleton, SkeletonRe
 import { BrandLogo } from '@/components/ui/brand'
 import { CameraIcon, PlusIcon, SearchIcon } from '@/components/icons'
 import { ReelsIcon } from '@/components/video-v23'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatNumber, formatPrice, plural } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
@@ -43,7 +43,7 @@ export default function SellerProductsScreen() {
 	return (
 		<Screen padding={0}>
 			<View style={{ paddingTop: 8, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>{t('Мои запчасти')}</Text>
+				<Text style={{ flex: 1, fontSize: fs.h1, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>{t('Мои запчасти')}</Text>
 				<Pressable
 					onPress={() => router.push('/seller-video')}
 					style={{
@@ -57,7 +57,7 @@ export default function SellerProductsScreen() {
 					}}
 				>
 					<ReelsIcon size={20} color={c.brandStrong} strokeWidth={2.2} />
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Видео')}</Text>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Видео')}</Text>
 				</Pressable>
 				<Pressable accessibilityRole="button" accessibilityLabel={t('Снять запчасть')}
 					onPress={() => newPart('/camera')}
@@ -93,8 +93,8 @@ export default function SellerProductsScreen() {
 								value={q}
 								onChangeText={setQ}
 								placeholder={t('Поиск по моим запчастям')}
-								placeholderTextColor="#7D7979"
-								style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+								placeholderTextColor={c.fillInk}
+								style={{ flex: 1, fontSize: fs.base, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 							/>
 						</View>
 
@@ -116,7 +116,7 @@ export default function SellerProductsScreen() {
 											justifyContent: 'center',
 										}}
 									>
-										<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: active ? '#FFFFFF' : c.ink }}>{item.label}</Text>
+										<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: active ? fixed.white : c.ink }}>{item.label}</Text>
 									</Pressable>
 								)
 							})}
@@ -125,7 +125,7 @@ export default function SellerProductsScreen() {
 						<QueryErrorBanner error={parts.error ?? summary.error} onRetry={() => parts.refetch()} />
 
 						{s ? (
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>
 								{t('Покупатели посмотрели ваши запчасти')}{' '}
 								<Text style={{ fontFamily: fontFamily(700), color: c.ink }}>
 									{formatNumber(s.viewsWeek)} {plural(s.viewsWeek, [t('раз'), t('раза'), t('раз')])}
@@ -135,7 +135,7 @@ export default function SellerProductsScreen() {
 						) : null}
 
 						{parts.isSuccess && items.length === 0 ? (
-							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: fs.base, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 								{q.trim() ? t('Ничего не нашли') : t('Товаров нет')}
 							</Text>
 						) : null}
@@ -173,8 +173,8 @@ export default function SellerProductsScreen() {
 					elevation: 8,
 				}}
 			>
-				<PlusIcon size={22} color="#FFFFFF" strokeWidth={2.6} />
-				<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Выложить запчасть')}</Text>
+				<PlusIcon size={22} color={fixed.white} strokeWidth={2.6} />
+				<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Выложить запчасть')}</Text>
 			</Pressable>
 		</Screen>
 	)
@@ -211,17 +211,17 @@ function PartRow({ part }: { part: MyPartItem }) {
 				) : null}
 			</View>
 			<View style={{ flex: 1, gap: 6 }}>
-				<Text numberOfLines={2} style={{ fontSize: 16.5, lineHeight: 20.5, fontFamily: fontFamily(700), color: c.ink }}>
+				<Text numberOfLines={2} style={{ fontSize: fs.base, lineHeight: 20.5, fontFamily: fontFamily(700), color: c.ink }}>
 					{part.title || t('Без названия')}
 				</Text>
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-					<Text numberOfLines={1} style={{ flexShrink: 1, fontSize: 14.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>
+					<Text numberOfLines={1} style={{ flexShrink: 1, fontSize: fs.sm, fontFamily: fontFamily(400), color: c.inkSecondary }}>
 						{part.fitmentLabels.join(', ') || t('Машины не указаны')}
 					</Text>
 					{part.brands[0] ? <BrandLogo brand={part.brands[0]} size={18} /> : null}
 				</View>
 				<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(800), color: c.ink }}>{formatPrice(part.price) || '—'}</Text>
+					<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(800), color: c.ink }}>{formatPrice(part.price) || '—'}</Text>
 					<Badge label={badge.label} tone={badge.tone} />
 				</View>
 			</View>

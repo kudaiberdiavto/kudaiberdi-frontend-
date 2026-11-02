@@ -12,7 +12,7 @@ import {
 import { marketMapStyle } from '@/data/map-style'
 import { routeToGeoJSON } from '@/lib/market-geojson'
 import { useMarketGeo } from '@/api/market'
-import { raw, useColors } from '@/theme'
+import { fixed, raw, useColors } from '@/theme'
 
 const MARKET_ZOOM = 16.2
 
@@ -193,7 +193,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 						}}
 						paint={{
 							'text-color': ['case', ['==', ['get', 'hl'], true], c.brandStrong, c.ink] as Expr,
-							'text-halo-color': '#FFFFFF',
+							'text-halo-color': fixed.white,
 							'text-halo-width': 1.2,
 						}}
 					/>
@@ -206,7 +206,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 						paint={{
 							'circle-radius': ['interpolate', ['linear'], ['zoom'], 15, 4, 19, 9] as Expr,
 							'circle-color': c.brand,
-							'circle-stroke-color': '#FFFFFF',
+							'circle-stroke-color': fixed.white,
 							'circle-stroke-width': 2,
 						}}
 					/>
@@ -222,7 +222,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 						}}
 						paint={{
 							'text-color': c.brandStrong,
-							'text-halo-color': '#FFFFFF',
+							'text-halo-color': fixed.white,
 							'text-halo-width': 1.4,
 						}}
 					/>

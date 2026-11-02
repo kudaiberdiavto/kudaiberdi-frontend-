@@ -3,11 +3,11 @@ import { Linking, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { MarketMapLive, type MarketMapLiveHandle } from '@/components/market-map-live'
-import { QueryErrorBanner } from '@/components/ui'
+import { QueryErrorBanner, ScreenHeader } from '@/components/ui'
 import { LinearGradient } from 'expo-linear-gradient'
-import { BigButton, BubbleIcon, CallIcon, TopBar } from '@/components/buyer-v23'
+import { BigButton, BubbleIcon, CallIcon } from '@/components/buyer-v23'
 import { schemaToGeo } from '@/lib/geo'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, raw, useColors } from '@/theme'
 import { formatPlace } from '@/lib/format'
 import { useRoute } from '@/api/market'
 import { t } from '@/i18n'
@@ -38,13 +38,13 @@ export default function RouteScreen() {
 			<MarketMapLive ref={mapRef} route={data?.polyline} highlightedRowIds={data ? [data.target.rowId] : undefined} />
 
 			<LinearGradient
-				colors={[c.surface, c.surface, 'rgba(243,245,248,0)']}
+				colors={[c.surface, c.surface, c.surfaceClear]}
 				locations={[0, 0.6, 1]}
 				pointerEvents="none"
 				style={{ position: 'absolute', left: 0, right: 0, top: 0, height: insets.top + 60 }}
 			/>
 			<View style={{ position: 'absolute', left: 0, right: 0, top: insets.top }}>
-				<TopBar title={t('Как пройти')} />
+				<ScreenHeader title={t('Как пройти')} />
 			</View>
 
 			<View
@@ -60,7 +60,7 @@ export default function RouteScreen() {
 					paddingHorizontal: 16,
 					paddingBottom: Math.max(insets.bottom, 28),
 					gap: 12,
-					shadowColor: '#201F1D',
+					shadowColor: fixed.shadow,
 					shadowOpacity: 0.1,
 					shadowOffset: { width: 0, height: -8 },
 					shadowRadius: 12,
@@ -76,10 +76,10 @@ export default function RouteScreen() {
 						<PlaceBox label={t('РЯД')} value={data.target.rowCode} />
 						<PlaceBox label={t('КОНТ.')} value={String(data.target.number)} />
 						<View style={{ flex: 1, gap: 2 }}>
-							<Text numberOfLines={1} style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text numberOfLines={1} style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: c.ink }}>
 								{params.shopName ?? formatPlace(data.target)}
 							</Text>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>
 								{t('≈ {0} мин пешком', minutes)}{data.fromSource === 'ENTRANCE' ? t(' от входа') : ''}
 							</Text>
 						</View>
@@ -89,9 +89,9 @@ export default function RouteScreen() {
 				{(data?.steps ?? []).map((step, i) => (
 					<View key={step.n} style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
 						<View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(800), color: c.brandStrong }}>{i + 1}</Text>
+							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(800), color: c.brandStrong }}>{i + 1}</Text>
 						</View>
-						<Text style={{ flex: 1, fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(500), color: c.ink }}>{step.text}</Text>
+						<Text style={{ flex: 1, fontSize: fs.base, lineHeight: 21.5, fontFamily: fontFamily(500), color: c.ink }}>{step.text}</Text>
 					</View>
 				))}
 
@@ -100,7 +100,7 @@ export default function RouteScreen() {
 						label={t('Позвонить')}
 						tone="green"
 						height={52}
-						icon={<CallIcon size={20} color="#FFFFFF" strokeWidth={2.4} />}
+						icon={<CallIcon size={20} color={fixed.white} strokeWidth={2.4} />}
 						disabled={!params.phone}
 						onPress={() => params.phone && Linking.openURL(`tel:${params.phone}`)}
 						style={{ flex: 1 }}
@@ -109,7 +109,7 @@ export default function RouteScreen() {
 						label={t('Написать')}
 						tone="green"
 						height={52}
-						icon={<BubbleIcon size={20} color="#FFFFFF" strokeWidth={2.4} />}
+						icon={<BubbleIcon size={20} color={fixed.white} strokeWidth={2.4} />}
 						disabled={!chatId}
 						onPress={() => router.push({ pathname: '/chat', params: { chatId: String(chatId) } })}
 						style={{ flex: 1 }}
@@ -125,8 +125,8 @@ function PlaceBox({ label, value }: { label: string; value: string }) {
 	const c = useColors()
 	return (
 		<View style={{ borderRadius: 14, backgroundColor: c.brand, paddingVertical: 8, paddingHorizontal: 14, alignItems: 'center' }}>
-			<Text style={{ fontSize: 12, fontFamily: fontFamily(700), letterSpacing: 0.88, color: 'rgba(255,255,255,0.85)' }}>{label}</Text>
-			<Text style={{ fontSize: 24, lineHeight: 28.5, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{value}</Text>
+			<Text style={{ fontSize: fs.xxs, fontFamily: fontFamily(700), letterSpacing: 0.88, color: 'rgba(255,255,255,0.85)' }}>{label}</Text>
+			<Text style={{ fontSize: fs.h2, lineHeight: 28.5, fontFamily: fontFamily(800), color: fixed.white }}>{value}</Text>
 		</View>
 	)
 }

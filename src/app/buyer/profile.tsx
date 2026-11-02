@@ -4,10 +4,10 @@ import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { API_URL } from '@/lib/env'
-import { BottomSheet, QueryErrorBanner, SettingsRow, Toggle } from '@/components/ui'
+import { BottomSheet, QueryErrorBanner, ScreenHeader, SettingsRow, Toggle } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
-import { BellIcon, Caps, ChevronIcon, GlobeIcon, HelpIcon, PlusThinIcon, TopBar } from '@/components/buyer-v23'
-import { fontFamily, useColors } from '@/theme'
+import { BellIcon, Caps, ChevronIcon, GlobeIcon, HelpIcon, PlusThinIcon } from '@/components/buyer-v23'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatE164 } from '@/lib/phone'
 import { useMe, useSettings, useUpdateMe, useUpdateSettings } from '@/api/me'
@@ -46,7 +46,7 @@ export default function BuyerProfileScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar title={t('Профиль')} big onBack={false} />
+			<ScreenHeader title={t('Профиль')} big onBack={false} />
 			<ScrollView contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={me.error ?? deleteCar.error} onRetry={() => me.refetch()} />
 
@@ -55,12 +55,12 @@ export default function BuyerProfileScreen() {
 						<Image source={{ uri: resolveUrl(user.avatarUrl) }} style={{ width: 56, height: 56, borderRadius: 28 }} />
 					) : (
 						<View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.brandStrong }}>{letter}</Text>
+							<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(800), color: c.brandStrong }}>{letter}</Text>
 						</View>
 					)}
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{user ? (user.name ?? t('Без имени')) : ' '}</Text>
-						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>{user ? formatE164(user.phone) : ' '}</Text>
+						<Text style={{ fontSize: fs.xxl, fontFamily: fontFamily(700), color: c.ink }}>{user ? (user.name ?? t('Без имени')) : ' '}</Text>
+						<Text style={{ fontSize: fs.base, fontFamily: fontFamily(400), color: c.muted }}>{user ? formatE164(user.phone) : ' '}</Text>
 					</View>
 				</View>
 
@@ -76,8 +76,8 @@ export default function BuyerProfileScreen() {
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 							<BrandLogo brand={car.brand} size={44} />
 							<View style={{ flex: 1, gap: 2 }}>
-								<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>{car.title}</Text>
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>{car.subtitle}</Text>
+								<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: c.ink }}>{car.title}</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>{car.subtitle}</Text>
 							</View>
 
 						</View>
@@ -90,7 +90,7 @@ export default function BuyerProfileScreen() {
 						borderRadius: 14,
 						borderWidth: 2,
 						borderStyle: 'dashed',
-						borderColor: '#B8C3D3',
+						borderColor: c.dashedBrand,
 						flexDirection: 'row',
 						alignItems: 'center',
 						justifyContent: 'center',
@@ -98,7 +98,7 @@ export default function BuyerProfileScreen() {
 					}}
 				>
 					<PlusThinIcon size={18} color={c.brandStrong} strokeWidth={2.6} />
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Добавить машину')}</Text>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Добавить машину')}</Text>
 				</Pressable>
 
 				<View style={{ height: 4 }} />
@@ -113,7 +113,7 @@ export default function BuyerProfileScreen() {
 										onPress={() => changeLang(value)}
 										style={{ width: 40, borderRadius: 15, backgroundColor: active ? c.brand : 'transparent', alignItems: 'center', justifyContent: 'center' }}
 									>
-										<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.muted }}>{value === 'ru' ? 'RU' : 'KG'}</Text>
+										<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: active ? fixed.white : c.muted }}>{value === 'ru' ? 'RU' : 'KG'}</Text>
 									</Pressable>
 								)
 							})}
@@ -129,13 +129,13 @@ export default function BuyerProfileScreen() {
 				{/* Not in the mockup, but without it there is no way out of the account. */}
 				<Text
 					onPress={() => useSession.getState().signOut()}
-					style={{ marginTop: 20, textAlign: 'center', fontSize: 16.5, fontFamily: fontFamily(600), color: c.muted }}
+					style={{ marginTop: 20, textAlign: 'center', fontSize: fs.base, fontFamily: fontFamily(600), color: c.muted }}
 				>{t('Выйти')}</Text>
 				<Text
 					onPress={() => router.push('/delete-account')}
-					style={{ marginTop: 14, textAlign: 'center', fontSize: 15, fontFamily: fontFamily(500), color: c.danger }}
+					style={{ marginTop: 14, textAlign: 'center', fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}
 				>{t('Удалить аккаунт')}</Text>
-				<Text style={{ marginTop: 14, textAlign: 'center', fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+				<Text style={{ marginTop: 14, textAlign: 'center', fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>
 					<Text onPress={() => Linking.openURL(`${API_URL}/terms`)}>{t('Правила')}</Text>
 					{'  ·  '}
 					<Text onPress={() => Linking.openURL(`${API_URL}/privacy`)}>{t('Политика конфиденциальности')}</Text>
@@ -152,8 +152,8 @@ function MenuRow({ icon, label, onPress, children }: { icon: ReactNode; label: s
 	return (
 		<Pressable onPress={onPress} disabled={!onPress} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 }}>
 			<View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' }}>{icon}</View>
-			<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(600), color: c.ink }}>{label}</Text>
-			{children ?? <ChevronIcon size={20} color="#B8B4B4" />}
+			<Text style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(600), color: c.ink }}>{label}</Text>
+			{children ?? <ChevronIcon size={20} color={c.chevron} />}
 		</Pressable>
 	)
 }
@@ -164,7 +164,7 @@ function NotificationsSheet({ onClose }: { onClose: () => void }) {
 	const settings = useSettings()
 	const update = useUpdateSettings()
 	return (
-		<BottomSheet onClose={onClose} header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{t('Уведомления')}</Text>}>
+		<BottomSheet onClose={onClose} header={<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(800), color: c.ink }}>{t('Уведомления')}</Text>}>
 			<View style={{ borderRadius: 16, backgroundColor: c.card, overflow: 'hidden' }}>
 				<SettingsRow
 					label={t('Ответы продавцов и мастеров')}

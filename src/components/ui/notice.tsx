@@ -2,7 +2,7 @@ import type { ComponentType } from 'react'
 import { Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-native'
 import type { IconProps } from '@/components/icons'
 import { isNetworkError } from '@/lib/api'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { t } from '@/i18n'
 
 /** Red banner from screen 20 («Нет сети. Покажем ответы, когда появится»). */
@@ -33,7 +33,7 @@ export function NoticeBanner({
 			]}
 		>
 			<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.danger }} />
-			<Text style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>{text}</Text>
+			<Text style={{ flex: 1, fontSize: fs.md, fontFamily: fontFamily(600), color: c.ink }}>{text}</Text>
 		</Pressable>
 	)
 }
@@ -82,9 +82,9 @@ export function EmptyState({
 				</View>
 			) : null}
 			<View style={{ gap: 6 }}>
-				<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink, textAlign: 'center' }}>{title}</Text>
+				<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(700), color: c.ink, textAlign: 'center' }}>{title}</Text>
 				{hint ? (
-					<Text style={{ fontSize: 16, lineHeight: 22, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>{hint}</Text>
+					<Text style={{ fontSize: fs.base, lineHeight: 22, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>{hint}</Text>
 				) : null}
 			</View>
 			{action ? (
@@ -93,11 +93,11 @@ export function EmptyState({
 					accessibilityRole="button"
 					style={{ height: 50, paddingHorizontal: 22, borderRadius: 14, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}
 				>
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{action.label}</Text>
+					<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{action.label}</Text>
 				</Pressable>
 			) : null}
 			{secondary ? (
-				<Text onPress={secondary.onPress} accessibilityRole="button" style={{ fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>
+				<Text onPress={secondary.onPress} accessibilityRole="button" style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.brandStrong }}>
 					{secondary.label}
 				</Text>
 			) : null}

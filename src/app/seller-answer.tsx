@@ -8,7 +8,7 @@ import { VoicePlayer, VoiceRecordingPanel, VoiceResultPanel, useVoiceNote } from
 import { Label, MicIcon, PlaneIcon, TickIcon } from '@/components/seller-v23'
 import { MediaStrip, photosAsMedia } from '@/components/media-strip'
 import { isPlaceholderText } from '@/components/request-text'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { formatNumber } from '@/lib/format'
 import { useIncomingRequest, useMarkSeen, useReplyToRequest } from '@/api/incoming'
 import type { PartCondition } from '@/api/types'
@@ -70,8 +70,8 @@ export default function SellerAnswerScreen() {
 				<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 					{data ? <BrandLogo brand={data.car.brand} size={32} /> : null}
 					<View style={{ flex: 1, gap: 1 }}>
-						<Text style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>{data?.car.label ?? ' '}</Text>
-						<Text style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>{data?.text ?? ' '}</Text>
+						<Text style={{ fontSize: fs.base, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>{data?.car.label ?? ' '}</Text>
+						<Text style={{ fontSize: fs.md, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>{data?.text ?? ' '}</Text>
 					</View>
 				</View>
 			</View>
@@ -99,11 +99,11 @@ export default function SellerAnswerScreen() {
 
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 						<View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}>
-							<TickIcon size={22} color="#FFFFFF" strokeWidth={2.2} />
+							<TickIcon size={22} color={fixed.white} strokeWidth={2.2} />
 						</View>
 						<View style={{ flex: 1, gap: 1 }}>
-							<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), color: c.ink }}>{t('Проверьте и отправьте')}</Text>
-							<Text numberOfLines={1} style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: fs.h3, lineHeight: 28.6, fontFamily: fontFamily(800), color: c.ink }}>{t('Проверьте и отправьте')}</Text>
+							<Text numberOfLines={1} style={{ fontSize: fs.md, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
 								{data ? [data.buyerName, data.car.label].filter(Boolean).join(' · ') : ' '}
 							</Text>
 						</View>
@@ -113,7 +113,7 @@ export default function SellerAnswerScreen() {
 					{data && (!isPlaceholderText(data.text) || data.voice || data.photos.length) ? (
 						<View style={{ borderRadius: 16, backgroundColor: c.surface, padding: 12, gap: 8 }}>
 							{isPlaceholderText(data.text) ? null : (
-								<Text style={{ fontSize: 17, lineHeight: 22, fontFamily: fontFamily(600), color: c.ink }}>{data.text}</Text>
+								<Text style={{ fontSize: fs.lg, lineHeight: 22, fontFamily: fontFamily(600), color: c.ink }}>{data.text}</Text>
 							)}
 							{data.voice ? <VoicePlayer voice={data.voice} background={c.card} /> : null}
 							<MediaStrip media={photosAsMedia(data.photos)} />
@@ -138,10 +138,10 @@ export default function SellerAnswerScreen() {
 							}}
 						>
 							<MicIcon size={20} color={c.brandStrong} />
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Сказать голосом')}</Text>
+							<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Сказать голосом')}</Text>
 						</Pressable>
 					)}
-					{note.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{note.error}</Text> : null}
+					{note.error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{note.error}</Text> : null}
 
 					<Label>{t('Ваш ответ')}</Label>
 
@@ -162,10 +162,10 @@ export default function SellerAnswerScreen() {
 							onChangeText={(text) => setPrice(text.replace(/\D/g, '').slice(0, 7))}
 							keyboardType="number-pad"
 							placeholder={t('Цена')}
-							placeholderTextColor={raw.fillInk}
-							style={{ minWidth: 40, fontSize: 32, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink, padding: 0 }}
+							placeholderTextColor={c.fillInk}
+							style={{ minWidth: 40, fontSize: fs.hero, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink, padding: 0 }}
 						/>
-						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>{t('сом')}</Text>
+						<Text style={{ fontSize: fs.xxl, fontFamily: fontFamily(700), color: c.muted }}>{t('сом')}</Text>
 					</View>
 
 					<View style={{ flexDirection: 'row', gap: 8 }}>
@@ -177,7 +177,7 @@ export default function SellerAnswerScreen() {
 						<Choice label={t('Копия')} active={original === false} onPress={() => setOriginal(false)} />
 					</View>
 
-					{reply.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text> : null}
+					{reply.error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text> : null}
 
 					<Pressable
 						disabled={!(amount > 0) || reply.isPending || note.recording || note.uploading}
@@ -193,8 +193,8 @@ export default function SellerAnswerScreen() {
 							opacity: amount > 0 && !reply.isPending ? 1 : 0.4,
 						}}
 					>
-						<PlaneIcon size={20} color="#FFFFFF" />
-						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Отправить покупателю')}</Text>
+						<PlaneIcon size={20} color={fixed.white} />
+						<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: fixed.white }}>{t('Отправить покупателю')}</Text>
 					</Pressable>
 				</View>
 			</KeyboardAvoidingView>
@@ -220,7 +220,7 @@ function Choice({ label, active, onPress }: { label: string; active: boolean; on
 				gap: 6,
 			}}
 		>
-			<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{label}</Text>
+			<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{label}</Text>
 		</Pressable>
 	)
 }

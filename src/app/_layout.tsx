@@ -21,7 +21,7 @@ import { RealtimeProvider } from '@/lib/realtime'
 import { PushProvider } from '@/lib/push'
 import { useDictionariesVersion } from '@/lib/dictionaries'
 import { useSession } from '@/store/useSession'
-import { lightColors } from '@/theme'
+import { useColors } from '@/theme'
 import { ToastHost } from '@/components/ui/toast'
 
 SplashScreen.preventAutoHideAsync()
@@ -36,6 +36,8 @@ export default function RootLayout() {
 		Inter_800ExtraBold,
 	})
 
+	// Follows the phone's light / dark setting (app.json: userInterfaceStyle automatic).
+	const c = useColors()
 	const booting = useSession((s) => s.status === 'booting')
 	// A language change remounts the screens — every text is read again in the new language.
 	const lang = useSession((s) => s.lang)
@@ -61,12 +63,12 @@ export default function RootLayout() {
 				<RealtimeProvider>
 					<PushProvider>
 						<SafeAreaProvider>
-							<StatusBar style="dark" />
+							<StatusBar style="auto" />
 							<Stack
 								key={lang}
 								screenOptions={{
 									headerShown: false,
-									contentStyle: { backgroundColor: lightColors.surface },
+									contentStyle: { backgroundColor: c.surface },
 								}}
 							/>
 							<ToastHost />

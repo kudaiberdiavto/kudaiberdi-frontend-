@@ -7,7 +7,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera'
 import * as ImagePicker from 'expo-image-picker'
 import { Button } from '@/components/ui'
 import { CloseIcon, FlashIcon, GalleryIcon } from '@/components/icons'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { plural } from '@/lib/format'
 import { usePhotoUploads } from '@/api/media'
 import { useRecognizeOem } from '@/api/parts'
@@ -38,8 +38,8 @@ export default function CameraScreen() {
 
 	if (!permission.granted) {
 		return (
-			<View style={{ flex: 1, backgroundColor: '#0B0B0C', alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 }}>
-				<Text style={{ fontSize: 17.5, color: '#FFFFFF', textAlign: 'center' }}>{t('Нужен доступ к камере, чтобы сфотографировать запчасть')}</Text>
+			<View style={{ flex: 1, backgroundColor: fixed.camera, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 }}>
+				<Text style={{ fontSize: fs.lg, color: fixed.white, textAlign: 'center' }}>{t('Нужен доступ к камере, чтобы сфотографировать запчасть')}</Text>
 				<Button label={t('Разрешить камеру')} onPress={requestPermission} />
 			</View>
 		)
@@ -89,7 +89,7 @@ export default function CameraScreen() {
 	const recentShots = draft.photos.slice(-2)
 
 	return (
-		<View style={{ flex: 1, backgroundColor: '#0B0B0C' }}>
+		<View style={{ flex: 1, backgroundColor: fixed.camera }}>
 			<CameraView ref={cameraRef} style={{ flex: 1 }} enableTorch={torch} />
 
 			<View
@@ -107,14 +107,14 @@ export default function CameraScreen() {
 					onPress={() => router.back()}
 					style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' }}
 				>
-					<CloseIcon size={20} color="#FFFFFF" />
+					<CloseIcon size={20} color={fixed.white} />
 				</Pressable>
-				<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{title}</Text>
+				<Text style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{title}</Text>
 				<Pressable accessibilityRole="button" accessibilityLabel={t('Вспышка')}
 					onPress={() => setTorch((v) => !v)}
 					style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' }}
 				>
-					<FlashIcon size={20} color="#FFD54A" />
+					<FlashIcon size={20} color={fixed.flash} />
 				</Pressable>
 			</View>
 
@@ -133,7 +133,7 @@ export default function CameraScreen() {
 							position: 'absolute',
 							width: 26,
 							height: 26,
-							borderColor: '#FFFFFF',
+							borderColor: fixed.white,
 							borderTopWidth: 4,
 							borderLeftWidth: 4,
 							borderTopLeftRadius: 6,
@@ -147,7 +147,7 @@ export default function CameraScreen() {
 			{mode === 1 && (recognize.isPending || recognize.data || recognize.error) ? (
 				<View style={{ position: 'absolute', left: 16, right: 16, top: 491, gap: 8 }}>
 					<View style={{ alignSelf: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.55)' }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: '#FFFFFF' }}>
+						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: fixed.white }}>
 							{recognize.isPending
 								? t('Распознаём номер…')
 								: recognize.error
@@ -168,12 +168,12 @@ export default function CameraScreen() {
 										paddingHorizontal: 14,
 										paddingVertical: 8,
 										borderRadius: 14,
-										backgroundColor: active ? '#FFD54A' : 'rgba(255,255,255,0.92)',
+										backgroundColor: active ? fixed.flash : 'rgba(255,255,255,0.92)',
 										gap: 2,
 									}}
 								>
-									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: '#201F1D' }}>{candidate.oem}</Text>
-									<Text style={{ fontSize: 12, fontFamily: fontFamily(600), color: '#605D5D' }}>
+									<Text style={{ fontSize: fs.base, fontFamily: fontFamily(800), color: fixed.inkOnLight }}>{candidate.oem}</Text>
+									<Text style={{ fontSize: fs.xxs, fontFamily: fontFamily(600), color: fixed.mutedOnLight }}>
 										{candidate.partsFound
 											? t('есть у {0} {1}', candidate.partsFound, plural(candidate.partsFound, [t('продавца'), t('продавцов'), t('продавцов')]))
 											: t('новый номер')}
@@ -197,7 +197,7 @@ export default function CameraScreen() {
 						justifyContent: 'center',
 					}}
 				>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: '#FFFFFF' }}>
+					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: fixed.white }}>
 						{t('Номер: {0}', draft.oemNumber)}
 					</Text>
 				</View>
@@ -227,7 +227,7 @@ export default function CameraScreen() {
 										bottom: 0,
 										height: 3,
 										width: `${Math.round(shot.progress * 100)}%`,
-										backgroundColor: '#FFFFFF',
+										backgroundColor: fixed.white,
 									}}
 								/>
 							) : null}
@@ -252,7 +252,7 @@ export default function CameraScreen() {
 					onPress={fromGallery}
 					style={{ width: 52, height: 52, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' }}
 				>
-					<GalleryIcon size={24} color="#FFFFFF" />
+					<GalleryIcon size={24} color={fixed.white} />
 				</Pressable>
 
 				<Pressable
@@ -263,13 +263,13 @@ export default function CameraScreen() {
 						height: 80,
 						borderRadius: 40,
 						borderWidth: 5,
-						borderColor: '#FFFFFF',
+						borderColor: fixed.white,
 						alignItems: 'center',
 						justifyContent: 'center',
 						opacity: recognize.isPending ? 0.5 : 1,
 					}}
 				>
-					<View style={{ width: 62, height: 62, borderRadius: 31, backgroundColor: '#FFFFFF' }} />
+					<View style={{ width: 62, height: 62, borderRadius: 31, backgroundColor: fixed.white }} />
 				</Pressable>
 
 				<Pressable
@@ -283,7 +283,7 @@ export default function CameraScreen() {
 						justifyContent: 'center',
 					}}
 				>
-					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Готово')}</Text>
+					<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Готово')}</Text>
 				</Pressable>
 			</View>
 		</View>

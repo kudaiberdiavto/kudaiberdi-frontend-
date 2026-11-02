@@ -3,7 +3,7 @@ import { Keyboard, Pressable, Text, TextInput, View, type TextInputInstance } fr
 import { router, useLocalSearchParams } from 'expo-router'
 import { ChevronLeftIcon } from '@/components/icons'
 import { AUTH_FIELD_HEIGHT, AuthLayout } from '@/components/auth-layout'
-import { fontFamily, useColors } from '@/theme'
+import { fontFamily, fs, useColors } from '@/theme'
 import { ApiError } from '@/lib/api'
 import { formatE164 } from '@/lib/phone'
 import { useSendOtp, useVerifyOtp } from '@/api/auth'
@@ -84,7 +84,7 @@ export default function CodeScreen() {
 				</Pressable>
 			}
 			header={
-				<Text style={{ fontSize: 32, lineHeight: 40, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink }}>{t('Код из SMS')}</Text>
+				<Text style={{ fontSize: fs.hero, lineHeight: 40, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink }}>{t('Код из SMS')}</Text>
 			}
 			label={t('Отправили на {0}', formatE164(phone))}
 			field={
@@ -108,7 +108,7 @@ export default function CodeScreen() {
 									}}
 								>
 									{digit ? (
-										<Text style={{ fontSize: 28, fontFamily: fontFamily(700), color: c.ink }}>{digit}</Text>
+										<Text style={{ fontSize: fs.display, fontFamily: fontFamily(700), color: c.ink }}>{digit}</Text>
 									) : isActive ? (
 										<View style={{ width: 2, height: 28, backgroundColor: c.brand }} />
 									) : null}
@@ -132,8 +132,8 @@ export default function CodeScreen() {
 			}
 			below={
 				<>
-					{errorText ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text> : null}
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
+					{errorText ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text> : null}
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>
 						{secondsLeft > 0 ? (
 							<>
 								{t('Отправить снова через')}{' '}

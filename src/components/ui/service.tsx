@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import Svg, { Circle, Path, Rect } from 'react-native-svg'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import type { ServiceType } from '@/api/types'
 
 /** `ServiceType.code` — a directory value, new codes may come from the server. */
@@ -102,7 +102,7 @@ export function ServiceBadge({ code, size = 36, radius = 10, active = false }: {
 				justifyContent: 'center',
 			}}
 		>
-			<ServiceIcon code={code} size={size * 0.55} color={active ? '#FFFFFF' : c.brandStrong} strokeWidth={2.2} />
+			<ServiceIcon code={code} size={size * 0.55} color={active ? fixed.white : c.brandStrong} strokeWidth={2.2} />
 		</View>
 	)
 }
@@ -129,7 +129,7 @@ export function ServiceTile({ type, selected, onPress, height = 92 }: { type: Se
 			<ServiceBadge code={type.code} size={40} radius={12} active={selected} />
 			<Text
 				style={{
-					fontSize: 14,
+					fontSize: fs.sm,
 					lineHeight: 16,
 					fontFamily: fontFamily(selected ? 700 : 600),
 					color: selected ? c.brandStrong : c.ink,

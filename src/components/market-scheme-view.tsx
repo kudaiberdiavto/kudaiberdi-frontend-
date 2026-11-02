@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Pressable, ScrollView, Text, View, type GestureResponderEvent, type HostInstance, type ScrollViewInstance } from 'react-native'
 import Svg, { G, Polygon, Polyline, Rect, Text as SvgText } from 'react-native-svg'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fontFamily, fs, raw, useColors } from '@/theme'
 import { useMarketScheme } from '@/api/market'
 
 interface Props {
@@ -158,13 +158,13 @@ export function MarketSchemeView({ width, height, selectedRowIds = [], onRowPres
 						height: 28,
 						paddingHorizontal: 10,
 						borderRadius: 14,
-						backgroundColor: 'rgba(255,255,255,0.94)',
+						backgroundColor: c.floating,
 						justifyContent: 'center',
 					}}
 				>
 					<Text
 						style={{
-							fontSize: 13,
+							fontSize: fs.xs,
 							fontFamily: fontFamily(700),
 							color: c.brandStrong,
 						}}

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { ScrollView } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
 import { haptic } from '@/lib/haptics'
-import { QueryErrorBanner, Screen, SkeletonRequestCard } from '@/components/ui'
-import { TopBar } from '@/components/buyer-v23'
+import { QueryErrorBanner, Screen, ScreenHeader, SkeletonRequestCard } from '@/components/ui'
+
 import { minutesLeft } from '@/lib/format'
 import { markServiceSeen, serviceName, useMasterOffer, useMasterRequest, useServiceTypes } from '@/api/services'
 import { RequestCard } from './master/index'
@@ -26,7 +26,7 @@ export default function MasterRequestScreen() {
 
 	return (
 		<Screen padding={0}>
-			<TopBar title={t('Заявка')} />
+			<ScreenHeader title={t('Заявка')} />
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 4, gap: 12 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={request.error ?? offer.error} onRetry={() => request.refetch()} />
 				{item ? (

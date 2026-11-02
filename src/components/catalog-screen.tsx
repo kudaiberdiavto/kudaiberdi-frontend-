@@ -5,7 +5,7 @@ import { router } from 'expo-router'
 import { EmptyState, ProductCard, QueryErrorBanner, Skeleton, SkeletonProductGrid } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { SearchIcon } from '@/components/icons'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { useVideoViewer } from '@/store/useVideoViewer'
 import { MarketVideos } from '@/components/market-videos'
 import { resolveUrl } from '@/lib/api'
@@ -81,9 +81,9 @@ export function CatalogScreen() {
 	const header = (
 		<View style={{ gap: 14, paddingBottom: 14 }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>{t('Поиск запчастей')}</Text>
+				<Text style={{ flex: 1, fontSize: fs.h1, fontFamily: fontFamily(700), letterSpacing: -0.26, color: c.ink }}>{t('Поиск запчастей')}</Text>
 				<Pressable onPress={() => router.push('/shops')} hitSlop={8}>
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Магазины ›')}</Text>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Магазины ›')}</Text>
 				</Pressable>
 			</View>
 
@@ -105,7 +105,7 @@ export function CatalogScreen() {
 					value={text}
 					onChangeText={setText}
 					placeholder={t('Стойки, колодки, номер детали…')}
-					placeholderTextColor="#7D7979"
+					placeholderTextColor={c.fillInk}
 					returnKeyType="search"
 					onFocus={() => setFocused(true)}
 					onBlur={() => {
@@ -117,15 +117,15 @@ export function CatalogScreen() {
 						useCatalogFilters.getState().setQ(text)
 						recent.add(text)
 					}}
-					style={{ flex: 1, minWidth: 0, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+					style={{ flex: 1, minWidth: 0, fontSize: fs.lg, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 				/>
 			</View>
 
 			{focused && !text && recent.items.length ? (
 				<View style={{ gap: 8 }}>
 					<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-						<Text style={{ flex: 1, fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('НЕДАВНО ИСКАЛИ')}</Text>
-						<Text onPress={recent.clear} style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.brandStrong }}>{t('Очистить')}</Text>
+						<Text style={{ flex: 1, fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('НЕДАВНО ИСКАЛИ')}</Text>
+						<Text onPress={recent.clear} style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.brandStrong }}>{t('Очистить')}</Text>
 					</View>
 					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 						{recent.items.map((item) => (
@@ -139,14 +139,14 @@ export function CatalogScreen() {
 								onLongPress={() => recent.remove(item)}
 								style={{ height: 36, paddingHorizontal: 14, borderRadius: 18, backgroundColor: c.card, borderWidth: 1, borderColor: c.border, justifyContent: 'center' }}
 							>
-								<Text numberOfLines={1} style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.ink }}>{item}</Text>
+								<Text numberOfLines={1} style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.ink }}>{item}</Text>
 							</Pressable>
 						))}
 					</View>
 				</View>
 			) : null}
 
-			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ИЩУ ДЛЯ МАШИНЫ')}</Text>
+			<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ИЩУ ДЛЯ МАШИНЫ')}</Text>
 
 			<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 				{carList.map((car) => {
@@ -169,7 +169,7 @@ export function CatalogScreen() {
 							}}
 						>
 							<BrandLogo brand={car.brand} size={28} />
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.inkSecondary }}>
+							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.inkSecondary }}>
 								{car.label}
 							</Text>
 						</Pressable>
@@ -193,7 +193,7 @@ export function CatalogScreen() {
 					{carId === null && f.brand ? <BrandLogo brand={f.brand} size={28} /> : null}
 					<Text
 						style={{
-							fontSize: 15.5,
+							fontSize: fs.md,
 							fontFamily: fontFamily(carId === null && f.brand ? 700 : 600),
 							color: carId === null && f.brand ? c.brandStrong : c.ink,
 						}}
@@ -221,7 +221,7 @@ export function CatalogScreen() {
 								justifyContent: 'center',
 							}}
 						>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: active ? '#FFFFFF' : c.ink }}>{category.name}</Text>
+							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: active ? fixed.white : c.ink }}>{category.name}</Text>
 						</Pressable>
 					)
 				})}
@@ -241,7 +241,7 @@ export function CatalogScreen() {
 						<Skeleton width={150} height={16} />
 					</View>
 				) : (
-				<Text numberOfLines={1} style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>
+				<Text numberOfLines={1} style={{ flex: 1, fontSize: fs.base, fontFamily: fontFamily(400), color: c.muted }}>
 					{total === undefined ? (
 						' '
 					) : (
@@ -263,7 +263,7 @@ export function CatalogScreen() {
 				</Text>
 				)}
 				<Pressable onPress={() => f.setSort(nextSort.value)}>
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{sort.label} ▾</Text>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>{sort.label} ▾</Text>
 				</Pressable>
 			</View>
 		</View>
@@ -280,7 +280,7 @@ export function CatalogScreen() {
 				onEndReached={() => search.hasNextPage && !search.isFetchingNextPage && search.fetchNextPage()}
 				renderItem={({ item: row }) =>
 					row.kind === 'others' ? (
-						<Text style={{ paddingTop: 8, fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ОСТАЛЬНЫЕ ЗАПЧАСТИ')}</Text>
+						<Text style={{ paddingTop: 8, fontSize: fs.sm, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ОСТАЛЬНЫЕ ЗАПЧАСТИ')}</Text>
 					) : (
 						<View style={{ flexDirection: 'row', gap: 12 }}>
 							{row.parts.map((part) => (
@@ -344,15 +344,15 @@ export function CatalogScreen() {
 					flexDirection: 'row',
 					alignItems: 'center',
 					gap: 12,
-					shadowColor: '#201F1D',
+					shadowColor: fixed.shadow,
 					shadowOpacity: 0.25,
 					shadowOffset: { width: 0, height: 8 },
 					shadowRadius: 20,
 					elevation: 8,
 				}}
 			>
-				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(400), color: '#FFFFFF' }}>{t('Не нашли? Спросите продавцов')}</Text>
-				<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: '#8FB0FF' }}>{t('Спросить →')}</Text>
+				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ flex: 1, fontSize: fs.md, fontFamily: fontFamily(400), color: fixed.white }}>{t('Не нашли? Спросите продавцов')}</Text>
+				<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: fixed.linkOnDark }}>{t('Спросить →')}</Text>
 			</Pressable>
 		</View>
 	)
