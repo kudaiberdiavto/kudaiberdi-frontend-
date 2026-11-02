@@ -16,9 +16,6 @@
         "NSCameraUsageDescription": "Сфотографируйте или снимите видео запчасти, чтобы показать продавцу или покупателям."
       },
       "bundleIdentifier": "kg.kudaiberdi.app",
-      "associatedDomains": [
-        "applinks:kudaibergen.kg"
-      ],
       "buildNumber": "1",
       "supportsTablet": false,
       "config": {
@@ -43,38 +40,6 @@
         "android.permission.CAMERA"
       ],
       "package": "kg.kudaiberdi.app",
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "kudaibergen.kg",
-              "pathPrefix": "/p/"
-            },
-            {
-              "scheme": "https",
-              "host": "kudaibergen.kg",
-              "pathPrefix": "/s/"
-            },
-            {
-              "scheme": "https",
-              "host": "kudaibergen.kg",
-              "pathPrefix": "/qr/"
-            },
-            {
-              "scheme": "https",
-              "host": "kudaibergen.kg",
-              "pathPrefix": "/m/"
-            }
-          ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
-        }
-      ],
       "versionCode": 1
     },
     "web": {
