@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { ActivityIndicator, Image, Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BottomSheet, QueryErrorBanner } from '@/components/ui'
+import { BottomSheet, QueryErrorBanner, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import {
 	BubbleIcon,
@@ -133,6 +133,8 @@ export default function RequestScreen() {
 							</Pressable>
 						) : null}
 					</View>
+				) : request.isLoading ? (
+					<SkeletonStatus />
 				) : null}
 				{extend.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{extend.error.message}</Text> : null}
 
@@ -184,6 +186,11 @@ export default function RequestScreen() {
 							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 								{active ? t('Ждём ответов') : t('Никто не ответил «Есть»')}
 							</Text>
+						) : null}
+						{replies.isLoading ? (
+							<SkeletonRepeat count={3} gap={10}>
+								<SkeletonOfferCard />
+							</SkeletonRepeat>
 						) : null}
 						{shown.map((reply, index) => (
 							<ReplyCard key={reply.id} reply={reply} best={index === 0} />

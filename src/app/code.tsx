@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Keyboard, Pressable, Text, TextInput, View } from 'react-native'
+import { Keyboard, Pressable, Text, TextInput, View, type TextInputInstance } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ChevronLeftIcon } from '@/components/icons'
 import { AUTH_FIELD_HEIGHT, AuthLayout } from '@/components/auth-layout'
@@ -23,7 +23,7 @@ export default function CodeScreen() {
 	// Dev backend returns the code in `debugCode` — prefill it instead of waiting for an SMS.
 	const [code, setCode] = useState(__DEV__ ? (params.debugCode ?? '') : '')
 	const [secondsLeft, setSecondsLeft] = useState(Number(params.resendIn) || 0)
-	const inputRef = useRef<TextInput>(null)
+	const inputRef = useRef<TextInputInstance>(null)
 	const verify = useVerifyOtp()
 	const resend = useSendOtp()
 	const error = (verify.error ?? resend.error) as ApiError | Error | null

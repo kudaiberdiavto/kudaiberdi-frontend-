@@ -1,6 +1,6 @@
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { router } from 'expo-router'
-import { BrandLogo, EmptyState, QueryErrorBanner, Screen } from '@/components/ui'
+import { BrandLogo, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRequestCard } from '@/components/ui'
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
 import { MediaGallery, MediaStrip, photosAsMedia } from '@/components/media-strip'
@@ -43,7 +43,11 @@ export default function SellerRequestsScreen() {
 				ListEmptyComponent={
 					fresh.isSuccess && answered.isSuccess && !orders.length ? (
 						<EmptyState title={t('Новых запросов нет')} icon={RequestsIcon} />
-					) : null
+					) : fresh.isLoading ? (
+						<SkeletonRepeat count={4} gap={10}>
+							<SkeletonRequestCard />
+						</SkeletonRepeat>
+					) : undefined
 				}
 				showsVerticalScrollIndicator={false}
 				onEndReached={() => {

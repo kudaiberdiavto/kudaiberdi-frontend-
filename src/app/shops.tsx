@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, FlatList, Image, Pressable, Text, TextInput, View } from 'react-native'
+import { FlatList, Image, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { BackIcon } from '@/components/buyer-v23'
 import { SearchIcon } from '@/components/icons'
-import { QueryErrorBanner } from '@/components/ui'
+import { QueryErrorBanner, Skeleton, SkeletonRepeat } from '@/components/ui'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { shopPlace } from '@/lib/shop-place'
@@ -71,7 +71,14 @@ export default function ShopsScreen() {
 						<QueryErrorBanner error={shops.error} onRetry={() => shops.refetch()} />
 					</View>
 				}
-				ListEmptyComponent={shops.isPending ? <ActivityIndicator color={c.muted} style={{ paddingTop: 40 }} /> : null}
+				ListEmptyComponent={
+					shops.isLoading ? (
+						<SkeletonRepeat count={7} gap={10}>
+							<ShopRowSkeleton />
+						</SkeletonRepeat>
+					) : undefined
+				}
+				ListFooterComponent={shops.isFetchingNextPage ? <ShopRowSkeleton /> : undefined}
 				renderItem={({ item }) => <ShopRow shop={item} />}
 			/>
 		</View>
@@ -104,5 +111,18 @@ function ShopRow({ shop }: { shop: ShopCard }) {
 			</View>
 			<Text style={{ fontSize: 24, color: c.muted }}>›</Text>
 		</Pressable>
+	)
+}
+
+function ShopRowSkeleton() {
+	const c = useColors()
+	return (
+		<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+			<Skeleton width={56} height={56} radius={28} />
+			<View style={{ flex: 1, gap: 9 }}>
+				<Skeleton width="60%" height={18} />
+				<Skeleton width="80%" height={14} />
+			</View>
+		</View>
 	)
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { FlatList, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { EmptyState, ProductCard, QueryErrorBanner } from '@/components/ui'
+import { EmptyState, ProductCard, QueryErrorBanner, Skeleton, SkeletonProductGrid } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { SearchIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
@@ -187,6 +187,7 @@ export function CatalogScreen() {
 						</Pressable>
 					)
 				})}
+				{categories.isLoading ? [92, 120, 84, 108].map((w, i) => <Skeleton key={i} width={w} height={38} radius={18} />) : null}
 			</ScrollView>
 
 			<QueryErrorBanner error={search.error} onRetry={() => search.refetch()} offlineText={t('Нет сети. Покажем запчасти, когда появится')} />
@@ -197,6 +198,11 @@ export function CatalogScreen() {
 			) : null}
 
 			<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+				{total === undefined && search.isLoading ? (
+					<View style={{ flex: 1 }}>
+						<Skeleton width={150} height={16} />
+					</View>
+				) : (
 				<Text numberOfLines={1} style={{ flex: 1, fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>
 					{total === undefined ? (
 						' '
@@ -217,6 +223,7 @@ export function CatalogScreen() {
 						</>
 					)}
 				</Text>
+				)}
 				<Pressable onPress={() => f.setSort(nextSort.value)}>
 					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{sort.label} ▾</Text>
 				</Pressable>
@@ -247,10 +254,13 @@ export function CatalogScreen() {
 						</View>
 					)
 				}
+				ListFooterComponent={search.isFetchingNextPage ? <SkeletonProductGrid rows={1} /> : undefined}
 				ListEmptyComponent={
 					search.isSuccess ? (
 						<EmptyState title={t('Ничего не нашли')} icon={SearchIcon} />
-					) : null
+					) : search.isLoading ? (
+						<SkeletonProductGrid rows={3} />
+					) : undefined
 				}
 			/>
 

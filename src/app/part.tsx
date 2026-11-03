@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Image, Pressable, ScrollView, Share, Text, View, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { PhotoPlaceholder, QueryErrorBanner } from '@/components/ui'
+import { PhotoPlaceholder, QueryErrorBanner, Skeleton, SkeletonProductGrid } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { ChatIcon, CheckIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, ShareIcon, WhatsAppIcon } from '@/components/icons'
 import { openWhatsApp } from '@/lib/whatsapp'
@@ -41,6 +41,7 @@ export default function PartScreen() {
 	const byPublicId = usePublicPart(params.publicId ?? '')
 	const query = params.publicId ? byPublicId : byId
 	const part = query.data
+	const loading = !part && query.isLoading
 
 	const favorite = useTogglePartFavorite(part?.id ?? 0)
 	const openChat = useOpenChat()
@@ -90,6 +91,8 @@ export default function PartScreen() {
 							</View>
 						</View>
 					</Pressable>
+				) : loading ? (
+					<Skeleton height={320} radius={0} />
 				) : (
 					<PhotoPlaceholder width={undefined} height={320} radius={0} style={{ width: '100%' }} />
 				)}
@@ -143,10 +146,16 @@ export default function PartScreen() {
 			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 16, gap: 12 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={query.error} onRetry={() => query.refetch()} />
 
-				<Text style={{ fontSize: 28, fontFamily: fontFamily(800), letterSpacing: -0.28, color: c.ink }}>
-					{formatPrice(part?.price) || ' '}
-				</Text>
-				<Text style={{ fontSize: 18.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>{part?.title ?? ' '}</Text>
+				{loading ? (
+					<PartBodySkeleton />
+				) : (
+					<>
+						<Text style={{ fontSize: 28, fontFamily: fontFamily(800), letterSpacing: -0.28, color: c.ink }}>
+							{formatPrice(part?.price) || ' '}
+						</Text>
+						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>{part?.title ?? ' '}</Text>
+					</>
+				)}
 
 				{part?.fit ? (
 					<View
@@ -289,6 +298,13 @@ function Similar({ partId, categoryId, car }: { partId: number; categoryId?: num
 	const items = flattenPages(search.data)
 		.filter((item) => item.id !== partId)
 		.slice(0, 6)
+	if (search.isLoading)
+		return (
+			<View style={{ gap: 12, paddingTop: 8 }}>
+				<Skeleton width={190} height={22} />
+				<SkeletonProductGrid rows={1} />
+			</View>
+		)
 	if (!items.length) return null
 	return (
 		<View style={{ gap: 12, paddingTop: 8 }}>
@@ -299,6 +315,27 @@ function Similar({ partId, categoryId, car }: { partId: number; categoryId?: num
 						<PartTile part={item} />
 					</View>
 				))}
+			</View>
+		</View>
+	)
+}
+
+/** Цена, название, «Подходит к …» и магазин — пока карточка грузится. */
+function PartBodySkeleton() {
+	return (
+		<View style={{ gap: 14 }}>
+			<Skeleton width={140} height={30} />
+			<View style={{ gap: 8 }}>
+				<Skeleton width="90%" height={18} />
+				<Skeleton width="55%" height={18} />
+			</View>
+			<Skeleton height={48} radius={12} />
+			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4 }}>
+				<Skeleton width={44} height={44} radius={22} />
+				<View style={{ flex: 1, gap: 7 }}>
+					<Skeleton width="50%" height={16} />
+					<Skeleton width="70%" height={13} />
+				</View>
 			</View>
 		</View>
 	)

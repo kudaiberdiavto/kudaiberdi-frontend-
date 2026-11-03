@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Pressable, ScrollView, Text, View, type GestureResponderEvent } from 'react-native'
+import { Pressable, ScrollView, Text, View, type GestureResponderEvent, type HostInstance, type ScrollViewInstance } from 'react-native'
 import Svg, { G, Polygon, Polyline, Rect, Text as SvgText } from 'react-native-svg'
 import { fontFamily, raw, useColors } from '@/theme'
 import { useMarketScheme } from '@/api/market'
@@ -49,9 +49,9 @@ export function MarketSchemeView({ width, height, selectedRowIds = [], onRowPres
 
 	// One press handler + hit test instead of onPress on every SVG shape (react-native-web
 	// leaks responder props onto <rect>). A drag cancels the press, so panning still works.
-	const canvas = useRef<View>(null)
-	const scrollV = useRef<ScrollView>(null)
-	const scrollH = useRef<ScrollView>(null)
+	const canvas = useRef<HostInstance>(null)
+	const scrollV = useRef<ScrollViewInstance>(null)
+	const scrollH = useRef<ScrollViewInstance>(null)
 	// contentOffset is ignored by react-native-web — scroll once the canvas is laid out.
 	const scrollToOffset = () => {
 		scrollV.current?.scrollTo({ y: offset.y, animated: false })

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { FlatList, Image, Pressable, Text, TextInput, View } from 'react-native'
 import { router } from 'expo-router'
-import { Badge, PhotoPlaceholder, QueryErrorBanner, Screen } from '@/components/ui'
+import { Badge, PhotoPlaceholder, QueryErrorBanner, Screen, Skeleton, SkeletonRepeat } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { CameraIcon, PlusIcon, SearchIcon } from '@/components/icons'
 import { ReelsIcon } from '@/components/video-v23'
@@ -142,6 +142,14 @@ export default function SellerProductsScreen() {
 					</View>
 				}
 				renderItem={({ item }) => <PartRow part={item} />}
+				ListEmptyComponent={
+					parts.isLoading ? (
+						<SkeletonRepeat count={6} gap={10}>
+							<PartRowSkeleton />
+						</SkeletonRepeat>
+					) : undefined
+				}
+				ListFooterComponent={parts.isFetchingNextPage ? <PartRowSkeleton /> : undefined}
 			/>
 
 			<Pressable
@@ -218,5 +226,22 @@ function PartRow({ part }: { part: MyPartItem }) {
 				</View>
 			</View>
 		</Pressable>
+	)
+}
+
+function PartRowSkeleton() {
+	const c = useColors()
+	return (
+		<View style={{ flexDirection: 'row', gap: 12, borderRadius: 16, backgroundColor: c.card, padding: 10 }}>
+			<Skeleton width={80} height={80} radius={10} />
+			<View style={{ flex: 1, gap: 8, paddingVertical: 2 }}>
+				<Skeleton width="80%" height={16} />
+				<Skeleton width="55%" height={13} />
+				<View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
+					<Skeleton width={90} height={19} />
+					<Skeleton width={72} height={22} radius={11} />
+				</View>
+			</View>
+		</View>
 	)
 }

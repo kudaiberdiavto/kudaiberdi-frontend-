@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, FlatList, Image, Pressable, Share, Text, View, type ViewToken } from 'react-native'
+import { FlatList, Image, Pressable, Share, Text, View, type ListViewToken } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router, useIsFocused } from 'expo-router'
@@ -14,6 +14,7 @@ import { useSignedIn, useToggleVideoFavorite, useSharePart, useVideoFeed } from 
 import type { VideoFeedItem } from '@/api/types'
 import { useOpenChat } from '@/api/chats'
 import { CommentsSheet } from '@/components/comments-sheet'
+import { Skeleton } from '@/components/ui'
 import { ChatIcon } from '@/components/icons'
 import { useVideoViewer } from '@/store/useVideoViewer'
 import { marketPlace } from '@/lib/shop-place'
@@ -54,7 +55,7 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 	}, [startPartId, height, items, feed])
 
 	// FlatList wants the same callback for its whole life.
-	const onViewable = useCallback(({ viewableItems }: { viewableItems: ViewToken<VideoFeedItem>[] }) => {
+	const onViewable = useCallback(({ viewableItems }: { viewableItems: ListViewToken[] }) => {
 		const first = viewableItems[0]
 		if (first?.index != null) setIndex(first.index)
 	}, [])
@@ -88,15 +89,17 @@ function VideoFeed({ top, bottom }: { top: number; bottom: number }) {
 						/>
 					)}
 					ListEmptyComponent={
+						feed.isLoading ? (
+							<VideoPageSkeleton height={height} bottom={bottom} />
+						) : (
 						<View style={{ height, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
-							{feed.isPending ? (
-								<ActivityIndicator color="#FFFFFF" />
-							) : (
+							{(
 								<Text style={{ fontSize: 17.5, lineHeight: 24, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
 									{feed.error ? t('Не удалось загрузить видео') : t('Видео нет')}
 								</Text>
 							)}
 						</View>
+						)
 					}
 					onRefresh={() => feed.refetch()}
 					refreshing={false}
@@ -296,6 +299,28 @@ function FeedPage({
 }
 
 /** The video itself and the thin progress line under the buttons. */
+/** Страница ленты, пока видео грузятся: кнопки справа, магазин, название и цена внизу — как у настоящей. */
+function VideoPageSkeleton({ height, bottom }: { height: number; bottom: number }) {
+	return (
+		<View style={{ height }}>
+			<View style={{ position: 'absolute', right: 12, bottom: bottom + 250, gap: 18, alignItems: 'center' }}>
+				{[0, 1, 2].map((i) => (
+					<Skeleton key={i} onDark width={44} height={44} radius={22} />
+				))}
+			</View>
+			<View style={{ position: 'absolute', left: 16, right: 16, bottom: bottom + 16, gap: 10 }}>
+				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+					<Skeleton onDark width={36} height={36} radius={18} />
+					<Skeleton onDark width={140} height={16} />
+				</View>
+				<Skeleton onDark width="80%" height={18} />
+				<Skeleton onDark width={110} height={24} />
+				<Skeleton onDark height={52} radius={14} style={{ marginTop: 6 }} />
+			</View>
+		</View>
+	)
+}
+
 function FeedVideo({ url, active, muted, durationSec, bottom }: { url: string; active: boolean; muted: boolean; durationSec: number; bottom: number }) {
 	const player = useVideoPlayer(resolveUrl(url), (p) => {
 		p.loop = true

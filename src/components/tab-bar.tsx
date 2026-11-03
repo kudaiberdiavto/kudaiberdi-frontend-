@@ -1,5 +1,5 @@
 import { forwardRef, type ComponentType, type Ref } from 'react'
-import { Pressable, Text, View, type PressableProps, type View as RNView } from 'react-native'
+import { Pressable, Text, View, type HostInstance, type PressableProps } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { fontFamily, useColors } from '@/theme'
 import type { IconProps } from '@/components/icons'
@@ -38,7 +38,7 @@ interface TabButtonProps extends PressableProps {
 
 export const TabButton = forwardRef(function TabButton(
 	{ isFocused, icon: Icon, label, badge, ...props }: TabButtonProps,
-	ref: Ref<RNView>,
+	ref: Ref<HostInstance>,
 ) {
 	const c = useColors()
 	const color = isFocused ? c.brandStrong : c.muted

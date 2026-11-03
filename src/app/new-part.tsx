@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { QueryErrorBanner, Segmented, Toggle } from '@/components/ui'
+import { QueryErrorBanner, Segmented, Skeleton, Toggle } from '@/components/ui'
 import { MediaViewer } from '@/components/media-viewer'
 import { PlayIcon } from '@/components/voice'
 import { resolveUrl } from '@/lib/api'
@@ -60,6 +60,8 @@ export default function NewPartScreen() {
 	}, [draft.photos.length, draft.fitments.length, draft.title, draft.categoryId, draft.price, resetSave, resetPublish])
 
 	const published = existing.data?.status === 'ACTIVE'
+	// Editing: until the saved part is in the draft the form would show (and could save) an empty one.
+	const loading = Boolean(id) && draft.id !== id && !existing.error
 	const uploading = draft.photos.some((p) => p.status === 'uploading')
 	const category = categories.data?.find((cat) => cat.id === draft.categoryId)
 	const error = save.error ?? publish.error
@@ -161,7 +163,7 @@ export default function NewPartScreen() {
 				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
 					{id ? t('Запчасть') : t('Новая запчасть')}
 				</Text>
-				{!published ? (
+				{!published && !loading ? (
 					<Pressable disabled={save.isPending || uploading} onPress={onDraft}>
 						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Черновик')}</Text>
 					</Pressable>
@@ -169,6 +171,9 @@ export default function NewPartScreen() {
 			</View>
 
 			<MediaViewer items={watch} onClose={() => setWatch(null)} />
+			{loading ? (
+				<PartFormSkeleton />
+			) : (
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 14, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={existing.error ?? categories.error} onRetry={() => existing.refetch()} />
 
@@ -404,6 +409,7 @@ export default function NewPartScreen() {
 					<Toggle value={draft.quantity > 0} onChange={(on) => draft.set({ quantity: on ? 1 : 0 })} />
 				</View>
 			</ScrollView>
+			)}
 
 			<View
 				style={{
@@ -420,7 +426,7 @@ export default function NewPartScreen() {
 					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text>
 				) : null}
 				<Pressable
-					disabled={save.isPending || publish.isPending || uploading}
+					disabled={loading || save.isPending || publish.isPending || uploading}
 					onPress={onPublish}
 					style={{
 						height: 56,
@@ -428,7 +434,7 @@ export default function NewPartScreen() {
 						backgroundColor: c.brand,
 						alignItems: 'center',
 						justifyContent: 'center',
-						opacity: save.isPending || publish.isPending || uploading ? 0.4 : 1,
+						opacity: loading || save.isPending || publish.isPending || uploading ? 0.4 : 1,
 					}}
 				>
 					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
@@ -436,6 +442,40 @@ export default function NewPartScreen() {
 					</Text>
 				</Pressable>
 			</View>
+		</View>
+	)
+}
+
+/** Форма поста, пока он грузится: фото, название, машины, категория, цена, наличие. */
+function PartFormSkeleton() {
+	const label = (width: number) => <Skeleton width={width} height={13} />
+	return (
+		<View style={{ flex: 1, padding: 16, paddingTop: 8, gap: 14 }}>
+			<View style={{ flexDirection: 'row', gap: 8 }}>
+				{[0, 1, 2].map((i) => (
+					<Skeleton key={i} width={80} height={80} radius={12} />
+				))}
+			</View>
+			<View style={{ gap: 6 }}>
+				{label(80)}
+				<Skeleton height={52} radius={12} />
+			</View>
+			<View style={{ gap: 8 }}>
+				{label(150)}
+				<View style={{ flexDirection: 'row', gap: 8 }}>
+					<Skeleton width={130} height={44} radius={20} />
+					<Skeleton width={100} height={44} radius={20} />
+				</View>
+			</View>
+			<View style={{ gap: 6 }}>
+				{label(90)}
+				<Skeleton height={52} radius={12} />
+			</View>
+			<View style={{ gap: 6 }}>
+				{label(50)}
+				<Skeleton height={52} radius={12} />
+			</View>
+			<Skeleton height={56} radius={12} />
 		</View>
 	)
 }

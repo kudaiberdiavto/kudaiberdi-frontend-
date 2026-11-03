@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react'
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View, type ScrollViewInstance } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Location from 'expo-location'
 import { addressAt, currentCoords } from '@/lib/locate'
-import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceGrid, Toggle } from '@/components/ui'
+import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceGrid, Skeleton, Toggle } from '@/components/ui'
 import { ChevronLeftIcon, LocateIcon, MapPinIcon, PhotoIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
 import { useBrands } from '@/api/directory'
@@ -37,8 +37,45 @@ const RADII = [3, 5, 10, 20, 30]
 export default function MasterProfileScreen() {
 	const profile = useMyMaster()
 	// Wait for the saved profile so the form starts from it.
-	if (profile.isPending) return null
+	if (profile.isPending) return <MasterProfileSkeleton />
 	return <MasterProfileForm initial={profile.data ?? null} error={profile.error} />
+}
+
+/** Форма «Мои услуги» до прихода сохранённого профиля: заголовок, плитки услуг, марки, адрес. */
+function MasterProfileSkeleton() {
+	const c = useColors()
+	const insets = useSafeAreaInsets()
+	return (
+		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
+			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+				{router.canGoBack() ? (
+					<Pressable onPress={() => router.back()}>
+						<ChevronLeftIcon size={24} color={c.ink} />
+					</Pressable>
+				) : null}
+				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>{t('Мои услуги')}</Text>
+			</View>
+			<View style={{ paddingTop: 8, paddingHorizontal: 16, gap: 10 }}>
+				<Skeleton width={110} height={14} />
+				{[0, 1].map((row) => (
+					<View key={row} style={{ flexDirection: 'row', gap: 8 }}>
+						{[0, 1, 2].map((i) => (
+							<Skeleton key={i} width="auto" height={84} radius={16} style={{ flex: 1 }} />
+						))}
+					</View>
+				))}
+				<Skeleton width={70} height={14} style={{ marginTop: 10 }} />
+				<View style={{ flexDirection: 'row', gap: 6 }}>
+					{[34, 34, 34, 100].map((w, i) => (
+						<Skeleton key={i} width={w} height={34} radius={17} />
+					))}
+				</View>
+				<Skeleton width={90} height={14} style={{ marginTop: 10 }} />
+				<Skeleton height={48} radius={12} />
+				<Skeleton height={48} radius={12} />
+			</View>
+		</View>
+	)
 }
 
 function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error: Error | null }) {
@@ -47,7 +84,7 @@ function MasterProfileForm({ initial, error }: { initial: MyMaster | null; error
 	const params = useLocalSearchParams<{ first?: string; section?: 'brands' | 'place' }>()
 	const first = params.first === '1' || !initial
 	// «Изменить» on a block of «Мой сервис» opens the form at that block
-	const scroll = useRef<ScrollView>(null)
+	const scroll = useRef<ScrollViewInstance>(null)
 	const scrolled = useRef(false)
 	const anchor = (section: 'brands' | 'place', e: { nativeEvent: { layout: { y: number } } }) => {
 		if (params.section !== section || scrolled.current) return

@@ -2,7 +2,7 @@ import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { QueryErrorBanner } from '@/components/ui'
+import { QueryErrorBanner, Skeleton } from '@/components/ui'
 import * as ImagePicker from 'expo-image-picker'
 import { SendIcon } from '@/components/icons'
 import { CameraV23Icon, MicV23Icon, TickIcon } from '@/components/buyer-v23'
@@ -181,6 +181,8 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 				keyExtractor={(m) => String(m.clientId ?? m.id)}
 				contentContainerStyle={{ padding: 16, gap: 10 }}
 				onEndReached={() => history.hasNextPage && !history.isFetchingNextPage && history.fetchNextPage()}
+				ListEmptyComponent={history.isLoading ? <BubblesSkeleton /> : undefined}
+				ListFooterComponent={history.isFetchingNextPage ? <BubblesSkeleton count={1} /> : undefined}
 				renderItem={({ item }) => (
 					<Message
 						message={item}
@@ -521,4 +523,26 @@ function replyText(payload: Record<string, unknown>, text: string | null | undef
 	if (tags.length) line += `. ${tags.join(', ')}`
 	if (typeof payload.price === 'number') line += ` — ${formatPrice(payload.price)}`
 	return text ? `${line}\n${text}` : line
+}
+
+/** Пузыри сообщений, пока грузится история: свои справа, чужие слева, разной ширины. Список перевёрнут — первый внизу. */
+const BUBBLES: { mine: boolean; width: number; height: number }[] = [
+	{ mine: true, width: 180, height: 40 },
+	{ mine: false, width: 240, height: 58 },
+	{ mine: false, width: 140, height: 40 },
+	{ mine: true, width: 220, height: 58 },
+	{ mine: false, width: 200, height: 40 },
+	{ mine: true, width: 120, height: 40 },
+]
+
+function BubblesSkeleton({ count = BUBBLES.length }: { count?: number }) {
+	return (
+		<View style={{ gap: 10 }}>
+			{BUBBLES.slice(0, count).map((bubble, i) => (
+				<View key={i} style={{ alignItems: bubble.mine ? 'flex-end' : 'flex-start', opacity: Math.max(0.4, 1 - i * 0.1) }}>
+					<Skeleton width={bubble.width} height={bubble.height} radius={18} />
+				</View>
+			))}
+		</View>
+	)
 }

@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { ActivityIndicator, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Share, Text, TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Share, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams } from 'expo-router'
 import { BigButton, BubbleIcon, TickIcon, TopBar, priceDigits } from '@/components/buyer-v23'
-import { QueryErrorBanner } from '@/components/ui'
+import { QueryErrorBanner, Skeleton } from '@/components/ui'
 import { ClockOutline, routeTitle, toRegion } from '@/components/video-v23'
 import { WhatsAppIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
@@ -39,13 +39,34 @@ export default function DeliveryOrderScreen() {
 			<TopBar title={asShop ? t('Заказ с доставкой') : t('Где посылка')} />
 			<QueryErrorBanner error={order.error} onRetry={() => order.refetch()} />
 			{!data ? (
-				<ActivityIndicator style={{ marginTop: 40 }} color={c.brand} />
+				order.isLoading ? <OrderSkeleton /> : null
 			) : asShop ? (
 				<ShopSide order={data} bottom={insets.bottom} />
 			) : (
 				<BuyerSide order={data} bottom={insets.bottom} />
 			)}
 		</KeyboardAvoidingView>
+	)
+}
+
+/** Карточка маршрута и шаги доставки, пока заказ грузится. */
+function OrderSkeleton() {
+	const c = useColors()
+	return (
+		<View style={{ paddingHorizontal: 16, gap: 10 }}>
+			<Skeleton height={132} radius={20} />
+			<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 14, gap: 18 }}>
+				{[0.55, 0.45, 0.6, 0.5, 0.4].map((w, i) => (
+					<View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+						<Skeleton width={22} height={22} radius={11} />
+						<View style={{ flex: 1, gap: 7 }}>
+							<Skeleton width={`${w * 100}%`} height={15} />
+							<Skeleton width="35%" height={12} />
+						</View>
+					</View>
+				))}
+			</View>
+		</View>
 	)
 }
 

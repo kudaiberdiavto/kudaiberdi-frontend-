@@ -1,6 +1,6 @@
 import { FlatList, Image, Pressable, Text, View } from 'react-native'
 import { router } from 'expo-router'
-import { Avatar, EmptyState, QueryErrorBanner, Screen } from '@/components/ui'
+import { Avatar, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRow } from '@/components/ui'
 import { ChatIcon } from '@/components/icons'
 import { fontFamily, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
@@ -49,7 +49,15 @@ export function ChatList({ as, also }: { as: ChatListAs; also?: ChatListAs }) {
 				refreshing={false}
 				renderItem={({ item, index }) => <ChatRow chat={item} highlight={index === 0} />}
 				contentContainerStyle={{ flexGrow: 1 }}
-				ListEmptyComponent={chats.isSuccess ? <EmptyState title={t('Чатов нет')} icon={ChatIcon} /> : null}
+				ListEmptyComponent={
+					chats.isSuccess ? (
+						<EmptyState title={t('Чатов нет')} icon={ChatIcon} />
+					) : chats.isLoading ? (
+						<SkeletonRepeat count={8}>
+							<SkeletonRow lines={3} />
+						</SkeletonRepeat>
+					) : undefined
+				}
 			/>
 		</Screen>
 	)

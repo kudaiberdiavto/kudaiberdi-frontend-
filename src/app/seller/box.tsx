@@ -3,7 +3,7 @@ import { ActivityIndicator, FlatList, Image, KeyboardAvoidingView, Linking, Plat
 import { router } from 'expo-router'
 import { API_URL } from '@/lib/env'
 import Svg, { Path } from 'react-native-svg'
-import { BottomSheet, Button, EmptyState, LanguageSwitch, PhotoPlaceholder, QueryErrorBanner, Screen, SettingsRow, Toggle } from '@/components/ui'
+import { BottomSheet, Button, EmptyState, LanguageSwitch, PhotoPlaceholder, QueryErrorBanner, Screen, SettingsRow, Skeleton, Toggle } from '@/components/ui'
 import { PlusIcon, TagIcon } from '@/components/icons'
 import { Label } from '@/components/seller-v23'
 import { BrandLogo } from '@/components/ui/brand'
@@ -62,41 +62,45 @@ export default function SellerBoxScreen() {
 			/>
 
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+				{shop.isLoading ? (
+					<Skeleton width={80} height={80} radius={40} />
+				) : (
 				<Pressable onPress={() => avatarUpload.pick('library')} disabled={avatarBusy}>
-					<View
-						style={{
-							width: 80,
-							height: 80,
-							borderRadius: 40,
-							overflow: 'hidden',
-							backgroundColor: c.brandTint,
-							alignItems: 'center',
-							justifyContent: 'center',
-						}}
-					>
-						{data?.avatarUrl ? (
-							<Image source={{ uri: resolveUrl(data.avatarUrl) }} style={{ width: '100%', height: '100%' }} />
-						) : (
-							<Text style={{ fontSize: 30, fontFamily: fontFamily(700), color: c.brandStrong }}>{data?.name.charAt(0).toUpperCase() ?? ' '}</Text>
-						)}
-						{avatarBusy ? (
-							<View
-								style={{
-									position: 'absolute',
-									left: 0,
-									top: 0,
-									right: 0,
-									bottom: 0,
-									backgroundColor: 'rgba(0,0,0,0.35)',
-									alignItems: 'center',
-									justifyContent: 'center',
-								}}
-							>
-								<ActivityIndicator color="#FFFFFF" />
-							</View>
-						) : null}
-					</View>
-</Pressable>
+						<View
+							style={{
+								width: 80,
+								height: 80,
+								borderRadius: 40,
+								overflow: 'hidden',
+								backgroundColor: c.brandTint,
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
+							{data?.avatarUrl ? (
+								<Image source={{ uri: resolveUrl(data.avatarUrl) }} style={{ width: '100%', height: '100%' }} />
+							) : (
+								<Text style={{ fontSize: 30, fontFamily: fontFamily(700), color: c.brandStrong }}>{data?.name.charAt(0).toUpperCase() ?? ' '}</Text>
+							)}
+							{avatarBusy ? (
+								<View
+									style={{
+										position: 'absolute',
+										left: 0,
+										top: 0,
+										right: 0,
+										bottom: 0,
+										backgroundColor: 'rgba(0,0,0,0.35)',
+										alignItems: 'center',
+										justifyContent: 'center',
+									}}
+								>
+									<ActivityIndicator color="#FFFFFF" />
+								</View>
+							) : null}
+						</View>
+	</Pressable>
+				)}
 				<View style={{ flex: 1, flexDirection: 'row' }}>
 					<Counter value={summary.data ? String(summary.data.all) : '—'} label={t('товаров')} />
 					<Counter value={data?.reviewsCount ? data.rating.toFixed(1) : '—'} label={t('рейтинг')} star={Boolean(data?.reviewsCount)} />
@@ -104,6 +108,12 @@ export default function SellerBoxScreen() {
 				</View>
 			</View>
 
+			{shop.isLoading ? (
+				<View style={{ gap: 8 }}>
+					<Skeleton width="65%" height={16} />
+					<Skeleton width="40%" height={14} />
+				</View>
+			) : null}
 			<View style={{ gap: 2 }}>
 				{place ? (
 					<Text numberOfLines={2} style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: c.ink }}>
@@ -137,9 +147,15 @@ export default function SellerBoxScreen() {
 	return (
 		<Screen padding={0}>
 			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-				<Text numberOfLines={1} style={{ flex: 1, fontSize: 22, fontFamily: fontFamily(700), letterSpacing: -0.22, color: c.ink }}>
-					{data?.name ?? t('Мой контейнер')}
-				</Text>
+				{shop.isLoading ? (
+					<View style={{ flex: 1 }}>
+						<Skeleton width={180} height={22} />
+					</View>
+				) : (
+					<Text numberOfLines={1} style={{ flex: 1, fontSize: 22, fontFamily: fontFamily(700), letterSpacing: -0.22, color: c.ink }}>
+						{data?.name ?? t('Мой контейнер')}
+					</Text>
+				)}
 				<Pressable onPress={() => setMenu(true)} hitSlop={10} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
 					<Svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke={c.ink} strokeWidth={2.2} strokeLinecap="round">
 						<Path d="M4 7h16M4 12h16M4 17h16" />
@@ -163,8 +179,12 @@ export default function SellerBoxScreen() {
 				}}
 				refreshing={false}
 				ListEmptyComponent={
-					parts.isPending ? (
-						<ActivityIndicator color={c.muted} style={{ paddingTop: 40 }} />
+					parts.isLoading ? (
+						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
+							{Array.from({ length: 9 }, (_, i) => (
+								<Skeleton key={i} width={tile} height={tile} radius={0} />
+							))}
+						</View>
 					) : (
 						<View style={{ paddingTop: 40 }}>
 							<EmptyState title={t('Публикаций нет')} icon={TagIcon} />

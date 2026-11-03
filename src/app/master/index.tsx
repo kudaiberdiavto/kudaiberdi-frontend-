@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { FlatList, Image, Pressable, Text, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
-import { EmptyState, QueryErrorBanner, Screen, ServiceIcon } from '@/components/ui'
+import { EmptyState, QueryErrorBanner, Screen, ServiceIcon, SkeletonRepeat, SkeletonRequestCard } from '@/components/ui'
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
 import { MediaGallery, MediaStrip } from '@/components/media-strip'
@@ -140,7 +140,11 @@ export default function MasterRequestsScreen() {
 				ListEmptyComponent={
 					fresh.isSuccess && answered.isSuccess ? (
 						<EmptyState title={t('Пока заявок нет')} icon={RequestsIcon} />
-					) : null
+					) : fresh.isLoading ? (
+						<SkeletonRepeat count={4} gap={10}>
+							<SkeletonRequestCard actions={2} />
+						</SkeletonRepeat>
+					) : undefined
 				}
 				showsVerticalScrollIndicator={false}
 				onEndReached={() => {

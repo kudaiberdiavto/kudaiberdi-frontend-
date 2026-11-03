@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, ScrollView } from 'react-native'
+import { ScrollView } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
-import { QueryErrorBanner, Screen } from '@/components/ui'
+import { QueryErrorBanner, Screen, SkeletonRequestCard } from '@/components/ui'
 import { TopBar } from '@/components/buyer-v23'
-import { useColors } from '@/theme'
 import { minutesLeft } from '@/lib/format'
 import { markServiceSeen, serviceName, useMasterOffer, useMasterRequest, useServiceTypes } from '@/api/services'
 import { RequestCard } from './master/index'
@@ -11,7 +10,6 @@ import { t } from '@/i18n'
 
 /** A client's request opened from «Заявки»: the same card, photos and videos large, the answer buttons below. */
 export default function MasterRequestScreen() {
-	const c = useColors()
 	const id = Number(useLocalSearchParams<{ id: string }>().id)
 	const request = useMasterRequest(id)
 	const types = useServiceTypes().data
@@ -41,8 +39,8 @@ export default function MasterRequestScreen() {
 						onSkip={() => offer.mutate({ id, body: { answer: 'NOT_MINE' } }, { onSuccess: () => router.back() })}
 						full
 					/>
-				) : request.isPending ? (
-					<ActivityIndicator color={c.muted} style={{ paddingTop: 40 }} />
+				) : request.isLoading ? (
+					<SkeletonRequestCard full actions={2} />
 				) : null}
 			</ScrollView>
 		</Screen>

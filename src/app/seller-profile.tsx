@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Image, Linking, Pressable, ScrollView, Share, Text, View, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { LocationCard, QueryErrorBanner } from '@/components/ui'
+import { LocationCard, QueryErrorBanner, Skeleton, SkeletonProductGrid, SkeletonRepeat } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { ChatIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, PhoneIcon, ShareIcon, WhatsAppIcon } from '@/components/icons'
 import { openWhatsApp } from '@/lib/whatsapp'
@@ -35,6 +35,7 @@ export default function SellerProfileForBuyerScreen() {
 	const query = params.publicId ? byPublicId : byId
 	const shop = query.data
 	const shopId = shop?.id ?? 0
+	const loading = !shop && query.isLoading
 
 	const [tab, setTab] = useState<Tab>('parts')
 	const [complaint, setComplaint] = useState<ComplaintTarget | null>(null)
@@ -67,6 +68,8 @@ export default function SellerProfileForBuyerScreen() {
 					{/* One banner — the box's first photo; no gallery. */}
 					{banner ? (
 						<Image source={{ uri: resolveUrl(banner.url) }} style={{ width, height: 210 }} resizeMode="cover" />
+					) : loading ? (
+						<Skeleton height={210} radius={0} />
 					) : (
 						<View style={{ width: '100%', height: 210, backgroundColor: raw.fill }} />
 					)}
@@ -108,6 +111,10 @@ export default function SellerProfileForBuyerScreen() {
 							source={{ uri: resolveUrl(shop.avatarUrl) }}
 							style={{ width: 88, height: 88, borderRadius: 44, borderWidth: 4, borderColor: c.surface }}
 						/>
+					) : loading ? (
+						<View style={{ borderRadius: 48, borderWidth: 4, borderColor: c.surface }}>
+							<Skeleton width={80} height={80} radius={40} />
+						</View>
 					) : (
 						<View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: raw.fill, borderWidth: 4, borderColor: c.surface }} />
 					)}
@@ -116,6 +123,12 @@ export default function SellerProfileForBuyerScreen() {
 				<View style={{ paddingHorizontal: 16, paddingTop: 12, gap: 14 }}>
 					<QueryErrorBanner error={query.error} onRetry={() => query.refetch()} />
 
+					{loading ? (
+						<View style={{ gap: 10 }}>
+							<Skeleton width="60%" height={24} />
+							<Skeleton width="40%" height={15} />
+						</View>
+					) : (
 					<View style={{ gap: 2 }}>
 						<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{shop?.name ?? ' '}</Text>
 						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
@@ -126,7 +139,11 @@ export default function SellerProfileForBuyerScreen() {
 								: ' '}
 						</Text>
 					</View>
+					)}
 
+					{loading ? (
+						<Skeleton height={128} radius={16} />
+					) : (
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 14 }}>
 						{/* On the market — row and box; a shop / centre elsewhere — its address. */}
 						{shop && !shop.location ? (
@@ -148,6 +165,7 @@ export default function SellerProfileForBuyerScreen() {
 							</Pressable>
 						</View>
 					</View>
+					)}
 
 					{brands.length ? (
 						<View style={{ gap: 8 }}>
@@ -273,6 +291,11 @@ export default function SellerProfileForBuyerScreen() {
 									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Показать ещё')}</Text>
 								</Pressable>
 							) : null}
+							{loading || parts.isLoading ? (
+								<View style={{ width: '100%' }}>
+									<SkeletonProductGrid rows={2} gap={10} />
+								</View>
+							) : null}
 							{parts.isSuccess && partItems.length === 0 ? (
 								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Запчасти ещё не выложены')}</Text>
 							) : null}
@@ -281,6 +304,17 @@ export default function SellerProfileForBuyerScreen() {
 
 					{tab === 'reviews' ? (
 						<View style={{ gap: 10, paddingBottom: 24 }}>
+							{reviews.isLoading ? (
+								<SkeletonRepeat count={3} gap={10}>
+									<View style={{ borderRadius: 14, backgroundColor: c.card, padding: 12, gap: 10 }}>
+										<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+											<Skeleton width={90} height={16} />
+											<Skeleton width={60} height={13} />
+										</View>
+										<Skeleton width="75%" height={14} />
+									</View>
+								</SkeletonRepeat>
+							) : null}
 							{reviewItems.map((review) => (
 								<Pressable
 									key={review.id}

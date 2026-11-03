@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { resolveUrl } from '@/lib/api'
-import { QueryErrorBanner } from '@/components/ui'
+import { QueryErrorBanner, Skeleton, SkeletonRepeat } from '@/components/ui'
 import {
 	BoxOutlineIcon,
 	Caps,
@@ -172,7 +172,16 @@ export default function BuyerHomeScreen() {
 					onRetry={() => requests.refetch()}
 					offlineText={t('Нет сети. Покажем запросы, когда появится')}
 				/>
-				{(all ? items : items.slice(0, PREVIEW)).map((item) =>
+				{!items.length && (requests.isLoading || services.isLoading) ? (
+						<>
+							<View style={{ height: 2 }} />
+							<Skeleton width={130} height={14} />
+							<SkeletonRepeat count={PREVIEW} gap={10}>
+								<RequestCardSkeleton />
+							</SkeletonRepeat>
+						</>
+					) : null}
+					{(all ? items : items.slice(0, PREVIEW)).map((item) =>
 					item.kind === 'part' ? (
 						<RequestRow key={`part-${item.request.id}`} request={item.request} />
 					) : (
@@ -289,6 +298,19 @@ function RequestCard({
 				</View>
 			) : null}
 		</Pressable>
+	)
+}
+
+function RequestCardSkeleton() {
+	const c = useColors()
+	return (
+		<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+			<Skeleton width={52} height={52} radius={14} />
+			<View style={{ flex: 1, gap: 9 }}>
+				<Skeleton width="70%" height={17} />
+				<Skeleton width="45%" height={14} />
+			</View>
+		</View>
 	)
 }
 

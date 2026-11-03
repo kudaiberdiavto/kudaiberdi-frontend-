@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Image, Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { QueryErrorBanner, ServiceIcon } from '@/components/ui'
+import { QueryErrorBanner, ServiceIcon, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus } from '@/components/ui'
 import { BackChevron, CallRow, SmallChip, offerWhen } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
 import { VoicePlayer } from '@/components/voice'
@@ -128,6 +128,8 @@ export default function ServiceOffersScreen() {
 							</Pressable>
 						) : null}
 					</View>
+				) : stats.isLoading ? (
+					<SkeletonStatus />
 				) : null}
 				{actionError ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{actionError.message}</Text> : null}
 
@@ -163,6 +165,11 @@ export default function ServiceOffersScreen() {
 					})}
 				</View>
 
+				{offers.isLoading ? (
+					<SkeletonRepeat count={3} gap={10}>
+						<SkeletonOfferCard />
+					</SkeletonRepeat>
+				) : null}
 				{list.map((offer, index) => (
 					<OfferCard
 						key={offer.id}

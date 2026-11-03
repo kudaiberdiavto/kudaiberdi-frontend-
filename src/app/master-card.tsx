@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Image, Linking, Pressable, ScrollView, Share, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceBadge } from '@/components/ui'
+import { BrandLogo, Button, Chip, QueryErrorBanner, SectionLabel, ServiceBadge, Skeleton } from '@/components/ui'
 import { ChatIcon, ChevronLeftIcon, MapPinIcon, PhoneIcon, ShareIcon } from '@/components/icons'
 import { fontFamily, raw, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
@@ -28,6 +28,7 @@ export default function MasterCardScreen() {
 	const byLink = useMasterByLink(params.publicId ?? '')
 	const query = params.publicId ? byLink : byId
 	const master = query.data
+	const loading = !master && query.isLoading
 	const reviews = useMasterReviews(master?.id ?? 0)
 	// Only reviews with tags — a bare rating is in the ★ average at the top.
 	const commented = (reviews.data ?? []).filter((review) => review.tags.length > 0)
@@ -53,6 +54,7 @@ export default function MasterCardScreen() {
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
 			<ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
 				<View style={{ height: 200 + insets.top, backgroundColor: raw.fill }}>
+					{loading ? <Skeleton height="100%" radius={0} style={{ position: 'absolute' }} /> : null}
 					{cover ? <Image source={{ uri: resolveUrl(cover.url) }} style={{ position: 'absolute', inset: 0 }} resizeMode="cover" /> : null}
 					<View style={{ paddingTop: insets.top + 8, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between' }}>
 						<Pressable onPress={() => router.back()} style={roundButton}>
@@ -69,6 +71,10 @@ export default function MasterCardScreen() {
 				<View style={{ marginTop: -44, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
 					{master?.avatarUrl ? (
 						<Image source={{ uri: resolveUrl(master.avatarUrl) }} style={{ width: 88, height: 88, borderRadius: 44, borderWidth: 4, borderColor: c.surface }} />
+					) : loading ? (
+						<View style={{ borderRadius: 48, borderWidth: 4, borderColor: c.surface }}>
+							<Skeleton width={80} height={80} radius={40} />
+						</View>
 					) : (
 						<View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: c.brandTint, borderWidth: 4, borderColor: c.surface, alignItems: 'center', justifyContent: 'center' }}>
 							<Text style={{ fontSize: 32, fontFamily: fontFamily(700), color: c.brandStrong }}>{master?.name.charAt(0) ?? ' '}</Text>
@@ -79,7 +85,7 @@ export default function MasterCardScreen() {
 				<View style={{ paddingHorizontal: 16, paddingTop: 10, gap: 12 }}>
 					<QueryErrorBanner error={query.error ?? openChat.error} onRetry={() => query.refetch()} />
 
-					<View style={{ gap: 4 }}>
+					<View style={{ gap: 4, display: loading ? 'none' : 'flex' }}>
 						<Text style={{ fontSize: 24, fontFamily: fontFamily(700), color: c.ink }}>{master?.name ?? ' '}</Text>
 						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
 							{master
@@ -89,6 +95,25 @@ export default function MasterCardScreen() {
 								: ' '}
 						</Text>
 					</View>
+
+					{loading ? (
+						<View style={{ gap: 12 }}>
+							<Skeleton width="60%" height={26} />
+							<Skeleton width="40%" height={15} />
+							<View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+								<Skeleton width="auto" height={48} radius={14} style={{ flex: 1 }} />
+								<Skeleton width="auto" height={48} radius={14} style={{ flex: 1.4 }} />
+							</View>
+							<Skeleton height={68} radius={14} />
+							<Skeleton width={90} height={14} style={{ marginTop: 4 }} />
+							{[0, 1, 2].map((i) => (
+								<View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+									<Skeleton width={32} height={32} radius={9} />
+									<Skeleton width={[140, 110, 160][i]} height={16} />
+								</View>
+							))}
+						</View>
+					) : null}
 
 					{master ? (
 						<View style={{ flexDirection: 'row', gap: 8 }}>

@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native'
+import { Alert, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native'
 import { router } from 'expo-router'
 import { PaperPlaneIcon } from '@/components/buyer-v23'
 import { ModalSheet } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
+import { Skeleton, SkeletonRepeat } from '@/components/ui'
 import { fontFamily, useColors } from '@/theme'
 import { formatAgo } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
@@ -54,7 +55,14 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 			</Text>
 
 			<ScrollView style={{ maxHeight: height * 0.45 }} contentContainerStyle={{ gap: 14, paddingVertical: 4 }} keyboardShouldPersistTaps="handled">
-				{comments.isPending ? <ActivityIndicator color={c.muted} /> : null}
+				{comments.isLoading ? (
+					<SkeletonRepeat count={4} gap={14}>
+						<View style={{ gap: 7 }}>
+							<Skeleton width={130} height={15} />
+							<Skeleton width="85%" height={15} />
+						</View>
+					</SkeletonRepeat>
+				) : null}
 				{items.map((comment) => (
 					<Pressable key={comment.id} onLongPress={() => actions(comment)} delayLongPress={400} style={{ gap: 3 }}>
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
