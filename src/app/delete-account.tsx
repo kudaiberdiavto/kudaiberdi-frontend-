@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useMutation } from '@tanstack/react-query'
-import { TopBar } from '@/components/buyer-v23'
-import { Button } from '@/components/ui'
-import { fontFamily, raw, useColors } from '@/theme'
+
+import { Button, ScreenHeader } from '@/components/ui'
+import { fontFamily, fs, useColors } from '@/theme'
 import { apiFetch } from '@/lib/api'
 import { formatDay } from '@/lib/format'
 import { useSession } from '@/store/useSession'
@@ -32,8 +32,8 @@ export default function DeleteAccountScreen() {
 		return (
 			<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 				<View style={{ flex: 1, padding: 24, justifyContent: 'center', gap: 14 }}>
-					<Text style={{ fontSize: 24, fontFamily: fontFamily(800), color: c.ink }}>{t('Аккаунт удалён')}</Text>
-					<Text style={{ fontSize: 17, lineHeight: 24, fontFamily: fontFamily(400), color: c.inkSecondary }}>
+					<Text style={{ fontSize: fs.h2, fontFamily: fontFamily(800), color: c.ink }}>{t('Аккаунт удалён')}</Text>
+					<Text style={{ fontSize: fs.lg, lineHeight: 24, fontFamily: fontFamily(400), color: c.inkSecondary }}>
 						{t('Данные сотрём {0}. Если передумаете — просто войдите по номеру до этой даты.', formatDay(confirm.data.purgeAt))}
 					</Text>
 				</View>
@@ -46,23 +46,23 @@ export default function DeleteAccountScreen() {
 
 	return (
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar title={t('Удалить аккаунт')} />
+			<ScreenHeader title={t('Удалить аккаунт')} />
 			<ScrollView contentContainerStyle={{ padding: 16, gap: 14 }} keyboardShouldPersistTaps="handled">
 				<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 16, gap: 8 }}>
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{t('Что удалится')}</Text>
-					<Text style={{ fontSize: 16, lineHeight: 23, fontFamily: fontFamily(400), color: c.inkSecondary }}>{t('Профиль, номер телефона, машины, избранное, запросы и заявки. Магазин и профиль мастера пропадут из поиска, сообщения в чатах будут скрыты. Через 30 дней данные сотрутся навсегда.')}</Text>
+					<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{t('Что удалится')}</Text>
+					<Text style={{ fontSize: fs.base, lineHeight: 23, fontFamily: fontFamily(400), color: c.inkSecondary }}>{t('Профиль, номер телефона, машины, избранное, запросы и заявки. Магазин и профиль мастера пропадут из поиска, сообщения в чатах будут скрыты. Через 30 дней данные сотрутся навсегда.')}</Text>
 				</View>
 
 				{send.data ? (
 					<>
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Код из SMS')}</Text>
+						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.muted }}>{t('Код из SMS')}</Text>
 						<TextInput
 							value={code}
 							onChangeText={(value) => setCode(value.replace(/\D/g, '').slice(0, 4))}
 							keyboardType="number-pad"
 							autoFocus
 							placeholder="••••"
-							placeholderTextColor={raw.fillInk}
+							placeholderTextColor={c.fillInk}
 							style={{
 								height: 64,
 								borderRadius: 14,
@@ -70,7 +70,7 @@ export default function DeleteAccountScreen() {
 								borderColor: c.border,
 								backgroundColor: c.card,
 								textAlign: 'center',
-								fontSize: 28,
+								fontSize: fs.display,
 								letterSpacing: 12,
 								fontFamily: fontFamily(700),
 								color: c.ink,
@@ -79,7 +79,7 @@ export default function DeleteAccountScreen() {
 					</>
 				) : null}
 
-				{error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
+				{error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
 			</ScrollView>
 
 			<View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: insets.bottom + 12 }}>

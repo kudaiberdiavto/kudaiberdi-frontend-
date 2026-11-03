@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Keyboard, Pressable, Text, TextInput, View } from 'react-native'
+import { Keyboard, Pressable, Text, TextInput, View, type TextInputInstance } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ChevronLeftIcon } from '@/components/icons'
 import { AUTH_FIELD_HEIGHT, AuthLayout } from '@/components/auth-layout'
-import { fontFamily, useColors } from '@/theme'
+import { fontFamily, fs, useColors } from '@/theme'
 import { ApiError } from '@/lib/api'
 import { formatE164 } from '@/lib/phone'
 import { useSendOtp, useVerifyOtp } from '@/api/auth'
@@ -23,7 +23,7 @@ export default function CodeScreen() {
 	// Dev backend returns the code in `debugCode` — prefill it instead of waiting for an SMS.
 	const [code, setCode] = useState(__DEV__ ? (params.debugCode ?? '') : '')
 	const [secondsLeft, setSecondsLeft] = useState(Number(params.resendIn) || 0)
-	const inputRef = useRef<TextInput>(null)
+	const inputRef = useRef<TextInputInstance>(null)
 	const verify = useVerifyOtp()
 	const resend = useSendOtp()
 	const error = (verify.error ?? resend.error) as ApiError | Error | null
@@ -69,7 +69,7 @@ export default function CodeScreen() {
 	return (
 		<AuthLayout
 			topBar={
-				<Pressable
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')}
 					onPress={() => router.back()}
 					style={{
 						width: 48,
@@ -84,7 +84,7 @@ export default function CodeScreen() {
 				</Pressable>
 			}
 			header={
-				<Text style={{ fontSize: 32, lineHeight: 40, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink }}>{t('Код из SMS')}</Text>
+				<Text style={{ fontSize: fs.hero, lineHeight: 40, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink }}>{t('Код из SMS')}</Text>
 			}
 			label={t('Отправили на {0}', formatE164(phone))}
 			field={
@@ -108,7 +108,7 @@ export default function CodeScreen() {
 									}}
 								>
 									{digit ? (
-										<Text style={{ fontSize: 28, fontFamily: fontFamily(700), color: c.ink }}>{digit}</Text>
+										<Text style={{ fontSize: fs.display, fontFamily: fontFamily(700), color: c.ink }}>{digit}</Text>
 									) : isActive ? (
 										<View style={{ width: 2, height: 28, backgroundColor: c.brand }} />
 									) : null}
@@ -125,6 +125,9 @@ export default function CodeScreen() {
 							setCode(text.replace(/\D/g, '').slice(0, CODE_LENGTH))
 						}}
 						keyboardType="number-pad"
+						// iOS offers the code from the SMS above the keyboard, Android fills it from the SMS.
+						textContentType="oneTimeCode"
+						autoComplete="sms-otp"
 						maxLength={CODE_LENGTH}
 						style={{ position: 'absolute', width: 0, height: 0, opacity: 0 }}
 					/>
@@ -132,8 +135,8 @@ export default function CodeScreen() {
 			}
 			below={
 				<>
-					{errorText ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text> : null}
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
+					{errorText ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text> : null}
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>
 						{secondsLeft > 0 ? (
 							<>
 								{t('Отправить снова через')}{' '}

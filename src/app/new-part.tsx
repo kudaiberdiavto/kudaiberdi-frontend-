@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react'
-import { Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { useConfirmLeave } from '@/lib/use-confirm-leave'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { QueryErrorBanner, Segmented, Toggle } from '@/components/ui'
+import { Button, QueryErrorBanner, ScreenHeader, Segmented, Skeleton, toast, Toggle } from '@/components/ui'
 import { MediaViewer } from '@/components/media-viewer'
 import { PlayIcon } from '@/components/voice'
-import { resolveUrl } from '@/lib/api'
 import { BrandLogo } from '@/components/ui/brand'
-import { CameraIcon, ChevronLeftIcon, CloseIcon, PlusIcon } from '@/components/icons'
-import { fontFamily, raw, useColors } from '@/theme'
-import { ApiError } from '@/lib/api'
-import type { MediaItem } from '@/api/types'
+import { CameraIcon, CloseIcon, PlusIcon } from '@/components/icons'
+import { fixed, fontFamily, fs, raw, useColors } from '@/theme'
+import { ApiError, resolveUrl } from '@/lib/api'
 import { formatNumber } from '@/lib/format'
 import { useCategories } from '@/api/directory'
 import { useMyPart, usePublishPart, useSavePart } from '@/api/parts'
-import type { PartCondition } from '@/api/types'
-import { MAX_PART_PHOTOS, partBody, usePartDraft } from '@/store/usePartDraft'
+import type { MediaItem, PartCondition } from '@/api/types'
+import { MAX_PART_PHOTOS, type PartDraft, partBody, usePartDraft } from '@/store/usePartDraft'
 import { t } from '@/i18n'
 
 const CONDITIONS: { value: PartCondition; label: string }[] = [
@@ -33,6 +33,20 @@ const MISSING: Record<string, string> = {
 	mediaIds: t('фото'),
 	fitments: t('машины'),
 }
+
+/** What the seller typed or picked — to tell an untouched form from one with unsaved input. */
+const fingerprint = (d: Pick<PartDraft, 'title' | 'categoryId' | 'condition' | 'price' | 'quantity' | 'oemNumber' | 'fitments' | 'photos'>) =>
+	JSON.stringify([
+		d.title.trim(),
+		d.categoryId,
+		d.condition,
+		d.price,
+		d.quantity,
+		d.oemNumber,
+		d.fitments.map((f) => [f.brandId, f.modelId, f.yearFrom, f.yearTo]),
+		d.photos.map((p) => p.key),
+	])
+const EMPTY = fingerprint({ title: '', categoryId: undefined, condition: 'NEW', price: '', quantity: 1, oemNumber: undefined, fitments: [], photos: [] })
 
 /** 26 «Новая запчасть» — create (after 24 / 25) or edit (`id`). Draft → publish. */
 export default function NewPartScreen() {
@@ -60,6 +74,8 @@ export default function NewPartScreen() {
 	}, [draft.photos.length, draft.fitments.length, draft.title, draft.categoryId, draft.price, resetSave, resetPublish])
 
 	const published = existing.data?.status === 'ACTIVE'
+	// Editing: until the saved part is in the draft the form would show (and could save) an empty one.
+	const loading = Boolean(id) && draft.id !== id && !existing.error
 	const uploading = draft.photos.some((p) => p.status === 'uploading')
 	const category = categories.data?.find((cat) => cat.id === draft.categoryId)
 	const error = save.error ?? publish.error
@@ -67,6 +83,12 @@ export default function NewPartScreen() {
 	const errorText = missing
 		? t('Заполните: {0}', missing.map((m) => MISSING[m] ?? m).join(', '))
 		: error?.message
+
+	// Unsaved input: a new part — anything entered (camera photos too); an edited one — any change since it loaded.
+	const [baseline, setBaseline] = useState<string | null>(id ? null : EMPTY)
+	// The edited part just landed in the draft — that's the «unchanged» state (set during render, not in an effect).
+	if (!loading && baseline === null) setBaseline(fingerprint(draft))
+	const dirty = baseline !== null && fingerprint(draft) !== baseline
 
 	const saveDraft = async () => {
 		const state = usePartDraft.getState()
@@ -76,10 +98,13 @@ export default function NewPartScreen() {
 		return part
 	}
 
+	const leave = useConfirmLeave(dirty, published ? undefined : () => saveDraft().then(() => toast(t('Черновик сохранён'))))
+
 	const onDraft = async () => {
 		try {
 			await saveDraft()
-			router.back()
+			toast(t('Черновик сохранён'))
+			leave(() => router.back())
 		} catch {}
 	}
 
@@ -87,7 +112,8 @@ export default function NewPartScreen() {
 		try {
 			const part = await saveDraft()
 			if (part.status !== 'ACTIVE') await publish.mutateAsync(part.id)
-			router.back()
+			toast(part.status === 'ACTIVE' ? t('Изменения сохранены') : t('Опубликовано'))
+			leave(() => router.back())
 		} catch {}
 	}
 
@@ -123,6 +149,15 @@ export default function NewPartScreen() {
 						}}
 					/>
 				) : null}
+				<Pressable
+					onPress={() => draft.removePhoto(photo.key)}
+					hitSlop={8}
+					accessibilityRole="button"
+					accessibilityLabel={t('Удалить фото')}
+					style={{ position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(32,31,29,0.72)', alignItems: 'center', justifyContent: 'center' }}
+				>
+					<CloseIcon size={12} color={fixed.white} strokeWidth={2.6} />
+				</Pressable>
 				{isMain ? (
 					<View
 						style={{
@@ -137,7 +172,7 @@ export default function NewPartScreen() {
 							justifyContent: 'center',
 						}}
 					>
-						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Главное')}</Text>
+						<Text style={{ fontSize: fs.xxs, fontFamily: fontFamily(700), color: fixed.white }}>{t('Главное')}</Text>
 					</View>
 				) : null}
 			</Pressable>
@@ -145,30 +180,12 @@ export default function NewPartScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
-			<View
-				style={{
-					paddingTop: insets.top + 12,
-					paddingHorizontal: 16,
-					paddingBottom: 8,
-					flexDirection: 'row',
-					alignItems: 'center',
-					gap: 10,
-				}}
-			>
-				<Pressable onPress={() => router.back()}>
-					<ChevronLeftIcon size={24} color={c.ink} />
-				</Pressable>
-				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					{id ? t('Запчасть') : t('Новая запчасть')}
-				</Text>
-				{!published ? (
-					<Pressable disabled={save.isPending || uploading} onPress={onDraft}>
-						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Черновик')}</Text>
-					</Pressable>
-				) : null}
-			</View>
+			<ScreenHeader inset title={id ? t('Запчасть') : t('Новая запчасть')} />
 
 			<MediaViewer items={watch} onClose={() => setWatch(null)} />
+			{loading ? (
+				<PartFormSkeleton />
+			) : (
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 14, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={existing.error ?? categories.error} onRetry={() => existing.refetch()} />
 
@@ -176,7 +193,7 @@ export default function NewPartScreen() {
 					{video ? (
 						<Pressable
 							onPress={() => setWatch([{ id: video.id, kind: 'VIDEO', url: video.url, thumbUrl: video.posterUrl, width: null, height: null, durationSec: video.durationSec }])}
-							style={{ width: 80, height: 80, borderRadius: 12, overflow: 'hidden', backgroundColor: '#1D2433' }}
+							style={{ width: 80, height: 80, borderRadius: 12, overflow: 'hidden', backgroundColor: fixed.media }}
 						>
 							{video.posterUrl ? <Image source={{ uri: resolveUrl(video.posterUrl) }} style={{ width: '100%', height: '100%' }} /> : null}
 							<View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.25)' }}>
@@ -206,20 +223,20 @@ export default function NewPartScreen() {
 							}}
 						>
 							<CameraIcon size={24} color={c.brandStrong} />
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.brandStrong }}>
+							<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), color: c.brandStrong }}>
 								{draft.photos.length ? t('Ещё фото') : t('Фото')}
 							</Text>
 						</Pressable>
 					) : null}
 				</View>
 				{draft.photos.length > 3 ? (
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>
+					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(500), color: c.muted }}>
 						{t('Ещё {0} фото · всего {1} из {2}', draft.photos.length - 3, draft.photos.length, MAX_PART_PHOTOS)}
 					</Text>
 				) : null}
 
 				<View style={{ gap: 6 }}>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Название')}</Text>
+					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.muted }}>{t('Название')}</Text>
 					<View
 						style={{
 							height: 52,
@@ -236,17 +253,17 @@ export default function NewPartScreen() {
 							onChangeText={(title) => draft.set({ title })}
 							maxLength={120}
 							placeholder={t('Например: Стойка передняя KYB, левая')}
-							placeholderTextColor={raw.fillInk}
-							style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+							placeholderTextColor={c.fillInk}
+							style={{ fontSize: fs.lg, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 						/>
 					</View>
 					{draft.oemNumber ? (
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>{t('Номер детали: {0}', draft.oemNumber)}</Text>
+						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(500), color: c.muted }}>{t('Номер детали: {0}', draft.oemNumber)}</Text>
 					) : null}
 				</View>
 
 				<View style={{ gap: 8 }}>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Подходит к машинам')}</Text>
+					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.muted }}>{t('Подходит к машинам')}</Text>
 					<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 						{draft.fitments.map((fitment, index) => (
 							<View
@@ -265,8 +282,8 @@ export default function NewPartScreen() {
 								}}
 							>
 								{fitment.brand ? <BrandLogo brand={fitment.brand} size={28} /> : null}
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{fitment.label}</Text>
-								<Pressable
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>{fitment.label}</Text>
+								<Pressable accessibilityRole="button" accessibilityLabel={t('Убрать машину')}
 									onPress={() => draft.removeFitment(index)}
 									style={{ width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}
 								>
@@ -289,13 +306,13 @@ export default function NewPartScreen() {
 							}}
 						>
 							<PlusIcon size={16} color={c.brandStrong} />
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Машина')}</Text>
+							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Машина')}</Text>
 						</Pressable>
 					</View>
 				</View>
 
 				<View style={{ gap: 6 }}>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Категория')}</Text>
+					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.muted }}>{t('Категория')}</Text>
 					<Pressable
 						onPress={() => setPickCategory((v) => !v)}
 						style={{
@@ -310,10 +327,10 @@ export default function NewPartScreen() {
 							justifyContent: 'space-between',
 						}}
 					>
-						<Text style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: category ? c.ink : raw.fillInk }}>
+						<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(400), color: category ? c.ink : c.fillInk }}>
 							{category?.name ?? t('Выберите категорию')}
 						</Text>
-						<Text style={{ fontSize: 17.5, color: c.muted }}>{pickCategory ? '⌃' : '›'}</Text>
+						<Text style={{ fontSize: fs.lg, color: c.muted }}>{pickCategory ? '⌃' : '›'}</Text>
 					</Pressable>
 					{pickCategory ? (
 						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingTop: 4 }}>
@@ -337,7 +354,7 @@ export default function NewPartScreen() {
 											justifyContent: 'center',
 										}}
 									>
-										<Text style={{ fontSize: 15.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.inkSecondary }}>
+										<Text style={{ fontSize: fs.md, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.inkSecondary }}>
 											{cat.name}
 										</Text>
 									</Pressable>
@@ -348,7 +365,7 @@ export default function NewPartScreen() {
 				</View>
 
 				<View style={{ gap: 6 }}>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Состояние')}</Text>
+					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.muted }}>{t('Состояние')}</Text>
 					<Segmented
 						items={CONDITIONS.map((item) => item.label)}
 						value={CONDITIONS.findIndex((item) => item.value === draft.condition)}
@@ -361,7 +378,7 @@ export default function NewPartScreen() {
 
 				<View style={{ flexDirection: 'row', gap: 16 }}>
 					<View style={{ flex: 1, gap: 6 }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Цена')}</Text>
+						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.muted }}>{t('Цена')}</Text>
 						<View
 							style={{
 								height: 52,
@@ -380,10 +397,10 @@ export default function NewPartScreen() {
 								onChangeText={(text) => draft.set({ price: text.replace(/\D/g, '').slice(0, 9) })}
 								keyboardType="numeric"
 								placeholder="0"
-								placeholderTextColor={raw.fillInk}
-								style={{ flex: 1, minWidth: 0, fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink, padding: 0 }}
+								placeholderTextColor={c.fillInk}
+								style={{ flex: 1, minWidth: 0, fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink, padding: 0 }}
 							/>
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(400), color: c.muted }}>{t('сом')}</Text>
+							<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(400), color: c.muted }}>{t('сом')}</Text>
 						</View>
 					</View>
 				</View>
@@ -400,10 +417,11 @@ export default function NewPartScreen() {
 						justifyContent: 'space-between',
 					}}
 				>
-					<Text style={{ fontSize: 17, fontFamily: fontFamily(600), color: c.ink }}>{t('Есть в наличии')}</Text>
+					<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(600), color: c.ink }}>{t('Есть в наличии')}</Text>
 					<Toggle value={draft.quantity > 0} onChange={(on) => draft.set({ quantity: on ? 1 : 0 })} />
 				</View>
 			</ScrollView>
+			)}
 
 			<View
 				style={{
@@ -417,25 +435,73 @@ export default function NewPartScreen() {
 				}}
 			>
 				{errorText ? (
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{errorText}</Text>
 				) : null}
-				<Pressable
-					disabled={save.isPending || publish.isPending || uploading}
-					onPress={onPublish}
-					style={{
-						height: 56,
-						borderRadius: 14,
-						backgroundColor: c.brand,
-						alignItems: 'center',
-						justifyContent: 'center',
-						opacity: save.isPending || publish.isPending || uploading ? 0.4 : 1,
-					}}
-				>
-					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
-						{uploading ? t('Загружаем фото…') : published ? t('Сохранить') : t('Опубликовать')}
-					</Text>
-				</Pressable>
+				<View style={{ flexDirection: 'row', gap: 8 }}>
+					{/* Both actions in one place, under the thumb — not «Черновик» as grey text in the top corner. */}
+					{!published && !loading ? (
+						<Button
+							label={t('Черновик')}
+							variant="outline"
+							height={56}
+							style={{ flex: 1 }}
+							disabled={save.isPending || publish.isPending || uploading}
+							onPress={onDraft}
+						/>
+					) : null}
+					<Pressable
+						disabled={loading || save.isPending || publish.isPending || uploading}
+						onPress={onPublish}
+						style={{
+							flex: 1.6,
+							height: 56,
+							borderRadius: 14,
+							backgroundColor: c.brand,
+							alignItems: 'center',
+							justifyContent: 'center',
+							opacity: loading || save.isPending || publish.isPending || uploading ? 0.4 : 1,
+						}}
+					>
+						<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: fixed.white }}>
+							{uploading ? t('Загружаем фото…') : published ? t('Сохранить') : t('Опубликовать')}
+						</Text>
+					</Pressable>
+				</View>
 			</View>
+		</View>
+	)
+}
+
+/** Форма поста, пока он грузится: фото, название, машины, категория, цена, наличие. */
+function PartFormSkeleton() {
+	const label = (width: number) => <Skeleton width={width} height={13} />
+	return (
+		<View style={{ flex: 1, padding: 16, paddingTop: 8, gap: 14 }}>
+			<View style={{ flexDirection: 'row', gap: 8 }}>
+				{[0, 1, 2].map((i) => (
+					<Skeleton key={i} width={80} height={80} radius={12} />
+				))}
+			</View>
+			<View style={{ gap: 6 }}>
+				{label(80)}
+				<Skeleton height={52} radius={12} />
+			</View>
+			<View style={{ gap: 8 }}>
+				{label(150)}
+				<View style={{ flexDirection: 'row', gap: 8 }}>
+					<Skeleton width={130} height={44} radius={20} />
+					<Skeleton width={100} height={44} radius={20} />
+				</View>
+			</View>
+			<View style={{ gap: 6 }}>
+				{label(90)}
+				<Skeleton height={52} radius={12} />
+			</View>
+			<View style={{ gap: 6 }}>
+				{label(50)}
+				<Skeleton height={52} radius={12} />
+			</View>
+			<Skeleton height={56} radius={12} />
 		</View>
 	)
 }

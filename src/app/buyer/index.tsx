@@ -1,10 +1,13 @@
-import { useState, type ComponentType, type ReactNode } from 'react'
-import { Image, Pressable, ScrollView, Text, View } from 'react-native'
+import { useRef, useState, type ComponentType, type ReactNode } from 'react'
+import { Pressable, RefreshControl, ScrollView, Text, View, type ScrollViewInstance } from 'react-native'
+import { onNearEnd } from '@/lib/scroll'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
-import { router } from 'expo-router'
+import { router, useScrollToTop } from 'expo-router'
 import { resolveUrl } from '@/lib/api'
-import { QueryErrorBanner } from '@/components/ui'
+import { usePullRefresh } from '@/lib/use-pull-refresh'
+import { QueryErrorBanner, Skeleton, SkeletonRepeat } from '@/components/ui'
 import {
 	BoxOutlineIcon,
 	Caps,
@@ -20,7 +23,8 @@ import {
 } from '@/components/buyer-v23'
 import { TruckIcon, deliveryStatusText } from '@/components/video-v23'
 import { MarketVideos } from '@/components/market-videos'
-import { fontFamily, useColors } from '@/theme'
+import { RecentlyViewed } from '@/components/recently-viewed'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { minutesLeft, plural } from '@/lib/format'
 import { useMe } from '@/api/me'
 import { useCars } from '@/api/garage'
@@ -47,13 +51,20 @@ const PREVIEW = 3
 /** 03 Главная: the car, «Найти запчасть», «Нужен мастер?», «Видео с рынка», parcels on the way, «Мои запросы». */
 export default function BuyerHomeScreen() {
 	const c = useColors()
+	// Tapping the active tab again scrolls back to the top, as in every app.
+	const list = useRef<ScrollViewInstance>(null)
+	useScrollToTop(list)
 	const insets = useSafeAreaInsets()
 	const me = useMe()
 	const cars = useCars()
 	const requests = useMyRequests()
 	const services = useMyServiceRequests()
 	const [all, setAll] = useState(false)
-	const parcels = useDeliveryOrders('BUYER', useSignedIn()).data ?? []
+	const signedIn = useSignedIn()
+	const delivery = useDeliveryOrders('BUYER', signedIn)
+	const parcels = delivery.data ?? []
+	// refetch() runs even a disabled query — a guest has no parcels to ask for.
+	const pull = usePullRefresh(() => [cars.refetch(), requests.refetch(), services.refetch(), signedIn && delivery.refetch()])
 	// Parts requests and service requests in one list, newest first.
 	const items: Row[] = [
 		...flattenPages(requests.data).map((request) => ({ kind: 'part' as const, request })),
@@ -66,8 +77,8 @@ export default function BuyerHomeScreen() {
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
 			<View style={{ height: 60, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.muted }}>{name ? t('Салам, {0}', name) : t('Салам')}</Text>
-					<Text numberOfLines={1} style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.muted }}>{name ? t('Салам, {0}', name) : t('Салам')}</Text>
+					<Text numberOfLines={1} style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: c.ink }}>
 						{car ? `${car.title} · ${car.year}` : t('Машина не выбрана')}
 					</Text>
 				</View>
@@ -88,18 +99,26 @@ export default function BuyerHomeScreen() {
 						}}
 					>
 						<PlusThinIcon size={16} color={c.ink} />
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>{t('Добавить')}</Text>
+						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.ink }}>{t('Добавить')}</Text>
 					</Pressable>
 				)}
 			</View>
 
 			<ScrollView
+				ref={list}
 				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
 				showsVerticalScrollIndicator={false}
+				scrollEventThrottle={200}
+				onScroll={onNearEnd(() => {
+					if (!all) return
+					if (requests.hasNextPage && !requests.isFetchingNextPage) requests.fetchNextPage()
+					if (services.hasNextPage && !services.isFetchingNextPage) services.fetchNextPage()
+				})}
+				refreshControl={<RefreshControl refreshing={pull.refreshing} onRefresh={pull.onRefresh} tintColor={c.muted} />}
 			>
 				<Pressable onPress={() => router.push('/search-part')}>
 					<LinearGradient
-						colors={['#2D63F0', '#1D46BF']}
+						colors={fixed.brandGradient}
 						start={{ x: 0.25, y: 0 }}
 						end={{ x: 0.75, y: 1 }}
 						style={{
@@ -110,7 +129,7 @@ export default function BuyerHomeScreen() {
 							alignItems: 'center',
 							gap: 14,
 							overflow: 'hidden',
-							shadowColor: '#1D46BF',
+							shadowColor: fixed.brandShadow,
 							shadowOpacity: 0.32,
 							shadowOffset: { width: 0, height: 14 },
 							shadowRadius: 15,
@@ -127,11 +146,11 @@ export default function BuyerHomeScreen() {
 								justifyContent: 'center',
 							}}
 						>
-							<LoupeIcon size={24} color="#FFFFFF" strokeWidth={2.6} />
+							<LoupeIcon size={24} color={fixed.white} strokeWidth={2.6} />
 						</View>
 						<View style={{ flex: 1, gap: 3 }}>
-							<Text style={{ fontSize: 23, lineHeight: 29, fontFamily: fontFamily(800), letterSpacing: -0.4, color: '#FFFFFF' }}>{t('Найти запчасть')}</Text>
-							<Text style={{ fontSize: 15, lineHeight: 20, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>{t('Фото или голосом — продавцы ответят с ценой')}</Text>
+							<Text style={{ fontSize: fs.h3, lineHeight: 29, fontFamily: fontFamily(800), letterSpacing: -0.4, color: fixed.white }}>{t('Найти запчасть')}</Text>
+							<Text style={{ fontSize: fs.md, lineHeight: 20, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>{t('Фото или голосом — продавцы ответят с ценой')}</Text>
 						</View>
 					</LinearGradient>
 				</Pressable>
@@ -156,6 +175,8 @@ export default function BuyerHomeScreen() {
 
 				<MarketVideos />
 
+				<RecentlyViewed />
+
 				{parcels.map((order) => (
 					<ParcelRow key={order.id} order={order} />
 				))}
@@ -172,22 +193,23 @@ export default function BuyerHomeScreen() {
 					onRetry={() => requests.refetch()}
 					offlineText={t('Нет сети. Покажем запросы, когда появится')}
 				/>
-				{(all ? items : items.slice(0, PREVIEW)).map((item) =>
+				{!items.length && (requests.isLoading || services.isLoading) ? (
+						<>
+							<View style={{ height: 2 }} />
+							<Skeleton width={130} height={14} />
+							<SkeletonRepeat count={PREVIEW} gap={10}>
+								<RequestCardSkeleton />
+							</SkeletonRepeat>
+						</>
+					) : null}
+					{(all ? items : items.slice(0, PREVIEW)).map((item) =>
 					item.kind === 'part' ? (
 						<RequestRow key={`part-${item.request.id}`} request={item.request} />
 					) : (
 						<ServiceRow key={`service-${item.request.id}`} request={item.request} />
 					)
 				)}
-				{all && (requests.hasNextPage || services.hasNextPage) ? (
-					<Text
-						onPress={() => {
-							if (requests.hasNextPage) requests.fetchNextPage()
-							if (services.hasNextPage) services.fetchNextPage()
-						}}
-						style={{ textAlign: 'center', paddingVertical: 8, fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}
-					>{t('Показать ещё')}</Text>
-				) : null}
+				{requests.isFetchingNextPage || services.isFetchingNextPage ? <RequestCardSkeleton /> : null}
 
 
 			</ScrollView>
@@ -242,7 +264,7 @@ function ServiceTile({ label, icon, muted, onPress }: { label: string; icon: Rea
 			>
 				{icon}
 			</View>
-			<Text numberOfLines={1} style={{ fontSize: 14, lineHeight: 16, fontFamily: fontFamily(600), color: c.ink, textAlign: 'center' }}>
+			<Text numberOfLines={1} style={{ fontSize: fs.sm, lineHeight: 16, fontFamily: fontFamily(600), color: c.ink, textAlign: 'center' }}>
 				{label}
 			</Text>
 		</Pressable>
@@ -271,17 +293,17 @@ function RequestCard({
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				{tile}
 				<View style={{ flex: 1, gap: 3 }}>
-					<Text numberOfLines={1} style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>
 						{title}
 					</Text>
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
 						{live ? <LiveDot /> : null}
-						<Text numberOfLines={1} style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text numberOfLines={1} style={{ flex: 1, fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>
 							{status}
 						</Text>
 					</View>
 				</View>
-				<ChevronIcon size={20} color="#B8B4B4" />
+				<ChevronIcon size={20} color={c.chevron} />
 			</View>
 			{chip ? (
 				<View style={{ flexDirection: 'row' }}>
@@ -289,6 +311,19 @@ function RequestCard({
 				</View>
 			) : null}
 		</Pressable>
+	)
+}
+
+function RequestCardSkeleton() {
+	const c = useColors()
+	return (
+		<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+			<Skeleton width={52} height={52} radius={14} />
+			<View style={{ flex: 1, gap: 9 }}>
+				<Skeleton width="70%" height={17} />
+				<Skeleton width="45%" height={14} />
+			</View>
+		</View>
 	)
 }
 

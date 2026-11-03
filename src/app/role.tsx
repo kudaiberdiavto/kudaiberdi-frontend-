@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Image, Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Button } from '@/components/ui'
 import { BoxOutlineIcon, LoupeIcon, TickIcon, WrenchIcon } from '@/components/buyer-v23'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { useSetRole } from '@/api/me'
 import type { UserRole } from '@/api/types'
 import { t } from '@/i18n'
@@ -27,14 +28,14 @@ export default function RoleScreen() {
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
 			<LinearGradient
-				colors={['#2355E8', '#142F8C']}
+				colors={fixed.brandGradient}
 				start={{ x: 0, y: 0 }}
 				end={{ x: 1, y: 1 }}
 				style={{ paddingTop: insets.top + 20, paddingBottom: 26, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, gap: 6 }}
 			>
 				<Image source={require('../../assets/images/logo-mark.png')} style={{ width: 56, height: 56, marginBottom: 8 }} />
-				<Text style={{ fontSize: 28, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.3, color: '#FFFFFF' }}>{t('Кто вы?')}</Text>
-				<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>{t('Приложение подстроится под вас')}</Text>
+				<Text style={{ fontSize: fs.display, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.3, color: fixed.white }}>{t('Кто вы?')}</Text>
+				<Text style={{ fontSize: fs.base, lineHeight: 22, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.88)' }}>{t('Приложение подстроится под вас')}</Text>
 			</LinearGradient>
 
 			<ScrollView contentContainerStyle={{ padding: 20, gap: 12 }} showsVerticalScrollIndicator={false}>
@@ -53,7 +54,7 @@ export default function RoleScreen() {
 								flexDirection: 'row',
 								alignItems: 'center',
 								gap: 14,
-								shadowColor: '#142F8C',
+								shadowColor: fixed.brandShadow,
 								shadowOpacity: selected ? 0.14 : 0,
 								shadowOffset: { width: 0, height: 8 },
 								shadowRadius: 14,
@@ -61,11 +62,11 @@ export default function RoleScreen() {
 							}}
 						>
 							<View style={{ width: 54, height: 54, borderRadius: 16, backgroundColor: selected ? c.brand : c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-								<Icon size={24} color={selected ? '#FFFFFF' : c.brandStrong} />
+								<Icon size={24} color={selected ? fixed.white : c.brandStrong} />
 							</View>
 							<View style={{ flex: 1, gap: 3 }}>
-								<Text style={{ fontSize: 19, lineHeight: 25, fontFamily: fontFamily(800), color: c.ink }}>{title}</Text>
-								<Text style={{ fontSize: 15, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>{description}</Text>
+								<Text style={{ fontSize: fs.xl, lineHeight: 25, fontFamily: fontFamily(800), color: c.ink }}>{title}</Text>
+								<Text style={{ fontSize: fs.md, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>{description}</Text>
 							</View>
 							<View
 								style={{
@@ -79,13 +80,13 @@ export default function RoleScreen() {
 									justifyContent: 'center',
 								}}
 							>
-								{selected ? <TickIcon size={14} color="#FFFFFF" /> : null}
+								{selected ? <TickIcon size={14} color={fixed.white} /> : null}
 							</View>
 						</Pressable>
 					)
 				})}
 				{saveRole.error ? (
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{saveRole.error.message}</Text>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{saveRole.error.message}</Text>
 				) : null}
 			</ScrollView>
 

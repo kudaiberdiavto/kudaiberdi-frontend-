@@ -1,7 +1,7 @@
 import { forwardRef, type ComponentType, type Ref } from 'react'
-import { Pressable, Text, View, type PressableProps, type View as RNView } from 'react-native'
+import { Pressable, Text, View, type HostInstance, type PressableProps } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import type { IconProps } from '@/components/icons'
 
 /**
@@ -38,7 +38,7 @@ interface TabButtonProps extends PressableProps {
 
 export const TabButton = forwardRef(function TabButton(
 	{ isFocused, icon: Icon, label, badge, ...props }: TabButtonProps,
-	ref: Ref<RNView>,
+	ref: Ref<HostInstance>,
 ) {
 	const c = useColors()
 	const color = isFocused ? c.brandStrong : c.muted
@@ -73,13 +73,13 @@ export const TabButton = forwardRef(function TabButton(
 							justifyContent: 'center',
 						}}
 					>
-						<Text style={{ fontSize: 12, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{badge}</Text>
+						<Text style={{ fontSize: fs.xxs, fontFamily: fontFamily(700), color: fixed.white }}>{badge}</Text>
 					</View>
 				) : null}
 			</View>
 			<Text
 				style={{
-					fontSize: 13,
+					fontSize: fs.xs,
 					fontFamily: fontFamily(isFocused ? 700 : 600),
 					color,
 				}}

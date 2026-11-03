@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CheckIcon, CloseIcon, SearchIcon } from '@/components/icons'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { t } from '@/i18n'
 
 export interface SelectOption<K extends string | number> {
@@ -29,7 +29,7 @@ export function SelectField({
 	const c = useColors()
 	return (
 		<View style={{ gap: 6, opacity: disabled ? 0.5 : 1 }}>
-			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{label.toUpperCase()}</Text>
+			<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{label}</Text>
 			<Pressable
 				onPress={onPress}
 				disabled={disabled}
@@ -45,10 +45,10 @@ export function SelectField({
 					gap: 10,
 				}}
 			>
-				<Text numberOfLines={1} style={{ flex: 1, fontSize: 18, fontFamily: fontFamily(value ? 600 : 400), color: value ? c.ink : raw.fillInk }}>
+				<Text numberOfLines={1} style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(value ? 600 : 400), color: value ? c.ink : c.fillInk }}>
 					{value || placeholder}
 				</Text>
-				<Text style={{ fontSize: 18, color: c.muted }}>▾</Text>
+				<Text style={{ fontSize: fs.lg, color: c.muted }}>▾</Text>
 			</Pressable>
 		</View>
 	)
@@ -84,8 +84,8 @@ export function SelectSheet<K extends string | number>({
 		<Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
 			<View style={{ flex: 1, backgroundColor: c.surface, paddingBottom: insets.bottom }}>
 				<View style={{ height: 60, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-					<Text style={{ flex: 1, fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{title}</Text>
-					<Pressable onPress={onClose} hitSlop={10} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}>
+					<Text style={{ flex: 1, fontSize: fs.h3, fontFamily: fontFamily(800), color: c.ink }}>{title}</Text>
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Закрыть')} onPress={onClose} hitSlop={10} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center' }}>
 						<CloseIcon size={18} color={c.ink} />
 					</Pressable>
 				</View>
@@ -111,8 +111,8 @@ export function SelectSheet<K extends string | number>({
 							onChangeText={setQ}
 							autoFocus
 							placeholder={searchPlaceholder}
-							placeholderTextColor={raw.fillInk}
-							style={{ flex: 1, fontSize: 17, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+							placeholderTextColor={c.fillInk}
+							style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 						/>
 					</View>
 				) : null}
@@ -132,15 +132,15 @@ export function SelectSheet<K extends string | number>({
 								style={{ minHeight: 58, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: c.hairline, flexDirection: 'row', alignItems: 'center', gap: 12 }}
 							>
 								<View style={{ flex: 1, gap: 2 }}>
-									<Text style={{ fontSize: 18, fontFamily: fontFamily(active ? 700 : 500), color: active ? c.brandStrong : c.ink }}>{item.label}</Text>
-									{item.sub ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>{item.sub}</Text> : null}
+									<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(active ? 700 : 500), color: active ? c.brandStrong : c.ink }}>{item.label}</Text>
+									{item.sub ? <Text style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>{item.sub}</Text> : null}
 								</View>
 								{active ? <CheckIcon size={20} color={c.brand} strokeWidth={3} /> : null}
 							</Pressable>
 						)
 					}}
 					ListEmptyComponent={
-						<Text style={{ paddingTop: 24, fontSize: 17, fontFamily: fontFamily(500), color: c.muted, textAlign: 'center' }}>{t('Ничего не нашли')}</Text>
+						<Text style={{ paddingTop: 24, fontSize: fs.lg, fontFamily: fontFamily(500), color: c.muted, textAlign: 'center' }}>{t('Ничего не нашли')}</Text>
 					}
 				/>
 			</View>

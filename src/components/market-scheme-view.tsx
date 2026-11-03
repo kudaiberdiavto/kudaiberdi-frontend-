@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
-import { Pressable, ScrollView, Text, View, type GestureResponderEvent } from 'react-native'
+import { Pressable, ScrollView, Text, View, type GestureResponderEvent, type HostInstance, type ScrollViewInstance } from 'react-native'
 import Svg, { G, Polygon, Polyline, Rect, Text as SvgText } from 'react-native-svg'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fontFamily, fs, raw, useColors } from '@/theme'
 import { useMarketScheme } from '@/api/market'
 
 interface Props {
@@ -49,9 +49,9 @@ export function MarketSchemeView({ width, height, selectedRowIds = [], onRowPres
 
 	// One press handler + hit test instead of onPress on every SVG shape (react-native-web
 	// leaks responder props onto <rect>). A drag cancels the press, so panning still works.
-	const canvas = useRef<View>(null)
-	const scrollV = useRef<ScrollView>(null)
-	const scrollH = useRef<ScrollView>(null)
+	const canvas = useRef<HostInstance>(null)
+	const scrollV = useRef<ScrollViewInstance>(null)
+	const scrollH = useRef<ScrollViewInstance>(null)
 	// contentOffset is ignored by react-native-web — scroll once the canvas is laid out.
 	const scrollToOffset = () => {
 		scrollV.current?.scrollTo({ y: offset.y, animated: false })
@@ -158,13 +158,13 @@ export function MarketSchemeView({ width, height, selectedRowIds = [], onRowPres
 						height: 28,
 						paddingHorizontal: 10,
 						borderRadius: 14,
-						backgroundColor: 'rgba(255,255,255,0.94)',
+						backgroundColor: c.floating,
 						justifyContent: 'center',
 					}}
 				>
 					<Text
 						style={{
-							fontSize: 13,
+							fontSize: fs.xs,
 							fontFamily: fontFamily(700),
 							color: c.brandStrong,
 						}}

@@ -1,21 +1,15 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { askForPushAt } from '@/lib/push'
+import { useConfirmLeave } from '@/lib/use-confirm-leave'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { QueryErrorBanner } from '@/components/ui'
+import { QueryErrorBanner, ScreenHeader } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
-import {
-	BigButton,
-	Caps,
-	CameraV23Icon,
-	CrossIcon,
-	MicV23Icon,
-	PaperPlaneIcon,
-	PlusThinIcon,
-	TopBar,
-} from '@/components/buyer-v23'
+import { BigButton, Caps, CameraV23Icon, CrossIcon, MicV23Icon, PaperPlaneIcon, PlusThinIcon } from '@/components/buyer-v23'
 import { VoicePlayer, useVoiceNote, voiceClock } from '@/components/voice'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { plural } from '@/lib/format'
 import { useCars } from '@/api/garage'
 import { usePhotoUploads } from '@/api/media'
@@ -64,6 +58,7 @@ export default function SearchPartScreen() {
 	// Something to go on: text, a photo or a voice note — no minimum length.
 	const hasPart = typed.length > 0 || uploads.mediaIds.length > 0 || Boolean(voiceId)
 	const busy = uploads.uploading || voice.uploading || voice.recording
+	const leave = useConfirmLeave(hasPart || busy)
 
 	const send = () =>
 		hasCar &&
@@ -74,7 +69,12 @@ export default function SearchPartScreen() {
 				mediaIds: uploads.mediaIds,
 				voiceMediaId: voiceId,
 			},
-			{ onSuccess: (request) => router.replace({ pathname: '/request', params: { id: String(request.id) } }) }
+			{
+				onSuccess: (request) => {
+					leave(() => router.replace({ pathname: '/request', params: { id: String(request.id) } }))
+					askForPushAt('request')
+				},
+			}
 		)
 
 	const photo = uploads.photos[0]
@@ -88,7 +88,7 @@ export default function SearchPartScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar title={t('Найти запчасть')} big onClose={() => router.back()} />
+			<ScreenHeader title={t('Найти запчасть')} big onClose={() => router.back()} />
 
 			<ScrollView
 				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
@@ -119,7 +119,7 @@ export default function SearchPartScreen() {
 								}}
 							>
 								<BrandLogo brand={car.brand} size={28} />
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: active ? c.brandStrong : c.ink }}>{car.label}</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: active ? c.brandStrong : c.ink }}>{car.label}</Text>
 							</Pressable>
 						)
 					})}
@@ -140,7 +140,7 @@ export default function SearchPartScreen() {
 							}}
 						>
 							<BrandLogo brand={clientCar.brand} size={28} />
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: useClient ? c.brandStrong : c.ink }}>
+							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: useClient ? c.brandStrong : c.ink }}>
 								{clientCar.model.label} · {clientCar.year}
 							</Text>
 						</Pressable>
@@ -153,7 +153,7 @@ export default function SearchPartScreen() {
 							borderRadius: 20,
 							borderWidth: 2,
 							borderStyle: hasCar ? 'dashed' : 'solid',
-							borderColor: hasCar ? '#B8C3D3' : c.brand,
+							borderColor: hasCar ? c.dashedBrand : c.brand,
 							backgroundColor: hasCar ? 'transparent' : c.brandTint,
 							flexDirection: 'row',
 							alignItems: 'center',
@@ -161,7 +161,7 @@ export default function SearchPartScreen() {
 						}}
 					>
 						<PlusThinIcon size={14} color={c.brandStrong} strokeWidth={2.6} />
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{addCarLabel}</Text>
+						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>{addCarLabel}</Text>
 					</Pressable>
 				</ScrollView>
 
@@ -169,14 +169,14 @@ export default function SearchPartScreen() {
 				<Caps>{t('Что нужно')}</Caps>
 				<View style={{ flexDirection: 'row', gap: 10 }}>
 					{photo ? (
-						<View style={{ flex: 1, height: 132, borderRadius: 18, overflow: 'hidden', backgroundColor: '#E1E6ED' }}>
+						<View style={{ flex: 1, height: 132, borderRadius: 18, overflow: 'hidden', backgroundColor: c.placeholder }}>
 							<Image source={{ uri: photo.uri }} style={{ width: '100%', height: '100%' }} />
 							{photo.status === 'uploading' ? (
 								<View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.4)' }}>
 									<ActivityIndicator color={c.brand} />
 								</View>
 							) : null}
-							<Pressable
+							<Pressable accessibilityRole="button" accessibilityLabel={t('Удалить фото')}
 								onPress={() => uploads.remove(photo.key)}
 								hitSlop={6}
 								style={{
@@ -191,11 +191,11 @@ export default function SearchPartScreen() {
 									justifyContent: 'center',
 								}}
 							>
-								<CrossIcon size={14} color="#FFFFFF" strokeWidth={2.6} />
+								<CrossIcon size={14} color={fixed.white} strokeWidth={2.6} />
 							</Pressable>
 							{uploads.photos.length > 1 ? (
 								<View style={{ position: 'absolute', top: 8, left: 8, height: 24, paddingHorizontal: 8, borderRadius: 12, backgroundColor: 'rgba(32,31,29,0.6)', justifyContent: 'center' }}>
-									<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('{0} фото', uploads.photos.length)}</Text>
+									<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), color: fixed.white }}>{t('{0} фото', uploads.photos.length)}</Text>
 								</View>
 							) : null}
 							{uploads.canAdd ? (
@@ -208,14 +208,14 @@ export default function SearchPartScreen() {
 										height: 26,
 										paddingHorizontal: 10,
 										borderRadius: 13,
-										backgroundColor: 'rgba(255,255,255,0.94)',
+										backgroundColor: c.floating,
 										flexDirection: 'row',
 										alignItems: 'center',
 										gap: 4,
 									}}
 								>
 									<PlusThinIcon size={12} color={c.ink} strokeWidth={2.8} />
-									<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: c.ink }}>{t('Ещё фото')}</Text>
+									<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), color: c.ink }}>{t('Ещё фото')}</Text>
 								</Pressable>
 							) : null}
 						</View>
@@ -224,15 +224,15 @@ export default function SearchPartScreen() {
 							<View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
 								<CameraV23Icon size={26} color={c.brandStrong} />
 							</View>
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>{t('Сфотать деталь')}</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.ink }}>{t('Сфотать деталь')}</Text>
 						</DashedTile>
 					)}
 
 					{voice.result ? (
 						<View style={{ flex: 1, height: 132, borderRadius: 18, backgroundColor: c.card, padding: 12, justifyContent: 'space-between' }}>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Голосом')}</Text>
+							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Голосом')}</Text>
 							<VoicePlayer voice={voice.result.voice} height={40} />
-							<Text onPress={voice.reset} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.muted }}>{t('Перезаписать')}</Text>
+							<Text onPress={voice.reset} style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: c.muted }}>{t('Перезаписать')}</Text>
 						</View>
 					) : (
 						<DashedTile onPress={voice.recording ? voice.stop : voice.start} disabled={voice.uploading}>
@@ -251,15 +251,15 @@ export default function SearchPartScreen() {
 									elevation: 6,
 								}}
 							>
-								{voice.uploading ? <ActivityIndicator color="#FFFFFF" /> : <MicV23Icon size={26} color="#FFFFFF" />}
+								{voice.uploading ? <ActivityIndicator color={fixed.white} /> : <MicV23Icon size={26} color={fixed.white} />}
 							</View>
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.ink }}>
 								{voice.uploading ? t('Слушаем…') : voice.recording ? t('Готово · {0}', voiceClock(voice.seconds)) : t('Сказать голосом')}
 							</Text>
 						</DashedTile>
 					)}
 				</View>
-				{voice.error ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.danger }}>{voice.error}</Text> : null}
+				{voice.error ? <Text style={{ fontSize: fs.sm, fontFamily: fontFamily(500), color: c.danger }}>{voice.error}</Text> : null}
 
 				<TextInput
 					value={text}
@@ -279,7 +279,7 @@ export default function SearchPartScreen() {
 						paddingHorizontal: 14,
 						paddingTop: 14,
 						paddingBottom: 14,
-						fontSize: 17.5,
+						fontSize: fs.lg,
 						fontFamily: fontFamily(400),
 						color: c.ink,
 					}}
@@ -288,13 +288,13 @@ export default function SearchPartScreen() {
 				{brand ? (
 					<View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start', borderRadius: 14, backgroundColor: c.brandTint, paddingVertical: 12, paddingHorizontal: 14 }}>
 						<PaperPlaneIcon size={18} color={c.brandStrong} strokeWidth={2.2} />
-						<Text style={{ flex: 1, fontSize: 15.5, lineHeight: 21.5, fontFamily: fontFamily(400), color: '#1D2B53' }}>{t('Спросим')}{' '}<Text style={{ fontFamily: fontFamily(700) }}>{t('всех продавцов {0}', brand)}</Text>
+						<Text style={{ flex: 1, fontSize: fs.md, lineHeight: 21.5, fontFamily: fontFamily(400), color: c.brandInk }}>{t('Спросим')}{' '}<Text style={{ fontFamily: fontFamily(700) }}>{t('всех продавцов {0}', brand)}</Text>
 							{recipients != null ? ` — ${recipients} ${plural(recipients, [t('магазин'), t('магазина'), t('магазинов')])}` : ''}{t('. Обычно отвечают за 5–10 минут.')}
 						</Text>
 					</View>
 				) : null}
 
-				{error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
+				{error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
 			</ScrollView>
 
 			<View
@@ -310,7 +310,7 @@ export default function SearchPartScreen() {
 				<BigButton
 					label={!hasCar ? t('Сначала выберите машину') : !hasPart ? t('Опишите, что нужно') : t('Отправить запрос')}
 					height={58}
-					icon={hasCar && hasPart ? <PaperPlaneIcon size={20} color="#FFFFFF" /> : undefined}
+					icon={hasCar && hasPart ? <PaperPlaneIcon size={20} color={fixed.white} /> : undefined}
 					disabled={hasCar && (!hasPart || busy)}
 					loading={create.isPending}
 					onPress={hasCar ? send : pickCar}
@@ -344,7 +344,7 @@ function DashedTile({
 				backgroundColor: c.card,
 				borderWidth: 2,
 				borderStyle: 'dashed',
-				borderColor: '#B8C3D3',
+				borderColor: c.dashedBrand,
 				alignItems: 'center',
 				justifyContent: 'center',
 				gap: 10,

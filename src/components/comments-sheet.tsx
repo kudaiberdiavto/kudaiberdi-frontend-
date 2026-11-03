@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native'
+import { Alert, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native'
 import { router } from 'expo-router'
+import { onNearEnd } from '@/lib/scroll'
 import { PaperPlaneIcon } from '@/components/buyer-v23'
 import { ModalSheet } from '@/components/master-v23'
 import { ComplaintSheet, type ComplaintTarget } from '@/components/complaint-sheet'
-import { fontFamily, useColors } from '@/theme'
+import { MoreButton, Skeleton, SkeletonRepeat, undoToast } from '@/components/ui'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { formatAgo } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
 import { useAddPartComment, useDeletePartComment, usePartComments, useSignedIn } from '@/api/catalog'
@@ -38,10 +40,21 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 		add.mutate(value, { onSuccess: () => setText('') })
 	}
 
+	// Hidden at once with «Вернуть» for 4 s; the server call waits for it.
+	const [hidden, setHidden] = useState<number[]>([])
+	const removeComment = (id: number) => {
+		setHidden((list) => [...list, id])
+		undoToast({
+			text: t('Комментарий удалён'),
+			restore: () => setHidden((list) => list.filter((x) => x !== id)),
+			commit: () => remove.mutate(id, { onError: () => setHidden((list) => list.filter((x) => x !== id)) }),
+		})
+	}
+
 	const actions = (comment: PartComment) =>
-		Alert.alert('Комментарий', comment.text, [
+		Alert.alert(t('Комментарий'), comment.text, [
 			...(comment.canDelete
-				? [{ text: t('Удалить'), style: 'destructive' as const, onPress: () => remove.mutate(comment.id) }]
+				? [{ text: t('Удалить'), style: 'destructive' as const, onPress: () => removeComment(comment.id) }]
 				: []),
 			...(!comment.mine && signedIn ? [{ text: t('Пожаловаться'), onPress: () => setComplaint({ type: 'PART_COMMENT', targetId: comment.id }) }] : []),
 			{ text: t('Отмена'), style: 'cancel' as const },
@@ -49,32 +62,49 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 
 	return (
 		<ModalSheet onClose={onClose}>
-			<Text numberOfLines={1} style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>
+			<Text numberOfLines={1} style={{ fontSize: fs.xxl, fontFamily: fontFamily(800), color: c.ink }}>
 				{t('Комментарии')}{total ? ` · ${total}` : ''}
 			</Text>
 
-			<ScrollView style={{ maxHeight: height * 0.45 }} contentContainerStyle={{ gap: 14, paddingVertical: 4 }} keyboardShouldPersistTaps="handled">
-				{comments.isPending ? <ActivityIndicator color={c.muted} /> : null}
-				{items.map((comment) => (
+			<ScrollView
+				style={{ maxHeight: height * 0.45 }}
+				contentContainerStyle={{ gap: 14, paddingVertical: 4 }}
+				keyboardShouldPersistTaps="handled"
+				scrollEventThrottle={200}
+				onScroll={onNearEnd(() => comments.hasNextPage && !comments.isFetchingNextPage && comments.fetchNextPage(), 200)}
+			>
+				{comments.isLoading ? (
+					<SkeletonRepeat count={4} gap={14}>
+						<View style={{ gap: 7 }}>
+							<Skeleton width={130} height={15} />
+							<Skeleton width="85%" height={15} />
+						</View>
+					</SkeletonRepeat>
+				) : null}
+				{items.filter((comment) => !hidden.includes(comment.id)).map((comment) => (
 					<Pressable key={comment.id} onLongPress={() => actions(comment)} delayLongPress={400} style={{ gap: 3 }}>
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>{comment.mine ? t('Вы') : (comment.authorName ?? t('Покупатель'))}</Text>
+							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.ink }}>{comment.mine ? t('Вы') : (comment.authorName ?? t('Покупатель'))}</Text>
 							{comment.fromSeller ? (
 								<View style={{ height: 20, paddingHorizontal: 6, borderRadius: 6, backgroundColor: c.brandTint, justifyContent: 'center' }}>
-									<Text style={{ fontSize: 12.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Продавец')}</Text>
+									<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Продавец')}</Text>
 								</View>
 							) : null}
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{formatAgo(comment.createdAt, { short: true })}</Text>
+							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>{formatAgo(comment.createdAt, { short: true })}</Text>
+							{comment.canDelete || (!comment.mine && signedIn) ? (
+								<>
+									<View style={{ flex: 1 }} />
+									<MoreButton onPress={() => actions(comment)} />
+								</>
+							) : null}
 						</View>
-						<Text style={{ fontSize: 16.5, lineHeight: 22, fontFamily: fontFamily(400), color: c.ink }}>{comment.text}</Text>
+						<Text style={{ fontSize: fs.base, lineHeight: 22, fontFamily: fontFamily(400), color: c.ink }}>{comment.text}</Text>
 					</Pressable>
 				))}
-				{comments.hasNextPage ? (
-					<Text onPress={() => comments.fetchNextPage()} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong, textAlign: 'center' }}>{t('Показать ещё')}</Text>
-				) : null}
+				{comments.isFetchingNextPage ? <Skeleton width="70%" height={15} /> : null}
 			</ScrollView>
 
-			{add.error ? <Text style={{ fontSize: 15, fontFamily: fontFamily(500), color: c.danger }}>{add.error.message}</Text> : null}
+			{add.error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{add.error.message}</Text> : null}
 			<View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10 }}>
 				<TextInput
 					value={text}
@@ -94,12 +124,12 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 						paddingHorizontal: 18,
 						paddingTop: 16,
 						paddingBottom: 16,
-						fontSize: 17.5,
+						fontSize: fs.lg,
 						fontFamily: fontFamily(400),
 						color: c.ink,
 					}}
 				/>
-				<Pressable
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Отправить')}
 					onPress={send}
 					disabled={signedIn && (!value || add.isPending)}
 					hitSlop={6}
@@ -107,13 +137,13 @@ export function CommentsSheet({ partId, onClose }: { partId: number; onClose: ()
 						width: 56,
 						height: 56,
 						borderRadius: 28,
-						backgroundColor: c.success,
+						backgroundColor: c.brand,
 						alignItems: 'center',
 						justifyContent: 'center',
 						opacity: !signedIn || value ? 1 : 0.5,
 					}}
 				>
-					<PaperPlaneIcon size={24} color="#FFFFFF" />
+					<PaperPlaneIcon size={24} color={fixed.white} />
 				</Pressable>
 			</View>
 			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />

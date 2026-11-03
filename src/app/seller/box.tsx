@@ -1,14 +1,16 @@
-import { useState } from 'react'
-import { ActivityIndicator, FlatList, Image, KeyboardAvoidingView, Linking, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from 'react-native'
-import { router } from 'expo-router'
+import { useRef, useState } from 'react'
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Linking, Platform, Pressable, Text, TextInput, View, useWindowDimensions, type TextInputInstance } from 'react-native'
+import { Image } from '@/components/ui/image'
+import { router, useScrollToTop } from 'expo-router'
+import { usePullRefresh } from '@/lib/use-pull-refresh'
 import { API_URL } from '@/lib/env'
 import Svg, { Path } from 'react-native-svg'
-import { BottomSheet, Button, EmptyState, LanguageSwitch, PhotoPlaceholder, QueryErrorBanner, Screen, SettingsRow, Toggle } from '@/components/ui'
+import { BottomSheet, Button, EmptyState, LanguageSwitch, PhotoPlaceholder, PlacePlate, QueryErrorBanner, Screen, SettingsRow, Skeleton, toast, Toggle } from '@/components/ui'
 import { PlusIcon, TagIcon } from '@/components/icons'
 import { Label } from '@/components/seller-v23'
 import { BrandLogo } from '@/components/ui/brand'
 import { AccountStatusBanner } from '@/components/account-status-banner'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatDay } from '@/lib/format'
 import { COUNTRY_CODE, formatE164, formatLocalPhone, isValidLocalPhone, toE164 } from '@/lib/phone'
@@ -31,11 +33,15 @@ import { t } from '@/i18n'
  */
 export default function SellerBoxScreen() {
 	const c = useColors()
+	// Tapping the active tab again scrolls back to the top, as in every app.
+	const list = useRef<FlatList<MyPartItem>>(null)
+	useScrollToTop(list)
 	const { width } = useWindowDimensions()
 	const shop = useMyShop()
 	const summary = useMyPartsSummary()
 	const parts = useMyParts('ALL')
 	const items = flattenPages(parts.data)
+	const pull = usePullRefresh(() => [shop.refetch(), parts.refetch(), summary.refetch()])
 	const setAvatar = useSetShopAvatar()
 	const avatarUpload = usePhotoUploads('AVATAR', 1, (photo) => setAvatar.mutateAsync(photo.id))
 	const [editing, setEditing] = useState(false)
@@ -62,41 +68,45 @@ export default function SellerBoxScreen() {
 			/>
 
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+				{shop.isLoading ? (
+					<Skeleton width={80} height={80} radius={40} />
+				) : (
 				<Pressable onPress={() => avatarUpload.pick('library')} disabled={avatarBusy}>
-					<View
-						style={{
-							width: 80,
-							height: 80,
-							borderRadius: 40,
-							overflow: 'hidden',
-							backgroundColor: c.brandTint,
-							alignItems: 'center',
-							justifyContent: 'center',
-						}}
-					>
-						{data?.avatarUrl ? (
-							<Image source={{ uri: resolveUrl(data.avatarUrl) }} style={{ width: '100%', height: '100%' }} />
-						) : (
-							<Text style={{ fontSize: 30, fontFamily: fontFamily(700), color: c.brandStrong }}>{data?.name.charAt(0).toUpperCase() ?? ' '}</Text>
-						)}
-						{avatarBusy ? (
-							<View
-								style={{
-									position: 'absolute',
-									left: 0,
-									top: 0,
-									right: 0,
-									bottom: 0,
-									backgroundColor: 'rgba(0,0,0,0.35)',
-									alignItems: 'center',
-									justifyContent: 'center',
-								}}
-							>
-								<ActivityIndicator color="#FFFFFF" />
-							</View>
-						) : null}
-					</View>
-</Pressable>
+						<View
+							style={{
+								width: 80,
+								height: 80,
+								borderRadius: 40,
+								overflow: 'hidden',
+								backgroundColor: c.brandTint,
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
+							{data?.avatarUrl ? (
+								<Image source={{ uri: resolveUrl(data.avatarUrl) }} style={{ width: '100%', height: '100%' }} />
+							) : (
+								<Text style={{ fontSize: fs.hero, fontFamily: fontFamily(700), color: c.brandStrong }}>{data?.name.charAt(0).toUpperCase() ?? ' '}</Text>
+							)}
+							{avatarBusy ? (
+								<View
+									style={{
+										position: 'absolute',
+										left: 0,
+										top: 0,
+										right: 0,
+										bottom: 0,
+										backgroundColor: 'rgba(0,0,0,0.35)',
+										alignItems: 'center',
+										justifyContent: 'center',
+									}}
+								>
+									<ActivityIndicator color={fixed.white} />
+								</View>
+							) : null}
+						</View>
+	</Pressable>
+				)}
 				<View style={{ flex: 1, flexDirection: 'row' }}>
 					<Counter value={summary.data ? String(summary.data.all) : '—'} label={t('товаров')} />
 					<Counter value={data?.reviewsCount ? data.rating.toFixed(1) : '—'} label={t('рейтинг')} star={Boolean(data?.reviewsCount)} />
@@ -104,13 +114,21 @@ export default function SellerBoxScreen() {
 				</View>
 			</View>
 
+			{shop.isLoading ? (
+				<View style={{ gap: 8 }}>
+					<Skeleton width="65%" height={16} />
+					<Skeleton width="40%" height={14} />
+				</View>
+			) : null}
 			<View style={{ gap: 2 }}>
-				{place ? (
-					<Text numberOfLines={2} style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: c.ink }}>
+				{data?.location ? (
+					<PlacePlate row={data.location.rowCode} box={data.location.number} style={{ marginBottom: 4 }} />
+				) : place ? (
+					<Text numberOfLines={2} style={{ fontSize: fs.md, lineHeight: 21, fontFamily: fontFamily(500), color: c.ink }}>
 						{place}
 					</Text>
 				) : null}
-				{data?.phone ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>{formatE164(data.phone)}</Text> : null}
+				{data?.phone ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>{formatE164(data.phone)}</Text> : null}
 			</View>
 
 			{data?.brands.length ? (
@@ -121,7 +139,7 @@ export default function SellerBoxScreen() {
 							style={{ height: 30, paddingLeft: 4, paddingRight: 10, borderRadius: 15, backgroundColor: c.card, flexDirection: 'row', alignItems: 'center', gap: 6 }}
 						>
 							<BrandLogo brand={brand} size={22} />
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.ink }}>{brand.name}</Text>
+							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.ink }}>{brand.name}</Text>
 						</View>
 					))}
 				</Pressable>
@@ -137,10 +155,16 @@ export default function SellerBoxScreen() {
 	return (
 		<Screen padding={0}>
 			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-				<Text numberOfLines={1} style={{ flex: 1, fontSize: 22, fontFamily: fontFamily(700), letterSpacing: -0.22, color: c.ink }}>
-					{data?.name ?? t('Мой контейнер')}
-				</Text>
-				<Pressable onPress={() => setMenu(true)} hitSlop={10} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
+				{shop.isLoading ? (
+					<View style={{ flex: 1 }}>
+						<Skeleton width={180} height={22} />
+					</View>
+				) : (
+					<Text numberOfLines={1} style={{ flex: 1, fontSize: fs.h3, fontFamily: fontFamily(700), letterSpacing: -0.22, color: c.ink }}>
+						{data?.name ?? t('Мой контейнер')}
+					</Text>
+				)}
+				<Pressable accessibilityRole="button" accessibilityLabel={t('Меню')} onPress={() => setMenu(true)} hitSlop={10} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
 					<Svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke={c.ink} strokeWidth={2.2} strokeLinecap="round">
 						<Path d="M4 7h16M4 12h16M4 17h16" />
 					</Svg>
@@ -148,6 +172,7 @@ export default function SellerBoxScreen() {
 			</View>
 
 			<FlatList
+				ref={list}
 				data={items}
 				keyExtractor={(item) => String(item.id)}
 				numColumns={3}
@@ -156,15 +181,15 @@ export default function SellerBoxScreen() {
 				showsVerticalScrollIndicator={false}
 				ListHeaderComponent={header}
 				onEndReached={() => parts.hasNextPage && !parts.isFetchingNextPage && parts.fetchNextPage()}
-				onRefresh={() => {
-					shop.refetch()
-					parts.refetch()
-					summary.refetch()
-				}}
-				refreshing={false}
+				onRefresh={pull.onRefresh}
+				refreshing={pull.refreshing}
 				ListEmptyComponent={
-					parts.isPending ? (
-						<ActivityIndicator color={c.muted} style={{ paddingTop: 40 }} />
+					parts.isLoading ? (
+						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
+							{Array.from({ length: 9 }, (_, i) => (
+								<Skeleton key={i} width={tile} height={tile} radius={0} />
+							))}
+						</View>
 					) : (
 						<View style={{ paddingTop: 40 }}>
 							<EmptyState title={t('Публикаций нет')} icon={TagIcon} />
@@ -184,11 +209,11 @@ function Counter({ value, label, star }: { value: string; label: string; star?: 
 	const c = useColors()
 	return (
 		<View style={{ flex: 1, alignItems: 'center', gap: 2 }}>
-			<Text numberOfLines={1} style={{ fontSize: 19, fontFamily: fontFamily(700), color: c.ink }}>
-				{star ? <Text style={{ color: '#F5A623' }}>★ </Text> : null}
+			<Text numberOfLines={1} style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: c.ink }}>
+				{star ? <Text style={{ color: fixed.star }}>★ </Text> : null}
 				{value}
 			</Text>
-			<Text numberOfLines={1} style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+			<Text numberOfLines={1} style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>
 				{label}
 			</Text>
 		</View>
@@ -212,7 +237,7 @@ function PostTile({ part, size }: { part: MyPartItem; size: number }) {
 			)}
 			{part.videoPosterUrl ? (
 				<View style={{ position: 'absolute', right: 6, top: 6 }}>
-					<Svg width={18} height={18} viewBox="0 0 24 24" fill="#FFFFFF">
+					<Svg width={18} height={18} viewBox="0 0 24 24" fill={fixed.white}>
 						<Path d="M8 5.5v13l10-6.5z" />
 					</Svg>
 				</View>
@@ -230,7 +255,7 @@ function PostTile({ part, size }: { part: MyPartItem; size: number }) {
 						justifyContent: 'center',
 					}}
 				>
-					<Text style={{ fontSize: 12.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Черновик')}</Text>
+					<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), color: fixed.white }}>{t('Черновик')}</Text>
 				</View>
 			) : null}
 		</Pressable>
@@ -261,7 +286,7 @@ function MenuSheet({ onClose }: { onClose: () => void }) {
 	}
 
 	return (
-		<BottomSheet onClose={onClose} maxHeight={0.85} header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{t('Настройки')}</Text>}>
+		<BottomSheet onClose={onClose} maxHeight={0.85} header={<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(800), color: c.ink }}>{t('Настройки')}</Text>}>
 			<QueryErrorBanner error={stats.error} />
 			<Label>{t('За 30 дней')}</Label>
 			<View style={{ flexDirection: 'row', gap: 8 }}>
@@ -271,8 +296,8 @@ function MenuSheet({ onClose }: { onClose: () => void }) {
 			</View>
 			{/* Only while paused — the rule itself is not explained up front. */}
 			{pausedUntil ? (
-				<View style={{ borderRadius: 14, backgroundColor: '#FFF7E6', paddingVertical: 10, paddingHorizontal: 14 }}>
-					<Text style={{ fontSize: 15, lineHeight: 21, fontFamily: fontFamily(400), color: '#7A4B00' }}>
+				<View style={{ borderRadius: 14, backgroundColor: c.warningTint, paddingVertical: 10, paddingHorizontal: 14 }}>
+					<Text style={{ fontSize: fs.md, lineHeight: 21, fontFamily: fontFamily(400), color: c.warningInk }}>
 						{t('Запросы не приходят до {0}: 3 покупателя отметили «сказали есть, а не было».', formatDay(pausedUntil))}
 					</Text>
 				</View>
@@ -302,8 +327,8 @@ function Stat({ value, label, color }: { value: string; label: string; color?: s
 	const c = useColors()
 	return (
 		<View style={{ flex: 1, borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 2 }}>
-			<Text style={{ fontSize: 24, lineHeight: 31.2, fontFamily: fontFamily(800), letterSpacing: -0.24, color: color ?? c.ink }}>{value}</Text>
-			<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(500), color: c.muted }}>{label}</Text>
+			<Text style={{ fontSize: fs.h2, lineHeight: 31.2, fontFamily: fontFamily(800), letterSpacing: -0.24, color: color ?? c.ink }}>{value}</Text>
+			<Text style={{ fontSize: fs.sm, lineHeight: 18.5, fontFamily: fontFamily(500), color: c.muted }}>{label}</Text>
 		</View>
 	)
 }
@@ -311,6 +336,7 @@ function Stat({ value, label, color }: { value: string; label: string; color?: s
 /** «Изменить»: name of the box and the phone buyers call. */
 function EditSheet({ shop, onClose }: { shop: MyShop; onClose: () => void }) {
 	const c = useColors()
+	const phoneRef = useRef<TextInputInstance>(null)
 	const update = useUpdateShop()
 	const [name, setName] = useState(shop.name)
 	const [phone, setPhone] = useState(shop.phone?.startsWith(COUNTRY_CODE) ? formatLocalPhone(shop.phone.slice(COUNTRY_CODE.length)) : '')
@@ -319,7 +345,7 @@ function EditSheet({ shop, onClose }: { shop: MyShop; onClose: () => void }) {
 	const save = () =>
 		update.mutate(
 			{ name: name.trim(), phone: phone ? toE164(phone) : '', phoneVisible: Boolean(phone) },
-			{ onSuccess: onClose }
+			{ onSuccess: () => (toast(t('Сохранено')), onClose()) }
 		)
 
 	const field = {
@@ -329,7 +355,7 @@ function EditSheet({ shop, onClose }: { shop: MyShop; onClose: () => void }) {
 		borderColor: c.border,
 		backgroundColor: c.card,
 		paddingHorizontal: 16,
-		fontSize: 18.5,
+		fontSize: fs.xl,
 		fontFamily: fontFamily(600),
 		color: c.ink,
 	} as const
@@ -338,24 +364,29 @@ function EditSheet({ shop, onClose }: { shop: MyShop; onClose: () => void }) {
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
 			<BottomSheet
 				onClose={onClose}
-				header={<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{t('Мой контейнер')}</Text>}
+				header={<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(800), color: c.ink }}>{t('Мой контейнер')}</Text>}
 				footer={<Button label={t('Сохранить')} disabled={name.trim().length < 2 || !phoneOk} loading={update.isPending} onPress={save} />}
 			>
 				<Label>{t('Название')}</Label>
-				<TextInput value={name} onChangeText={setName} maxLength={60} placeholder={t('Автодеталь Азамат')} placeholderTextColor={raw.fillInk} style={field} />
+				<TextInput value={name} onChangeText={setName} maxLength={60} placeholder={t('Автодеталь Азамат')} placeholderTextColor={c.fillInk} style={field} returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => phoneRef.current?.focus()} />
 				<Label>{t('Телефон для покупателей')}</Label>
 				<View style={{ ...field, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-					<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.muted }}>{COUNTRY_CODE}</Text>
+					<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: c.muted }}>{COUNTRY_CODE}</Text>
 					<TextInput
+						ref={phoneRef}
 						value={phone}
 						onChangeText={(text) => setPhone(formatLocalPhone(text))}
 						keyboardType="phone-pad"
+						textContentType="telephoneNumber"
+						autoComplete="tel"
+						returnKeyType="done"
+						onSubmitEditing={save}
 						placeholder="700 11 22 33"
-						placeholderTextColor={raw.fillInk}
-						style={{ flex: 1, fontSize: 18.5, fontFamily: fontFamily(600), color: c.ink, padding: 0 }}
+						placeholderTextColor={c.fillInk}
+						style={{ flex: 1, fontSize: fs.xl, fontFamily: fontFamily(600), color: c.ink, padding: 0 }}
 					/>
 				</View>
-				{update.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{update.error.message}</Text> : null}
+				{update.error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{update.error.message}</Text> : null}
 			</BottomSheet>
 		</KeyboardAvoidingView>
 	)

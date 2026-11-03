@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, FlatList, Image, Pressable, Text, TextInput, View } from 'react-native'
+import { FlatList, Pressable, Text, TextInput, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { BackIcon } from '@/components/buyer-v23'
 import { SearchIcon } from '@/components/icons'
-import { QueryErrorBanner } from '@/components/ui'
-import { fontFamily, raw, useColors } from '@/theme'
+import { PlacePlate, QueryErrorBanner, ScreenHeader, Skeleton, SkeletonRepeat } from '@/components/ui'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { shopPlace } from '@/lib/shop-place'
 import { flattenPages } from '@/api/pagination'
@@ -30,12 +30,7 @@ export default function ShopsScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<View style={{ height: 56, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-				<Pressable onPress={() => router.back()} hitSlop={10}>
-					<BackIcon color={c.ink} />
-				</Pressable>
-				<Text style={{ flex: 1, fontSize: 24, fontFamily: fontFamily(700), color: c.ink }}>{t('Магазины')}</Text>
-			</View>
+			<ScreenHeader title={t('Магазины')} />
 
 			<FlatList
 				data={items}
@@ -64,21 +59,28 @@ export default function ShopsScreen() {
 								value={text}
 								onChangeText={setText}
 								placeholder={t('Название магазина')}
-								placeholderTextColor={raw.fillInk}
-								style={{ flex: 1, fontSize: 17, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+								placeholderTextColor={c.fillInk}
+								style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 							/>
 						</View>
 						<QueryErrorBanner error={shops.error} onRetry={() => shops.refetch()} />
 					</View>
 				}
-				ListEmptyComponent={shops.isPending ? <ActivityIndicator color={c.muted} style={{ paddingTop: 40 }} /> : null}
+				ListEmptyComponent={
+					shops.isLoading ? (
+						<SkeletonRepeat count={7} gap={10}>
+							<ShopRowSkeleton />
+						</SkeletonRepeat>
+					) : undefined
+				}
+				ListFooterComponent={shops.isFetchingNextPage ? <ShopRowSkeleton /> : undefined}
 				renderItem={({ item }) => <ShopRow shop={item} />}
 			/>
 		</View>
 	)
 }
 
-function ShopRow({ shop }: { shop: ShopCard }) {
+export function ShopRow({ shop }: { shop: ShopCard }) {
 	const c = useColors()
 	return (
 		<Pressable
@@ -89,20 +91,39 @@ function ShopRow({ shop }: { shop: ShopCard }) {
 				<Image source={{ uri: resolveUrl(shop.avatarUrl) }} style={{ width: 56, height: 56, borderRadius: 28 }} />
 			) : (
 				<View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-					<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop.name.charAt(0).toUpperCase()}</Text>
+					<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(700), color: c.brandStrong }}>{shop.name.charAt(0).toUpperCase()}</Text>
 				</View>
 			)}
-			<View style={{ flex: 1, gap: 3 }}>
-				<Text numberOfLines={1} style={{ fontSize: 18, fontFamily: fontFamily(700), color: c.ink }}>
+			<View style={{ flex: 1, gap: 6 }}>
+				<Text numberOfLines={1} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>
 					{shop.name}
+					{shop.reviewsCount ? (
+						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.muted }}>
+							{'  '}
+							<Text style={{ color: fixed.star }}>★</Text> {shop.rating.toFixed(1)}
+						</Text>
+					) : null}
 				</Text>
-				<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>
-					{shop.reviewsCount ? <Text style={{ color: '#F5A623' }}>★ </Text> : null}
-					{shop.reviewsCount ? `${shop.rating.toFixed(1)} · ` : ''}
-					{shopPlace(shop)}
-				</Text>
+				{shop.location ? (
+					<PlacePlate row={shop.location.rowCode} box={shop.location.number} />
+				) : (
+					<Text numberOfLines={1} style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>{shopPlace(shop)}</Text>
+				)}
 			</View>
-			<Text style={{ fontSize: 24, color: c.muted }}>›</Text>
+			<Text style={{ fontSize: fs.h2, color: c.muted }}>›</Text>
 		</Pressable>
+	)
+}
+
+export function ShopRowSkeleton() {
+	const c = useColors()
+	return (
+		<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+			<Skeleton width={56} height={56} radius={28} />
+			<View style={{ flex: 1, gap: 9 }}>
+				<Skeleton width="60%" height={18} />
+				<Skeleton width="80%" height={14} />
+			</View>
+		</View>
 	)
 }

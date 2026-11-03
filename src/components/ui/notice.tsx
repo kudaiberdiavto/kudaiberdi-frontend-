@@ -2,7 +2,7 @@ import type { ComponentType } from 'react'
 import { Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-native'
 import type { IconProps } from '@/components/icons'
 import { isNetworkError } from '@/lib/api'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { t } from '@/i18n'
 
 /** Red banner from screen 20 («Нет сети. Покажем ответы, когда появится»). */
@@ -33,7 +33,7 @@ export function NoticeBanner({
 			]}
 		>
 			<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.danger }} />
-			<Text style={{ flex: 1, fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>{text}</Text>
+			<Text style={{ flex: 1, fontSize: fs.md, fontFamily: fontFamily(600), color: c.ink }}>{text}</Text>
 		</Pressable>
 	)
 }
@@ -55,8 +55,24 @@ export function QueryErrorBanner({
 	return <NoticeBanner text={text} onPress={onRetry} style={style} />
 }
 
-/** An empty list: an icon in a tinted circle and a short title, centred in the free space (the list needs `contentContainerStyle.flexGrow: 1`). */
-export function EmptyState({ title, icon: Icon }: { title: string; icon?: ComponentType<IconProps> }) {
+/**
+ * An empty list: an icon in a tinted circle and a short title, centred in the free space (the list needs `contentContainerStyle.flexGrow: 1`).
+ * `hint` and `action` turn a dead end into a next step («Ничего не нашли» → «Спросить у продавцов»).
+ */
+export function EmptyState({
+	title,
+	icon: Icon,
+	hint,
+	action,
+	secondary,
+}: {
+	title: string
+	icon?: ComponentType<IconProps>
+	hint?: string
+	action?: { label: string; onPress: () => void }
+	/** A quieter way out under the main action («Сбросить фильтры»). */
+	secondary?: { label: string; onPress: () => void }
+}) {
 	const c = useColors()
 	return (
 		<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 60, gap: 16 }}>
@@ -65,7 +81,26 @@ export function EmptyState({ title, icon: Icon }: { title: string; icon?: Compon
 					<Icon size={44} color={c.brandStrong} strokeWidth={1.8} />
 				</View>
 			) : null}
-			<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink, textAlign: 'center' }}>{title}</Text>
+			<View style={{ gap: 6 }}>
+				<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(700), color: c.ink, textAlign: 'center' }}>{title}</Text>
+				{hint ? (
+					<Text style={{ fontSize: fs.base, lineHeight: 22, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>{hint}</Text>
+				) : null}
+			</View>
+			{action ? (
+				<Pressable
+					onPress={action.onPress}
+					accessibilityRole="button"
+					style={{ height: 50, paddingHorizontal: 22, borderRadius: 14, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}
+				>
+					<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{action.label}</Text>
+				</Pressable>
+			) : null}
+			{secondary ? (
+				<Text onPress={secondary.onPress} accessibilityRole="button" style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.brandStrong }}>
+					{secondary.label}
+				</Text>
+			) : null}
 		</View>
 	)
 }

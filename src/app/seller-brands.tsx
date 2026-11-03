@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { QueryErrorBanner } from '@/components/ui'
+import { QueryErrorBanner, ScreenHeader, toast } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
-import { CheckIcon, ChevronLeftIcon, SearchIcon } from '@/components/icons'
-import { fontFamily, useColors } from '@/theme'
+import { CheckIcon, SearchIcon } from '@/components/icons'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { plural } from '@/lib/format'
 import { useBrands } from '@/api/directory'
 import { useMyShop, useSetShopBrands } from '@/api/shop'
@@ -30,21 +30,7 @@ export default function SellerBrandsScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
-			<View
-				style={{
-					paddingTop: insets.top + 12,
-					paddingHorizontal: 16,
-					paddingBottom: 8,
-					flexDirection: 'row',
-					alignItems: 'center',
-					gap: 10,
-				}}
-			>
-				<Pressable onPress={() => router.back()}>
-					<ChevronLeftIcon size={24} color={c.ink} />
-				</Pressable>
-				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>{t('Марки, которые продаю')}</Text>
-			</View>
+			<ScreenHeader inset title={t('Марки, которые продаю')} />
 
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 12, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
 				<View
@@ -65,8 +51,8 @@ export default function SellerBrandsScreen() {
 						value={q}
 						onChangeText={setQ}
 						placeholder={t('Найти марку')}
-						placeholderTextColor="#7D7979"
-						style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+						placeholderTextColor={c.fillInk}
+						style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 					/>
 				</View>
 
@@ -74,10 +60,10 @@ export default function SellerBrandsScreen() {
 
 
 				<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-						{searching ? t('НАЙДЕНО') : t('ПОПУЛЯРНЫЕ')}
+					<Text style={{ ...sectionTitle, color: c.inkSecondary }}>
+						{searching ? t('Найдено') : t('Популярные')}
 					</Text>
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>Выбрано {selected.length}</Text>
+					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: c.brandStrong }}>Выбрано {selected.length}</Text>
 				</View>
 
 				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -116,12 +102,12 @@ export default function SellerBrandsScreen() {
 												justifyContent: 'center',
 											}}
 										>
-											<CheckIcon size={13} color="#FFFFFF" strokeWidth={3} />
+											<CheckIcon size={13} color={fixed.white} strokeWidth={3} />
 										</View>
 									) : null}
 								</View>
 								<Text
-									style={{ fontSize: 13, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}
+									style={{ fontSize: fs.xs, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}
 								>
 									{brand.shortName}
 								</Text>
@@ -131,7 +117,7 @@ export default function SellerBrandsScreen() {
 				</View>
 
 				{!searching ? (
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ВСЕ МАРКИ А–Я')}</Text>
+					<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('Все марки А–Я')}</Text>
 				) : null}
 
 				<View style={{ borderRadius: 16, backgroundColor: c.card, overflow: 'hidden' }}>
@@ -152,7 +138,7 @@ export default function SellerBrandsScreen() {
 								}}
 							>
 								<BrandLogo brand={brand} size={34} />
-								<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink }}>{brand.name}</Text>
+								<Text style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(400), color: c.ink }}>{brand.name}</Text>
 								<View
 									style={{
 										width: 24,
@@ -165,7 +151,7 @@ export default function SellerBrandsScreen() {
 										justifyContent: 'center',
 									}}
 								>
-									{active ? <CheckIcon size={14} color="#FFFFFF" strokeWidth={3} /> : null}
+									{active ? <CheckIcon size={14} color={fixed.white} strokeWidth={3} /> : null}
 								</View>
 							</Pressable>
 						)
@@ -185,7 +171,7 @@ export default function SellerBrandsScreen() {
 			>
 				<Pressable
 					disabled={selected.length === 0 || save.isPending}
-					onPress={() => save.mutate(selected, { onSuccess: () => router.back() })}
+					onPress={() => save.mutate(selected, { onSuccess: () => (toast(t('Марки сохранены')), router.back()) })}
 					style={{
 						height: 56,
 						borderRadius: 14,
@@ -196,9 +182,9 @@ export default function SellerBrandsScreen() {
 					}}
 				>
 					{save.isPending ? (
-						<ActivityIndicator color="#FFFFFF" />
+						<ActivityIndicator color={fixed.white} />
 					) : (
-						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+						<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: fixed.white }}>
 							Сохранить · {selected.length} {plural(selected.length, [t('марка'), t('марки'), t('марок')])}
 						</Text>
 					)}

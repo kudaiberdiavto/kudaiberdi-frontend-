@@ -3,11 +3,12 @@ import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, Tex
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import * as Location from 'expo-location'
-import { BottomSheet, BrandLogo, Button, QueryErrorBanner } from '@/components/ui'
-import { BackIcon, BrandTile, Label, PlusIcon, TickIcon } from '@/components/seller-v23'
+import { askForPushAt } from '@/lib/push'
+import { BottomSheet, BrandLogo, Button, QueryErrorBanner, ScreenHeader, toast } from '@/components/ui'
+import { BrandTile, Label, PlusIcon, TickIcon } from '@/components/seller-v23'
 import { LocateIcon, SearchIcon } from '@/components/icons'
 import { addressAt, currentCoords } from '@/lib/locate'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { useRowContainers, useRows } from '@/api/market'
 import { useBrands } from '@/api/directory'
 import { useMyShop, useRegisterShop, useRelocateShop } from '@/api/shop'
@@ -114,7 +115,7 @@ export default function BoxSelectScreen() {
 		borderColor: c.border,
 		backgroundColor: c.card,
 		paddingHorizontal: 16,
-		fontSize: 17.5,
+		fontSize: fs.lg,
 		fontFamily: fontFamily(500),
 		color: c.ink,
 	} as const
@@ -129,22 +130,13 @@ export default function BoxSelectScreen() {
 			return
 		}
 		if (!slot) return
-		if (hasShop) relocate.mutate(slot.id, { onSuccess: () => router.back() })
-		else register.mutate({ containerId: slot.id, brandIds: picked }, { onSuccess: () => router.replace('/seller') })
+		if (hasShop) relocate.mutate(slot.id, { onSuccess: () => (toast(t('Контейнер изменён')), router.back()) })
+		else register.mutate({ containerId: slot.id, brandIds: picked }, { onSuccess: () => (router.replace('/seller'), askForPushAt('shop')) })
 	}
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				{router.canGoBack() ? (
-					<Pressable onPress={() => router.back()} hitSlop={10}>
-						<BackIcon color={c.ink} />
-					</Pressable>
-				) : null}
-				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					{hasShop ? t('Ваш контейнер') : t('Где вы продаёте')}
-				</Text>
-			</View>
+			<ScreenHeader title={hasShop ? t('Ваш контейнер') : t('Где вы продаёте')} />
 
 			<ScrollView
 				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
@@ -154,7 +146,7 @@ export default function BoxSelectScreen() {
 				<QueryErrorBanner error={rows.error ?? detail.error ?? brands.error} onRetry={() => rows.refetch()} />
 
 				{hasShop ? null : (
-					<View style={{ flexDirection: 'row', padding: 4, borderRadius: 14, backgroundColor: raw.fill, gap: 4 }}>
+					<View style={{ flexDirection: 'row', padding: 4, borderRadius: 14, backgroundColor: c.fill, gap: 4 }}>
 						{[
 							{ value: true, label: t('На рынке Кудайберген') },
 							{ value: false, label: t('Магазин или центр') },
@@ -166,7 +158,7 @@ export default function BoxSelectScreen() {
 									onPress={() => setOnMarket(option.value)}
 									style={{ flex: 1, height: 40, borderRadius: 11, backgroundColor: active ? c.card : 'transparent', alignItems: 'center', justifyContent: 'center' }}
 								>
-									<Text style={{ fontSize: 15.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.ink : c.muted }}>{option.label}</Text>
+									<Text style={{ fontSize: fs.md, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.ink : c.muted }}>{option.label}</Text>
 								</Pressable>
 							)
 						})}
@@ -180,7 +172,7 @@ export default function BoxSelectScreen() {
 							value={name}
 							onChangeText={(text) => setName(text.slice(0, 60))}
 							placeholder={t('Например, Kia Центр Бишкек')}
-							placeholderTextColor={raw.fillInk}
+							placeholderTextColor={c.fillInk}
 							style={field}
 						/>
 						<Label>{t('Адрес')}</Label>
@@ -188,21 +180,21 @@ export default function BoxSelectScreen() {
 							value={address}
 							onChangeText={(text) => setAddress(text.slice(0, 160))}
 							placeholder={t('ул. Ленина 45')}
-							placeholderTextColor={raw.fillInk}
+							placeholderTextColor={c.fillInk}
 							style={field}
 						/>
 						<Pressable
 							onPress={locate}
 							disabled={locating}
-							style={{ height: 48, borderRadius: 14, backgroundColor: point ? '#E7F6EC' : c.brandTint, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+							style={{ height: 48, borderRadius: 14, backgroundColor: point ? c.successSoft : c.brandTint, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<LocateIcon size={20} color={point ? c.success : c.brandStrong} />
-							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: point ? c.success : c.brandStrong }}>
+							<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: point ? c.success : c.brandStrong }}>
 								{locating ? t('Определяем…') : point ? t('Точка определена — обновить') : t('Отметить по геолокации')}
 							</Text>
 						</Pressable>
 						{locateError ? (
-							<Text style={{ fontSize: 15, lineHeight: 19, fontFamily: fontFamily(400), color: c.danger }}>{locateError}</Text>
+							<Text style={{ fontSize: fs.md, lineHeight: 19, fontFamily: fontFamily(400), color: c.danger }}>{locateError}</Text>
 						) : null}
 					</>
 				) : (
@@ -228,7 +220,7 @@ export default function BoxSelectScreen() {
 											justifyContent: 'center',
 										}}
 									>
-										<Text style={{ fontSize: 16.5, fontFamily: fontFamily(active ? 800 : 600), color: active ? '#FFFFFF' : c.ink }}>
+										<Text style={{ fontSize: fs.base, fontFamily: fontFamily(active ? 800 : 600), color: active ? fixed.white : c.ink }}>
 											{item.code}
 										</Text>
 									</Pressable>
@@ -253,17 +245,17 @@ export default function BoxSelectScreen() {
 								onChangeText={(text) => setNumber(text.replace(/\D/g, '').slice(0, 4))}
 								keyboardType="number-pad"
 								placeholder={row ? t('Например, 12') : t('Сначала выберите ряд')}
-								placeholderTextColor={raw.fillInk}
-								style={{ fontSize: 24, fontFamily: fontFamily(800), color: c.ink, padding: 0 }}
+								placeholderTextColor={c.fillInk}
+								style={{ fontSize: fs.h2, fontFamily: fontFamily(800), color: c.ink, padding: 0 }}
 							/>
 						</View>
 						{placeError ? (
 							<View style={{ gap: 4 }}>
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{placeError}</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{placeError}</Text>
 								{taken && slot ? (
 									<Text
 										onPress={() => setClaim({ id: slot.id, number: slot.number })}
-										style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}
+										style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}
 									>{t('Это мой контейнер')}</Text>
 								) : null}
 							</View>
@@ -288,20 +280,20 @@ export default function BoxSelectScreen() {
 									borderRadius: 14,
 									borderWidth: 2,
 									borderStyle: 'dashed',
-									borderColor: '#B8C3D3',
+									borderColor: c.dashedBrand,
 									alignItems: 'center',
 									justifyContent: 'center',
 									gap: 4,
 								}}
 							>
 								<PlusIcon size={20} color={c.brandStrong} />
-								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Другие')}</Text>
+								<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Другие')}</Text>
 							</Pressable>
 						</View>
 					</>
 				)}
 
-				{error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
+				{error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
 			</ScrollView>
 
 			{othersOpen ? (
@@ -363,7 +355,7 @@ function OtherBrands({
 			maxHeight={0.8}
 			header={
 				<View style={{ gap: 12 }}>
-					<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{t('Все марки')}</Text>
+					<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(800), color: c.ink }}>{t('Все марки')}</Text>
 					<View
 						style={{
 							height: 48,
@@ -380,8 +372,8 @@ function OtherBrands({
 							value={q}
 							onChangeText={setQ}
 							placeholder={t('Найти марку')}
-							placeholderTextColor={raw.fillInk}
-							style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+							placeholderTextColor={c.fillInk}
+							style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 						/>
 					</View>
 				</View>
@@ -393,7 +385,7 @@ function OtherBrands({
 				return (
 					<Pressable key={brand.id} onPress={() => onToggle(brand.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 						<BrandLogo brand={brand} size={34} />
-						<Text style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink }}>{brand.name}</Text>
+						<Text style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(400), color: c.ink }}>{brand.name}</Text>
 						<View
 							style={{
 								width: 24,
@@ -406,7 +398,7 @@ function OtherBrands({
 								justifyContent: 'center',
 							}}
 						>
-							{active ? <TickIcon size={14} color="#FFFFFF" strokeWidth={3} /> : null}
+							{active ? <TickIcon size={14} color={fixed.white} strokeWidth={3} /> : null}
 						</View>
 					</Pressable>
 				)
@@ -447,24 +439,24 @@ function ClaimSheet({
 				<View style={{ backgroundColor: c.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 28 + insets.bottom, gap: 14 }}>
 					{claim.isSuccess ? (
 						<>
-							<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>{t('Заявка на спор отправлена')}</Text>
-							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>{t('Администрация рынка проверит, чей это контейнер, и пришлёт пуш с решением.')}</Text>
+							<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(700), color: c.ink }}>{t('Заявка на спор отправлена')}</Text>
+							<Text style={{ fontSize: fs.base, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>{t('Администрация рынка проверит, чей это контейнер, и пришлёт пуш с решением.')}</Text>
 							<Button label={t('Понятно')} onPress={close} />
 						</>
 					) : (
 						<>
-							<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>{t('{0} занят', box?.place ?? ' ')}</Text>
-							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>{t('Если это ваш контейнер, а в приложении его занял другой продавец, — откройте спор. Администрация рынка разберётся.')}</Text>
+							<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(700), color: c.ink }}>{t('{0} занят', box?.place ?? ' ')}</Text>
+							<Text style={{ fontSize: fs.base, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>{t('Если это ваш контейнер, а в приложении его занял другой продавец, — откройте спор. Администрация рынка разберётся.')}</Text>
 							<TextInput
 								value={text}
 								onChangeText={(v) => setText(v.slice(0, 500))}
 								placeholder={t('Комментарий — необязательно: с какого года аренда, договор…')}
-								placeholderTextColor={raw.fillInk}
+								placeholderTextColor={c.fillInk}
 								multiline
-								style={{ minHeight: 72, borderRadius: 12, borderWidth: 2, borderColor: c.border, paddingVertical: 10, paddingHorizontal: 14, fontSize: 16.5, fontFamily: fontFamily(400), color: c.ink, textAlignVertical: 'top' }}
+								style={{ minHeight: 72, borderRadius: 12, borderWidth: 2, borderColor: c.border, paddingVertical: 10, paddingHorizontal: 14, fontSize: fs.base, fontFamily: fontFamily(400), color: c.ink, textAlignVertical: 'top' }}
 							/>
 							{claim.error ? (
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{claim.error.message}</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{claim.error.message}</Text>
 							) : null}
 							{code === 'CONTAINER_FREE' && box ? (
 								<Button label={t('Занять этот контейнер')} variant="secondary" onPress={() => onFree({ id: box.id, number: box.number })} />

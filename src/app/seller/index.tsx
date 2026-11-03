@@ -1,12 +1,15 @@
+import { useEffect, useRef } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
-import { router } from 'expo-router'
-import { BrandLogo, EmptyState, QueryErrorBanner, Screen } from '@/components/ui'
+import { router, useScrollToTop } from 'expo-router'
+import { askForPushAt } from '@/lib/push'
+import { usePullRefresh } from '@/lib/use-pull-refresh'
+import { BrandLogo, EmptyState, QueryErrorBanner, Screen, SkeletonRepeat, SkeletonRequestCard, undoToast } from '@/components/ui'
 import { RequestsIcon } from '@/components/icons'
 import { VoicePlayer } from '@/components/voice'
 import { MediaGallery, MediaStrip, photosAsMedia } from '@/components/media-strip'
 import { isPlaceholderText } from '@/components/request-text'
 import { MicIcon, TickIcon } from '@/components/seller-v23'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { formatAgo, formatNumber, formatRemaining } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
 import { useIncomingRequests, useReplyToRequest } from '@/api/incoming'
@@ -17,45 +20,56 @@ import { priceDigits } from '@/components/buyer-v23'
 import type { DeliveryOrder, IncomingRequest } from '@/api/types'
 import { AccountStatusBanner } from '@/components/account-status-banner'
 import { t } from '@/i18n'
+import { useHiddenCards, useHiddenIds } from '@/store/useHiddenCards'
 
 /** 13 «Запросы» — new requests on top with «Ответить голосом», answered ones below. */
 export default function SellerRequestsScreen() {
 	const c = useColors()
+	// Tapping the active tab again scrolls back to the top, as in every app.
+	const list = useRef<FlatList<IncomingRequest>>(null)
+	useScrollToTop(list)
+	// Requests reach this side by push — ask (once per few days) if it isn't allowed yet.
+	useEffect(() => {
+		askForPushAt('shop')
+	}, [])
 	const shop = useMyShop()
 	const fresh = useIncomingRequests('NEW')
 	const answered = useIncomingRequests('ANSWERED')
 	// Orders with delivery still to pack or hand to the courier — on top.
 	const delivery = useDeliveryOrders('SHOP')
+	const pull = usePullRefresh(() => [fresh.refetch(), answered.refetch(), delivery.refetch()])
 	const orders = (delivery.data ?? []).filter((order) => order.status !== 'DELIVERED' && order.status !== 'CANCELLED')
 
-	const items = [...flattenPages(fresh.data), ...flattenPages(answered.data)]
+	const hiddenIds = useHiddenIds('incoming')
+	const items = [...flattenPages(fresh.data), ...flattenPages(answered.data)].filter((item) => !hiddenIds.includes(item.id))
 
 	return (
 		<Screen padding={0}>
 			<View style={{ height: 60, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-				<Text style={{ flex: 1, fontSize: 26, fontFamily: fontFamily(700), color: c.ink }}>{t('Запросы')}</Text>
+				<Text style={{ flex: 1, fontSize: fs.h1, fontFamily: fontFamily(700), color: c.ink }}>{t('Запросы')}</Text>
 			</View>
 
 			<FlatList
+				ref={list}
 				data={items}
 				keyExtractor={(item) => String(item.id)}
 				contentContainerStyle={{ flexGrow: 1, paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}
 				ListEmptyComponent={
 					fresh.isSuccess && answered.isSuccess && !orders.length ? (
 						<EmptyState title={t('Новых запросов нет')} icon={RequestsIcon} />
-					) : null
+					) : fresh.isLoading ? (
+						<SkeletonRepeat count={4} gap={10}>
+							<SkeletonRequestCard />
+						</SkeletonRepeat>
+					) : undefined
 				}
 				showsVerticalScrollIndicator={false}
 				onEndReached={() => {
 					if (fresh.hasNextPage && !fresh.isFetchingNextPage) fresh.fetchNextPage()
 					else if (!fresh.hasNextPage && answered.hasNextPage && !answered.isFetchingNextPage) answered.fetchNextPage()
 				}}
-				onRefresh={() => {
-					fresh.refetch()
-					answered.refetch()
-					delivery.refetch()
-				}}
-				refreshing={false}
+				onRefresh={pull.onRefresh}
+				refreshing={pull.refreshing}
 				ListHeaderComponent={
 					<View style={{ gap: 10 }}>
 						<AccountStatusBanner
@@ -92,17 +106,17 @@ function DeliveryCard({ order }: { order: DeliveryOrder }) {
 	return (
 		<Pressable
 			onPress={() => router.push({ pathname: '/delivery-order', params: { id: String(order.id), as: 'shop' } })}
-			style={{ borderRadius: 18, backgroundColor: '#FCEBB0', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}
+			style={{ borderRadius: 18, backgroundColor: c.warningSoft, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}
 		>
 			<TruckTile size={44} />
 			<View style={{ flex: 1, gap: 2 }}>
-				<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1, color: '#7A5A00' }}>
+				<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), letterSpacing: 1, color: c.warningInk }}>
 					{t('{0} · в {1}', order.status === 'NEW' ? t('Новый заказ') : t('Заказ с доставкой'), toRegion(order.districtName ?? order.regionName)).toUpperCase()}
 				</Text>
-				<Text numberOfLines={1} style={{ fontSize: 17.5, fontFamily: fontFamily(800), color: c.ink }}>
+				<Text numberOfLines={1} style={{ fontSize: fs.lg, fontFamily: fontFamily(800), color: c.ink }}>
 					{order.part.title}
 				</Text>
-				<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(600), color: c.inkSecondary }}>
+				<Text numberOfLines={1} style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.inkSecondary }}>
 					{t('{0} сом · {1}', priceDigits(order.part.price), status)}
 				</Text>
 			</View>
@@ -114,6 +128,16 @@ function DeliveryCard({ order }: { order: DeliveryOrder }) {
 export function RequestCard({ request, full }: { request: IncomingRequest; full?: boolean }) {
 	const c = useColors()
 	const reply = useReplyToRequest(request.id)
+	// «Нет» sits next to «Есть» — a slip while scrolling would lose a buyer: hide at once, answer after «Вернуть» is gone.
+	const answerNo = () => {
+		const { hide, show } = useHiddenCards.getState()
+		hide('incoming', request.id)
+		undoToast({
+			text: t('Ответили «Нет»'),
+			restore: () => show('incoming', request.id),
+			commit: () => reply.mutate({ answer: 'NOT_HAVE' }, { onSettled: () => show('incoming', request.id) }),
+		})
+	}
 	const mine = request.myReply
 	const meta = mine
 		? formatAgo(request.notifiedAt)
@@ -128,10 +152,10 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 				<BrandLogo brand={request.car.brand} size={36} />
 				<View style={{ flex: 1, gap: 1 }}>
-					<Text numberOfLines={1} style={{ fontSize: 16.5, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.base, lineHeight: 21.5, fontFamily: fontFamily(700), color: c.ink }}>
 						{request.car.label}
 					</Text>
-					<Text numberOfLines={1} style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.sm, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>
 						<Text style={{ fontFamily: fontFamily(600), color: c.inkSecondary }}>{request.buyerName?.trim() || t('Покупатель')}</Text> · {meta}
 					</Text>
 				</View>
@@ -139,7 +163,7 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 
 			<View style={{ gap: 8 }}>
 				{isPlaceholderText(request.text) ? null : (
-					<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{request.text}</Text>
+					<Text style={{ fontSize: fs.lg, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{request.text}</Text>
 				)}
 				{request.voice ? <VoicePlayer voice={request.voice} /> : null}
 				{full ? <MediaGallery media={photosAsMedia(request.photos)} /> : <MediaStrip media={photosAsMedia(request.photos)} />}
@@ -150,7 +174,7 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 					style={{
 						height: 44,
 						borderRadius: 12,
-						backgroundColor: '#E7F6EC',
+						backgroundColor: c.successSoft,
 						flexDirection: 'row',
 						alignItems: 'center',
 						justifyContent: 'center',
@@ -158,7 +182,7 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 					}}
 				>
 					<TickIcon size={18} color={c.success} strokeWidth={2.8} />
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.success }}>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.success }}>
 						{request.soldHere
 							? t('Купили у вас')
 							: mine.answer === 'HAVE'
@@ -195,28 +219,28 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 								justifyContent: 'center',
 							}}
 						>
-							<MicIcon size={20} color="#FFFFFF" />
+							<MicIcon size={20} color={fixed.white} />
 						</View>
-						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Ответить голосом')}</Text>
+						<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: fixed.white }}>{t('Ответить голосом')}</Text>
 					</Pressable>
 					{reply.error ? (
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text>
+						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{reply.error.message}</Text>
 					) : null}
 					<View style={{ flexDirection: 'row', gap: 8 }}>
 						<Pressable
 							disabled={reply.isPending}
-							onPress={() => reply.mutate({ answer: 'NOT_HAVE' })}
+							onPress={answerNo}
 							style={{
 								flex: 1,
 								height: 44,
 								borderRadius: 14,
-								backgroundColor: '#EFEDEC',
+								backgroundColor: c.fill,
 								alignItems: 'center',
 								justifyContent: 'center',
 								opacity: reply.isPending ? 0.4 : 1,
 							}}
 						>
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>{t('Нет')}</Text>
+							<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{t('Нет')}</Text>
 						</Pressable>
 						<Pressable
 							onPress={() => router.push({ pathname: '/seller-answer', params: { id: String(request.id) } })}
@@ -224,7 +248,7 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 								flex: 1,
 								height: 44,
 								borderRadius: 14,
-								backgroundColor: '#E7F6EC',
+								backgroundColor: c.successSoft,
 								flexDirection: 'row',
 								alignItems: 'center',
 								justifyContent: 'center',
@@ -232,7 +256,7 @@ export function RequestCard({ request, full }: { request: IncomingRequest; full?
 							}}
 						>
 							<TickIcon size={20} color={c.success} />
-							<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.success }}>{t('Есть')}</Text>
+							<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.success }}>{t('Есть')}</Text>
 						</Pressable>
 					</View>
 				</>

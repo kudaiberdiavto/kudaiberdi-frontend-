@@ -1,25 +1,16 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { ActivityIndicator, Image, Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Linking, Pressable, ScrollView, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BottomSheet, QueryErrorBanner } from '@/components/ui'
+import { BottomSheet, Button, PlacePlate, QueryErrorBanner, ScreenHeader, SkeletonOfferCard, SkeletonRepeat, SkeletonStatus, toast } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
-import {
-	BubbleIcon,
-	CallIcon,
-	ChevronIcon,
-	CrossIcon,
-	LoupeIcon,
-	RouteIcon,
-	TickIcon,
-	TopBar,
-	priceDigits,
-	replyChips,
-} from '@/components/buyer-v23'
+import { BubbleIcon, CallIcon, ChevronIcon, CrossIcon, LoupeIcon, RouteIcon, TickIcon, priceDigits, replyChips } from '@/components/buyer-v23'
 import { VoicePlayer } from '@/components/voice'
 import { MediaStrip, photosAsMedia } from '@/components/media-strip'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { minutesLeft, plural } from '@/lib/format'
+import { askForReview } from '@/lib/store-review'
 import { resolveUrl } from '@/lib/api'
 import {
 	useCloseRequest,
@@ -82,16 +73,19 @@ export default function RequestScreen() {
 	const answered = counts ? counts.have + counts.notHave : have.length
 
 	const title = detail?.text ?? ' '
+	// Pinned under the thumb: «Нашли запчасть?» once someone has it, «Продлить» when the search is about to end.
+	const extendSoon = Boolean(detail?.canExtend) && !closed && left <= 3
+	const bar = !closed && (have.length > 0 || extendSoon)
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar
+			<ScreenHeader
 				title={title}
 				right={detail ? <BrandLogo brand={detail.car.brand} size={30} /> : null}
 			/>
 
 			<ScrollView
-				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: 16 + insets.bottom, gap: 10 }}
+				contentContainerStyle={{ paddingTop: 4, paddingHorizontal: 16, paddingBottom: bar ? 16 : 16 + insets.bottom, gap: 10 }}
 				showsVerticalScrollIndicator={false}
 			>
 				<QueryErrorBanner error={request.error ?? replies.error} onRetry={() => {
@@ -102,18 +96,18 @@ export default function RequestScreen() {
 
 				{detail ? (
 					<View style={{ borderRadius: 16, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-						<View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: active ? '#E7F6EC' : c.surface, alignItems: 'center', justifyContent: 'center' }}>
+						<View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: active ? c.successSoft : c.surface, alignItems: 'center', justifyContent: 'center' }}>
 							<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: active ? c.success : c.border }} />
 						</View>
 						<View style={{ flex: 1, gap: 2 }}>
-							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.ink }}>
 								{closed
 									? t('Запрос закрыт')
 									: active
 										? t('Ищем ещё {0} {1}', left, plural(left, [t('минуту'), t('минуты'), t('минут')]))
 										: t('Время вышло')}
 							</Text>
-							<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>
 								{t('Спросили {0} {1} · ответили {2}', askedCount, plural(askedCount, [t('продавца'), t('продавцов'), t('продавцов')]), answered)}
 							</Text>
 						</View>
@@ -126,20 +120,22 @@ export default function RequestScreen() {
 									shadowColor: c.brand, shadowOpacity: 0.3, shadowOffset: { width: 0, height: 4 }, shadowRadius: 8, elevation: 3 }}
 							>
 								{extend.isPending ? (
-									<ActivityIndicator size="small" color="#FFFFFF" />
+									<ActivityIndicator size="small" color={fixed.white} />
 								) : (
-									<Text style={{ fontSize: 15, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Продлить +30 мин')}</Text>
+									<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: fixed.white }}>{t('Продлить +30 мин')}</Text>
 								)}
 							</Pressable>
 						) : null}
 					</View>
+				) : request.isLoading ? (
+					<SkeletonStatus />
 				) : null}
-				{extend.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{extend.error.message}</Text> : null}
+				{extend.error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{extend.error.message}</Text> : null}
 
 				{/* What the buyer attached — voice and photos — not in the mockup, but they should see what they asked. */}
 				{detail?.voice || detail?.photos.length ? (
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 8 }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.muted }}>{t('Ваш запрос')}</Text>
+						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.muted }}>{t('Ваш запрос')}</Text>
 						{detail.voice ? <VoicePlayer voice={detail.voice} /> : null}
 						<MediaStrip media={photosAsMedia(detail.photos)} />
 					</View>
@@ -152,47 +148,44 @@ export default function RequestScreen() {
 					<SortChip label={t('Новые')} active={onlyNew} onPress={() => setOnlyNew(!onlyNew)} />
 				</ScrollView>
 
-				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-					<Text
-						onPress={() => setTab('HAVE')}
-						style={{
-							fontSize: 14.5,
-							fontFamily: fontFamily(tab === 'HAVE' ? 700 : 600),
-							letterSpacing: tab === 'HAVE' ? 1.04 : 0,
-							color: c.muted,
-						}}
-					>
-						{tab === 'HAVE' ? t('ЕСТЬ · {0}', have.length) : t('Есть · {0}', have.length)}
-					</Text>
-					<View style={{ flex: 1 }} />
-					<Text
-						onPress={() => setTab('NOT_HAVE')}
-						style={{
-							fontSize: 14.5,
-							fontFamily: fontFamily(tab === 'NOT_HAVE' ? 700 : 600),
-							letterSpacing: tab === 'NOT_HAVE' ? 1.04 : 0,
-							color: c.muted,
-						}}
-					>
-						{tab === 'NOT_HAVE' ? t('НЕТ · {0}', counts?.notHave ?? 0) : t('Нет · {0}', counts?.notHave ?? 0)}
-					</Text>
+				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }} accessibilityRole="tablist">
+					{(
+						[
+							{ value: 'HAVE', label: t('Есть · {0}', have.length) },
+							{ value: 'NOT_HAVE', label: t('Нет · {0}', counts?.notHave ?? 0) },
+						] as const
+					).map((item) => {
+						const active = tab === item.value
+						return (
+							<Pressable
+								key={item.value}
+								onPress={() => setTab(item.value)}
+								hitSlop={8}
+								accessibilityRole="tab"
+								accessibilityState={{ selected: active }}
+								style={{ paddingVertical: 6, borderBottomWidth: 2, borderBottomColor: active ? c.brand : 'transparent' }}
+							>
+								<Text style={{ ...sectionTitle, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.ink : c.muted }}>{item.label}</Text>
+							</Pressable>
+						)
+					})}
 				</View>
 
 				{tab === 'HAVE' ? (
 					<>
 						{replies.isSuccess && have.length === 0 ? (
-							<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: fs.base, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>
 								{active ? t('Ждём ответов') : t('Никто не ответил «Есть»')}
 							</Text>
+						) : null}
+						{replies.isLoading ? (
+							<SkeletonRepeat count={3} gap={10}>
+								<SkeletonOfferCard />
+							</SkeletonRepeat>
 						) : null}
 						{shown.map((reply, index) => (
 							<ReplyCard key={reply.id} reply={reply} best={index === 0} />
 						))}
-						{have.length > 0 && !closed ? (
-							<Pressable onPress={() => setSheet(true)} style={{ alignItems: 'center', paddingVertical: 10 }}>
-								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Нашли запчасть?')}</Text>
-							</Pressable>
-						) : null}
 					</>
 				) : (
 					<View style={{ borderRadius: 18, backgroundColor: c.card, paddingHorizontal: 14 }}>
@@ -206,17 +199,44 @@ export default function RequestScreen() {
 									borderTopColor: c.hairline,
 								}}
 							>
-								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(600), color: c.ink }}>
+								<Text style={{ fontSize: fs.base, fontFamily: fontFamily(600), color: c.ink }}>
 									{place.row ? t('Ряд {0}', place.row) : t('Ряд —')}{t(' · конт. {0}', place.container ?? '—')}
 								</Text>
 							</View>
 						))}
 						{(stats.data?.notHave ?? []).length === 0 ? (
-							<Text style={{ paddingVertical: 14, fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Никто не ответил «Нет»')}</Text>
+							<Text style={{ paddingVertical: 14, fontSize: fs.base, fontFamily: fontFamily(400), color: c.muted }}>{t('Никто не ответил «Нет»')}</Text>
 						) : null}
 					</View>
 				)}
 			</ScrollView>
+
+			{bar ? (
+				<View
+					style={{
+						paddingHorizontal: 16,
+						paddingTop: 12,
+						paddingBottom: insets.bottom + 12,
+						borderTopWidth: 1,
+						borderTopColor: c.hairline,
+						backgroundColor: c.card,
+						flexDirection: 'row',
+						gap: 8,
+					}}
+				>
+					{extendSoon ? (
+						<Button
+							label={t('Продлить +30 мин')}
+							variant={have.length ? 'secondary' : 'primary'}
+							height={52}
+							style={{ flex: 1 }}
+							loading={extend.isPending}
+							onPress={() => extend.mutate(30)}
+						/>
+					) : null}
+					{have.length ? <Button label={t('Нашли запчасть?')} height={52} style={{ flex: 1.4 }} onPress={() => setSheet(true)} /> : null}
+				</View>
+			) : null}
 
 			{showSheet ? (
 				<FoundSheet
@@ -247,7 +267,7 @@ function SortChip({ label, active, onPress }: { label: string; active: boolean; 
 				justifyContent: 'center',
 			}}
 		>
-			<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: active ? '#FFFFFF' : c.ink }}>{label}</Text>
+			<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: active ? fixed.white : c.ink }}>{label}</Text>
 		</Pressable>
 	)
 }
@@ -270,26 +290,28 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 	const c = useColors()
 	const shop = reply.shop
 	if (!shop) return null
-	const place = shop.location
-		? t('Ряд {0} · конт. {1}', shop.location.rowCode, shop.location.number) + (reply.walkMinutes != null ? t(' · {0} мин', reply.walkMinutes) : '')
-		: (shop.address ?? '')
 	const chips = replyChips(reply)
 	return (
 		<View style={{ borderRadius: 18, backgroundColor: c.card, padding: 14, gap: 10, borderWidth: 2, borderColor: best ? c.success : c.card }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 				<ShopAvatar name={shop.name} url={shop.avatarUrl} />
-				<View style={{ flex: 1, gap: 2 }}>
-					<Text numberOfLines={1} style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
+				<View style={{ flex: 1, gap: 6 }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>
 						{shop.name}
 					</Text>
-					<Text style={{ fontSize: 15, fontFamily: fontFamily(400), color: c.muted }}>{place}</Text>
+					{/* Where to go — the place plate; a shop off the market — its address. */}
+					{shop.location ? (
+						<PlacePlate row={shop.location.rowCode} box={shop.location.number} walk={reply.walkMinutes} />
+					) : (
+						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>{shop.address ?? ''}</Text>
+					)}
 				</View>
 				{reply.price != null ? (
 					<View style={{ alignItems: 'flex-end' }}>
-						<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), letterSpacing: -0.22, color: c.ink }}>
+						<Text style={{ fontSize: fs.h3, lineHeight: 28.6, fontFamily: fontFamily(800), letterSpacing: -0.22, color: c.ink }}>
 							{priceDigits(reply.price)}
 						</Text>
-						<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>{t('сом')}</Text>
+						<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(600), color: c.muted }}>{t('сом')}</Text>
 					</View>
 				) : null}
 			</View>
@@ -298,15 +320,15 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 					{chips.map((chip, index) => {
 						const green = index === 0 && reply.condition === 'NEW'
 						return (
-							<View key={chip} style={{ height: 26, paddingHorizontal: 9, borderRadius: 8, backgroundColor: green ? '#E7F6EC' : c.surface, justifyContent: 'center' }}>
-								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: green ? c.success : c.ink }}>{chip}</Text>
+							<View key={chip} style={{ height: 26, paddingHorizontal: 9, borderRadius: 8, backgroundColor: green ? c.successSoft : c.surface, justifyContent: 'center' }}>
+								<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: green ? c.success : c.ink }}>{chip}</Text>
 							</View>
 						)
 					})}
 				</View>
 			) : null}
 			{reply.voice ? <VoicePlayer voice={reply.voice} tone="green" /> : null}
-			{reply.message ? <Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(400), color: c.inkSecondary }}>{reply.message}</Text> : null}
+			{reply.message ? <Text style={{ fontSize: fs.md, lineHeight: 21, fontFamily: fontFamily(400), color: c.inkSecondary }}>{reply.message}</Text> : null}
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
 				{/* The seller hid the number — the main button writes to them instead of a dead «Позвонить». */}
 				<Pressable
@@ -319,15 +341,15 @@ function ReplyCard({ reply, best }: { reply: Reply; best: boolean }) {
 						flex: 1,
 						height: 48,
 						borderRadius: 14,
-						backgroundColor: shop.phone ? c.success : c.brand,
+						backgroundColor: c.brand,
 						flexDirection: 'row',
 						alignItems: 'center',
 						justifyContent: 'center',
 						gap: 8,
 					}}
 				>
-					{shop.phone ? <CallIcon size={20} color="#FFFFFF" strokeWidth={2.4} /> : <BubbleIcon size={20} color="#FFFFFF" />}
-					<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{shop.phone ? t('Позвонить') : t('Написать')}</Text>
+					{shop.phone ? <CallIcon size={20} color={fixed.white} strokeWidth={2.4} /> : <BubbleIcon size={20} color={fixed.white} />}
+					<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{shop.phone ? t('Позвонить') : t('Написать')}</Text>
 				</Pressable>
 				{shop.phone ? (
 					<SquareButton onPress={() => reply.chatId && router.push({ pathname: '/chat', params: { chatId: String(reply.chatId) } })}>
@@ -385,10 +407,10 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 			}}
 		>
 			<ShopAvatar name={shop.name} url={shop.avatarUrl} size={40} />
-			<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: selected ? c.brandStrong : c.ink, textAlign: 'center' }}>
+			<Text numberOfLines={1} style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: selected ? c.brandStrong : c.ink, textAlign: 'center' }}>
 				{shop.name}
 			</Text>
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
+			<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(400), color: c.muted }}>
 				{done ? t('отмечен') : shop.location ? `${shop.location.rowCode} · ${shop.location.number}` : t('магазин')}
 			</Text>
 		</Pressable>
@@ -399,7 +421,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 			onClose={onClose}
 			maxHeight={0.8}
 			header={
-				<Text style={{ fontSize: 24, lineHeight: 31.2, fontFamily: fontFamily(800), letterSpacing: -0.24, color: c.ink }}>
+				<Text style={{ fontSize: fs.h2, lineHeight: 31.2, fontFamily: fontFamily(800), letterSpacing: -0.24, color: c.ink }}>
 					{step === 'MAIN' ? t('Нашли запчасть?') : t('Кто сказал «есть»?')}
 				</Text>
 			}
@@ -407,18 +429,20 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 			<View style={{ gap: 12 }}>
 				{step === 'MAIN' ? (
 					<>
-						<View style={{ borderRadius: 16, borderWidth: 2, borderColor: c.success, backgroundColor: '#E7F6EC', padding: 14, gap: 12 }}>
+						<View style={{ borderRadius: 16, borderWidth: 2, borderColor: c.success, backgroundColor: c.successSoft, padding: 14, gap: 12 }}>
 							<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 								<View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}>
-									<TickIcon size={22} color="#FFFFFF" strokeWidth={2.2} />
+									<TickIcon size={22} color={fixed.white} strokeWidth={2.2} />
 								</View>
-								<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>{t('Да, купил — у кого?')}</Text>
+								<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: c.ink }}>{t('Да, купил — у кого?')}</Text>
 							</View>
 							<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 								{shops.map((shop) =>
 									shopCard(shop, close.variables?.shopId === shop.id, () =>
 										close.mutate({ shopId: shop.id }, {
 											onSuccess: () => {
+												toast(t('Запрос закрыт — спасибо!'))
+												askForReview()
 												onClose()
 												router.back()
 											},
@@ -443,7 +467,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 					</>
 				) : (
 					<>
-						<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>{t('Выберите продавца')}</Text>
+						<Text style={{ fontSize: fs.base, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>{t('Выберите продавца')}</Text>
 						<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 							{shops.map((shop) =>
 								shopCard(
@@ -457,7 +481,7 @@ function FoundSheet({ id, replies, onClose }: { id: number; replies: Reply[]; on
 						<SheetRow icon={<LoupeIcon size={22} color={c.brandStrong} />} title={t('Готово')} subtitle={t('Вернуться к ответам')} onPress={onClose} />
 					</>
 				)}
-				{error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
+				{error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text> : null}
 			</View>
 		</BottomSheet>
 	)
@@ -482,14 +506,14 @@ function SheetRow({
 			onPress={onPress}
 			style={{ borderRadius: 16, borderWidth: 2, borderColor: c.border, paddingVertical: 10, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 14 }}
 		>
-			<View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: tone === 'red' ? '#FDECEC' : c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
+			<View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: tone === 'red' ? c.dangerSoft : c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
 				{icon}
 			</View>
 			<View style={{ flex: 1, gap: 2 }}>
-				<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: c.ink }}>{title}</Text>
-				<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>{subtitle}</Text>
+				<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: c.ink }}>{title}</Text>
+				<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>{subtitle}</Text>
 			</View>
-			<ChevronIcon size={20} color="#B8B4B4" />
+			<ChevronIcon size={20} color={c.chevron} />
 		</Pressable>
 	)
 }

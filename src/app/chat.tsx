@@ -1,9 +1,10 @@
-import { Image, Linking, Pressable, Text, View } from 'react-native'
+import { Linking, Pressable, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ChatConversation, presenceLabel } from '@/components/chat-conversation'
 import { BackIcon, BoxOutlineIcon, CallIcon, WrenchIcon } from '@/components/buyer-v23'
 import { resolveUrl } from '@/lib/api'
-import { fontFamily, useColors } from '@/theme'
+import { fontFamily, fs, useColors } from '@/theme'
 import { useChat } from '@/api/chats'
 import { openShopRoute } from '@/lib/shop-place'
 import { t } from '@/i18n'
@@ -50,7 +51,7 @@ export default function BuyerChatScreen() {
 						borderBottomColor: c.hairline,
 					}}
 				>
-					<Pressable onPress={() => router.back()} hitSlop={10}>
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} hitSlop={10}>
 						<BackIcon color={c.ink} />
 					</Pressable>
 					{/* Avatar and name — the shop's profile (or the master's card). */}
@@ -68,14 +69,14 @@ export default function BuyerChatScreen() {
 							<Image source={{ uri: avatar }} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.surface }} />
 						) : (
 							<View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.brandTint, alignItems: 'center', justifyContent: 'center' }}>
-								<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{name.slice(0, 1).toUpperCase()}</Text>
+								<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.brandStrong }}>{name.slice(0, 1).toUpperCase()}</Text>
 							</View>
 						)}
 						<View style={{ flex: 1, gap: 1 }}>
-							<Text numberOfLines={1} style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text numberOfLines={1} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>
 								{name}
 							</Text>
-							<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: typing ? c.success : c.brandStrong }}>
+							<Text numberOfLines={1} style={{ fontSize: fs.sm, fontFamily: fontFamily(500), color: typing ? c.success : c.brandStrong }}>
 								{typing ? (
 								t('печатает…')
 							) : (
@@ -92,9 +93,9 @@ export default function BuyerChatScreen() {
 						<Pressable
 							onPress={() => Linking.openURL(`tel:${phone}`)}
 							accessibilityLabel={t('Позвонить')}
-							style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}
+							style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.fill, alignItems: 'center', justifyContent: 'center' }}
 						>
-							<CallIcon size={22} color="#FFFFFF" />
+							<CallIcon size={22} color={c.ink} />
 						</Pressable>
 					) : null}
 				</View>
@@ -120,8 +121,8 @@ export default function BuyerChatScreen() {
 							{chat?.serviceRequest ? <WrenchIcon size={20} color={c.brandStrong} /> : <BoxOutlineIcon size={20} color={c.brandStrong} />}
 						</View>
 						<View style={{ flexShrink: 1, gap: 1 }}>
-							<Text style={{ fontSize: 13, fontFamily: fontFamily(600), color: c.muted }}>{chat?.serviceRequest ? t('Ваша заявка') : t('Ваш запрос')}</Text>
-							<Text numberOfLines={1} style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>
+							<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(600), color: c.muted }}>{chat?.serviceRequest ? t('Ваша заявка') : t('Ваш запрос')}</Text>
+							<Text numberOfLines={1} style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.ink }}>
 								{request.text} · {request.carLabel}
 							</Text>
 						</View>

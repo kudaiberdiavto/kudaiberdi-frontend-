@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Modal, Platform, Pressable, Text, TextInput, View
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Button } from '@/components/ui'
 import { CheckIcon, FlagIcon } from '@/components/icons'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fontFamily, fs, useColors } from '@/theme'
 import { useComplain } from '@/api/complaints'
 import type { ComplaintReason, ComplaintType } from '@/api/types'
 import { t } from '@/i18n'
@@ -48,19 +48,19 @@ function Sheet({ target, onClose }: { target: ComplaintTarget; onClose: () => vo
 		<KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
 			<Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }} onPress={onClose} />
 			<View style={{ backgroundColor: c.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingTop: 12, paddingHorizontal: 20, paddingBottom: 28 + insets.bottom, gap: 14 }}>
-				<View style={{ width: 44, height: 4, borderRadius: 2, backgroundColor: raw.dashed, alignSelf: 'center' }} />
+				<View style={{ width: 44, height: 4, borderRadius: 2, backgroundColor: c.dashed, alignSelf: 'center' }} />
 				{complain.isSuccess ? (
 					<>
 						<View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.successTint, alignItems: 'center', justifyContent: 'center' }}>
 							<CheckIcon size={28} color={c.success} />
 						</View>
-						<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>{t('Жалоба отправлена')}</Text>
-						<Text style={{ fontSize: 16.5, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>{t('Администрация проверит и пришлёт пуш с решением.')}</Text>
+						<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(700), color: c.ink }}>{t('Жалоба отправлена')}</Text>
+						<Text style={{ fontSize: fs.base, lineHeight: 23, fontFamily: fontFamily(400), color: c.muted }}>{t('Администрация проверит и пришлёт пуш с решением.')}</Text>
 						<Button label={t('Готово')} onPress={onClose} />
 					</>
 				) : (
 					<>
-						<Text style={{ fontSize: 22, fontFamily: fontFamily(700), color: c.ink }}>{t('Пожаловаться')}</Text>
+						<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(700), color: c.ink }}>{t('Пожаловаться')}</Text>
 						<View style={{ gap: 8 }}>
 							{reasons.map((r) => {
 								const active = r.value === reason
@@ -78,7 +78,7 @@ function Sheet({ target, onClose }: { target: ComplaintTarget; onClose: () => vo
 											justifyContent: 'center',
 										}}
 									>
-										<Text style={{ fontSize: 16.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{r.label}</Text>
+										<Text style={{ fontSize: fs.base, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>{r.label}</Text>
 									</Pressable>
 								)
 							})}
@@ -87,7 +87,7 @@ function Sheet({ target, onClose }: { target: ComplaintTarget; onClose: () => vo
 							value={text}
 							onChangeText={(v) => setText(v.slice(0, 500))}
 							placeholder={t('Подробности — необязательно')}
-							placeholderTextColor={raw.fillInk}
+							placeholderTextColor={c.fillInk}
 							multiline
 							style={{
 								minHeight: 72,
@@ -96,13 +96,13 @@ function Sheet({ target, onClose }: { target: ComplaintTarget; onClose: () => vo
 								borderColor: c.border,
 								paddingVertical: 10,
 								paddingHorizontal: 14,
-								fontSize: 16.5,
+								fontSize: fs.base,
 								fontFamily: fontFamily(400),
 								color: c.ink,
 								textAlignVertical: 'top',
 							}}
 						/>
-						{complain.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{complain.error.message}</Text> : null}
+						{complain.error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{complain.error.message}</Text> : null}
 						<Button
 							label={t('Отправить')}
 							disabled={!reason}
@@ -122,7 +122,7 @@ export function ComplainLink({ onPress, label = t('Пожаловаться') }:
 	return (
 		<Pressable onPress={onPress} hitSlop={8} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'center', paddingVertical: 12 }}>
 			<FlagIcon size={16} color={c.muted} />
-			<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.muted }}>{label}</Text>
+			<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.muted }}>{label}</Text>
 		</Pressable>
 	)
 }

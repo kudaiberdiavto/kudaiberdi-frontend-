@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Keyboard, Platform, Pressable, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { fontFamily, useColors } from '@/theme'
+import { fontFamily, fs, useColors } from '@/theme'
 
 /** Height of the phone field and the code cells — the same on 01 and 02. */
 export const AUTH_FIELD_HEIGHT = 64
@@ -41,7 +41,7 @@ export function AuthLayout({
 
 			<View style={{ flex: 1, paddingTop: 8, paddingHorizontal: 24 }}>
 				<View style={{ height: HEADER_HEIGHT, justifyContent: 'flex-end', gap: 12 }}>{header}</View>
-				<Text style={{ marginTop: 28, marginBottom: 10, fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(600), color: c.muted }}>
+				<Text style={{ marginTop: 28, marginBottom: 10, fontSize: fs.md, lineHeight: 20, fontFamily: fontFamily(600), color: c.muted }}>
 					{label}
 				</Text>
 				{field}

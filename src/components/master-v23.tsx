@@ -5,9 +5,10 @@ import { KeyboardAvoidingView, Modal, Platform, Pressable, Text, View } from 're
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Circle, Path, Rect } from 'react-native-svg'
 import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { formatClock, formatNumber } from '@/lib/format'
 import { t } from '@/i18n'
+import { ToastHost } from '@/components/ui/toast'
 
 type IconProps = { size?: number; color: string; strokeWidth?: number }
 
@@ -82,19 +83,23 @@ export const MobileTruck = (p: IconProps) => (
 	</Outline>
 )
 /** «✧» of fields filled from the voice note. */
-export const Sparkle = ({ size = 13, color = '#5B3FD1' }: { size?: number; color?: string }) => (
-	<Outline size={size} color={color} strokeWidth={2}>
+export function Sparkle({ size = 13, color }: { size?: number; color?: string }) {
+	const c = useColors()
+	return (
+	<Outline size={size} color={color ?? c.violet} strokeWidth={2}>
 		<Path d="M12 3.5 13.8 9 19.5 10.5 13.8 12 12 17.5 10.2 12 4.5 10.5 10.2 9z" />
 		<Path d="M18.5 16v4M16.5 18h4" />
 	</Outline>
-)
+	)
+}
 
 /** Violet «✧ из голоса» pill [19]. */
 export function FromVoiceBadge() {
+	const c = useColors()
 	return (
-		<View style={{ height: 24, paddingHorizontal: 8, borderRadius: 12, backgroundColor: '#F1ECFF', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+		<View style={{ height: 24, paddingHorizontal: 8, borderRadius: 12, backgroundColor: c.violetSoft, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
 			<Sparkle />
-			<Text style={{ fontSize: 13, fontFamily: fontFamily(700), color: '#5B3FD1' }}>{t('из голоса')}</Text>
+			<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), color: c.violet }}>{t('из голоса')}</Text>
 		</View>
 	)
 }
@@ -110,9 +115,9 @@ export function Switch({ value, onChange, size = 'md', disabled }: { value: bool
 			disabled={disabled}
 			onPress={() => onChange(!value)}
 			hitSlop={8}
-			style={{ width: w, height: h, borderRadius: h / 2, backgroundColor: value ? c.success : '#BAB6B6', justifyContent: 'center' }}
+			style={{ width: w, height: h, borderRadius: h / 2, backgroundColor: value ? c.success : c.toggleOff, justifyContent: 'center' }}
 		>
-			<View style={{ width: knob, height: knob, borderRadius: knob / 2, backgroundColor: '#FFFFFF', marginLeft: value ? w - knob - 3 : 3 }} />
+			<View style={{ width: knob, height: knob, borderRadius: knob / 2, backgroundColor: fixed.white, marginLeft: value ? w - knob - 3 : 3 }} />
 		</Pressable>
 	)
 }
@@ -131,6 +136,7 @@ export function CallRow({ onCall, onChat, onRoute }: { onCall?: () => void; onCh
 	)
 	return (
 		<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+			{/* As in the mockup [37]: «Позвонить» grey, «Написать» the main blue one, the route a square. */}
 			<Pressable
 				onPress={onCall}
 				disabled={!onCall}
@@ -138,7 +144,7 @@ export function CallRow({ onCall, onChat, onRoute }: { onCall?: () => void; onCh
 					flex: 1,
 					height: 48,
 					borderRadius: 14,
-					backgroundColor: c.success,
+					backgroundColor: c.fill,
 					flexDirection: 'row',
 					alignItems: 'center',
 					justifyContent: 'center',
@@ -146,11 +152,28 @@ export function CallRow({ onCall, onChat, onRoute }: { onCall?: () => void; onCh
 					opacity: onCall ? 1 : 0.5,
 				}}
 			>
-				<PhoneOutline size={20} color="#FFFFFF" />
-				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Позвонить')}</Text>
+				<PhoneOutline size={20} color={c.ink} />
+				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{t('Позвонить')}</Text>
 			</Pressable>
-			{/* «Написать» — green like «Позвонить» */}
-			{square(<ChatBubble size={22} color={c.success} />, onChat, '#E7F6EC')}
+			<Pressable
+				onPress={onChat}
+				disabled={!onChat}
+				accessibilityRole="button"
+				style={{
+					flex: 1,
+					height: 48,
+					borderRadius: 14,
+					backgroundColor: c.brand,
+					flexDirection: 'row',
+					alignItems: 'center',
+					justifyContent: 'center',
+					gap: 8,
+					opacity: onChat ? 1 : 0.5,
+				}}
+			>
+				<ChatBubble size={20} color={fixed.white} />
+				<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Написать')}</Text>
+			</Pressable>
 			{square(<RouteOutline size={22} color={c.brandStrong} />, onRoute)}
 		</View>
 	)
@@ -159,10 +182,10 @@ export function CallRow({ onCall, onChat, onRoute }: { onCall?: () => void; onCh
 /** Chip 26 px: green — time, grey — the master's note, red — «Срочно». */
 export function SmallChip({ label, tone }: { label: string; tone: 'green' | 'grey' | 'red' }) {
 	const c = useColors()
-	const colors = { green: ['#E7F6EC', c.success], grey: [c.surface, c.ink], red: ['#FDECEC', c.danger] }[tone]
+	const colors = { green: [c.successSoft, c.success], grey: [c.surface, c.ink], red: [c.dangerSoft, c.danger] }[tone]
 	return (
 		<View style={{ height: 26, paddingHorizontal: 9, borderRadius: 8, backgroundColor: colors[0], justifyContent: 'center' }}>
-			<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: colors[1] }}>
+			<Text numberOfLines={1} style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: colors[1] }}>
 				{label}
 			</Text>
 		</View>
@@ -188,8 +211,8 @@ export function UrgentChip({ label = t('Срочно') }: { label?: string }) {
 				blink,
 			]}
 		>
-			<View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: '#FFFFFF' }} />
-			<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+			<View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: fixed.white }} />
+			<Text numberOfLines={1} style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: fixed.white }}>
 				{label}
 			</Text>
 		</Animated.View>
@@ -219,6 +242,8 @@ export function ModalSheet({ visible = true, onClose, children }: { visible?: bo
 					{children}
 				</View>
 			</KeyboardAvoidingView>
+			{/* A Modal covers the root toast — show it here too («Комментарий удалён · Вернуть»). */}
+			<ToastHost />
 		</Modal>
 	)
 }

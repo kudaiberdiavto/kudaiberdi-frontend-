@@ -1,12 +1,13 @@
-import { useState } from 'react'
-import { Image, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { useState, useRef } from 'react'
+import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Text, TextInput, View, type TextInputInstance } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BigButton, Caps, TopBar, priceDigits } from '@/components/buyer-v23'
-import { QueryErrorBanner } from '@/components/ui'
+import { BigButton, Caps, priceDigits } from '@/components/buyer-v23'
+import { QueryErrorBanner, ScreenHeader } from '@/components/ui'
 import { PlayIcon } from '@/components/voice'
 import { YellowChip, formatKgPhone } from '@/components/video-v23'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { usePart } from '@/api/catalog'
 import { useMe } from '@/api/me'
@@ -21,6 +22,9 @@ import { t } from '@/i18n'
  */
 export default function DeliveryScreen() {
 	const c = useColors()
+	// «Далее» on the keyboard walks the address → name → phone.
+	const nameRef = useRef<TextInputInstance>(null)
+	const phoneRef = useRef<TextInputInstance>(null)
 	const insets = useSafeAreaInsets()
 	const partId = Number(useLocalSearchParams<{ partId: string }>().partId) || 0
 	const part = usePart(partId).data
@@ -69,33 +73,33 @@ export default function DeliveryScreen() {
 		borderColor: c.border,
 		backgroundColor: c.card,
 		paddingHorizontal: 14,
-		fontSize: 17.5,
+		fontSize: fs.lg,
 		fontFamily: fontFamily(500),
 		color: c.ink,
 	} as const
-	const label = { fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted } as const
+	const label = { fontSize: fs.sm, fontFamily: fontFamily(500), color: c.muted } as const
 
 	return (
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar title={t('Доставка')} right={<YellowChip label={tariffs.data?.courierName ?? t('Ылдам Экспресс')} height={28} />} />
+			<ScreenHeader title={t('Доставка')} right={<YellowChip label={tariffs.data?.courierName ?? t('Ылдам Экспресс')} height={28} />} />
 
 			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 				{part ? (
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 10, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-						<View style={{ width: 56, height: 56, borderRadius: 12, backgroundColor: '#1F2329', overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
+						<View style={{ width: 56, height: 56, borderRadius: 12, backgroundColor: fixed.media, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
 							{poster ? <Image source={{ uri: poster }} style={{ position: 'absolute', width: '100%', height: '100%' }} /> : null}
 							{video ? <PlayIcon size={20} /> : null}
 						</View>
 						<View style={{ flex: 1, gap: 2 }}>
-							<Text numberOfLines={2} style={{ fontSize: 17.5, lineHeight: 22, fontFamily: fontFamily(700), color: c.ink }}>
+							<Text numberOfLines={2} style={{ fontSize: fs.lg, lineHeight: 22, fontFamily: fontFamily(700), color: c.ink }}>
 								{part.title}
 							</Text>
-							<Text numberOfLines={1} style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text numberOfLines={1} style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>
 								{part.shop.name} · {shopPlace(part.shop).replace(t('Контейнер'), t('конт.'))}
 							</Text>
 						</View>
 						{part.price != null ? (
-							<Text style={{ fontSize: 18.5, fontFamily: fontFamily(800), color: c.ink }}>{t('{0} с', priceDigits(part.price))}</Text>
+							<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(800), color: c.ink }}>{t('{0} с', priceDigits(part.price))}</Text>
 						) : null}
 					</View>
 				) : null}
@@ -123,7 +127,7 @@ export default function DeliveryScreen() {
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: active ? c.brandStrong : c.ink }}>{item.name}</Text>
+								<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: active ? c.brandStrong : c.ink }}>{item.name}</Text>
 							</Pressable>
 						)
 					})}
@@ -132,21 +136,25 @@ export default function DeliveryScreen() {
 				<Caps>{t('Курьер привезёт домой')}</Caps>
 				<View style={{ gap: 6 }}>
 					<Text style={label}>{region ? t('Адрес в {0}', region.inName) : t('Адрес')}</Text>
-					<TextInput value={address} onChangeText={setAddress} placeholder={t('ул. Ленина 45, кв. 12')} placeholderTextColor="#8C8888" style={input} />
+					<TextInput value={address} onChangeText={setAddress} placeholder={t('ул. Ленина 45, кв. 12')} placeholderTextColor={c.fillInk} style={input} textContentType="fullStreetAddress" autoComplete="street-address" returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => nameRef.current?.focus()} />
 				</View>
 				<View style={{ flexDirection: 'row', gap: 10 }}>
 					<View style={{ flex: 1, gap: 6 }}>
 						<Text style={label}>{t('Получатель')}</Text>
-						<TextInput value={recipient} onChangeText={setName} placeholder={t('Имя')} placeholderTextColor="#8C8888" style={input} />
+						<TextInput ref={nameRef} value={recipient} onChangeText={setName} placeholder={t('Имя')} placeholderTextColor={c.fillInk} style={input} textContentType="name" autoComplete="name" returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => phoneRef.current?.focus()} />
 					</View>
 					<View style={{ flex: 1.2, gap: 6 }}>
 						<Text style={label}>{t('Телефон')}</Text>
 						<TextInput
+							ref={phoneRef}
 							value={recipientPhone}
 							onChangeText={setPhone}
 							keyboardType="phone-pad"
+							textContentType="telephoneNumber"
+							autoComplete="tel"
+							returnKeyType="done"
 							placeholder="+996 555 123 456"
-							placeholderTextColor="#8C8888"
+							placeholderTextColor={c.fillInk}
 							style={input}
 						/>
 					</View>
@@ -155,13 +163,13 @@ export default function DeliveryScreen() {
 
 			<View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: insets.bottom + 12, gap: 8, backgroundColor: c.surface }}>
 				{/* Prices and days are agreed with the courier service itself. */}
-				<View style={{ borderRadius: 14, backgroundColor: '#FFF4D6', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+				<View style={{ borderRadius: 14, backgroundColor: c.warningTint, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink }}>{t('Стоимость — у {0}', tariffs.data?.courierName ?? t('Ылдам Экспресс'))}</Text>
-						<Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(400), color: c.inkSecondary }}>{t('Цену доставки обговорите с ними')}</Text>
+						<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.ink }}>{t('Стоимость — у {0}', tariffs.data?.courierName ?? t('Ылдам Экспресс'))}</Text>
+						<Text style={{ fontSize: fs.md, lineHeight: 21, fontFamily: fontFamily(400), color: c.inkSecondary }}>{t('Цену доставки обговорите с ними')}</Text>
 					</View>
 				</View>
-				<BigButton label={t('Заказать доставку')} tone="green" onPress={submit} loading={create.isPending} disabled={!ready} />
+				<BigButton label={t('Заказать доставку')} onPress={submit} loading={create.isPending} disabled={!ready} />
 			</View>
 		</KeyboardAvoidingView>
 	)

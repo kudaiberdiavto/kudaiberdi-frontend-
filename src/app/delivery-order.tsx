@@ -1,14 +1,15 @@
 import { useState } from 'react'
-import { ActivityIndicator, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Share, Text, TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Share, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BigButton, BubbleIcon, TickIcon, TopBar, priceDigits } from '@/components/buyer-v23'
-import { QueryErrorBanner } from '@/components/ui'
+import { BigButton, BubbleIcon, TickIcon, priceDigits } from '@/components/buyer-v23'
+import { QueryErrorBanner, ScreenHeader, Skeleton } from '@/components/ui'
 import { ClockOutline, routeTitle, toRegion } from '@/components/video-v23'
 import { WhatsAppIcon } from '@/components/icons'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { formatDay, formatWhenAt } from '@/lib/format'
+import { askForReview } from '@/lib/store-review'
 import { useMe } from '@/api/me'
 import {
 	useDeliveryOrder,
@@ -36,16 +37,37 @@ export default function DeliveryOrderScreen() {
 
 	return (
 		<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: c.surface, paddingTop: insets.top }}>
-			<TopBar title={asShop ? t('Заказ с доставкой') : t('Где посылка')} />
+			<ScreenHeader title={asShop ? t('Заказ с доставкой') : t('Где посылка')} />
 			<QueryErrorBanner error={order.error} onRetry={() => order.refetch()} />
 			{!data ? (
-				<ActivityIndicator style={{ marginTop: 40 }} color={c.brand} />
+				order.isLoading ? <OrderSkeleton /> : null
 			) : asShop ? (
 				<ShopSide order={data} bottom={insets.bottom} />
 			) : (
 				<BuyerSide order={data} bottom={insets.bottom} />
 			)}
 		</KeyboardAvoidingView>
+	)
+}
+
+/** Карточка маршрута и шаги доставки, пока заказ грузится. */
+function OrderSkeleton() {
+	const c = useColors()
+	return (
+		<View style={{ paddingHorizontal: 16, gap: 10 }}>
+			<Skeleton height={132} radius={20} />
+			<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 14, gap: 18 }}>
+				{[0.55, 0.45, 0.6, 0.5, 0.4].map((w, i) => (
+					<View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+						<Skeleton width={22} height={22} radius={11} />
+						<View style={{ flex: 1, gap: 7 }}>
+							<Skeleton width={`${w * 100}%`} height={15} />
+							<Skeleton width="35%" height={12} />
+						</View>
+					</View>
+				))}
+			</View>
+		</View>
 	)
 }
 
@@ -101,19 +123,19 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 		<>
 			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} showsVerticalScrollIndicator={false}>
 				<LinearGradient
-					colors={order.status === 'CANCELLED' ? ['#8C8888', '#6B6767'] : ['#2D63F0', '#1D46BF']}
+					colors={order.status === 'CANCELLED' ? fixed.cancelledGradient : fixed.brandGradient}
 					start={{ x: 0.25, y: 0 }}
 					end={{ x: 0.75, y: 1 }}
 					style={{ borderRadius: 20, padding: 16, gap: 6 }}
 				>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1, color: 'rgba(255,255,255,0.85)' }}>
-						{CAPTION[order.status].toUpperCase()}
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: 'rgba(255,255,255,0.85)' }}>
+						{CAPTION[order.status]}
 					</Text>
-					<Text style={{ fontSize: 24, fontFamily: fontFamily(800), letterSpacing: -0.4, color: '#FFFFFF' }}>{routeTitle(order)}</Text>
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.9)' }}>{arrivalText(order)}</Text>
+					<Text style={{ fontSize: fs.h2, fontFamily: fontFamily(800), letterSpacing: -0.4, color: fixed.white }}>{routeTitle(order)}</Text>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.9)' }}>{arrivalText(order)}</Text>
 					<View style={{ flexDirection: 'row', gap: 6, paddingTop: 6 }}>
 						{[0, 1, 2, 3, 4].map((i) => (
-							<View key={i} style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: i < filled ? '#FFFFFF' : 'rgba(255,255,255,0.3)' }} />
+							<View key={i} style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: i < filled ? fixed.white : 'rgba(255,255,255,0.3)' }} />
 						))}
 					</View>
 				</LinearGradient>
@@ -132,20 +154,20 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 								<View style={{ alignItems: 'center' }}>
 									{done ? (
 										<View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}>
-											<TickIcon size={13} color="#FFFFFF" />
+											<TickIcon size={13} color={fixed.white} />
 										</View>
 									) : now ? (
 										<View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: c.brand, alignItems: 'center', justifyContent: 'center' }}>
 											<View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: c.brand }} />
 										</View>
 									) : (
-										<View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: '#D5D2D0' }} />
+										<View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: c.border }} />
 									)}
-									{i < steps.length - 1 ? <View style={{ flex: 1, width: 2, minHeight: 14, backgroundColor: i < lastDone ? c.success : '#E4E1DF' }} /> : null}
+									{i < steps.length - 1 ? <View style={{ flex: 1, width: 2, minHeight: 14, backgroundColor: i < lastDone ? c.success : c.border }} /> : null}
 								</View>
 								<View style={{ flex: 1, paddingBottom: i < steps.length - 1 ? 12 : 0, gap: 1 }}>
-									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: now ? c.brandStrong : done ? c.ink : c.muted }}>{step.title}</Text>
-									{line ? <Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>{line}</Text> : null}
+									<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: now ? c.brandStrong : done ? c.ink : c.muted }}>{step.title}</Text>
+									{line ? <Text style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>{line}</Text> : null}
 								</View>
 							</View>
 						)
@@ -154,15 +176,15 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 
 				<View style={{ borderRadius: 16, backgroundColor: c.card, paddingVertical: 12, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center' }}>
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>{t('Трек-номер')}</Text>
-						<Text style={{ fontSize: 17.5, fontFamily: fontFamily(800), color: c.ink }}>{order.number}</Text>
+						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(500), color: c.muted }}>{t('Трек-номер')}</Text>
+						<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(800), color: c.ink }}>{order.number}</Text>
 					</View>
 					{/* No clipboard module in the app — the share sheet has «Скопировать». */}
 					<Pressable
 						onPress={() => Share.share({ message: order.number })}
 						style={{ height: 38, paddingHorizontal: 14, borderRadius: 19, borderWidth: 1.5, borderColor: c.border, justifyContent: 'center' }}
 					>
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.ink }}>{t('Скопировать')}</Text>
+						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.ink }}>{t('Скопировать')}</Text>
 					</Pressable>
 				</View>
 			</ScrollView>
@@ -170,15 +192,15 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 			<View style={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: bottom + 12, gap: 10 }}>
 				<QueryErrorBanner error={receive.error} />
 				{order.status === 'PICKED_UP' || order.status === 'COURIER_ORDERED' ? (
-					<BigButton label={t('Получил посылку')} tone="green" onPress={() => receive.mutate()} loading={receive.isPending} />
+					<BigButton label={t('Получил посылку')} onPress={() => receive.mutate(undefined, { onSuccess: () => askForReview() })} loading={receive.isPending} />
 				) : null}
 				<View style={{ flexDirection: 'row', gap: 10 }}>
 					{order.chatId ? (
 						<Pressable
 							onPress={() => router.push({ pathname: '/chat', params: { chatId: String(order.chatId) } })}
-							style={{ flex: 1, height: 52, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}
+							style={{ flex: 1, height: 52, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}
 						>
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Чат с продавцом')}</Text>
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Чат с продавцом')}</Text>
 						</Pressable>
 					) : null}
 					{order.courierWhatsappUrl ? (
@@ -190,15 +212,15 @@ function BuyerSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) 
 								height: 52,
 								paddingHorizontal: 10,
 								borderRadius: 14,
-								backgroundColor: '#25D366',
+								backgroundColor: fixed.whatsapp,
 								flexDirection: 'row',
 								alignItems: 'center',
 								justifyContent: 'center',
 								gap: 8,
 							}}
 						>
-							<WhatsAppIcon size={22} color="#FFFFFF" />
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Курьер Ылдам')}</Text>
+							<WhatsAppIcon size={22} color={fixed.white} />
+							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Курьер Ылдам')}</Text>
 						</Pressable>
 					) : null}
 				</View>
@@ -245,11 +267,11 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 					justifyContent: 'center',
 				}}
 			>
-				{done ? <TickIcon size={14} color="#FFFFFF" /> : <Text style={{ fontSize: 15.5, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{n}</Text>}
+				{done ? <TickIcon size={14} color={fixed.white} /> : <Text style={{ fontSize: fs.md, fontFamily: fontFamily(800), color: fixed.white }}>{n}</Text>}
 			</View>
 			<View style={{ flex: 1, gap: 3 }}>
-				<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{title}</Text>
-				<Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>{body}</Text>
+				<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{title}</Text>
+				<Text style={{ fontSize: fs.sm, lineHeight: 18.5, fontFamily: fontFamily(400), color: c.muted }}>{body}</Text>
 				{extra}
 			</View>
 		</View>
@@ -258,12 +280,12 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 	return (
 		<>
 			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 10 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-				<View style={{ borderRadius: 18, backgroundColor: '#FCEBB0', padding: 16, gap: 4 }}>
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1, color: '#7A5A00' }}>
-						{t('{0} · в {1}', caption, toRegion(destination)).toUpperCase()}
+				<View style={{ borderRadius: 18, backgroundColor: c.warningSoft, padding: 16, gap: 4 }}>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.warningInk }}>
+						{t('{0} · в {1}', caption, toRegion(destination))}
 					</Text>
-					<Text style={{ fontSize: 20, lineHeight: 25.5, fontFamily: fontFamily(800), color: c.ink }}>{order.part.title}</Text>
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>
+					<Text style={{ fontSize: fs.xxl, lineHeight: 25.5, fontFamily: fontFamily(800), color: c.ink }}>{order.part.title}</Text>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.inkSecondary }}>
 						{t('{0} сом · покупатель {1}', priceDigits(order.part.price), buyerName)}
 					</Text>
 				</View>
@@ -287,15 +309,15 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 									gap: 8,
 								}}
 							>
-								<Text style={{ fontSize: 15, fontFamily: fontFamily(500), color: c.muted }}>{t('Вес, кг')}</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.muted }}>{t('Вес, кг')}</Text>
 								<TextInput
 									value={weight}
 									onChangeText={setWeight}
 									editable={!packed}
 									keyboardType="decimal-pad"
 									placeholder="0"
-									placeholderTextColor="#B8B4B4"
-									style={{ width: 44, fontSize: 16.5, fontFamily: fontFamily(700), color: c.ink, padding: 0, textAlign: 'center' }}
+									placeholderTextColor={c.fillInk}
+									style={{ width: 44, fontSize: fs.base, fontFamily: fontFamily(700), color: c.ink, padding: 0, textAlign: 'center' }}
 								/>
 							</View>
 							<Pressable
@@ -317,15 +339,15 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 										height: 18,
 										borderRadius: 4,
 										borderWidth: 1.5,
-										borderColor: fragile ? c.success : '#B8B4B4',
+										borderColor: fragile ? c.success : c.chevron,
 										backgroundColor: fragile ? c.success : 'transparent',
 										alignItems: 'center',
 										justifyContent: 'center',
 									}}
 								>
-									{fragile ? <TickIcon size={11} color="#FFFFFF" /> : null}
+									{fragile ? <TickIcon size={11} color={fixed.white} /> : null}
 								</View>
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.ink }}>{t('Хрупкое')}</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.ink }}>{t('Хрупкое')}</Text>
 							</Pressable>
 						</View>
 					)}
@@ -338,8 +360,8 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 						<ClockOutline size={20} color={c.brandStrong} />
 					</View>
 					<View style={{ flex: 1, gap: 2 }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>{t('Курьер')}</Text>
-						<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(700), color: c.ink }}>
+						<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(500), color: c.muted }}>{t('Курьер')}</Text>
+						<Text style={{ fontSize: fs.lg, lineHeight: 23, fontFamily: fontFamily(700), color: c.ink }}>
 							{order.status === 'DELIVERED'
 								? t('Покупатель получил посылку')
 								: handed
@@ -355,8 +377,8 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 						style={{ borderRadius: 12, backgroundColor: c.brandTint, paddingVertical: 10, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 8 }}
 					>
 						<BubbleIcon size={18} color={c.brandStrong} />
-						<Text style={{ flex: 1, fontSize: 15, fontFamily: fontFamily(600), color: c.brandStrong }}>{t('Оплату договоритесь с покупателем в чате')}</Text>
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Чат')}</Text>
+						<Text style={{ flex: 1, fontSize: fs.md, fontFamily: fontFamily(600), color: c.brandStrong }}>{t('Оплату договоритесь с покупателем в чате')}</Text>
+						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Чат')}</Text>
 					</Pressable>
 				) : null}
 
@@ -367,13 +389,12 @@ function ShopSide({ order, bottom }: { order: DeliveryOrder; bottom: number }) {
 				{order.status === 'NEW' ? (
 					<BigButton
 						label={t('Упаковал — жду курьера')}
-						tone="green"
 						disabled={!weightOk}
 						loading={pack.isPending}
 						onPress={() => pack.mutate({ weightKg: Math.round(weightKg * 10) / 10, fragile })}
 					/>
 				) : order.status === 'PACKED' || order.status === 'COURIER_ORDERED' ? (
-					<BigButton label={t('Курьер забрал')} tone="green" loading={pickedUp.isPending} onPress={() => pickedUp.mutate()} />
+					<BigButton label={t('Курьер забрал')} loading={pickedUp.isPending} onPress={() => pickedUp.mutate()} />
 				) : (
 					<BigButton
 						label={order.status === 'DELIVERED' ? t('Покупатель получил') : order.status === 'CANCELLED' ? t('Заказ отменён') : t('Отдали курьеру')}

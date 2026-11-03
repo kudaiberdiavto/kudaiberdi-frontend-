@@ -2,14 +2,15 @@ import { useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { QueryErrorBanner } from '@/components/ui'
+import { QueryErrorBanner, ScreenHeader } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
-import { ChevronLeftIcon, SearchIcon } from '@/components/icons'
-import { fontFamily, raw, useColors } from '@/theme'
+import { SearchIcon } from '@/components/icons'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { useSearchCount } from '@/api/catalog'
 import { useBrands, useModels } from '@/api/directory'
 import type { Brand } from '@/api/types'
 import { toPartFilters, useCatalogFilters } from '@/store/useCatalogFilters'
+import { t } from '@/i18n'
 
 /** 28 «Марка авто» — for the catalog when the car is not in the garage. */
 export default function PickBrandScreen() {
@@ -39,23 +40,7 @@ export default function PickBrandScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
-			<View
-				style={{
-					paddingTop: insets.top + 12,
-					paddingHorizontal: 16,
-					paddingBottom: 8,
-					flexDirection: 'row',
-					alignItems: 'center',
-					gap: 10,
-				}}
-			>
-				<Pressable onPress={() => router.back()}>
-					<ChevronLeftIcon size={24} color={c.ink} />
-				</Pressable>
-				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					Марка авто
-				</Text>
-			</View>
+			<ScreenHeader inset title={t('Марка авто')} />
 
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 14 }} showsVerticalScrollIndicator={false}>
 				<View
@@ -76,15 +61,15 @@ export default function PickBrandScreen() {
 						value={q}
 						onChangeText={setQ}
 						placeholder="Марка или модель"
-						placeholderTextColor="#7D7979"
-						style={{ flex: 1, minWidth: 0, fontSize: 16, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+						placeholderTextColor={c.fillInk}
+						style={{ flex: 1, minWidth: 0, fontSize: fs.base, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 					/>
 				</View>
 
 				<QueryErrorBanner error={all.error} onRetry={() => all.refetch()} />
 
 				{popular.length ? (
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>ПОПУЛЯРНЫЕ</Text>
+					<Text style={{ ...sectionTitle, color: c.inkSecondary }}>ПОПУЛЯРНЫЕ</Text>
 				) : null}
 
 				<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -110,7 +95,7 @@ export default function PickBrandScreen() {
 								}}
 							>
 								<BrandLogo brand={b} size={40} />
-								<Text style={{ fontSize: 12, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
+								<Text style={{ fontSize: fs.xxs, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
 									{b.shortName}
 								</Text>
 							</Pressable>
@@ -119,7 +104,7 @@ export default function PickBrandScreen() {
 				</View>
 
 				{others.length ? (
-					<Text style={{ fontSize: 13, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
+					<Text style={{ ...sectionTitle, color: c.inkSecondary }}>
 						{searching ? 'НАЙДЕНО' : 'ВСЕ МАРКИ А–Я'}
 					</Text>
 				) : null}
@@ -143,7 +128,7 @@ export default function PickBrandScreen() {
 							}}
 						>
 							<BrandLogo brand={b} size={34} />
-							<Text style={{ flex: 1, fontSize: 16, fontFamily: fontFamily(400), color: c.ink }}>{b.name}</Text>
+							<Text style={{ flex: 1, fontSize: fs.base, fontFamily: fontFamily(400), color: c.ink }}>{b.name}</Text>
 						</Pressable>
 					))}
 				</View>
@@ -160,7 +145,7 @@ export default function PickBrandScreen() {
 						paddingHorizontal: 16,
 						paddingBottom: insets.bottom + 12,
 						gap: 14,
-						shadowColor: '#201F1D',
+						shadowColor: fixed.shadow,
 						shadowOpacity: 0.14,
 						shadowOffset: { width: 0, height: -6 },
 						shadowRadius: 20,
@@ -172,8 +157,8 @@ export default function PickBrandScreen() {
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 						<BrandLogo brand={brand} size={44} />
 						<View style={{ gap: 2 }}>
-							<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{brand.name}</Text>
-							<Text style={{ fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>Выберите модель или пропустите</Text>
+							<Text style={{ fontSize: fs.xxl, fontFamily: fontFamily(700), color: c.ink }}>{brand.name}</Text>
+							<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>Выберите модель или пропустите</Text>
 						</View>
 					</View>
 
@@ -196,7 +181,7 @@ export default function PickBrandScreen() {
 										justifyContent: 'center',
 									}}
 								>
-									<Text style={{ fontSize: 14, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
+									<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
 										{label}
 									</Text>
 								</Pressable>
@@ -207,23 +192,23 @@ export default function PickBrandScreen() {
 					<View style={{ flexDirection: 'row', gap: 8 }}>
 						<Pressable
 							onPress={() => apply(false)}
-							style={{ flex: 1, height: 52, borderRadius: 14, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}
+							style={{ flex: 1, height: 52, borderRadius: 14, backgroundColor: c.fill, alignItems: 'center', justifyContent: 'center' }}
 						>
-							<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>Все модели</Text>
+							<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>Все модели</Text>
 						</Pressable>
 						<Pressable
 							onPress={() => apply(true)}
 							style={{ flex: 1.4, height: 52, borderRadius: 14, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}
 						>
 							{count.data === undefined ? (
-								<ActivityIndicator color="#FFFFFF" />
+								<ActivityIndicator color={fixed.white} />
 							) : (
-								<Text style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>Показать {count.data}</Text>
+								<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>Показать {count.data}</Text>
 							)}
 						</Pressable>
 					</View>
 
-					<Text onPress={() => router.push('/garage-add')} style={{ fontSize: 13, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text onPress={() => router.push('/garage-add')} style={{ fontSize: fs.xs, fontFamily: fontFamily(400), color: c.muted }}>
 						Добавить эту машину в <Text style={{ fontFamily: fontFamily(700), color: c.brandStrong }}>Мой гараж</Text>
 					</Text>
 				</View>

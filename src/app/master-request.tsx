@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, ScrollView } from 'react-native'
+import { ScrollView } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
-import { QueryErrorBanner, Screen } from '@/components/ui'
-import { TopBar } from '@/components/buyer-v23'
-import { useColors } from '@/theme'
+import { QueryErrorBanner, Screen, ScreenHeader, SkeletonRequestCard, undoToast } from '@/components/ui'
+
 import { minutesLeft } from '@/lib/format'
 import { markServiceSeen, serviceName, useMasterOffer, useMasterRequest, useServiceTypes } from '@/api/services'
 import { RequestCard } from './master/index'
 import { t } from '@/i18n'
+import { useHiddenCards } from '@/store/useHiddenCards'
 
 /** A client's request opened from «Заявки»: the same card, photos and videos large, the answer buttons below. */
 export default function MasterRequestScreen() {
-	const c = useColors()
 	const id = Number(useLocalSearchParams<{ id: string }>().id)
 	const request = useMasterRequest(id)
 	const types = useServiceTypes().data
@@ -27,7 +26,7 @@ export default function MasterRequestScreen() {
 
 	return (
 		<Screen padding={0}>
-			<TopBar title={t('Заявка')} />
+			<ScreenHeader title={t('Заявка')} />
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 4, gap: 12 }} showsVerticalScrollIndicator={false}>
 				<QueryErrorBanner error={request.error ?? offer.error} onRetry={() => request.refetch()} />
 				{item ? (
@@ -38,11 +37,20 @@ export default function MasterRequestScreen() {
 						now={now}
 						onVoice={() => answer(true)}
 						onHelp={() => answer(false)}
-						onSkip={() => offer.mutate({ id, body: { answer: 'NOT_MINE' } }, { onSuccess: () => router.back() })}
+						onSkip={() => {
+							const { hide, show } = useHiddenCards.getState()
+							hide('master-feed', id)
+							router.back()
+							undoToast({
+								text: t('Ответили «Не моё»'),
+								restore: () => show('master-feed', id),
+								commit: () => offer.mutate({ id, body: { answer: 'NOT_MINE' } }, { onSettled: () => show('master-feed', id) }),
+							})
+						}}
 						full
 					/>
-				) : request.isPending ? (
-					<ActivityIndicator color={c.muted} style={{ paddingTop: 40 }} />
+				) : request.isLoading ? (
+					<SkeletonRequestCard full actions={2} />
 				) : null}
 			</ScrollView>
 		</Screen>

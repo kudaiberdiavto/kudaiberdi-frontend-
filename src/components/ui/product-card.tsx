@@ -1,6 +1,7 @@
-import { Image, Pressable, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
+import { Image } from './image'
 import { CheckIcon, HeartIcon } from '@/components/icons'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import Svg, { Path } from 'react-native-svg'
 import { PhotoPlaceholder } from './photo'
 import { t } from '@/i18n'
@@ -47,7 +48,7 @@ export function ProductCard({
 		<Pressable onPress={onPress} style={{ width: width ?? '100%', gap: 8, opacity: dimmed ? 0.6 : 1 }}>
 			<View style={{ borderRadius: 16, overflow: 'hidden', backgroundColor: c.card }}>
 				{photoUrl ? (
-					<Image source={{ uri: photoUrl }} style={{ width: '100%', aspectRatio: 1 }} resizeMode="cover" />
+					<Image source={{ uri: photoUrl }} style={{ width: '100%', aspectRatio: 1 }} contentFit="cover" />
 				) : (
 					<View style={{ width: '100%', aspectRatio: 1, overflow: 'hidden' }}>
 						<PhotoPlaceholder width={width ?? 200} height={width ?? 200} radius={0} />
@@ -68,7 +69,7 @@ export function ProductCard({
 							justifyContent: 'center',
 						}}
 					>
-						<Svg width={12} height={12} viewBox="0 0 24 24" fill="#FFFFFF">
+						<Svg width={12} height={12} viewBox="0 0 24 24" fill={fixed.white}>
 							<Path d="M8 5.5v13l10-6.5z" />
 						</Svg>
 					</View>
@@ -81,7 +82,7 @@ export function ProductCard({
 						width: 30,
 						height: 30,
 						borderRadius: 15,
-						backgroundColor: 'rgba(255,255,255,0.9)',
+						backgroundColor: c.floating,
 						alignItems: 'center',
 						justifyContent: 'center',
 					}}
@@ -103,20 +104,20 @@ export function ProductCard({
 							gap: 4,
 						}}
 					>
-						<CheckIcon size={14} color="#FFFFFF" strokeWidth={3} />
-						<Text style={{ fontSize: 13.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Подходит')}</Text>
+						<CheckIcon size={14} color={fixed.white} strokeWidth={3} />
+						<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(700), color: fixed.white }}>{t('Подходит')}</Text>
 					</View>
 				) : null}
 			</View>
 
 			<View style={{ paddingHorizontal: 2, gap: 4 }}>
-				<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: c.ink }}>{price}</Text>
-				<Text numberOfLines={2} style={{ fontSize: 16, lineHeight: 21, fontFamily: fontFamily(400), color: c.ink }}>
+				<Text style={{ fontSize: fs.xxl, fontFamily: fontFamily(800), color: c.ink }}>{price}</Text>
+				<Text numberOfLines={2} style={{ fontSize: fs.base, lineHeight: 21, fontFamily: fontFamily(400), color: c.ink }}>
 					{title}
 				</Text>
 				<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 2 }}>
 					{shopAvatarUrl ? <Image source={{ uri: shopAvatarUrl }} style={{ width: 20, height: 20, borderRadius: 10 }} /> : null}
-					<Text numberOfLines={1} style={{ flex: 1, fontSize: 14, fontFamily: fontFamily(400), color: c.muted }}>
+					<Text numberOfLines={1} style={{ flex: 1, fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>
 						{[shopName, location].filter(Boolean).join(' · ')}
 					</Text>
 				</View>

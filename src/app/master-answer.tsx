@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Stack, router, useLocalSearchParams } from 'expo-router'
+import { useConfirmLeave } from '@/lib/use-confirm-leave'
+import { toast } from '@/components/ui'
 import { VoicePlayer, VoiceRecordingPanel, VoiceResultPanel, useVoiceNote } from '@/components/voice'
 import { CheckMark, MicOutline, SendPlane } from '@/components/master-v23'
 import { MediaStrip } from '@/components/media-strip'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { formatClock, formatNumber } from '@/lib/format'
 import { useMasterOffer, useMasterRequest } from '@/api/services'
 import { t } from '@/i18n'
@@ -53,6 +55,7 @@ export default function MasterAnswerScreen() {
 
 	const priceValue = price ? Number(price) : null
 	const busy = voice.recording || voice.uploading || offer.isPending
+	const leave = useConfirmLeave(Boolean(price) || Boolean(voice.result) || voice.recording)
 	const close = () => {
 		if (voice.recording) voice.cancel()
 		router.back()
@@ -71,7 +74,7 @@ export default function MasterAnswerScreen() {
 					voiceMediaId: voice.result?.voice.id,
 				},
 			},
-			{ onSuccess: () => router.back() }
+			{ onSuccess: () => (toast(t('Ответ отправлен клиенту')), leave(() => router.back())) }
 		)
 	}
 
@@ -103,11 +106,11 @@ export default function MasterAnswerScreen() {
 
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 						<View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: c.success, alignItems: 'center', justifyContent: 'center' }}>
-							<CheckMark size={22} color="#FFFFFF" strokeWidth={2.2} />
+							<CheckMark size={22} color={fixed.white} strokeWidth={2.2} />
 						</View>
 						<View style={{ flex: 1, gap: 1 }}>
-							<Text style={{ fontSize: 22, lineHeight: 28.6, fontFamily: fontFamily(800), color: c.ink }}>{t('Проверьте и отправьте')}</Text>
-							<Text numberOfLines={1} style={{ fontSize: 15.5, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
+							<Text style={{ fontSize: fs.h3, lineHeight: 28.6, fontFamily: fontFamily(800), color: c.ink }}>{t('Проверьте и отправьте')}</Text>
+							<Text numberOfLines={1} style={{ fontSize: fs.md, lineHeight: 20, fontFamily: fontFamily(400), color: c.muted }}>
 								{subtitle}
 							</Text>
 						</View>
@@ -131,17 +134,17 @@ export default function MasterAnswerScreen() {
 							style={{ height: 48, borderRadius: 14, backgroundColor: c.brandTint, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
 						>
 							<MicOutline size={20} color={c.brandStrong} />
-							<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Сказать голосом')}</Text>
+							<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Сказать голосом')}</Text>
 						</Pressable>
 					)}
-					{voice.error ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.danger }}>{voice.error}</Text> : null}
+					{voice.error ? <Text style={{ fontSize: fs.sm, fontFamily: fontFamily(500), color: c.danger }}>{voice.error}</Text> : null}
 
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, textTransform: 'uppercase', color: c.muted }}>
+						<Text style={{ ...sectionTitle, color: c.inkSecondary }}>
 							{voice.result ? t('Заполнили из голоса') : t('Цена и время')}
 						</Text>
 						<View style={{ flex: 1 }} />
-						{voice.result ? <Text style={{ fontSize: 14.5, fontFamily: fontFamily(500), color: c.muted }}>{t('можно поправить')}</Text> : null}
+						{voice.result ? <Text style={{ fontSize: fs.sm, fontFamily: fontFamily(500), color: c.muted }}>{t('можно поправить')}</Text> : null}
 					</View>
 
 					<View
@@ -156,16 +159,16 @@ export default function MasterAnswerScreen() {
 							gap: 8,
 						}}
 					>
-						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>{t('от')}</Text>
+						<Text style={{ fontSize: fs.xxl, fontFamily: fontFamily(700), color: c.muted }}>{t('от')}</Text>
 						<TextInput
 							value={priceValue ? formatNumber(priceValue) : ''}
 							onChangeText={(value) => setPrice(value.replace(/\D/g, '').slice(0, 7))}
 							keyboardType="number-pad"
 							placeholder="0"
 							placeholderTextColor={c.border}
-							style={{ minWidth: 40, fontSize: 32, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink, padding: 0 }}
+							style={{ minWidth: 40, fontSize: fs.hero, fontFamily: fontFamily(800), letterSpacing: -0.64, color: c.ink, padding: 0 }}
 						/>
-						<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.muted }}>{t('сом')}</Text>
+						<Text style={{ fontSize: fs.xxl, fontFamily: fontFamily(700), color: c.muted }}>{t('сом')}</Text>
 					</View>
 
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -188,7 +191,7 @@ export default function MasterAnswerScreen() {
 										gap: 6,
 									}}
 								>
-									<Text numberOfLines={1} style={{ fontSize: 16.5, fontFamily: fontFamily(selected ? 700 : 600), color: selected ? c.brandStrong : c.ink }}>
+									<Text numberOfLines={1} style={{ fontSize: fs.base, fontFamily: fontFamily(selected ? 700 : 600), color: selected ? c.brandStrong : c.ink }}>
 										{timeLabel(value)}
 									</Text>
 								</Pressable>
@@ -196,7 +199,7 @@ export default function MasterAnswerScreen() {
 						})}
 					</View>
 
-					{offer.error ? <Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{offer.error.message}</Text> : null}
+					{offer.error ? <Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{offer.error.message}</Text> : null}
 
 					<Pressable
 						onPress={send}
@@ -204,7 +207,7 @@ export default function MasterAnswerScreen() {
 						style={{
 							height: 58,
 							borderRadius: 14,
-							backgroundColor: c.success,
+							backgroundColor: c.brand,
 							flexDirection: 'row',
 							alignItems: 'center',
 							justifyContent: 'center',
@@ -212,8 +215,8 @@ export default function MasterAnswerScreen() {
 							opacity: busy ? 0.5 : 1,
 						}}
 					>
-						<SendPlane size={20} color="#FFFFFF" />
-						<Text style={{ fontSize: 18.5, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{offer.isPending ? t('Отправляем…') : t('Отправить клиенту')}</Text>
+						<SendPlane size={20} color={fixed.white} />
+						<Text style={{ fontSize: fs.xl, fontFamily: fontFamily(700), color: fixed.white }}>{offer.isPending ? t('Отправляем…') : t('Отправить клиенту')}</Text>
 					</Pressable>
 				</View>
 			</KeyboardAvoidingView>

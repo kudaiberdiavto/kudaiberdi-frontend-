@@ -1,11 +1,11 @@
 import { useCallback, useState } from 'react'
-import { FlatList, Text, View, type ViewToken } from 'react-native'
+import { FlatList, Text, View, type ListViewToken } from 'react-native'
 import { router, useIsFocused } from 'expo-router'
 import { VideoTile } from '@/components/video-v23'
-import { fontFamily, useColors } from '@/theme'
+import { Skeleton } from '@/components/ui'
+import { fontFamily, fs, useColors } from '@/theme'
 import { flattenPages } from '@/api/pagination'
 import { useVideoFeed } from '@/api/catalog'
-import type { VideoFeedItem } from '@/api/types'
 import { useVideoViewer } from '@/store/useVideoViewer'
 import { marketPlace } from '@/lib/shop-place'
 import { t } from '@/i18n'
@@ -22,11 +22,24 @@ export function MarketVideos() {
 	const [visible, setVisible] = useState<number[]>([0, 1, 2])
 	// FlatList wants the same callback for its whole life.
 	const onViewable = useCallback(
-		({ viewableItems }: { viewableItems: ViewToken<VideoFeedItem>[] }) =>
+		({ viewableItems }: { viewableItems: ListViewToken[] }) =>
 			setVisible(viewableItems.flatMap((token) => (token.index == null ? [] : [token.index]))),
 		[]
 	)
 
+	if (feed.isLoading)
+		return (
+			<View style={{ gap: 10, paddingTop: 2 }}>
+				<View style={{ alignItems: 'flex-end' }}>
+					<Skeleton width={110} height={18} />
+				</View>
+				<View style={{ flexDirection: 'row', gap: 8, marginHorizontal: -16, paddingLeft: 16, overflow: 'hidden' }}>
+					{[0, 1, 2].map((i) => (
+						<Skeleton key={i} width={172} height={250} radius={18} />
+					))}
+				</View>
+			</View>
+		)
 	if (!items.length) return null
 
 	const openFeed = (partId?: number) => {
@@ -38,7 +51,7 @@ export function MarketVideos() {
 		<View style={{ gap: 10, paddingTop: 2 }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
 				<View style={{ flex: 1 }} />
-				<Text onPress={() => openFeed()} style={{ flexShrink: 0, fontSize: 16, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Смотреть все')}</Text>
+				<Text onPress={() => openFeed()} style={{ flexShrink: 0, fontSize: fs.base, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Смотреть все')}</Text>
 			</View>
 			<FlatList
 				horizontal

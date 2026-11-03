@@ -3,8 +3,7 @@
 import type { ReactNode } from 'react'
 import { ActivityIndicator, Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-native'
 import Svg, { Circle, Path, Rect } from 'react-native-svg'
-import { router } from 'expo-router'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { t } from '@/i18n'
 
 // ─── Icons (24×24 strokes from the mockup) ──────────────────────────────────
@@ -167,53 +166,16 @@ export const DotsIcon = (p: V23IconProps) => (
  * 52px bar under the status bar: ‹ back, title (20px / 700; 26px for big titles), right slot.
  * `onClose` instead of `onBack` puts × on the right, as on «Найти запчасть» [04].
  */
-export function TopBar({
-	title,
-	big,
-	onBack,
-	onClose,
-	right,
-}: {
-	title?: string
-	big?: boolean
-	onBack?: (() => void) | false
-	onClose?: () => void
-	right?: ReactNode
-}) {
-	const c = useColors()
-	return (
-		<View style={{ height: 52, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-			{onBack !== false && !onClose ? (
-				<Pressable onPress={onBack || (() => router.back())} hitSlop={10}>
-					<BackIcon color={c.ink} />
-				</Pressable>
-			) : null}
-			<Text
-				numberOfLines={1}
-				style={{ flex: 1, fontSize: big ? 26 : 20, fontFamily: fontFamily(700), letterSpacing: big ? -0.26 : -0.2, color: c.ink }}
-			>
-				{title ?? ''}
-			</Text>
-			{right}
-			{onClose ? (
-				<Pressable onPress={onClose} hitSlop={10}>
-					<CrossIcon color={c.ink} />
-				</Pressable>
-			) : null}
-		</View>
-	)
-}
-
-/** «НУЖЕН МАСТЕР?» — 13px / 700, letter-spacing .08em, uppercase; optional link on the right. */
+/** A section heading («Нужен мастер?», sentence case) with an optional link on the right. */
 export function Caps({ children, link, onLink }: { children: string; link?: string; onLink?: () => void }) {
 	const c = useColors()
 	return (
 		<View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-			<Text style={{ flex: 1, fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-				{children.toUpperCase()}
+			<Text style={{ flex: 1, ...sectionTitle, color: c.inkSecondary }}>
+				{children}
 			</Text>
 			{link ? (
-				<Text onPress={onLink} style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>
+				<Text onPress={onLink} style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>
 					{link}
 				</Text>
 			) : null}
@@ -221,7 +183,7 @@ export function Caps({ children, link, onLink }: { children: string; link?: stri
 	)
 }
 
-/** 56–58px main button: blue action or green «Есть / Позвонить». */
+/** 56–58px button: blue — the screen's main action, grey — a secondary one. Green is for statuses, not buttons. */
 export function BigButton({
 	label,
 	onPress,
@@ -234,7 +196,7 @@ export function BigButton({
 }: {
 	label: string
 	onPress?: () => void
-	tone?: 'blue' | 'green' | 'grey'
+	tone?: 'blue' | 'grey'
 	icon?: ReactNode
 	height?: number
 	loading?: boolean
@@ -242,8 +204,8 @@ export function BigButton({
 	style?: StyleProp<ViewStyle>
 }) {
 	const c = useColors()
-	const background = tone === 'green' ? c.success : tone === 'grey' ? '#EFEDEC' : c.brand
-	const color = tone === 'grey' ? c.ink : '#FFFFFF'
+	const background = tone === 'grey' ? c.fill : c.brand
+	const color = tone === 'grey' ? c.ink : fixed.white
 	return (
 		<Pressable
 			onPress={onPress}
@@ -264,7 +226,7 @@ export function BigButton({
 			]}
 		>
 			{loading ? <ActivityIndicator color={color} /> : icon}
-			<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ flexShrink: 1, fontSize: 18.5, fontFamily: fontFamily(700), color }}>{label}</Text>
+			<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ flexShrink: 1, fontSize: fs.xl, fontFamily: fontFamily(700), color }}>{label}</Text>
 		</Pressable>
 	)
 }
@@ -278,11 +240,11 @@ export function MetaChip({ label, tone = 'grey' }: { label: string; tone?: 'gree
 				height: 26,
 				paddingHorizontal: 9,
 				borderRadius: 8,
-				backgroundColor: tone === 'green' ? '#E7F6EC' : c.surface,
+				backgroundColor: tone === 'green' ? c.successSoft : c.surface,
 				justifyContent: 'center',
 			}}
 		>
-			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: tone === 'green' ? c.success : c.ink }}>{label}</Text>
+			<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: tone === 'green' ? c.success : c.ink }}>{label}</Text>
 		</View>
 	)
 }
@@ -291,7 +253,7 @@ export function MetaChip({ label, tone = 'grey' }: { label: string; tone?: 'gree
 export function LiveDot() {
 	const c = useColors()
 	return (
-		<View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: '#E7F6EC', alignItems: 'center', justifyContent: 'center' }}>
+		<View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: c.successSoft, alignItems: 'center', justifyContent: 'center' }}>
 			<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.success }} />
 		</View>
 	)
@@ -299,8 +261,9 @@ export function LiveDot() {
 
 /** The illustration of a part used in the mockup when there is no photo (strut on a grey gradient). */
 export function PartIllustration({ size }: { size: number }) {
+	const c = useColors()
 	return (
-		<View style={{ width: size, height: size, backgroundColor: '#E1E6ED' }}>
+		<View style={{ width: size, height: size, backgroundColor: c.placeholder }}>
 			<Svg viewBox="0 0 100 100" width={size} height={size}>
 				<Rect x="42" y="12" width="16" height="30" rx="4" fill="#9CA3AF" stroke="#6B7280" strokeWidth="2" />
 				<Path d="M36 44h28M38 50l24 5M38 58l24 5M38 66l24 5M38 74l24 5" stroke="#374151" strokeWidth="3.5" strokeLinecap="round" />

@@ -1,13 +1,14 @@
 // Videos from the market: icons of the feed, the autoplaying tile of «Видео с рынка» and the delivery pieces
 // (truck, «Ылдам Экспресс», day / price labels, the 17:30 cut-off). Sizes and colours — from the mockup.
 import { useEffect, type ReactNode } from 'react'
-import { Image, Pressable, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import Svg, { Circle, Path, Rect } from 'react-native-svg'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useVideoPlayer, VideoView, type VideoPlayer } from 'expo-video'
 import { priceDigits } from '@/components/buyer-v23'
 import { resolveUrl } from '@/lib/api'
-import { fontFamily } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import type { DeliveryOrder, Video } from '@/api/types'
 import { t } from '@/i18n'
 
@@ -71,30 +72,32 @@ export const WhatsAppIcon = (p: IconProps) => (
 
 /** Yellow «Ылдам Экспресс» / «Доставка по КР» chip. */
 export function YellowChip({ label, icon, height = 26 }: { label: string; icon?: boolean; height?: number }) {
+	const c = useColors()
 	return (
 		<View
 			style={{
 				height,
 				paddingHorizontal: 10,
 				borderRadius: height / 2,
-				backgroundColor: '#FCE7A2',
+				backgroundColor: c.warningSoft,
 				flexDirection: 'row',
 				alignItems: 'center',
 				gap: 5,
 				alignSelf: 'flex-start',
 			}}
 		>
-			{icon ? <TruckIcon size={15} color="#6B4E00" strokeWidth={2.2} /> : null}
-			<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: '#6B4E00' }}>{label}</Text>
+			{icon ? <TruckIcon size={15} color={c.warningInk} strokeWidth={2.2} /> : null}
+			<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: c.warningInk }}>{label}</Text>
 		</View>
 	)
 }
 
 /** Yellow tile with a truck — «Отправлю в регионы». */
 export function TruckTile({ size = 40 }: { size?: number }) {
+	const c = useColors()
 	return (
-		<View style={{ width: size, height: size, borderRadius: 12, backgroundColor: '#FCE7A2', alignItems: 'center', justifyContent: 'center' }}>
-			<TruckIcon size={size * 0.55} color="#6B4E00" />
+		<View style={{ width: size, height: size, borderRadius: 12, backgroundColor: c.warningSoft, alignItems: 'center', justifyContent: 'center' }}>
+			<TruckIcon size={size * 0.55} color={c.warningInk} />
 		</View>
 	)
 }
@@ -144,7 +147,7 @@ export function VideoTile({
 }) {
 	const poster = resolveUrl(video.posterUrl)
 	return (
-		<Pressable onPress={onPress} style={{ width: 172, height: 250, borderRadius: 18, overflow: 'hidden', backgroundColor: '#1F2329' }}>
+		<Pressable onPress={onPress} style={{ width: 172, height: 250, borderRadius: 18, overflow: 'hidden', backgroundColor: fixed.media }}>
 			{poster ? <Image source={{ uri: poster }} style={{ position: 'absolute', width: '100%', height: '100%' }} /> : null}
 			{/* A player only while the tile plays — a player per tile (10 on screen, more off it) slows the phone down. */}
 			{playing ? <LoopVideo url={video.url} playing style={{ position: 'absolute', width: '100%', height: '100%' }} /> : null}
@@ -155,11 +158,11 @@ export function VideoTile({
 				style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
 			/>
 			<View style={{ position: 'absolute', left: 10, right: 10, bottom: 10, gap: 3 }}>
-				<Text numberOfLines={2} style={{ fontSize: 18.5, lineHeight: 23, fontFamily: fontFamily(700), color: '#FFFFFF' }}>
+				<Text numberOfLines={2} style={{ fontSize: fs.xl, lineHeight: 23, fontFamily: fontFamily(700), color: fixed.white }}>
 					{title}
 				</Text>
-				<Text style={{ fontSize: 20, fontFamily: fontFamily(800), color: '#FFFFFF' }}>{t('{0} с', priceDigits(price))}</Text>
-				<Text numberOfLines={1} style={{ fontSize: 15, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.75)' }}>
+				<Text style={{ fontSize: fs.xxl, fontFamily: fontFamily(800), color: fixed.white }}>{t('{0} с', priceDigits(price))}</Text>
+				<Text numberOfLines={1} style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.75)' }}>
 					{place}
 				</Text>
 			</View>

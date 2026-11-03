@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { BottomSheet, BrandLogo, Button, QueryErrorBanner } from '@/components/ui'
-import { ChevronLeftIcon, SearchIcon } from '@/components/icons'
-import { fontFamily, useColors } from '@/theme'
+import { BottomSheet, BrandLogo, Button, QueryErrorBanner, ScreenHeader, toast } from '@/components/ui'
+import { SearchIcon } from '@/components/icons'
+import { fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { useBrands, useModels } from '@/api/directory'
 import { useAddCar } from '@/api/garage'
 import type { Brand, CarModel, CarOrigin, FuelType } from '@/api/types'
@@ -29,7 +28,6 @@ function yearsOf(model: CarModel | undefined) {
  */
 export default function GarageAddScreen() {
 	const c = useColors()
-	const insets = useSafeAreaInsets()
 	// From «Фото техпаспорта» [04] when the model wasn't read: what was read is prefilled.
 	const passport = useLocalSearchParams<{
 		brand?: string
@@ -83,7 +81,7 @@ export default function GarageAddScreen() {
 				justifyContent: 'center',
 			}}
 		>
-			<Text style={{ fontSize: 15.5, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
+			<Text style={{ fontSize: fs.md, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
 				{label}
 			</Text>
 		</Pressable>
@@ -91,23 +89,7 @@ export default function GarageAddScreen() {
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
-			<View
-				style={{
-					paddingTop: insets.top + 12,
-					paddingHorizontal: 16,
-					paddingBottom: 8,
-					flexDirection: 'row',
-					alignItems: 'center',
-					gap: 10,
-				}}
-			>
-				<Pressable onPress={() => router.back()}>
-					<ChevronLeftIcon size={24} color={c.ink} />
-				</Pressable>
-				<Text style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(700), letterSpacing: -0.2, color: c.ink }}>
-					{once ? t('Другая машина') : t('Добавить машину')}
-				</Text>
-			</View>
+			<ScreenHeader inset title={once ? t('Другая машина') : t('Добавить машину')} />
 
 			<ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 14 }} showsVerticalScrollIndicator={false}>
 				<View
@@ -128,8 +110,8 @@ export default function GarageAddScreen() {
 						value={q}
 						onChangeText={setQ}
 						placeholder={t('Марка: Toyota, мерс, бэха…')}
-						placeholderTextColor="#7D7979"
-						style={{ flex: 1, fontSize: 17.5, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
+						placeholderTextColor={c.fillInk}
+						style={{ flex: 1, fontSize: fs.lg, fontFamily: fontFamily(400), color: c.ink, padding: 0 }}
 					/>
 				</View>
 
@@ -137,7 +119,7 @@ export default function GarageAddScreen() {
 
 				{popular.length ? (
 					<>
-						<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ПОПУЛЯРНЫЕ')}</Text>
+						<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('Популярные')}</Text>
 						<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 							{popular.map((b) => {
 								const active = brand?.id === b.id
@@ -158,7 +140,7 @@ export default function GarageAddScreen() {
 										}}
 									>
 										<BrandLogo brand={b} size={40} />
-										<Text style={{ fontSize: 13, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
+										<Text style={{ fontSize: fs.xs, fontFamily: fontFamily(active ? 700 : 600), color: active ? c.brandStrong : c.ink }}>
 											{b.shortName}
 										</Text>
 									</Pressable>
@@ -169,8 +151,8 @@ export default function GarageAddScreen() {
 				) : null}
 
 				{rest.length ? (
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>
-						{q.trim() ? t('НАЙДЕНО') : t('ВСЕ МАРКИ А–Я')}
+					<Text style={{ ...sectionTitle, color: c.inkSecondary }}>
+						{q.trim() ? t('Найдено') : t('Все марки А–Я')}
 					</Text>
 				) : null}
 				{rest.map((b) => (
@@ -188,7 +170,7 @@ export default function GarageAddScreen() {
 						}}
 					>
 						<BrandLogo brand={b} size={32} />
-						<Text style={{ fontSize: 17.5, fontFamily: fontFamily(600), color: c.ink }}>{b.name}</Text>
+						<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(600), color: c.ink }}>{b.name}</Text>
 					</Pressable>
 				))}
 			</ScrollView>
@@ -199,13 +181,13 @@ export default function GarageAddScreen() {
 					header={
 						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
 							<BrandLogo brand={brand} size={44} />
-							<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{brand.name}</Text>
+							<Text style={{ fontSize: fs.xxl, fontFamily: fontFamily(700), color: c.ink }}>{brand.name}</Text>
 						</View>
 					}
 					footer={
 						<>
 							{addCar.error ? (
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{addCar.error.message}</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{addCar.error.message}</Text>
 							) : null}
 							<Button
 								label={once ? t('Выбрать') : t('Добавить в гараж')}
@@ -233,6 +215,7 @@ export default function GarageAddScreen() {
 										{
 											onSuccess: (car) => {
 												if (passport.select === '1') useClientCar.getState().select(car.id)
+												toast(t('Машина добавлена'))
 												router.back()
 											},
 										}
@@ -254,15 +237,15 @@ export default function GarageAddScreen() {
 
 					{year && !once ? (
 						<>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ОБЪЁМ, Л · НЕОБЯЗАТЕЛЬНО')}</Text>
+							<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('ОБЪЁМ, Л · НЕОБЯЗАТЕЛЬНО')}</Text>
 							<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
 								{VOLUMES.map((v) => chip(v.toFixed(1), v === engineVolume, () => setEngineVolume(v === engineVolume ? null : v), v))}
 							</ScrollView>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ТОПЛИВО')}</Text>
+							<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('Топливо')}</Text>
 							<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 								{FUELS.map((f) => chip(f.label, f.value === fuel, () => setFuel(f.value === fuel ? null : f.value), f.value))}
 							</View>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ОТКУДА МАШИНА')}</Text>
+							<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('Откуда машина')}</Text>
 							<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 								{ORIGINS.filter((o) => o.value !== 'UNKNOWN').map((o) => chip(o.label, o.value === origin, () => setOrigin(o.value === origin ? null : o.value), o.value))}
 							</View>

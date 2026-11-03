@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { Image, Linking, Pressable, ScrollView, Share, Text, View, useWindowDimensions } from 'react-native'
+import { Linking, Pressable, ScrollView, Share, Text, View, useWindowDimensions } from 'react-native'
+import { onNearEnd } from '@/lib/scroll'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
-import { LocationCard, QueryErrorBanner } from '@/components/ui'
+import { LocationCard, QueryErrorBanner, Skeleton, SkeletonProductGrid, SkeletonRepeat, MoreButton } from '@/components/ui'
 import { BrandLogo } from '@/components/ui/brand'
 import { ChatIcon, ChevronLeftIcon, HeartIcon, MapPinIcon, PhoneIcon, ShareIcon, WhatsAppIcon } from '@/components/icons'
 import { openWhatsApp } from '@/lib/whatsapp'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, sectionTitle, useColors } from '@/theme'
 import { resolveUrl } from '@/lib/api'
 import { formatDay, formatSide, plural } from '@/lib/format'
 import { flattenPages } from '@/api/pagination'
@@ -18,7 +20,7 @@ import { PartTile } from '@/components/catalog-screen'
 import { t } from '@/i18n'
 
 /** Filled rating stars — gold, the empty ones stay grey. */
-const STAR = '#F5A623'
+const STAR = fixed.star
 
 type Tab = 'parts' | 'reviews'
 const VISIBLE_BRANDS = 4
@@ -35,6 +37,7 @@ export default function SellerProfileForBuyerScreen() {
 	const query = params.publicId ? byPublicId : byId
 	const shop = query.data
 	const shopId = shop?.id ?? 0
+	const loading = !shop && query.isLoading
 
 	const [tab, setTab] = useState<Tab>('parts')
 	const [complaint, setComplaint] = useState<ComplaintTarget | null>(null)
@@ -58,17 +61,26 @@ export default function SellerProfileForBuyerScreen() {
 			? openChat.mutate({ shopId: shop.id }, { onSuccess: (chat) => router.push({ pathname: '/chat', params: { chatId: String(chat.id) } }) })
 			: router.push('/'))
 
-	const roundButton = { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.92)', alignItems: 'center', justifyContent: 'center' } as const
+	const roundButton = { width: 40, height: 40, borderRadius: 20, backgroundColor: c.floating, alignItems: 'center', justifyContent: 'center' } as const
 
 	return (
 		<View style={{ flex: 1, backgroundColor: c.surface }}>
-			<ScrollView showsVerticalScrollIndicator={false}>
+			<ScrollView
+				showsVerticalScrollIndicator={false}
+				scrollEventThrottle={200}
+				onScroll={onNearEnd(() => {
+					const list = tab === 'parts' ? parts : reviews
+					if (list.hasNextPage && !list.isFetchingNextPage) list.fetchNextPage()
+				})}
+			>
 				<View>
 					{/* One banner — the box's first photo; no gallery. */}
 					{banner ? (
-						<Image source={{ uri: resolveUrl(banner.url) }} style={{ width, height: 210 }} resizeMode="cover" />
+						<Image source={{ uri: resolveUrl(banner.url) }} style={{ width, height: 210 }} contentFit="cover" />
+					) : loading ? (
+						<Skeleton height={210} radius={0} />
 					) : (
-						<View style={{ width: '100%', height: 210, backgroundColor: raw.fill }} />
+						<View style={{ width: '100%', height: 210, backgroundColor: c.fill }} />
 					)}
 					<View
 						style={{
@@ -81,17 +93,17 @@ export default function SellerProfileForBuyerScreen() {
 							alignItems: 'center',
 						}}
 					>
-						<Pressable onPress={() => router.back()} style={roundButton}>
+						<Pressable accessibilityRole="button" accessibilityLabel={t('Назад')} onPress={() => router.back()} style={roundButton}>
 							<ChevronLeftIcon size={24} color={c.ink} />
 						</Pressable>
 						<View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
 							{signedIn && shop ? (
-								<Pressable onPress={() => favorite.mutate(!shop.isFavorite)} style={roundButton}>
+								<Pressable accessibilityRole="button" accessibilityLabel={shop.isFavorite ? t('Убрать из избранного') : t('В избранное')} onPress={() => favorite.mutate(!shop.isFavorite)} style={roundButton}>
 									<HeartIcon size={20} color={shop.isFavorite ? c.danger : c.ink} filled={shop.isFavorite} />
 								</Pressable>
 							) : null}
 							{shop ? (
-								<Pressable
+								<Pressable accessibilityRole="button" accessibilityLabel={t('Поделиться')}
 									onPress={() => Share.share({ message: `${shop.name}\nhttps://kudaibergen.kg/s/${shop.publicId}` })}
 									style={roundButton}
 								>
@@ -108,17 +120,27 @@ export default function SellerProfileForBuyerScreen() {
 							source={{ uri: resolveUrl(shop.avatarUrl) }}
 							style={{ width: 88, height: 88, borderRadius: 44, borderWidth: 4, borderColor: c.surface }}
 						/>
+					) : loading ? (
+						<View style={{ borderRadius: 48, borderWidth: 4, borderColor: c.surface }}>
+							<Skeleton width={80} height={80} radius={40} />
+						</View>
 					) : (
-						<View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: raw.fill, borderWidth: 4, borderColor: c.surface }} />
+						<View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: c.fill, borderWidth: 4, borderColor: c.surface }} />
 					)}
 				</View>
 
 				<View style={{ paddingHorizontal: 16, paddingTop: 12, gap: 14 }}>
 					<QueryErrorBanner error={query.error} onRetry={() => query.refetch()} />
 
+					{loading ? (
+						<View style={{ gap: 10 }}>
+							<Skeleton width="60%" height={24} />
+							<Skeleton width="40%" height={15} />
+						</View>
+					) : (
 					<View style={{ gap: 2 }}>
-						<Text style={{ fontSize: 22, fontFamily: fontFamily(800), color: c.ink }}>{shop?.name ?? ' '}</Text>
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>
+						<Text style={{ fontSize: fs.h3, fontFamily: fontFamily(800), color: c.ink }}>{shop?.name ?? ' '}</Text>
+						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>
 							{shop
 								? shop.reviewsCount
 									? <><Text style={{ color: STAR }}>★</Text>{` ${shop.rating.toFixed(1)} · ${shop.reviewsCount} ${plural(shop.reviewsCount, [t('оценка'), t('оценки'), t('оценок')])}`}</>
@@ -126,16 +148,20 @@ export default function SellerProfileForBuyerScreen() {
 								: ' '}
 						</Text>
 					</View>
+					)}
 
+					{loading ? (
+						<Skeleton height={128} radius={16} />
+					) : (
 					<View style={{ borderRadius: 16, backgroundColor: c.card, padding: 12, gap: 14 }}>
 						{/* On the market — row and box; a shop / centre elsewhere — its address. */}
 						{shop && !shop.location ? (
-							<Text style={{ fontSize: 17.5, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{shop.address}</Text>
+							<Text style={{ fontSize: fs.lg, lineHeight: 23, fontFamily: fontFamily(600), color: c.ink }}>{shop.address}</Text>
 						) : (
 							<LocationCard rowLabel={shop?.location?.rowCode ?? ' '} boxLabel={shop?.location ? String(shop.location.number) : ' '} />
 						)}
 						<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-							<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.inkSecondary }}>
+							<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.inkSecondary }}>
 								{shop?.location ? t('{0} сторона', formatSide(shop.location.side)).replace(/^./, (ch) => ch.toUpperCase()) : shop ? t('Магазин') : ' '}
 							</Text>
 							<Pressable
@@ -144,14 +170,15 @@ export default function SellerProfileForBuyerScreen() {
 								style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: c.brandTint, flexDirection: 'row', alignItems: 'center', gap: 6 }}
 							>
 								<MapPinIcon size={16} color={c.brandStrong} />
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('2ГИС')}</Text>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('2ГИС')}</Text>
 							</Pressable>
 						</View>
 					</View>
+					)}
 
 					{brands.length ? (
 						<View style={{ gap: 8 }}>
-							<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), letterSpacing: 1.04, color: c.muted }}>{t('ПРОДАЁТ ДЛЯ МАРОК')}</Text>
+							<Text style={{ ...sectionTitle, color: c.inkSecondary }}>{t('Продаёт для марок')}</Text>
 							{showAllBrands ? (
 								// all brands as chips: logo + name
 								<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
@@ -161,7 +188,7 @@ export default function SellerProfileForBuyerScreen() {
 											style={{ height: 32, paddingLeft: 4, paddingRight: 10, borderRadius: 16, backgroundColor: c.card, flexDirection: 'row', alignItems: 'center', gap: 6 }}
 										>
 											<BrandLogo brand={brand} size={24} />
-											<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.ink }}>{brand.name}</Text>
+											<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.ink }}>{brand.name}</Text>
 										</View>
 									))}
 								</View>
@@ -185,7 +212,7 @@ export default function SellerProfileForBuyerScreen() {
 												justifyContent: 'center',
 											}}
 										>
-											<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>+{brands.length - VISIBLE_BRANDS}</Text>
+											<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: c.brandStrong }}>+{brands.length - VISIBLE_BRANDS}</Text>
 										</View>
 									) : null}
 								</Pressable>
@@ -193,42 +220,8 @@ export default function SellerProfileForBuyerScreen() {
 						</View>
 					) : null}
 
-					<View style={{ flexDirection: 'row', gap: 8 }}>
-						<Pressable
-							onPress={write}
-							disabled={!shop || openChat.isPending}
-							style={{ flex: 1, height: 48, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-						>
-							<ChatIcon size={20} color="#FFFFFF" />
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: '#FFFFFF' }}>{t('Написать')}</Text>
-						</Pressable>
-						<Pressable
-							onPress={route}
-							style={{ flex: 1, height: 48, paddingHorizontal: 10, borderRadius: 14, backgroundColor: raw.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-						>
-							<MapPinIcon size={20} color={c.ink} />
-							<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: 17, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? t('2ГИС') : t('Маршрут')}</Text>
-						</Pressable>
-						{/* The phone, then WhatsApp at the edge — only when the shop made the number visible (or after a chat). */}
-						{shop?.phone ? (
-							<Pressable
-								onPress={() => Linking.openURL(`tel:${shop.phone}`)}
-								style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: raw.fill, alignItems: 'center', justifyContent: 'center' }}
-							>
-								<PhoneIcon size={20} color={c.ink} />
-							</Pressable>
-						) : null}
-						{shop?.phone ? (
-							<Pressable
-								onPress={() => shop.phone && openWhatsApp(shop.phone)}
-								style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#25D366', alignItems: 'center', justifyContent: 'center' }}
-							>
-								<WhatsAppIcon size={24} color="#FFFFFF" />
-							</Pressable>
-						) : null}
-					</View>
 					{openChat.error ? (
-						<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{openChat.error.message}</Text>
+						<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{openChat.error.message}</Text>
 					) : null}
 
 					<View style={{ flexDirection: 'row', gap: 20 }}>
@@ -249,7 +242,7 @@ export default function SellerProfileForBuyerScreen() {
 							>
 								<Text
 									style={{
-										fontSize: 16.5,
+										fontSize: fs.base,
 										fontFamily: fontFamily(tab === item.value ? 700 : 600),
 										color: tab === item.value ? c.ink : c.muted,
 									}}
@@ -268,19 +261,35 @@ export default function SellerProfileForBuyerScreen() {
 									<PartTile part={part} />
 								</View>
 							))}
-							{parts.hasNextPage ? (
-								<Pressable onPress={() => parts.fetchNextPage()} style={{ width: '100%', paddingVertical: 12, alignItems: 'center' }}>
-									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Показать ещё')}</Text>
-								</Pressable>
+							{parts.isFetchingNextPage ? (
+								<View style={{ width: '100%' }}>
+									<SkeletonProductGrid rows={1} gap={10} />
+								</View>
+							) : null}
+							{loading || parts.isLoading ? (
+								<View style={{ width: '100%' }}>
+									<SkeletonProductGrid rows={2} gap={10} />
+								</View>
 							) : null}
 							{parts.isSuccess && partItems.length === 0 ? (
-								<Text style={{ fontSize: 16.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Запчасти ещё не выложены')}</Text>
+								<Text style={{ fontSize: fs.base, fontFamily: fontFamily(400), color: c.muted }}>{t('Запчасти ещё не выложены')}</Text>
 							) : null}
 						</View>
 					) : null}
 
 					{tab === 'reviews' ? (
 						<View style={{ gap: 10, paddingBottom: 24 }}>
+							{reviews.isLoading ? (
+								<SkeletonRepeat count={3} gap={10}>
+									<View style={{ borderRadius: 14, backgroundColor: c.card, padding: 12, gap: 10 }}>
+										<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+											<Skeleton width={90} height={16} />
+											<Skeleton width={60} height={13} />
+										</View>
+										<Skeleton width="75%" height={14} />
+									</View>
+								</SkeletonRepeat>
+							) : null}
 							{reviewItems.map((review) => (
 								<Pressable
 									key={review.id}
@@ -288,31 +297,78 @@ export default function SellerProfileForBuyerScreen() {
 									style={{ borderRadius: 14, backgroundColor: c.card, padding: 12, gap: 6 }}
 								>
 									<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-										<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: STAR }}>
+										<Text style={{ fontSize: fs.base, fontFamily: fontFamily(700), color: STAR }}>
 											{'★'.repeat(review.stars)}
-											<Text style={{ color: raw.dashed }}>{'★'.repeat(5 - review.stars)}</Text>
+											<Text style={{ color: c.dashed }}>{'★'.repeat(5 - review.stars)}</Text>
 										</Text>
-										<Text style={{ fontSize: 14.5, fontFamily: fontFamily(400), color: c.muted }}>{formatDay(review.createdAt)}</Text>
+										<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+											<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(400), color: c.muted }}>{formatDay(review.createdAt)}</Text>
+											<MoreButton label={t('Пожаловаться на отзыв')} onPress={() => setComplaint({ type: 'REVIEW', targetId: review.id })} />
+										</View>
 									</View>
-									<Text style={{ fontSize: 15.5, fontFamily: fontFamily(600), color: c.inkSecondary }}>
+									<Text style={{ fontSize: fs.md, fontFamily: fontFamily(600), color: c.inkSecondary }}>
 										{review.buyerName ?? t('Покупатель')}
 										{review.tags.length ? ` · ${review.tags.map((t) => t.label).join(', ')}` : ''}
 									</Text>
 									{review.reply ? (
-										<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Ответ продавца: {0}', review.reply)}</Text>
+										<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>{t('Ответ продавца: {0}', review.reply)}</Text>
 									) : null}
 								</Pressable>
 							))}
-							{reviews.hasNextPage ? (
-								<Pressable onPress={() => reviews.fetchNextPage()} style={{ paddingVertical: 12, alignItems: 'center' }}>
-									<Text style={{ fontSize: 16.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{t('Показать ещё')}</Text>
-								</Pressable>
-							) : null}
+							{reviews.isFetchingNextPage ? <Skeleton height={64} radius={14} /> : null}
 						</View>
 					) : null}
 				</View>
 				{shop ? <ComplainLink onPress={() => setComplaint({ type: 'SHOP', targetId: shop.id })} label={t('Пожаловаться на магазин')} /> : null}
 			</ScrollView>
+			{/* Pinned under the thumb: scrolling through parts and reviews doesn't take «Написать» away. */}
+			<View
+				style={{
+					paddingHorizontal: 16,
+					paddingTop: 12,
+					paddingBottom: insets.bottom + 12,
+					borderTopWidth: 1,
+					borderTopColor: c.hairline,
+					backgroundColor: c.card,
+					flexDirection: 'row',
+					gap: 8,
+				}}
+			>
+				<Pressable
+					onPress={route}
+					accessibilityRole="button"
+					style={{ flex: 1, height: 52, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.fill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+				>
+					<MapPinIcon size={20} color={c.ink} />
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: c.ink }}>{shop && !shop.location ? t('2ГИС') : t('Маршрут')}</Text>
+				</Pressable>
+				<Pressable
+					onPress={write}
+					disabled={!shop || openChat.isPending}
+					accessibilityRole="button"
+					style={{ flex: 1.6, height: 52, paddingHorizontal: 10, borderRadius: 14, backgroundColor: c.brand, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: openChat.isPending ? 0.6 : 1 }}
+				>
+					<ChatIcon size={20} color={fixed.white} />
+					<Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: fixed.white }}>{t('Написать')}</Text>
+				</Pressable>
+				{/* The phone, then WhatsApp at the edge — only when the shop made the number visible (or after a chat). */}
+				{shop?.phone ? (
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Позвонить')}
+						onPress={() => Linking.openURL(`tel:${shop.phone}`)}
+						style={{ width: 52, height: 52, borderRadius: 14, backgroundColor: c.fill, alignItems: 'center', justifyContent: 'center' }}
+					>
+						<PhoneIcon size={20} color={c.ink} />
+					</Pressable>
+				) : null}
+				{shop?.phone ? (
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Написать в WhatsApp')}
+						onPress={() => shop.phone && openWhatsApp(shop.phone)}
+						style={{ width: 52, height: 52, borderRadius: 14, backgroundColor: fixed.whatsapp, alignItems: 'center', justifyContent: 'center' }}
+					>
+						<WhatsAppIcon size={24} color={fixed.white} />
+					</Pressable>
+				) : null}
+			</View>
 			<ComplaintSheet target={complaint} onClose={() => setComplaint(null)} />
 		</View>
 	)

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Image, Keyboard, Linking, Pressable, Text, TextInput, View } from 'react-native'
+import { Keyboard, Linking, Pressable, Text, TextInput, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { Redirect, router } from 'expo-router'
 import { useVideoPlayer, VideoView } from 'expo-video'
 import { Button } from '@/components/ui'
 import { AUTH_FIELD_HEIGHT, AuthLayout } from '@/components/auth-layout'
-import { fontFamily, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
 import { COUNTRY_CODE, formatLocalPhone, isValidLocalPhone, toE164 } from '@/lib/phone'
 import { ApiError } from '@/lib/api'
 import { API_URL } from '@/lib/env'
@@ -92,7 +93,7 @@ export default function PhoneScreen() {
 									backgroundColor: active ? c.brand : 'transparent',
 								}}
 							>
-								<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: active ? '#FFFFFF' : c.muted }}>
+								<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: active ? fixed.white : c.muted }}>
 									{label}
 								</Text>
 							</Pressable>
@@ -102,12 +103,12 @@ export default function PhoneScreen() {
 			}
 			header={
 				// The brand card: a pre-rendered 3D loop (the logo comes apart like a watch), the name over it
-				<View style={{ marginTop: 12, borderRadius: 28, overflow: 'hidden', aspectRatio: 1086 / 690, backgroundColor: '#1C44B8' }}>
+				<View style={{ marginTop: 12, borderRadius: 28, overflow: 'hidden', aspectRatio: 1086 / 690, backgroundColor: fixed.brandCard }}>
 					<Image source={require('../../assets/video/login-poster.jpg')} style={{ position: 'absolute', width: '100%', height: '100%' }} />
 					<VideoView player={logoLoop} nativeControls={false} contentFit="cover" style={{ position: 'absolute', width: '100%', height: '100%' }} />
 					<View style={{ position: 'absolute', left: 0, right: 0, bottom: 16, alignItems: 'center', gap: 2 }}>
-						<Text style={{ fontSize: 28, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.5, color: '#FFFFFF' }}>KUDAIBERDI</Text>
-						<Text style={{ fontSize: 15.5, lineHeight: 21, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.85)' }}>{t('Авторынок запчастей в Бишкеке')}</Text>
+						<Text style={{ fontSize: fs.display, lineHeight: 34, fontFamily: fontFamily(800), letterSpacing: -0.5, color: fixed.white }}>KUDAIBERDI</Text>
+						<Text style={{ fontSize: fs.md, lineHeight: 21, fontFamily: fontFamily(500), color: 'rgba(255,255,255,0.85)' }}>{t('Авторынок запчастей в Бишкеке')}</Text>
 					</View>
 				</View>
 			}
@@ -126,7 +127,7 @@ export default function PhoneScreen() {
 						gap: 12,
 					}}
 				>
-					<Text style={{ fontSize: 20, fontFamily: fontFamily(700), color: c.ink }}>{COUNTRY_CODE}</Text>
+					<Text style={{ fontSize: fs.xxl, fontFamily: fontFamily(700), color: c.ink }}>{COUNTRY_CODE}</Text>
 					<View style={{ width: 1.5, height: 26, backgroundColor: c.border }} />
 					<TextInput
 						value={phone}
@@ -138,24 +139,27 @@ export default function PhoneScreen() {
 							if (isValidLocalPhone(next)) Keyboard.dismiss()
 						}}
 						keyboardType="phone-pad"
+						// The phone's own number / contacts autofill — they come as «+996 555…» or «0555…», see formatLocalPhone.
+						textContentType="telephoneNumber"
+						autoComplete="tel"
 						placeholder="555 12 34 56"
 						placeholderTextColor={c.muted}
-						style={{ flex: 1, fontSize: 20, fontFamily: fontFamily(400), letterSpacing: 0.4, color: c.ink, padding: 0 }}
+						style={{ flex: 1, fontSize: fs.xxl, fontFamily: fontFamily(400), letterSpacing: 0.4, color: c.ink, padding: 0 }}
 					/>
 				</View>
 			}
 			below={
 				error ? (
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>{error.message}</Text>
 				) : (
-					<Text style={{ fontSize: 15.5, fontFamily: fontFamily(400), color: c.muted }}>{t('Отправим SMS с кодом')}</Text>
+					<Text style={{ fontSize: fs.md, fontFamily: fontFamily(400), color: c.muted }}>{t('Отправим SMS с кодом')}</Text>
 				)
 			}
 			footer={
 				<View style={{ gap: 12 }}>
 					<Button label={t('Получить код')} disabled={!isValidLocalPhone(phone)} loading={sendOtp.isPending} onPress={submit} />
 					{/* Entering means accepting the rules (App Store 1.2: user content needs agreed terms). */}
-					<Text style={{ fontSize: 13.5, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
+					<Text style={{ fontSize: fs.xs, lineHeight: 19, fontFamily: fontFamily(400), color: c.muted, textAlign: 'center' }}>
 						{t('Продолжая, вы принимаете')}{' '}
 						<Text onPress={() => Linking.openURL(`${API_URL}/terms`)} style={{ color: c.brandStrong }}>{t('Правила пользования')}</Text>{' '}
 						{t('и')}{' '}

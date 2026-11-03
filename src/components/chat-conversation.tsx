@@ -1,16 +1,19 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react'
-import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Image } from '@/components/ui/image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { QueryErrorBanner } from '@/components/ui'
+import { QueryErrorBanner, Skeleton, toast } from '@/components/ui'
 import * as ImagePicker from 'expo-image-picker'
+import * as Clipboard from 'expo-clipboard'
 import { SendIcon } from '@/components/icons'
 import { CameraV23Icon, MicV23Icon, TickIcon } from '@/components/buyer-v23'
 import { VoicePlayer } from '@/components/voice'
 import { TruckTile } from '@/components/video-v23'
 import { RecordingBar, useVoiceRecorder, VideoBubble } from '@/components/chat-media'
 import { MediaViewer } from '@/components/media-viewer'
-import { fontFamily, raw, useColors } from '@/theme'
+import { fixed, fontFamily, fs, useColors } from '@/theme'
+import { haptic } from '@/lib/haptics'
 import { newIdempotencyKey, resolveUrl } from '@/lib/api'
 import { formatAgo, formatClock, formatPrice, formatWhenAt } from '@/lib/format'
 import { useRealtime, useChatChannel } from '@/lib/realtime'
@@ -114,6 +117,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 	const send = () => {
 		const value = text.trim()
 		if (!value) return
+		haptic.tap()
 		sender.send({ text: value })
 		setText('')
 	}
@@ -150,6 +154,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 
 	const pressQuick = (reply: QuickReply) => {
 		if (reply.kind === 'ACTION') return onAction(reply)
+		haptic.tap()
 		if (reply.code) sender.send({ quickReply: reply.code })
 		else sender.send({ text: reply.text })
 	}
@@ -163,7 +168,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 			{pinned}
 
 			{voice.error || media.error ? (
-				<Text style={{ marginHorizontal: 16, marginTop: 8, fontSize: 15.5, fontFamily: fontFamily(500), color: c.danger }}>
+				<Text style={{ marginHorizontal: 16, marginTop: 8, fontSize: fs.md, fontFamily: fontFamily(500), color: c.danger }}>
 					{voice.error ?? media.error?.message}
 				</Text>
 			) : null}
@@ -181,6 +186,8 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 				keyExtractor={(m) => String(m.clientId ?? m.id)}
 				contentContainerStyle={{ padding: 16, gap: 10 }}
 				onEndReached={() => history.hasNextPage && !history.isFetchingNextPage && history.fetchNextPage()}
+				ListEmptyComponent={history.isLoading ? <BubblesSkeleton /> : undefined}
+				ListFooterComponent={history.isFetchingNextPage ? <BubblesSkeleton count={1} /> : undefined}
 				renderItem={({ item }) => (
 					<Message
 						message={item}
@@ -238,7 +245,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 									justifyContent: 'center',
 								}}
 							>
-								<Text style={{ fontSize: 15.5, fontFamily: fontFamily(positive || greeting ? 700 : 600), color: greeting ? '#FFFFFF' : positive ? c.success : c.ink }}>
+								<Text style={{ fontSize: fs.md, fontFamily: fontFamily(positive || greeting ? 700 : 600), color: greeting ? fixed.white : positive ? c.success : c.ink }}>
 									{greeting ? `👋 ${reply.text}` : reply.text}
 								</Text>
 							</Pressable>
@@ -261,7 +268,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 				}}
 			>
 				{canWrite && !voice.recording ? (
-					<Pressable
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Отправить фото')}
 						onPress={attach}
 						style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' }}
 					>
@@ -280,7 +287,7 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 						}}
 						onSubmitEditing={send}
 						placeholder={canWrite ? t('Сообщение') : chat.data?.blockedByOther ? t('Собеседник ограничил чат') : t('Чат недоступен')}
-						placeholderTextColor="#8C8888"
+						placeholderTextColor={c.fillInk}
 						maxLength={2000}
 						style={{
 							flex: 1,
@@ -288,14 +295,14 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 							borderRadius: 22,
 							backgroundColor: c.surface,
 							paddingHorizontal: 16,
-							fontSize: 17.5,
+							fontSize: fs.lg,
 							fontFamily: fontFamily(400),
 							color: c.ink,
 						}}
 					/>
 				)}
 				{text.trim() || voice.recording ? (
-					<Pressable
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Отправить')}
 						onPress={voice.recording ? voice.send : send}
 						disabled={!canWrite}
 						style={{
@@ -307,16 +314,16 @@ export function ChatConversation({ chatId, mySide, header, pinned, onAction, dra
 							justifyContent: 'center',
 						}}
 					>
-						<SendIcon size={20} color="#FFFFFF" />
+						<SendIcon size={20} color={fixed.white} />
 					</Pressable>
 				) : (
 					// Empty field — the mic: tap to record a voice message (up to 60 s), send with the arrow.
-					<Pressable
-						onPress={voice.start}
+					<Pressable accessibilityRole="button" accessibilityLabel={t('Записать голосовое')}
+						onPress={() => (haptic.tap(), voice.start())}
 						disabled={!canWrite}
 						style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: c.brand, alignItems: 'center', justifyContent: 'center' }}
 					>
-						<MicV23Icon size={22} color="#FFFFFF" />
+						<MicV23Icon size={22} color={fixed.white} />
 					</Pressable>
 				)}
 			</View>
@@ -354,7 +361,7 @@ function Message({
 	if (message.code === 'HIDDEN_BY_ADMIN') {
 		return (
 			<View style={{ alignSelf: mine ? 'flex-end' : 'flex-start', borderRadius: 16, borderWidth: 1.5, borderColor: c.border, borderStyle: 'dashed', paddingVertical: 10, paddingHorizontal: 14 }}>
-				<Text style={{ fontSize: 15.5, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.muted }}>{t('Сообщение скрыто администрацией')}</Text>
+				<Text style={{ fontSize: fs.md, fontStyle: 'italic', fontFamily: fontFamily(400), color: c.muted }}>{t('Сообщение скрыто администрацией')}</Text>
 			</View>
 		)
 	}
@@ -368,13 +375,13 @@ function Message({
 					typeof orderId === 'number' &&
 					router.push({ pathname: '/delivery-order', params: { id: String(orderId), ...(shopSide ? { as: 'shop' } : {}) } })
 				}
-				style={{ alignSelf: 'center', width: 280, borderRadius: 16, backgroundColor: '#FCEBB0', padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}
+				style={{ alignSelf: 'center', width: 280, borderRadius: 16, backgroundColor: c.warningSoft, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}
 			>
 				<TruckTile size={40} />
 				<View style={{ flex: 1, gap: 2 }}>
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: c.ink }}>{t('Заказ с доставкой')}</Text>
-					{message.text ? <Text style={{ fontSize: 14.5, lineHeight: 18.5, fontFamily: fontFamily(500), color: c.inkSecondary }}>{message.text}</Text> : null}
-					<Text style={{ fontSize: 14.5, fontFamily: fontFamily(700), color: c.brandStrong }}>{shopSide ? t('Открыть заказ ›') : t('Где посылка ›')}</Text>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(800), color: c.ink }}>{t('Заказ с доставкой')}</Text>
+					{message.text ? <Text style={{ fontSize: fs.sm, lineHeight: 18.5, fontFamily: fontFamily(500), color: c.inkSecondary }}>{message.text}</Text> : null}
+					<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(700), color: c.brandStrong }}>{shopSide ? t('Открыть заказ ›') : t('Где посылка ›')}</Text>
 				</View>
 			</Pressable>
 		)
@@ -383,7 +390,7 @@ function Message({
 	if (message.side === 'SYSTEM' || message.type === 'SYSTEM') {
 		return (
 			<View style={{ alignSelf: 'center', borderRadius: 10, backgroundColor: c.brandTint, paddingVertical: 6, paddingHorizontal: 12 }}>
-				<Text style={{ fontSize: 14.5, fontFamily: fontFamily(600), color: c.brandStrong }}>
+				<Text style={{ fontSize: fs.sm, fontFamily: fontFamily(600), color: c.brandStrong }}>
 					{message.text ?? SYSTEM_TEXT[message.code ?? ''] ?? ''}
 				</Text>
 			</View>
@@ -408,15 +415,33 @@ function Message({
 					voice={{ url: message.mediaUrl, durationSec: message.durationSeconds ?? 0, waveform: message.waveform ?? [] }}
 					background={c.card}
 				/>
-				<Text style={{ fontSize: 12, fontFamily: fontFamily(400), color: raw.fillInk, alignSelf: mine ? 'flex-end' : 'flex-start' }}>
+				<Text style={{ fontSize: fs.xxs, fontFamily: fontFamily(400), color: c.fillInk, alignSelf: mine ? 'flex-end' : 'flex-start' }}>
 					{formatClock(message.createdAt)}
 				</Text>
 			</View>
 		)
 	}
 
+	// Long press — the usual message menu: copy the text (a part number, an address), report the other side's message.
+	const copyable = message.text?.trim()
+	const menu = () =>
+		Alert.alert('', copyable ?? undefined, [
+			...(copyable
+				? [
+						{
+							text: t('Копировать'),
+							onPress: () => {
+								Clipboard.setStringAsync(copyable).then(() => toast(t('Скопировано')))
+							},
+						},
+					]
+				: []),
+			...(onComplain ? [{ text: t('Пожаловаться'), style: 'destructive' as const, onPress: onComplain }] : []),
+			{ text: t('Отмена'), style: 'cancel' as const },
+		])
+
 	return (
-		<Pressable onLongPress={onComplain} disabled={!onComplain} delayLongPress={450} style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '78%', gap: 3 }}>
+		<Pressable onLongPress={menu} disabled={!copyable && !onComplain} delayLongPress={400} style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '78%', gap: 3 }}>
 			<View
 				style={{
 					maxWidth: 260,
@@ -431,7 +456,7 @@ function Message({
 				}}
 			>
 				{about ? (
-					<Text numberOfLines={1} style={{ fontSize: 13, fontFamily: fontFamily(600), color: mine ? 'rgba(255,255,255,0.8)' : c.muted }}>
+					<Text numberOfLines={1} style={{ fontSize: fs.xs, fontFamily: fontFamily(600), color: mine ? 'rgba(255,255,255,0.8)' : c.muted }}>
 						{about}
 					</Text>
 				) : null}
@@ -444,19 +469,19 @@ function Message({
 				{body && message.code === 'RESERVED' ? (
 					<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
 						<TickIcon size={18} color={c.success} strokeWidth={2.8} />
-						<Text style={{ fontSize: 17.5, fontFamily: fontFamily(700), color: mine ? '#FFFFFF' : c.ink }}>{body}</Text>
+						<Text style={{ fontSize: fs.lg, fontFamily: fontFamily(700), color: mine ? fixed.white : c.ink }}>{body}</Text>
 					</View>
 				) : body ? (
-					<Text style={{ fontSize: 17.5, lineHeight: 24, fontFamily: fontFamily(400), color: mine ? '#FFFFFF' : c.ink }}>{body}</Text>
+					<Text style={{ fontSize: fs.lg, lineHeight: 24, fontFamily: fontFamily(400), color: mine ? fixed.white : c.ink }}>{body}</Text>
 				) : null}
 				{price && !partReply && (message.type === 'REPLY' || message.type === 'PART') ? (
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: mine ? '#FFFFFF' : c.ink }}>{price}</Text>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(800), color: mine ? fixed.white : c.ink }}>{price}</Text>
 				) : null}
 				{message.type === 'REPLY' && (offerPrice || offerAt) ? (
-					<Text style={{ fontSize: 16.5, fontFamily: fontFamily(800), color: mine ? '#FFFFFF' : c.ink }}>
+					<Text style={{ fontSize: fs.base, fontFamily: fontFamily(800), color: mine ? fixed.white : c.ink }}>
 						{offerPrice}
 						{offerPrice && offerAt ? ' · ' : ''}
-						{offerAt ? <Text style={{ fontFamily: fontFamily(700), color: mine ? '#FFFFFF' : c.success }}>{offerAt}</Text> : null}
+						{offerAt ? <Text style={{ fontFamily: fontFamily(700), color: mine ? fixed.white : c.success }}>{offerAt}</Text> : null}
 					</Text>
 				) : null}
 			</View>
@@ -464,9 +489,9 @@ function Message({
 				onPress={status === 'failed' ? onRetry : undefined}
 				style={{
 					alignSelf: mine ? 'flex-end' : 'flex-start',
-					fontSize: 12,
+					fontSize: fs.xxs,
 					fontFamily: fontFamily(status === 'failed' ? 700 : 400),
-					color: status === 'failed' ? c.danger : raw.fillInk,
+					color: status === 'failed' ? c.danger : c.fillInk,
 				}}
 			>
 				{status === 'failed' ? (
@@ -477,7 +502,7 @@ function Message({
 					<>
 						{formatClock(message.createdAt)}
 						{status ? (
-							<Text style={{ fontFamily: fontFamily(700), color: status === 'read' ? c.brand : raw.fillInk }}>
+							<Text style={{ fontFamily: fontFamily(700), color: status === 'read' ? c.brand : c.fillInk }}>
 								{status === 'read' ? '  ✓✓' : '  ✓'}
 								{last ? (status === 'read' ? t(' Прочитано') : t(' Доставлено')) : ''}
 							</Text>
@@ -521,4 +546,26 @@ function replyText(payload: Record<string, unknown>, text: string | null | undef
 	if (tags.length) line += `. ${tags.join(', ')}`
 	if (typeof payload.price === 'number') line += ` — ${formatPrice(payload.price)}`
 	return text ? `${line}\n${text}` : line
+}
+
+/** Пузыри сообщений, пока грузится история: свои справа, чужие слева, разной ширины. Список перевёрнут — первый внизу. */
+const BUBBLES: { mine: boolean; width: number; height: number }[] = [
+	{ mine: true, width: 180, height: 40 },
+	{ mine: false, width: 240, height: 58 },
+	{ mine: false, width: 140, height: 40 },
+	{ mine: true, width: 220, height: 58 },
+	{ mine: false, width: 200, height: 40 },
+	{ mine: true, width: 120, height: 40 },
+]
+
+function BubblesSkeleton({ count = BUBBLES.length }: { count?: number }) {
+	return (
+		<View style={{ gap: 10 }}>
+			{BUBBLES.slice(0, count).map((bubble, i) => (
+				<View key={i} style={{ alignItems: bubble.mine ? 'flex-end' : 'flex-start', opacity: Math.max(0.4, 1 - i * 0.1) }}>
+					<Skeleton width={bubble.width} height={bubble.height} radius={18} />
+				</View>
+			))}
+		</View>
+	)
 }

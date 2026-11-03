@@ -9,7 +9,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { marketMapStyle } from '@/data/map-style'
 import { type MarketGeo, routeToGeoJSON } from '@/lib/market-geojson'
 import { useMarketGeo } from '@/api/market'
-import { raw, useColors } from '@/theme'
+import { fixed, fs, raw, useColors } from '@/theme'
 import { t } from '@/i18n'
 
 const MARKET_ZOOM = 16.2
@@ -192,7 +192,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 				},
 				paint: {
 					'text-color': ['case', ['==', ['get', 'hl'], true], c.brandStrong, c.ink],
-					'text-halo-color': '#FFFFFF',
+					'text-halo-color': fixed.white,
 					'text-halo-width': 1.2,
 				},
 			})
@@ -205,7 +205,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 				paint: {
 					'circle-radius': ['interpolate', ['linear'], ['zoom'], 15, 4, 19, 9],
 					'circle-color': c.brand,
-					'circle-stroke-color': '#FFFFFF',
+					'circle-stroke-color': fixed.white,
 					'circle-stroke-width': 2,
 				},
 			})
@@ -220,7 +220,7 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 					'text-size': 11,
 					'text-offset': [0, 1.2],
 				},
-				paint: { 'text-color': c.brandStrong, 'text-halo-color': '#FFFFFF', 'text-halo-width': 1.4 },
+				paint: { 'text-color': c.brandStrong, 'text-halo-color': fixed.white, 'text-halo-width': 1.4 },
 			})
 
 			{
@@ -290,11 +290,11 @@ export const MarketMapLive = forwardRef(function MarketMapLive(
 						},
 					]}
 				>
-					<Text style={{ fontSize: 16.5, color: c.ink, textAlign: 'center' }}>
+					<Text style={{ fontSize: fs.base, color: c.ink, textAlign: 'center' }}>
 						{status === 'loading' ? t('Загружаю карту…') : t('Карта не загрузилась')}
 					</Text>
 					{status === 'error' ? (
-						<Text selectable style={{ fontSize: 14.5, color: c.danger, textAlign: 'center' }}>
+						<Text selectable style={{ fontSize: fs.sm, color: c.danger, textAlign: 'center' }}>
 							{errorText}
 						</Text>
 					) : null}
